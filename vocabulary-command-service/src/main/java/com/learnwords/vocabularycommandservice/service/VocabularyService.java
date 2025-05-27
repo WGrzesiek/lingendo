@@ -40,40 +40,40 @@ public class VocabularyService {
         this.sentenceService = sentenceService;
     }
 
-    public VocabularyDto createVocabulary(CreateVocabularyDto createVocabularyDto) {
-        log.debug("Rozpoczęcie tworzenia słówka: {}", createVocabularyDto.getWord());
-        List<String> sentenceIds = new ArrayList<>();
-
-            if (createVocabularyDto.getSentences() != null && !createVocabularyDto.getSentences().isEmpty()) {
-                try {
-                    for (CreateSentenceDto createSentenceDto : createVocabularyDto.getSentences()){
-                        SentenceDto sentenceDto = sentenceService.createSentence(createSentenceDto);
-                        sentenceIds.add(sentenceDto.id());
-                        log.info("Stworzono nowe zdania: {}", sentenceDto);
-                    }
-                } catch (Exception e) {
-                    log.error("Błąd podczas zapisywania zdań: {}", e.getMessage(), e);
-                    throw new RuntimeException("Nie udało się zapisać zdań", e);
-                }
-            }
-            try {
-                String id = UUID.randomUUID().toString();
-                VocabularyDto vocabularyDto = new VocabularyDto(
-                        id,
-                        createVocabularyDto.getWord(),
-                        createVocabularyDto.getTranslations(),
-                        sentenceIds
-                );
-                outboxRepository.save(entityToOutboxEntityMapper.map(id, vocabularyDto, EventType.CREATE_VOCABULARY));
-                vocabularyDtoKafkaTemplate.send(KafkaTopic.CREATE_VOCABULARY_TOPIC, vocabularyDto);
-                log.info("Stworzono słówko: ID: {}, słowo: '{}', tłumaczenia: {}, powiązane zdania: {}",
-                        vocabularyDto.id(), vocabularyDto.word(), vocabularyDto.translations(), vocabularyDto.sentenceIds());
-                return vocabularyDto;
-            } catch (Exception e) {
-                log.error("Błąd podczas zapisywania słówka: {}", e.getMessage(), e);
-                throw new RuntimeException("Nie udało się zapisać słówka", e);
-            }
-        }
+//    public VocabularyDto createVocabulary(CreateVocabularyDto createVocabularyDto) {
+//        log.debug("Rozpoczęcie tworzenia słówka: {}", createVocabularyDto.getWord());
+//        List<String> sentenceIds = new ArrayList<>();
+//
+//            if (createVocabularyDto.getSentences() != null && !createVocabularyDto.getSentences().isEmpty()) {
+//                try {
+//                    for (CreateSentenceDto createSentenceDto : createVocabularyDto.getSentences()){
+//                        SentenceDto sentenceDto = sentenceService.createSentence(createSentenceDto);
+//                        sentenceIds.add(sentenceDto.id());
+//                        log.info("Stworzono nowe zdania: {}", sentenceDto);
+//                    }
+//                } catch (Exception e) {
+//                    log.error("Błąd podczas zapisywania zdań: {}", e.getMessage(), e);
+//                    throw new RuntimeException("Nie udało się zapisać zdań", e);
+//                }
+//            }
+//            try {
+//                String id = UUID.randomUUID().toString();
+//                VocabularyDto vocabularyDto = new VocabularyDto(
+//                        id,
+//                        createVocabularyDto.getWord(),
+//                        createVocabularyDto.getTranslations(),
+//                        sentenceIds
+//                );
+//                outboxRepository.save(entityToOutboxEntityMapper.map(id, vocabularyDto, EventType.CREATE_VOCABULARY));
+//                vocabularyDtoKafkaTemplate.send(KafkaTopic.CREATE_VOCABULARY_TOPIC, vocabularyDto);
+//                log.info("Stworzono słówko: ID: {}, słowo: '{}', tłumaczenia: {}, powiązane zdania: {}",
+//                        vocabularyDto.id(), vocabularyDto.word(), vocabularyDto.translations(), vocabularyDto.sentenceIds());
+//                return vocabularyDto;
+//            } catch (Exception e) {
+//                log.error("Błąd podczas zapisywania słówka: {}", e.getMessage(), e);
+//                throw new RuntimeException("Nie udało się zapisać słówka", e);
+//            }
+//        }
 
     }
 

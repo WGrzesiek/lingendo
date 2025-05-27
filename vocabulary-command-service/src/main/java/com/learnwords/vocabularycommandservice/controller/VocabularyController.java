@@ -18,10 +18,10 @@ public class VocabularyController {
         this.vocabularyService = vocabularyService;
     }
 
-    @PostMapping("/voc")
-    public ResponseEntity<VocabularyDto> createVocabulary(@Valid @RequestBody CreateVocabularyDto createVocabularyDto){
-        VocabularyDto saveVocabulary = vocabularyService.createVocabulary(createVocabularyDto);
-        return ResponseEntity.status(HttpStatus.CREATED).body(saveVocabulary);
-
-    }
+//    @PostMapping("/voc")
+//    public ResponseEntity<VocabularyDto> createVocabulary(@Valid @RequestBody CreateVocabularyDto createVocabularyDto){
+//        VocabularyDto saveVocabulary = vocabularyService.createVocabulary(createVocabularyDto);
+//        return ResponseEntity.status(HttpStatus.CREATED).body(saveVocabulary);
+//
+//    }
 }

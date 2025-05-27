@@ -20,14 +20,14 @@ public class UpdateStatusEvent {
         this.outboxRepository = outboxRepository;
     }
 
-    @KafkaListener(topics = KafkaTopic.UPPATED_STATUS, groupId = KafkaGroup.VOCABULARY_COMMAND_GROUP)
-    @Transactional
-    public void confirmCreateSentence(UpdateStatusDto updateStatusDto){
-        log.info("slucham update");
-        outboxRepository.findById(updateStatusDto.id()).ifPresent(outbox -> {
-            outbox.setEventStatus(updateStatusDto.eventStatus());
-            outbox.setUpdatedAt(new Date());
-            outboxRepository.save(outbox);
-        });
-    }
+//    @KafkaListener(topics = KafkaTopic.UPPATED_STATUS, groupId = KafkaGroup.VOCABULARY_COMMAND_GROUP)
+//    @Transactional
+//    public void confirmCreateSentence(UpdateStatusDto updateStatusDto){
+//        log.info("slucham update");
+//        outboxRepository.findById(updateStatusDto.id()).ifPresent(outbox -> {
+//            outbox.setEventStatus(updateStatusDto.eventStatus());
+//            outbox.setUpdatedAt(new Date());
+//            outboxRepository.save(outbox);
+//        });
+//    }
 }
