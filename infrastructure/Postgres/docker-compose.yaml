@@ -1,18 +1,14 @@
 services:
   postgres:
     image: postgres:15
-    container_name: LearnWorldsOutbox
+    container_name: postgres
     environment:
       POSTGRES_USER: admin
       POSTGRES_PASSWORD: adminpassword
-      POSTGRES_DB: mydatabase
-    ports:
-      - "5432:5432"
+      POSTGRES_DB: outbox
+    ports: ["5432:5432"]
     volumes:
-      - postgres_data:/var/lib/postgresql/data
-    networks:
-      shared_network:
-        ipv4_address: 192.168.23.13
+      - pgdata:/var/lib/postgresql/data
 
   pgadmin:
     image: dpage/pgadmin4
@@ -21,13 +17,10 @@ services:
       PGADMIN_DEFAULT_EMAIL: admin@admin.com
       PGADMIN_DEFAULT_PASSWORD: adminpassword
     ports:
-      - "8080:80"
+      - "8081:80"
     depends_on:
       - postgres
 
 volumes:
-  postgres_data:
+  pgdata:
 
-networks:
-  shared_network:
-    external: true

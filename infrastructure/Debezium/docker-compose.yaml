@@ -1,0 +1,27 @@
+services:
+  connect:
+    image: quay.io/debezium/connect:3.1
+    platform: linux/amd64
+    container_name: connect
+    depends_on:
+      - kafka
+      - postgres
+    ports:
+      - "8083:8083"        # REST API Kafka Connect
+    environment:
+      BOOTSTRAP_SERVERS: kafka:9092
+      GROUP_ID: 1
+      CONFIG_STORAGE_TOPIC: connect_configs
+      OFFSET_STORAGE_TOPIC: connect_offsets
+      STATUS_STORAGE_TOPIC: connect_statuses
+      # wszystkie pluginy Debezium są już w obrazie
+
+  debezium-ui:
+    image: quay.io/debezium/debezium-ui:latest
+    platform: linux/amd64
+    ports:
+      - "8080:8080"
+    environment:
+      KAFKA_CONNECT_URIS: http://connect:8083
+    depends_on:
+      - connect

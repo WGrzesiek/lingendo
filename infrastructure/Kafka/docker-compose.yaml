@@ -1,61 +1,31 @@
 services:
-  broker:
-    image: apache/kafka:3.9.0
-    container_name: broker
-    hostname: broker
+  zookeeper:
+    image: quay.io/debezium/zookeeper:3.1
+    platform: linux/amd64
+    container_name: zookeeper
     ports:
-      - "9092:9092"
-    healthcheck:
-      test: [ "CMD-SHELL", "echo 'ruok' | nc localhost 9092 || exit 1" ]
-      interval: 30s
-      timeout: 20s
-      retries: 5
-      start_period: 60s
+      - "2181:2181"
     environment:
-      KAFKA_BROKER_ID: 1
-      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT,CONTROLLER:PLAINTEXT
-      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:29092,CONTROLLER://broker:29093,PLAINTEXT_HOST://0.0.0.0:9092
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://192.168.1.18:29092,PLAINTEXT_HOST://localhost:9092
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
 
-      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
-      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
-
-      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
-      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
-      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
-      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
-
-      KAFKA_PROCESS_ROLES: broker,controller
-      KAFKA_NODE_ID: 1
-      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@broker:29093
-
-      KAFKA_LOG_DIRS: /tmp/kraft-combined-logs
-      KAFKA_CLUSTER_ID: "5L6g3nShT-eMCtK--X86sw"
-      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
-    # networks:
-    #   shared_network:
-    #     ipv4_address: 192.168.1.18
-  kafka-exporter:
-    image: danielqsj/kafka-exporter:latest
-    container_name: kafka-exporter
-    ports:
-      - "9308:9308"
-    healthcheck:
-      test: [ "CMD", "wget", "--spider", "-q", "http://localhost:9308/metrics" ]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 10s
-
-    command:
-      - --kafka.server=broker:29092
+  kafka:
+    image: quay.io/debezium/kafka:3.1
+    platform: linux/amd64
+    container_name: kafka
     depends_on:
-      broker:
-        condition: service_healthy
-    restart: unless-stopped
-#     networks:
-#       shared_network:
-#         ipv4_address: 192.168.1.19
-# networks:
-#   shared_network:
-#     external: true
+      - zookeeper
+    ports:
+      - "9092:9092"      # wewnętrzny port w klastrze
+      - "29092:29092"    # port wystawiony na localhost
+    environment:
+      ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_BROKER_ID: 1
+      KAFKA_LISTENERS: INTERNAL://0.0.0.0:9092,EXTERNAL://0.0.0.0:29092
+      KAFKA_ADVERTISED_LISTENERS: INTERNAL://kafka:9092,EXTERNAL://localhost:29092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
