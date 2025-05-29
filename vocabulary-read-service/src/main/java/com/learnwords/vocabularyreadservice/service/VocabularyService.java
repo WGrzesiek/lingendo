@@ -1,22 +1,16 @@
 package com.learnwords.vocabularyreadservice.service;
 
-import com.learnwords.common.EventStatus;
 import com.learnwords.common.EventType;
 import com.learnwords.common.KafkaGroup;
 import com.learnwords.common.KafkaTopic;
-import com.learnwords.common.dto.SentenceDto;
-import com.learnwords.common.dto.UpdateStatusDto;
 import com.learnwords.common.dto.VocabularyDto;
 import com.learnwords.vocabularyreadservice.entity.Vocabulary;
-import com.learnwords.vocabularyreadservice.repository.SentenceRepository;
 import com.learnwords.vocabularyreadservice.repository.VocabularyRepository;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataAccessException;
 import org.springframework.kafka.annotation.KafkaListener;
-import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.Date;
 
 @Slf4j
 @Service
@@ -30,15 +24,18 @@ public class VocabularyService {
     @Transactional
     @KafkaListener(topics = KafkaTopic.CREATE_VOCABULARY_TOPIC, groupId = KafkaGroup.VOCABULARY_READ_SERVICE_GROUP,containerFactory = "vocabularyKafkaListenerFactory")
     public void processSentenceCreate(VocabularyDto vocabularyDto) {
-        log.info("Received event: {}", EventType.CREATE_VOCABULARY);
+        log.info("Otrzymano event: {}", EventType.CREATE_VOCABULARY);
         Vocabulary vocabulary = new Vocabulary();
-        Date now = new Date();
+        try{
         vocabulary.setId(vocabularyDto.id());
         vocabulary.setWord(vocabularyDto.word());
         vocabulary.setTranslations(vocabularyDto.translations());
         vocabulary.setSentenceIds(vocabularyDto.sentenceIds());
-        vocabulary.setCreatedAt(now);
-        vocabulary.setUpdatedAt(now);
         vocabularyRepository.save(vocabulary);
+        } catch (DataAccessException e) {
+            log.error("Błąd dostępu do bazy danych: {}", e.getMessage(), e);
+        } catch (Exception e) {
+            log.error("Błąd podczas przetwarzania słowa: {}", e.getMessage(), e);
+        }
     }
 }

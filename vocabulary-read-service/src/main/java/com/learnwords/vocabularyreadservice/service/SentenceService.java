@@ -8,11 +8,11 @@ import com.learnwords.vocabularyreadservice.entity.Sentence;
 import com.learnwords.vocabularyreadservice.repository.SentenceRepository;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataAccessException;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Date;
 
 @Slf4j
 @Service
@@ -28,12 +28,17 @@ public class SentenceService {
     public void processSentenceCreate(SentenceDto sentenceDto) {
         log.info("Otrzymano event: {}", EventType.CREATE_SENTENCE);
         Sentence sentence = new Sentence();
-        Date now = new Date();
-        sentence.setId(sentenceDto.id());
-        sentence.setSentence(sentenceDto.sentence());
-        sentence.setTranslation(sentenceDto.translation());
-        sentence.setCreatedAt(now);
-        sentence.setUpdatedAt(now);
-        sentenceRepository.save(sentence);
+        try {
+            sentence.setId(sentenceDto.id());
+            sentence.setSentence(sentenceDto.sentence());
+            sentence.setTranslation(sentenceDto.translation());
+
+            sentenceRepository.save(sentence);
+            log.info("Zapisano zdanie o id: {}", sentenceDto.id());
+        } catch (DataAccessException e) {
+            log.error("Błąd dostępu do bazy danych: {}", e.getMessage(), e);
+        } catch (Exception e) {
+            log.error("Błąd podczas przetwarzania zdania: {}", e.getMessage(), e);
+        }
     }
 }

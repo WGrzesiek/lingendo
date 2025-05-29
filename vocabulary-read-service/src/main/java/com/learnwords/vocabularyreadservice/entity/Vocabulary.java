@@ -1,12 +1,12 @@
 package com.learnwords.vocabularyreadservice.entity;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.PreUpdate;
+import lombok.*;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import java.time.Instant;
 import java.util.Date;
 import java.util.List;
 
@@ -14,6 +14,7 @@ import java.util.List;
 @NoArgsConstructor
 @Getter
 @Setter
+@Builder
 @Document(collection = "vocabulary")
 public class Vocabulary {
     @Id
@@ -21,7 +22,18 @@ public class Vocabulary {
     private String word;
     private List<String> translations;
     private List<String> sentenceIds;
-    private Date createdAt;
-    private Date updatedAt;
+    @Builder.Default
+    private Instant createdAt = Instant.now();
+    private Instant updatedAt;
+
+    @PrePersist
+    public void prePersist() {
+        updatedAt = createdAt;
+    }
+
+    @PreUpdate
+    public void preUpdate() {
+        updatedAt = Instant.now();
+    }
 
 }

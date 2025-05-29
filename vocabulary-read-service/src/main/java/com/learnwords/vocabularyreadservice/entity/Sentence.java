@@ -1,10 +1,11 @@
 package com.learnwords.vocabularyreadservice.entity;
 
+import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-import java.util.Date;
+import java.time.Instant;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -17,7 +18,18 @@ public class Sentence {
     private String id;
     private String sentence;
     private String translation;
-    private Date createdAt;
-    private Date updatedAt;
+    @Builder.Default
+    private Instant createdAt = Instant.now();
+    private Instant updatedAt;
+
+    @PrePersist
+    public void prePersist() {
+        updatedAt = createdAt;
+    }
+
+    @PreUpdate
+    public void preUpdate() {
+        updatedAt = Instant.now();
+    }
 
 }
