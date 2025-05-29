@@ -8,7 +8,6 @@ import com.learnwords.vocabularycommandservice.entity.Outbox;
 import lombok.SneakyThrows;
 import org.springframework.stereotype.Component;
 
-import java.util.Date;
 import java.util.UUID;
 
 @Component

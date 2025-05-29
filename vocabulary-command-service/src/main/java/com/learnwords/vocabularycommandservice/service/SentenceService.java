@@ -9,6 +9,7 @@ import com.learnwords.vocabularycommandservice.mapper.EntityToOutboxEntityMapper
 import com.learnwords.vocabularycommandservice.repository.OutboxRepository;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
 
 import java.util.UUID;
@@ -26,21 +27,37 @@ public class SentenceService {
 
     @Transactional
     public SentenceDto createSentence(CreateSentenceDto csd) {
-
+        log.info("Rozpoczęcie tworzenia zdania: {}", csd.getSentence());
         String aggregateId = UUID.randomUUID().toString();
-        SentenceDto eventPayload = new SentenceDto(
-                aggregateId,
-                csd.getSentence(),
-                csd.getTranslation()
-        );
+        try {
+            if (csd.getSentence() == null || csd.getTranslation() == null) {
+                log.error("Nie można utworzyć zdania, ponieważ brak jest wymaganych pól.");
+                throw new IllegalArgumentException("Sentence and translation must not be null");
+            }
+            SentenceDto eventPayload = new SentenceDto(
+                    aggregateId,
+                    csd.getSentence(),
+                    csd.getTranslation()
+            );
 
-        Outbox outbox = entityToOutboxEntityMapper.map(
-                aggregateId,
-                AggregateType.SENTENCE,
-                eventPayload,
-                EventType.CREATE_SENTENCE
-        );
-        outboxRepository.save(outbox);
-        return eventPayload;
+            log.info("Stworzono zdanie z aggregateId: {}", aggregateId);
+
+            Outbox outbox = entityToOutboxEntityMapper.map(
+                    aggregateId,
+                    AggregateType.SENTENCE,
+                    eventPayload,
+                    EventType.CREATE_SENTENCE
+            );
+            outboxRepository.save(outbox);
+            return eventPayload;
+
+        }catch (DataAccessException e) {
+            log.error("Błąd podczas zapisywania zdania: {}", e.getMessage(), e);
+            throw e;
+        }
+        catch (Exception e) {
+            log.error("Błąd podczas tworzenia zdania: {}", e.getMessage());
+            throw new RuntimeException("Failed to create sentence", e);
+        }
     }
 }

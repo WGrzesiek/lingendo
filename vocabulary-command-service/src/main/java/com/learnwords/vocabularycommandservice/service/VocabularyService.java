@@ -14,6 +14,7 @@ import com.learnwords.vocabularycommandservice.mapper.EntityToOutboxEntityMapper
 import com.learnwords.vocabularycommandservice.repository.OutboxRepository;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataAccessException;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
@@ -40,28 +41,26 @@ public class VocabularyService {
     public VocabularyDto createVocabulary(CreateVocabularyDto createVocabularyDto) {
         log.debug("Rozpoczęcie tworzenia słówka: {}", createVocabularyDto.getWord());
         List<String> sentenceIds = new ArrayList<>();
-
+        String aggregateId = UUID.randomUUID().toString();
+        try {
+        if (createVocabularyDto.getWord() == null || createVocabularyDto.getTranslations() == null) {
+            log.error("Nie można utworzyć słówka, ponieważ brak jest wymaganych pól.");
+            throw new IllegalArgumentException("Word and translations must not be null");
+        }
             if (createVocabularyDto.getSentences() != null && !createVocabularyDto.getSentences().isEmpty()) {
-                try {
                     for (CreateSentenceDto createSentenceDto : createVocabularyDto.getSentences()){
                         SentenceDto sentenceDto = sentenceService.createSentence(createSentenceDto);
                         sentenceIds.add(sentenceDto.id());
-                        log.info("Stworzono nowe zdania: {}", sentenceDto);
+                        log.info("Stworzono nowe zdania: {}, dla slowka: {}", sentenceDto.id(), createVocabularyDto.getWord());
                     }
-                } catch (Exception e) {
-                    log.error("Błąd podczas zapisywania zdań: {}", e.getMessage(), e);
-                    throw new RuntimeException("Nie udało się zapisać zdań", e);
-                }
             }
-            try {
-                String aggregateId = UUID.randomUUID().toString();
                 VocabularyDto eventPayload = new VocabularyDto(
                         aggregateId,
                         createVocabularyDto.getWord(),
                         createVocabularyDto.getTranslations(),
                         sentenceIds
                 );
-
+                log.info("Stworzono słówko z aggregateId: {}", aggregateId);
                 Outbox outbox = entityToOutboxEntityMapper.map(
                         aggregateId,
                         AggregateType.VOCABULARY,
@@ -74,7 +73,11 @@ public class VocabularyService {
                 log.info("Stworzono słówko: ID: {}, słowo: '{}', tłumaczenia: {}, powiązane zdania: {}",
                         eventPayload.id(), eventPayload.word(), eventPayload.translations(), eventPayload.sentenceIds());
                 return eventPayload;
-            } catch (Exception e) {
+            } catch (DataAccessException e) {
+                log.error("Błąd podczas zapisywania słówka: {}", e.getMessage(), e);
+                throw e;
+            }
+            catch (Exception e) {
                 log.error("Błąd podczas zapisywania słówka: {}", e.getMessage(), e);
                 throw new RuntimeException("Nie udało się zapisać słówka", e);
             }
