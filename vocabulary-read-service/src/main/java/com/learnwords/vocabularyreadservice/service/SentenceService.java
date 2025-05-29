@@ -24,7 +24,7 @@ public class SentenceService {
     }
 
     @Transactional
-    @KafkaListener(topics = KafkaTopic.CREATE_SENTENCE_TOPIC, groupId = KafkaGroup.VOCABULARY_READ_SERVICE_GROUP)
+    @KafkaListener(topics = KafkaTopic.CREATE_SENTENCE_TOPIC, groupId = KafkaGroup.VOCABULARY_READ_SERVICE_GROUP, containerFactory = "sentenceKafkaListenerFactory")
     public void processSentenceCreate(SentenceDto sentenceDto) {
         log.info("Otrzymano event: {}", EventType.CREATE_SENTENCE);
         Sentence sentence = new Sentence();

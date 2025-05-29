@@ -21,18 +21,14 @@ import java.util.Date;
 @Slf4j
 @Service
 public class VocabularyService {
-    private final SentenceRepository sentenceRepository;
     private final VocabularyRepository vocabularyRepository;
-    private final KafkaTemplate<String, UpdateStatusDto> kafkaTemplate;
 
-    public VocabularyService(SentenceRepository sentenceRepository, VocabularyRepository vocabularyRepository, KafkaTemplate<String, UpdateStatusDto> kafkaTemplate){
-        this.sentenceRepository = sentenceRepository;
+    public VocabularyService(VocabularyRepository vocabularyRepository){
         this.vocabularyRepository = vocabularyRepository;
-        this.kafkaTemplate = kafkaTemplate;
     }
 
     @Transactional
-    @KafkaListener(topics = KafkaTopic.CREATE_VOCABULARY_TOPIC, groupId = KafkaGroup.VOCABULARY_READ_SERVICE_GROUP)
+    @KafkaListener(topics = KafkaTopic.CREATE_VOCABULARY_TOPIC, groupId = KafkaGroup.VOCABULARY_READ_SERVICE_GROUP,containerFactory = "vocabularyKafkaListenerFactory")
     public void processSentenceCreate(VocabularyDto vocabularyDto) {
         log.info("Received event: {}", EventType.CREATE_VOCABULARY);
         Vocabulary vocabulary = new Vocabulary();
@@ -44,7 +40,5 @@ public class VocabularyService {
         vocabulary.setCreatedAt(now);
         vocabulary.setUpdatedAt(now);
         vocabularyRepository.save(vocabulary);
-        UpdateStatusDto updateStatusDto = new UpdateStatusDto(vocabularyDto.id(), EventStatus.COMPLETED.name());
-        kafkaTemplate.send(KafkaTopic.UPPATED_STATUS, updateStatusDto);
     }
 }
