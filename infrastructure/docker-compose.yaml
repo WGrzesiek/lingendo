@@ -1,6 +1,6 @@
 services:
   zookeeper:
-    image: quay.io/debezium/zookeeper:3.1
+    image: quay.io/debezium/zookeeper:3.1.1.Final
     platform: linux/amd64
     container_name: zookeeper
     ports:
@@ -10,7 +10,7 @@ services:
       ZOOKEEPER_TICK_TIME: 2000
 
   kafka:
-    image: quay.io/debezium/kafka:3.1
+    image: quay.io/debezium/kafka:3.1.1.Final
     platform: linux/amd64
     container_name: kafka
     depends_on:
@@ -54,7 +54,7 @@ services:
 
   # 4) Kafka Connect z wbudowanymi connectorami Debezium (Postgres, MySQL, itp.)
   connect:
-    image: quay.io/debezium/connect:3.1
+    image: quay.io/debezium/connect:3.1.1.Final
     platform: linux/amd64
     container_name: connect
     depends_on:
@@ -68,7 +68,18 @@ services:
       CONFIG_STORAGE_TOPIC: connect_configs
       OFFSET_STORAGE_TOPIC: connect_offsets
       STATUS_STORAGE_TOPIC: connect_statuses
-      # wszystkie pluginy Debezium są już w obrazie
+
+  akhq:
+    image: tchiotludo/akhq:latest
+    ports:
+      - "8080:8080"
+    environment:
+      AKHQ_CONFIGURATION: |
+        akhq:
+          connections:
+            local:
+              properties:
+                bootstrap.servers: "kafka:9092"
 
   debezium-ui:
     image: quay.io/debezium/debezium-ui:latest
