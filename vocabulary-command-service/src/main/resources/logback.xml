@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <include resource="net/logstash/logback/include/json-event-layout.xml"/>
+    <include resource="org/springframework/boot/logging/logback/base.xml"/>
+
+
+    <appender name="LOGSTASH" class="net.logstash.logback.appender.LogstashTcpSocketAppender">
+        <destination>localhost:50000</destination>
+        <encoder class="co.elastic.logging.logback.EcsEncoder">
+            <serviceName>vocabulary-service</serviceName>
+        </encoder>
+    </appender>
+
+    <root level="INFO">
+        <appender-ref ref="LOGSTASH"/>
+    </root>
+</configuration>
+
