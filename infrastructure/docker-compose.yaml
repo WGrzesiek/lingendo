@@ -52,7 +52,6 @@ services:
     depends_on:
       - postgres
 
-  # 4) Kafka Connect z wbudowanymi connectorami Debezium (Postgres, MySQL, itp.)
   connect:
     image: quay.io/debezium/connect:3.1.1.Final
     platform: linux/amd64
@@ -81,6 +80,7 @@ services:
               properties:
                 bootstrap.servers: "kafka:9092"
 
+
   debezium-ui:
     image: quay.io/debezium/debezium-ui:latest
     platform: linux/amd64
@@ -90,6 +90,7 @@ services:
       KAFKA_CONNECT_URIS: http://connect:8083
     depends_on:
       - connect
+
 volumes:
   pgdata:
 
