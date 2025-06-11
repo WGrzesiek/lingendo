@@ -4,6 +4,8 @@ import com.learnwords.common.EventType;
 import com.learnwords.common.KafkaGroup;
 import com.learnwords.common.KafkaTopic;
 import com.learnwords.common.dto.VocabularyDto;
+import com.learnwords.vocabularyreadservice.dto.ResponseSentenceDto;
+import com.learnwords.vocabularyreadservice.dto.ResponseVocabularyDto;
 import com.learnwords.vocabularyreadservice.entity.Vocabulary;
 import com.learnwords.vocabularyreadservice.repository.VocabularyRepository;
 import lombok.extern.slf4j.Slf4j;
@@ -37,5 +39,11 @@ public class VocabularyService {
         } catch (Exception e) {
             log.error("Błąd podczas przetwarzania słowa: {}", e.getMessage(), e);
         }
+    }
+    public ResponseVocabularyDto getVocabulary(String id) {
+        log.info("Pobieranie słowa o id: {}", id);
+        Vocabulary vocabulary = vocabularyRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Nie znaleziono słowa o id: " + id));
+        return new ResponseVocabularyDto(vocabulary.getWord(), vocabulary.getTranslations(), vocabulary.getSentenceIds());
     }
 }

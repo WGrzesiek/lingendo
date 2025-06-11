@@ -4,6 +4,7 @@ import com.learnwords.common.EventType;
 import com.learnwords.common.KafkaGroup;
 import com.learnwords.common.KafkaTopic;
 import com.learnwords.common.dto.SentenceDto;
+import com.learnwords.vocabularyreadservice.dto.ResponseSentenceDto;
 import com.learnwords.vocabularyreadservice.entity.Sentence;
 import com.learnwords.vocabularyreadservice.repository.SentenceRepository;
 
@@ -40,5 +41,12 @@ public class SentenceService {
         } catch (Exception e) {
             log.error("Błąd podczas przetwarzania zdania: {}", e.getMessage(), e);
         }
+    }
+
+    public ResponseSentenceDto getSentence(String id){
+        log.info("Pobieranie zdania o id: {}", id);
+        Sentence sentence = sentenceRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Nie znaleziono zdania o id: " + id));
+        return new ResponseSentenceDto(sentence.getSentence(), sentence.getTranslation());
     }
 }
