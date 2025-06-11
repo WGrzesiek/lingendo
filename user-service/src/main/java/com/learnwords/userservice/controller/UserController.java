@@ -52,6 +52,7 @@ public class UserController {
         log.info("Generated token for user: {}", loginRequest.getUsername());
         Long expireIn = authenticationService.getExpireIn();
         LoginResponse loginResponse = new LoginResponse(loginRequest.getUsername(), "User logged in successfully", token, expireIn);
+
         return ResponseEntity.ok(loginResponse);
     }
 

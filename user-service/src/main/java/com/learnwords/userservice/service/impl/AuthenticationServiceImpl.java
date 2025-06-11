@@ -1,9 +1,7 @@
 package com.learnwords.userservice.service.impl;
 
-import com.learnwords.userservice.entity.User;
 import com.learnwords.userservice.service.AppUserDetailService;
 import com.learnwords.userservice.service.AuthenticationService;
-import com.learnwords.userservice.service.UserService;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -38,7 +36,6 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         Map<String, Object> claims = new HashMap<>();
         claims.put("user_id", id);
         claims.put("authorities", authorities);
-
         return Jwts.builder()
                 .addClaims(claims)
                 .setSubject(username)
