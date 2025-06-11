@@ -53,6 +53,9 @@ public class Outbox {
     @Builder.Default
     private int retryCount = 0;
 
+    @Column(length = 36, nullable = false)
+    private String userId;
+
     @Column(nullable = false, updatable = false)
     @Builder.Default
     private Instant createdAt = Instant.now();
