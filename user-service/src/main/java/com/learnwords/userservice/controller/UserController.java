@@ -5,14 +5,14 @@ import com.learnwords.userservice.dtos.LoginResponse;
 import com.learnwords.userservice.dtos.RegisterRequest;
 import com.learnwords.userservice.dtos.RegisterResponse;
 import com.learnwords.userservice.security.AppUserDetails;
-import com.learnwords.userservice.service.AuthenticationService;
 import com.learnwords.userservice.service.UserService;
 import com.learnwords.userservice.service.impl.AuthenticationServiceImpl;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
@@ -51,13 +51,15 @@ public class UserController {
         log.info(userDetails.getAuthorities().toString());
         log.info("Generated token for user: {}", loginRequest.getUsername());
         Long expireIn = authenticationService.getExpireIn();
-        LoginResponse loginResponse = new LoginResponse(loginRequest.getUsername(), "User logged in successfully", token, expireIn);
+        LoginResponse loginResponse = new LoginResponse(loginRequest.getUsername(), "User logged in successfully", token, expireIn );
 
         return ResponseEntity.ok(loginResponse);
     }
 
-    @GetMapping(path = "/test")
-    public String test() {
-        return "test";
+    @GetMapping("/me")
+    public String me(@AuthenticationPrincipal Jwt jwt) {
+//        return jwt.getClaimAsString("user_id");
+        return "Hello";
     }
+
 }

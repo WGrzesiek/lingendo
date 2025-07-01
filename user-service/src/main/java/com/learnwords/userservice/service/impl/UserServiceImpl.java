@@ -1,6 +1,5 @@
 package com.learnwords.userservice.service.impl;
 
-
 import com.learnwords.userservice.dtos.RegisterRequest;
 import com.learnwords.userservice.entity.User;
 import com.learnwords.userservice.exception.exceptions.EmailAlreadyExistsException;
@@ -17,7 +16,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
-import java.util.UUID;
 
 @Slf4j
 @Service
@@ -35,7 +33,6 @@ public class UserServiceImpl implements UserService {
         this.userRepository = userRepository;
 
     }
-
 
     @Override
     @Transactional
