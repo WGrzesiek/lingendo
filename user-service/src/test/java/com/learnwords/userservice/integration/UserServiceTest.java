@@ -33,7 +33,7 @@ class UserServiceTest {
     @Test
     void shouldRegisterUser() {
         RegisterRequest request = TestDataUtil.registerRequest();
-        userService.registerUser(request, "UUID-1");
+        userService.registerUser(request);
         ArgumentCaptor<User> userCaptor = ArgumentCaptor.forClass(User.class);
         then(userRepository).should().save(userCaptor.capture());
         User capturedUser = userCaptor.getValue();
@@ -44,9 +44,9 @@ class UserServiceTest {
     @Test
     void shouldThrowExceptionWhenUsernameAlreadyExists() {
         RegisterRequest request = TestDataUtil.registerRequest();
-        userService.registerUser(request, "UUID-1");
+        userService.registerUser(request);
         given(userRepository.existsByUsername(request.getUsername())).willReturn(true);
-        assertThatThrownBy(() -> userService.registerUser(request, "UUID-1"))
+        assertThatThrownBy(() -> userService.registerUser(request))
                 .isInstanceOf(UsernameAlreadyExistsException.class)
                 .hasMessageContaining("Username '" + request.getUsername() + "' is already taken");
     }
@@ -54,9 +54,9 @@ class UserServiceTest {
     @Test
     void shouldThrowExceptionWhenEmailAlreadyExists(){
         RegisterRequest request = TestDataUtil.registerRequest();
-        userService.registerUser(request, "UUID-1");
+        userService.registerUser(request);
         given(userRepository.existsByEmail(request.getEmail())).willReturn(true);
-        assertThatThrownBy(() -> userService.registerUser(request,"UUID-1"))
+        assertThatThrownBy(() -> userService.registerUser(request))
                 .isInstanceOf(EmailAlreadyExistsException.class)
                 .hasMessageContaining("Email '" + request.getEmail() + "' is already taken");
     }

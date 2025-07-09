@@ -11,6 +11,6 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 public interface UserService {
 
-    void registerUser(RegisterRequest registerRequest, String userID) throws UsernameAlreadyExistsException, EmailAlreadyExistsException;
+    void registerUser(RegisterRequest registerRequest) throws UsernameAlreadyExistsException, EmailAlreadyExistsException;
     AppUserDetails authenticate(String username, String password);
 }

@@ -15,6 +15,8 @@ import java.util.*;
 @Service
 public class AuthenticationServiceImpl implements AuthenticationService {
 
+    @Value("${spring.application.name}")
+    private String applicationName;
 
     @Value("${jwt.expire-in}")
     private Long expireIn;
@@ -34,15 +36,13 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                 .toList();
 
         return Jwts.builder()
-//                .setIssuer("http://localhost:0003")
-                .setIssuer("${spring.application.name}")
+                .setIssuer(applicationName)
                 .setSubject(username)
-//                .setAudience("learnworlds-api")
                 .setAudience("${spring.application.name}")
                 .setExpiration(new Date(System.currentTimeMillis() + expireIn))
                 .claim("user_id", id)
                 .claim("authorities", roles)
-                .signWith(keyPair.getPrivate(), SignatureAlgorithm.RS256)
+                .signWith(keyPair.getPrivate() ,SignatureAlgorithm.RS256)
                 .compact();
     }
 

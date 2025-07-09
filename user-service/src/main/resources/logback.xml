@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+
+    <include resource="org/springframework/boot/logging/logback/base.xml"/>
+
+
+    <appender name="LOGSTASH" class="net.logstash.logback.appender.LogstashTcpSocketAppender">
+        <destination>localhost:50000</destination>
+        <encoder class="co.elastic.logging.logback.EcsEncoder">
+            <serviceName>user-service</serviceName>
+        </encoder>
+    </appender>
+
+
+    <!-- Appender dla logów PostgreSQL -->
+    <appender name="LOGSTASH_POSTGRES" class="net.logstash.logback.appender.LogstashTcpSocketAppender">
+        <destination>localhost:50000</destination>
+        <encoder class="co.elastic.logging.logback.EcsEncoder">
+            <serviceName>user-postgres-service</serviceName>
+        </encoder>
+    </appender>
+
+    <!-- Logger dla PostgreSQL -->
+    <logger name="org.postgresql" level="INFO" additivity="false">
+        <appender-ref ref="CONSOLE" />
+        <appender-ref ref="LOGSTASH_POSTGRES" />
+    </logger>
+
+    <logger name="org.hibernate" level="INFO" additivity="false">
+        <appender-ref ref="CONSOLE" />
+        <appender-ref ref="LOGSTASH_POSTGRES" />
+    </logger>
+
+    <root level="INFO">
+        <appender-ref ref="LOGSTASH"/>
+    </root>
+</configuration>
+
