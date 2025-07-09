@@ -5,5 +5,5 @@ import org.springframework.data.mongodb.repository.MongoRepository;
 
 import java.util.UUID;
 
-public interface VocabularyRepository extends MongoRepository<Vocabulary, UUID> {
+public interface VocabularyRepository extends MongoRepository<Vocabulary, String> {
 }
