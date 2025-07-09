@@ -56,7 +56,7 @@ public class Outbox {
     @Column(length = 36, nullable = false)
     private String userId;
 
-    @Column(length = 36, nullable = false)
+    @Column(length = 36, nullable = true)
     private String deckId;
 
     @Column(nullable = false, updatable = false)
