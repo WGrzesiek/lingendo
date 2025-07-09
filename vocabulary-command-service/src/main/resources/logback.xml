@@ -15,7 +15,7 @@
     <appender name="LOGSTASH_KAFKA" class="net.logstash.logback.appender.LogstashTcpSocketAppender">
         <destination>localhost:50000</destination>
         <encoder class="co.elastic.logging.logback.EcsEncoder">
-            <serviceName>kafka-service</serviceName>
+            <serviceName>vocabulary-command-kafka-service</serviceName>
         </encoder>
     </appender>
 
@@ -34,7 +34,7 @@
     <appender name="LOGSTASH_DEBEZIUM" class="net.logstash.logback.appender.LogstashTcpSocketAppender">
         <destination>localhost:50000</destination>
         <encoder class="co.elastic.logging.logback.EcsEncoder">
-            <serviceName>debezium-service</serviceName>
+            <serviceName>vocabulary-command-debezium-service</serviceName>
         </encoder>
     </appender>
 
@@ -48,7 +48,7 @@
     <appender name="LOGSTASH_POSTGRES" class="net.logstash.logback.appender.LogstashTcpSocketAppender">
         <destination>localhost:50000</destination>
         <encoder class="co.elastic.logging.logback.EcsEncoder">
-            <serviceName>postgres-service</serviceName>
+            <serviceName>vocabulary-command-postgres-service</serviceName>
         </encoder>
     </appender>
 

@@ -23,7 +23,8 @@ public class EntityToOutboxEntityMapper {
     public Outbox map(String aggregateId,
                       AggregateType aggregateType,
                       Object payload,
-                      EventType eventType) {
+                      EventType eventType,
+                      String userId) {
 
         return Outbox.builder()
                 .eventId(UUID.randomUUID().toString())
@@ -32,6 +33,7 @@ public class EntityToOutboxEntityMapper {
                 .eventType(eventType)
                 .payload(objectMapper.writeValueAsString(payload))
                 .eventStatus(EventStatus.CREATED)
+                .userId(userId)
                 .build();
     }
 }
