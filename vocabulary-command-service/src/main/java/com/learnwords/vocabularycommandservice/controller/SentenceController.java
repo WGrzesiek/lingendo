@@ -17,10 +17,10 @@ import org.springframework.web.bind.annotation.RestController;
 public class SentenceController {
 
     private final SentenceService sentenceService;
-    private final HttpServletRequest request;
-    public SentenceController(SentenceService sentenceService, HttpServletRequest request){
+
+    public SentenceController(SentenceService sentenceService){
         this.sentenceService=sentenceService;
-        this.request = request;
+
 
     }
 

@@ -56,6 +56,9 @@ public class Outbox {
     @Column(length = 36, nullable = false)
     private String userId;
 
+    @Column(length = 36, nullable = false)
+    private String deckId;
+
     @Column(nullable = false, updatable = false)
     @Builder.Default
     private Instant createdAt = Instant.now();
