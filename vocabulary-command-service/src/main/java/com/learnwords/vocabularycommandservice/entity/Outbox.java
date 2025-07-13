@@ -53,9 +53,6 @@ public class Outbox {
     @Builder.Default
     private int retryCount = 0;
 
-    @Column(length = 36, nullable = false)
-    private String userId;
-
     @Column(length = 36, nullable = true)
     private String deckId;
 

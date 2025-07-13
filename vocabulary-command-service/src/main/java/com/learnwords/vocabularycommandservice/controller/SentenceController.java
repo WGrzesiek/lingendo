@@ -5,30 +5,25 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
 import com.learnwords.vocabularycommandservice.dto.CreateSentenceDto;
 import com.learnwords.vocabularycommandservice.service.SentenceService;
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
+@RequestMapping("/api/v1/sentences")
 public class SentenceController {
 
     private final SentenceService sentenceService;
 
     public SentenceController(SentenceService sentenceService){
         this.sentenceService=sentenceService;
-
-
     }
 
-    @PostMapping("/add")
-    public ResponseEntity<SentenceDto> createSentence(@Valid @RequestBody CreateSentenceDto sentenceDto, @AuthenticationPrincipal Jwt jwt) {
-        String userId = jwt.getClaimAsString("user_id");
-        if (userId == null) userId = jwt.getSubject();
-        SentenceDto savedSentence = sentenceService.createSentence(sentenceDto, userId);
+    @PostMapping("/create/{deckId}")
+    public ResponseEntity<SentenceDto> createSentence(@PathVariable String deckId, @Valid @RequestBody CreateSentenceDto sentenceDto, @AuthenticationPrincipal Jwt jwt) {
+
+        SentenceDto savedSentence = sentenceService.createSentence(sentenceDto, deckId);
         return ResponseEntity.status(HttpStatus.CREATED).body(savedSentence);
     }
 }

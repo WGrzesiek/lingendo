@@ -17,7 +17,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-
 @Slf4j
 @Service
 public class VocabularyService {
@@ -31,7 +30,7 @@ public class VocabularyService {
         this.sentenceService = sentenceService;
     }
 
-    public VocabularyDto createVocabulary(CreateVocabularyDto createVocabularyDto, String userId) {
+    public VocabularyDto createVocabulary(CreateVocabularyDto createVocabularyDto, String deckId) {
         log.debug("Rozpoczęcie tworzenia słówka: {}", createVocabularyDto.getWord());
         List<String> sentenceIds = new ArrayList<>();
         String aggregateId = UUID.randomUUID().toString();
@@ -42,7 +41,7 @@ public class VocabularyService {
         }
             if (createVocabularyDto.getSentences() != null && !createVocabularyDto.getSentences().isEmpty()) {
                     for (CreateSentenceDto createSentenceDto : createVocabularyDto.getSentences()){
-                        SentenceDto sentenceDto = sentenceService.createSentence(createSentenceDto, userId);
+                        SentenceDto sentenceDto = sentenceService.createSentence(createSentenceDto, deckId);
                         sentenceIds.add(sentenceDto.id());
                         log.info("Stworzono nowe zdania: {}, dla slowka: {}", sentenceDto.id(), createVocabularyDto.getWord());
                     }
@@ -51,7 +50,8 @@ public class VocabularyService {
                         aggregateId,
                         createVocabularyDto.getWord(),
                         createVocabularyDto.getTranslations(),
-                        sentenceIds
+                        sentenceIds,
+                        deckId
                 );
                 log.info("Stworzono słówko z aggregateId: {}", aggregateId);
                 Outbox outbox = entityToOutboxEntityMapper.map(
@@ -59,7 +59,7 @@ public class VocabularyService {
                         AggregateType.VOCABULARY,
                         eventPayload,
                         EventType.CREATE_VOCABULARY,
-                        userId
+                        deckId
                 );
                 outboxRepository.save(outbox);
                 log.info("Stworzono słówko: ID: {}, słowo: '{}', tłumaczenia: {}, powiązane zdania: {}",
@@ -74,9 +74,4 @@ public class VocabularyService {
                 throw new RuntimeException("Nie udało się zapisać słówka", e);
             }
         }
-
     }
-
-
-
-

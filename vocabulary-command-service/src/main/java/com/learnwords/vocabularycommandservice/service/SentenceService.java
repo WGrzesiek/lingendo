@@ -26,7 +26,7 @@ public class SentenceService {
     }
 
     @Transactional
-    public SentenceDto createSentence(CreateSentenceDto csd, String userId) {
+    public SentenceDto createSentence(CreateSentenceDto csd, String deckId) {
         log.info("Rozpoczęcie tworzenia zdania: {}", csd.getSentence());
         String aggregateId = UUID.randomUUID().toString();
         try {
@@ -47,7 +47,7 @@ public class SentenceService {
                     AggregateType.SENTENCE,
                     eventPayload,
                     EventType.CREATE_SENTENCE,
-                    userId
+                    deckId
             );
             outboxRepository.save(outbox);
             return eventPayload;

@@ -24,7 +24,7 @@ public class EntityToOutboxEntityMapper {
                       AggregateType aggregateType,
                       Object payload,
                       EventType eventType,
-                      String userId) {
+                      String deckId) {
 
         return Outbox.builder()
                 .eventId(UUID.randomUUID().toString())
@@ -33,7 +33,7 @@ public class EntityToOutboxEntityMapper {
                 .eventType(eventType)
                 .payload(objectMapper.writeValueAsString(payload))
                 .eventStatus(EventStatus.CREATED)
-                .userId(userId)
+                .deckId(deckId)
                 .build();
     }
 }
