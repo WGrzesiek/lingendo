@@ -4,7 +4,6 @@ import com.learnwords.common.EventType;
 import com.learnwords.common.KafkaGroup;
 import com.learnwords.common.KafkaTopic;
 import com.learnwords.common.dto.VocabularyDto;
-import com.learnwords.vocabularyreadservice.dto.ResponseSentenceDto;
 import com.learnwords.vocabularyreadservice.dto.ResponseVocabularyDto;
 import com.learnwords.vocabularyreadservice.entity.Vocabulary;
 import com.learnwords.vocabularyreadservice.repository.VocabularyRepository;
@@ -24,20 +23,22 @@ public class VocabularyService {
     }
 
     @Transactional
-    @KafkaListener(topics = KafkaTopic.CREATE_VOCABULARY_TOPIC, groupId = KafkaGroup.VOCABULARY_READ_SERVICE_GROUP,containerFactory = "vocabularyKafkaListenerFactory")
+    @KafkaListener(topics = KafkaTopic.CREATE_VOCABULARY_TOPIC, groupId = KafkaGroup.VOCABULARY_READ_SERVICE_GROUP, containerFactory = "vocabularyKafkaListenerFactory")
     public void processSentenceCreate(VocabularyDto vocabularyDto) {
         log.info("Otrzymano event: {}", EventType.CREATE_VOCABULARY);
         Vocabulary vocabulary = new Vocabulary();
         try{
-        vocabulary.setId(vocabularyDto.id());
-        vocabulary.setWord(vocabularyDto.word());
-        vocabulary.setTranslations(vocabularyDto.translations());
-        vocabulary.setSentenceIds(vocabularyDto.sentenceIds());
-        vocabularyRepository.save(vocabulary);
+            vocabulary.setId(vocabularyDto.id());
+            vocabulary.setWord(vocabularyDto.word());
+            vocabulary.setTranslations(vocabularyDto.translations());
+            vocabulary.setSentenceIds(vocabularyDto.sentenceIds());
+            vocabularyRepository.save(vocabulary);
         } catch (DataAccessException e) {
             log.error("Błąd dostępu do bazy danych: {}", e.getMessage(), e);
+            throw new RuntimeException("Błąd dostępu do bazy danych: " + e.getMessage(), e);
         } catch (Exception e) {
             log.error("Błąd podczas przetwarzania słowa: {}", e.getMessage(), e);
+            throw new RuntimeException("Błąd podczas przetwarzania słowa: " + e.getMessage(), e);
         }
     }
     public ResponseVocabularyDto getVocabulary(String id) {
