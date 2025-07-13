@@ -1,6 +1,9 @@
 package com.learnwords.deckservice.service.Algorithm.State;
 
+import com.google.gson.Gson;
 import com.learnwords.deckservice.service.Algorithm.Step.Step;
+
+import java.util.Map;
 
 public abstract non-sealed class AbstractState<T extends Step, S extends AbstractState<T,S>> implements AlgorithmState{
 
@@ -12,12 +15,16 @@ public abstract non-sealed class AbstractState<T extends Step, S extends Abstrac
 
     @Override
     public String serialize() {
-        return String.format("Step: %s", step.name());
+        Gson gson = new Gson();
+        Map<String, String> map = Map.of("step", step.name());
+        return gson.toJson(map);
     }
 
     @Override
     public S deserialize(String serializedState) {
-        String stepName = serializedState.replace("Step: ", "");
+        Gson gson = new Gson();
+        Map<String, String> map = gson.fromJson(serializedState, Map.class);
+        String stepName = map.get("step");
         return createStateFromStepName(stepName);
     }
 

@@ -15,22 +15,20 @@ import java.time.Instant;
 @Entity
 @Table(name = "flashcard")
 public class Flashcard {
-    //deck id -> id do decka
-    //word id -> id do słowa z mongodb
-    //próby -> ile razy próbowano się nauczyć
-    //poprawne odpowiedzi -> ile razy poprawnie odpowiedziano
-    //ile powtórek -> ile razy było powtarzane
-    //czy nauczone -> czy słowo zostało nauczone
-    //czy skipnięte -> czy słowo zostało pominięte w sesji
-    //algorytm state -> stan algorytmu nauki dla tego słowa
+
     @Id
+    @Column(name = "id", nullable = false, length = 36)
+    private String id;
+
     @Column(name = "word_id", nullable = false, length = 36)
     private String wordId;
 
     @Column(name = "correct_answers")
+    @Builder.Default
     private int correctAnswers = 0;
 
     @Column(name = "total_attempts")
+    @Builder.Default
     private int totalAttempts = 0;
 
     @ManyToOne

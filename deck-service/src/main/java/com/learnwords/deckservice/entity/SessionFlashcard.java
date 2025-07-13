@@ -16,7 +16,7 @@ public class SessionFlashcard {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
-    private String Id;
+    private String id;
 
     @ManyToOne
     @JoinColumn(name = "learning_session_id", nullable = false)

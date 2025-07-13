@@ -18,14 +18,6 @@ import java.util.Set;
 @Entity
 @Table(name = "deck")
 public class Deck {
-    //user id -> id użytkownika, który stworzył deck
-    //id_fishcard -> id fiszków, które będą w decku
-    //algorytmID -> algorytm nauki, który będzie używany do nauki słówek
-    //rozmiar sesji -> ile słówek będzie w jednej sesji nauki
-    //liczba słówek -> liczba słówek w decku
-    //język z -> język, z którego będą tłumaczone słówka
-    //język na -> język, na który będą tłumaczone słówka
-    //public -> czy deck jest publiczny, czy prywatny
     @Id
     @Column(nullable = false, unique = true, length = 36)
     private String id;
@@ -39,8 +31,11 @@ public class Deck {
     @Column(name = "user_id", nullable = false, length = 36)
     private String userId;
 
-    @OneToMany(mappedBy = "deck", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "deck", fetch = FetchType.LAZY)
     private Set<Flashcard> flashcards = new HashSet<>();
+
+    @OneToMany(mappedBy = "deck", fetch = FetchType.LAZY)
+    private Set<Session> sessions = new HashSet<>();
 
     @Column(name = "how_many_flashcards_for_one_session")
     @Builder.Default
