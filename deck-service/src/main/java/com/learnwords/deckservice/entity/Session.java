@@ -12,6 +12,11 @@ import java.time.Instant;
 @Setter
 @Getter
 public class Session {
+    // deck id -> id do decka
+    // session id -> unikalny identyfikator sesji
+    // czy sesja jest zakończona -> czy sesja została zakończona
+    // czas rozpoczęcia sesji -> kiedy sesja została rozpoczęta
+    // czas zakończenia sesji -> kiedy sesja została zakończona
 
     @Id
     private String id;
