@@ -46,7 +46,8 @@ public class Deck {
     private boolean isPublic = false;
 
     @Column(name = "word_count", nullable = false)
-    private int wordCount;
+    @Builder.Default
+    private int wordCount = 0;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "learn_algorithm", nullable = false)

@@ -1,7 +1,9 @@
 package com.learnwords.deckservice.service.Algorithm.State;
 
 import com.learnwords.deckservice.service.Algorithm.Step.GrzesiekStep;
+import org.springframework.stereotype.Component;
 
+//@Component
 public final class GrzesiekState extends AbstractState<GrzesiekStep, GrzesiekState> implements AlgorithmState {
 
     public GrzesiekState(GrzesiekStep step) {
@@ -13,5 +15,6 @@ public final class GrzesiekState extends AbstractState<GrzesiekStep, GrzesiekSta
         GrzesiekStep step = GrzesiekStep.valueOf(stepName);
         return new GrzesiekState(step);
     }
+
 }
 

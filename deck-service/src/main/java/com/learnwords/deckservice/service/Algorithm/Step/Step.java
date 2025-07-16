@@ -1,6 +1,8 @@
 package com.learnwords.deckservice.service.Algorithm.Step;
 
-//public sealed interface Step permits GrzesiekStep, LeitnerStep {
+import org.springframework.stereotype.Component;
+
+@Component
 public sealed interface Step permits GrzesiekStep {
 
 

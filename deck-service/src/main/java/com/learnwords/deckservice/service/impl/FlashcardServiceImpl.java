@@ -8,8 +8,6 @@ import com.learnwords.deckservice.entity.Flashcard;
 import com.learnwords.deckservice.enums.LearnAlgorithm;
 import com.learnwords.deckservice.repository.DeckRepository;
 import com.learnwords.deckservice.repository.FlashcardRepository;
-import com.learnwords.deckservice.service.Algorithm.Algorithm;
-import com.learnwords.deckservice.service.Algorithm.AlgorithmType;
 import com.learnwords.deckservice.service.Algorithm.GrzesiekAlgorithm;
 import com.learnwords.deckservice.service.FlashcardService;
 import jakarta.transaction.Transactional;
@@ -26,15 +24,13 @@ public class FlashcardServiceImpl implements FlashcardService {
 
     private final FlashcardRepository flashcardRepository;
     private final DeckRepository deckRepository;
-    private final Algorithm algorithm;
     private final GrzesiekAlgorithm grzesiekAlgorithm;
 
 
-    public FlashcardServiceImpl(FlashcardRepository flashcardRepository, DeckRepository deckRepository, GrzesiekAlgorithm grzesiekAlgorithm, Algorithm algorithm) {
+    public FlashcardServiceImpl(FlashcardRepository flashcardRepository, DeckRepository deckRepository, GrzesiekAlgorithm grzesiekAlgorithm) {
         this.flashcardRepository = flashcardRepository;
         this.deckRepository = deckRepository;
         this.grzesiekAlgorithm = grzesiekAlgorithm;
-        this.algorithm = algorithm;
     }
 
     @Override
@@ -55,6 +51,10 @@ public class FlashcardServiceImpl implements FlashcardService {
             setInitialFlashcardState(vocabularyDto.deckId(), flashcard);
             flashcardRepository.save(flashcard);
             log.info("Zapisano fiszke o id: {}", flashcardId);
+//            deck.setWordCount(deck.getWordCount() + 1);
+            deck.setWordCount(deck.getFlashcards().size());
+            deckRepository.save(deck);
+            log.info("Zaktualizowano talię o id: {}", vocabularyDto.deckId());
         }
         catch (DataAccessException e) {
             log.error("Błąd dostępu do bazy danych: {}", e.getMessage(), e);
@@ -66,7 +66,6 @@ public class FlashcardServiceImpl implements FlashcardService {
         }
     }
 
-
     @Override
     public void setInitialFlashcardState(String deckId, Flashcard flashcard) {
         try{
@@ -76,10 +75,7 @@ public class FlashcardServiceImpl implements FlashcardService {
             switch (algorithm) {
                 case GRZESIEK_ALGORITHM -> flashcard.setAlgorithmState(grzesiekAlgorithm.initialize().serialize());
             }
-
-
             log.info("Ustawianie początkowego stanu fiszki dla talii: {}", deckId);
-
         }
         catch (DataAccessException e) {
             log.error("Błąd dostępu do bazy danych: {}", e.getMessage(), e);
@@ -89,6 +85,5 @@ public class FlashcardServiceImpl implements FlashcardService {
             log.error("Błąd podczas ustawiania początkowego stanu fiszki: {}", e.getMessage(), e);
             throw new RuntimeException("Błąd podczas ustawiania początkowego stanu fiszki: " + e.getMessage(), e);
         }
-
     }
 }

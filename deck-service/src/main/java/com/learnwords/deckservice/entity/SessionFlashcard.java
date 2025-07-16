@@ -15,12 +15,12 @@ import java.time.Instant;
 public class SessionFlashcard {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
+//    @GeneratedValue(strategy = GenerationType.UUID)
     private String id;
 
     @ManyToOne
     @JoinColumn(name = "learning_session_id", nullable = false)
-    private Session Session;
+    private Session session;
 
     @ManyToOne
     @JoinColumn(name = "flashcard_id", nullable = false)

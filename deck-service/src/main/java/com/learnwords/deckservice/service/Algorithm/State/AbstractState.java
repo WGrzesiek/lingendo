@@ -2,9 +2,11 @@ package com.learnwords.deckservice.service.Algorithm.State;
 
 import com.google.gson.Gson;
 import com.learnwords.deckservice.service.Algorithm.Step.Step;
+import org.springframework.stereotype.Component;
 
 import java.util.Map;
 
+@Component
 public abstract non-sealed class AbstractState<T extends Step, S extends AbstractState<T,S>> implements AlgorithmState{
 
     private final T step;
@@ -43,5 +45,11 @@ public abstract non-sealed class AbstractState<T extends Step, S extends Abstrac
         return createStateFromStepName(step.previousStep().name());
     }
 
+    @Override
+    public Step getStep() {
+        return step;
+    }
+
     protected abstract S createStateFromStepName(String stepName);
+
 }

@@ -1,5 +1,6 @@
 package com.learnwords.deckservice.service.Algorithm.Step;
 
+
 public enum GrzesiekStep implements Step{
     SHOW_BOTH,
     QUIZ,
