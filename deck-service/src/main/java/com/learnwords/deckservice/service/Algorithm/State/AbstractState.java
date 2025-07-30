@@ -1,6 +1,7 @@
 package com.learnwords.deckservice.service.Algorithm.State;
 
 import com.google.gson.Gson;
+import com.learnwords.deckservice.exception.exceptions.StepWithThisNameNoExist;
 import com.learnwords.deckservice.service.Algorithm.Step.Step;
 import org.springframework.stereotype.Component;
 
@@ -21,14 +22,7 @@ public abstract non-sealed class AbstractState<T extends Step, S extends Abstrac
         Map<String, String> map = Map.of("step", step.name());
         return gson.toJson(map);
     }
-
-    @Override
-    public S deserialize(String serializedState) {
-        Gson gson = new Gson();
-        Map<String, String> map = gson.fromJson(serializedState, Map.class);
-        String stepName = map.get("step");
-        return createStateFromStepName(stepName);
-    }
+    
 
     @Override
     public S reset(){
@@ -46,10 +40,10 @@ public abstract non-sealed class AbstractState<T extends Step, S extends Abstrac
     }
 
     @Override
-    public Step getStep() {
+    public T getStep() {
         return step;
     }
 
-    protected abstract S createStateFromStepName(String stepName);
+    protected abstract S createStateFromStepName(String stepName) throws StepWithThisNameNoExist;
 
 }

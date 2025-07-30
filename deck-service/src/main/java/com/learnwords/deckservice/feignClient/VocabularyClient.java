@@ -9,7 +9,6 @@ import java.util.List;
 
 @FeignClient(
         name = "${vocabulary-read-service.name}",
-//        path = "${vocabulary-read-service.path}",
         url = "${vocabulary-read-service.url}",
         configuration = FeignConfig.class)
 public interface VocabularyClient {

@@ -1,4 +1,4 @@
-package com.learnwords.deckservice.service.Algorithm.Result;
+package com.learnwords.deckservice.service.Algorithm.responseResult;
 
 import com.learnwords.deckservice.service.Algorithm.State.AlgorithmState;
 

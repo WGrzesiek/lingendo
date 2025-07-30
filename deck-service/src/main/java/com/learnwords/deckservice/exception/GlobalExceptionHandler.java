@@ -2,6 +2,7 @@ package com.learnwords.deckservice.exception;
 
 import com.learnwords.deckservice.dto.ApiErrorResponse;
 import com.learnwords.deckservice.exception.exceptions.DeckWithThisNameForThisUserAlreadyExistsException;
+import com.learnwords.deckservice.exception.exceptions.StepWithThisNameNoExist;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -23,6 +24,13 @@ public class GlobalExceptionHandler {
         log.error("Deck with this name for this user already exists: {}", ex.getMessage());
         ApiErrorResponse errorResponse = new ApiErrorResponse(HttpStatus.CONFLICT.value(), ex.getMessage());
         return ResponseEntity.status(HttpStatus.CONFLICT).body(errorResponse);
+    }
+
+    @ExceptionHandler(StepWithThisNameNoExist.class)
+    public ResponseEntity<ApiErrorResponse> handleStepWithThisNameNoExist(StepWithThisNameNoExist ex) {
+        log.error("Step with this name does not exist: {}", ex.getMessage());
+        ApiErrorResponse errorResponse = new ApiErrorResponse(HttpStatus.NOT_FOUND.value(), ex.getMessage());
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)

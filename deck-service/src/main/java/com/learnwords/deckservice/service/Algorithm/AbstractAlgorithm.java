@@ -2,7 +2,6 @@ package com.learnwords.deckservice.service.Algorithm;
 
 import com.learnwords.deckservice.enums.LearnAlgorithm;
 import com.learnwords.deckservice.service.Algorithm.State.AlgorithmState;
-import org.springframework.stereotype.Component;
 
 
 public abstract sealed class AbstractAlgorithm implements Algorithm<AlgorithmState> permits GrzesiekAlgorithm {
