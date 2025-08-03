@@ -12,7 +12,6 @@ import java.time.Instant;
 @Setter
 @Getter
 public class Session {
-
     @Id
     private String id;
 
