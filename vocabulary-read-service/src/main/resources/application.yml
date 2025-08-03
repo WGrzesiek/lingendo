@@ -1,0 +1,42 @@
+logging:
+    level:
+        io:
+            debezium: INFO
+            debezium.connector.postgresql: INFO
+        org:
+            apache:
+                kafka: INFO
+            hibernate: INFO
+            postgresql: INFO
+server:
+    port: ${SERVER_PORT:2}
+spring:
+    application:
+        name: vocabulary-read-service
+    config:
+      import:
+        - optional:file:../.env[.properties]
+        - optional:file:.env[.properties]
+    data:
+        mongodb:
+            database: ${DB_MONGODB_NAME:vocabulary-command-service}
+            host: ${DB_MONGODB_HOST:localhost}
+            username: ${DB_MONGODB_USER:User}
+            password: ${DB_MONGODB_PASSWORD:password}
+            port: ${DB_MONGODB_PORT:27017}
+    jpa:
+        hibernate:
+            ddl-auto: update
+    kafka:
+        consumer:
+            auto-offset-reset: earliest
+            bootstrap-servers: ${KAFKA_BOOTSTRAP:127.0.0.1:29092}
+            group-id: ${KAFKA_GROUP:sentence-service-group}
+            key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+            properties:
+                spring:
+                    deserializer:
+                        value:
+                            delegate:
+                                class: org.springframework.kafka.support.serializer.JsonDeserializer
+            value-deserializer: org.springframework.kafka.support.serializer.ErrorHandlingDeserializer
