@@ -1,7 +1,7 @@
 package com.learnwords.vocabularyreadservice.controller;
 
-import com.learnwords.vocabularyreadservice.dto.OnlyWordDto;
-import com.learnwords.vocabularyreadservice.dto.ResponseVocabularyDto;
+import com.learnwords.common.dto.OnlyWordDto;
+import com.learnwords.common.dto.ResponseVocabularyDto;
 import com.learnwords.vocabularyreadservice.service.VocabularyService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

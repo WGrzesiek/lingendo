@@ -1,6 +1,6 @@
 package com.learnwords.vocabularyreadservice.controller;
 
-import com.learnwords.vocabularyreadservice.dto.ResponseSentenceDto;
+import com.learnwords.common.dto.ResponseSentenceDto;
 import com.learnwords.vocabularyreadservice.service.SentenceService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;

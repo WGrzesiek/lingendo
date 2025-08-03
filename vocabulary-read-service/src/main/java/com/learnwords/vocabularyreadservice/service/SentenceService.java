@@ -4,7 +4,7 @@ import com.learnwords.common.EventType;
 import com.learnwords.common.KafkaGroup;
 import com.learnwords.common.KafkaTopic;
 import com.learnwords.common.dto.SentenceDto;
-import com.learnwords.vocabularyreadservice.dto.ResponseSentenceDto;
+import com.learnwords.common.dto.ResponseSentenceDto;
 import com.learnwords.vocabularyreadservice.entity.Sentence;
 import com.learnwords.vocabularyreadservice.repository.SentenceRepository;
 
