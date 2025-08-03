@@ -1,0 +1,61 @@
+logging:
+  level:
+    org:
+      apache:
+        kafka: INFO
+      hibernate: INFO
+      postgresql: INFO
+
+server:
+  port: ${SERVER_PORT:8004}
+
+spring:
+  application:
+    name: deck-service
+  config:
+    import:
+      - optional:file:../.env[.properties]
+      - optional:file:.env[.properties]
+  datasource:
+    url: jdbc:postgresql://${DB_POSTGRESQL_HOST:localhost}:${DB_POSTGRESQL_PORT:5432}/${DB_POSTGRESQL_NAME:deck}
+    username: ${DB_POSTGRESQL_USER:admin}
+    password: ${DB_POSTGRESQL_PASSWORD:}
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+  kafka:
+    consumer:
+      auto-offset-reset: earliest
+      bootstrap-servers: ${KAFKA_BOOTSTRAP:127.0.0.1:29092}
+      group-id: ${KAFKA_GROUP:sentence-service-group}
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      properties:
+        spring:
+          deserializer:
+            value:
+              delegate:
+                class: org.springframework.kafka.support.serializer.JsonDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.ErrorHandlingDeserializer
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          jwk-set-uri: ${JWK_SET_URI:http://localhost:0003/.well-known/jwks.json}
+
+springdoc:
+  api-docs:
+    enabled: true
+    path: /api-docs
+  swagger-ui:
+    enabled: true
+    path: /swagger-ui.html
+
+vocabulary-read-service:
+  name: ${VOCAB_SERVICE_NAME:vocabulary-read-service}
+  path: ${VOCAB_SERVICE_PATH:/api/v1/vocabulary}
+  url: ${VOCAB_SERVICE_URL:http://localhost:2/api/v1/vocabulary}
+  url.get-vocabularies: ${VOCAB_SERVICE_GET_VOCAB:/vocabularies}
+  url.get-words: ${VOCAB_SERVICE_GET_WORDS:/words}
