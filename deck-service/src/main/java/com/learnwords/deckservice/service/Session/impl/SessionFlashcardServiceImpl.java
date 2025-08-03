@@ -23,9 +23,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
-
-import static java.io.IO.println;
-
 @Slf4j
 @Service
 public class SessionFlashcardServiceImpl implements SessionFlashcardService {
@@ -74,9 +71,6 @@ public class SessionFlashcardServiceImpl implements SessionFlashcardService {
                             .flashcard(flashcard)
                             .build())
                     .collect(Collectors.toSet());
-            for (SessionFlashcard sessionFlashcard : sessionFlashcards) {
-                println("Dodawanie fiszki do sesji: " + sessionFlashcard.getFlashcard().getId() + " w sesji: " + session.getId());
-            }
             sessionFlashcardRepository.saveAll(sessionFlashcards);
             log.info("Pomyślnie dodano {} fiszek do sesji {}", deck.getFlashcards().size(), session.getId());
             return session.getId();

@@ -5,15 +5,11 @@ import com.learnwords.deckservice.feignClient.VocabularyClient;
 import com.learnwords.deckservice.repository.FlashcardRepository;
 import com.learnwords.deckservice.service.Session.FlashcardFetchStrategy.FlashcardFetchStrategy;
 import com.learnwords.deckservice.service.Session.FlashcardFetchStrategy.FlashcardFetchStrategyService;
-import com.learnwords.vocabularyreadservice.dto.OnlyWordDto;
+import com.learnwords.common.dto.OnlyWordDto;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
-
-import static java.io.IO.println;
 
 @Component
 public class FlashcardFetchStrategyServiceImpl implements FlashcardFetchStrategyService {
@@ -29,23 +25,6 @@ public class FlashcardFetchStrategyServiceImpl implements FlashcardFetchStrategy
 
     public List<Flashcard> sortFlashcardsByStrategy(FlashcardFetchStrategy strategy, Long limit, List<Flashcard> flashcards){
         return switch (strategy) {
-//            case ALPHABETICAL -> {
-//                for (Flashcard flashcard : flashcards) {
-//                    println("Flashcard ID: " + flashcard.getId() + ", Word: " + flashcard.getId());
-//                }
-//                List<OnlyWordDto> words = vocabularyClient.getWords(flashcards.stream().map(Flashcard::getWordId).toList());
-//                for (OnlyWordDto word : words) {
-//                    println("Word ID: " + word.id() + ", Word: " + word.word());
-//                }
-//                words.sort((o1, o2) -> o1.word().compareToIgnoreCase(o2.word()));
-//                yield
-//                words.stream().limit(limit)
-//                        .map(word -> flashcards.stream().
-//                                filter(flashcard -> flashcard.getWordId().equals(word.id())))
-//                                .findFirst()
-//                                .orElse(null)
-//                        .toList();
-//            }
             case ALPHABETICAL -> {
                 List<OnlyWordDto> words = vocabularyClient.getWords(flashcards.stream().map(Flashcard::getWordId).toList());
                 // Sortuj słowa alfabetycznie
@@ -72,7 +51,6 @@ public class FlashcardFetchStrategyServiceImpl implements FlashcardFetchStrategy
             case UNLEARNED_FIRST -> null;
         };
         }
-
     }
 
 

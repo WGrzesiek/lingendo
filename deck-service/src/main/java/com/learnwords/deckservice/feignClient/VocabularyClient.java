@@ -1,7 +1,7 @@
 package com.learnwords.deckservice.feignClient;
 
-import com.learnwords.vocabularyreadservice.dto.OnlyWordDto;
-import com.learnwords.vocabularyreadservice.dto.ResponseVocabularyDto;
+import com.learnwords.common.dto.OnlyWordDto;
+import com.learnwords.common.dto.ResponseVocabularyDto;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.*;
 

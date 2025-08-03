@@ -1,7 +1,7 @@
 package com.learnwords.deckservice.controller;
 
 import com.learnwords.deckservice.feignClient.VocabularyClient;
-import com.learnwords.vocabularyreadservice.dto.ResponseVocabularyDto;
+import com.learnwords.common.dto.ResponseVocabularyDto;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
