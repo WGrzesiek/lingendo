@@ -7,7 +7,6 @@ import com.learnwords.deckservice.repository.SessionRepository;
 import com.learnwords.deckservice.service.Session.FlashcardFetchStrategy.FlashcardFetchStrategy;
 import com.learnwords.deckservice.service.Session.SessionFlashcardService;
 import com.learnwords.deckservice.service.Session.SessionService;
-import org.springframework.transaction.annotation.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
@@ -30,7 +29,6 @@ public class SessionServiceImpl implements SessionService {
     }
 
     @Override
-//    @Transactional
     public String initializeSession(String deckId, FlashcardFetchStrategy flashcardFetchStrategy) {
         log.info("Inicjalizacja sesji dla talii: {}", deckId);
         try {

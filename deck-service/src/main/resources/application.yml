@@ -5,7 +5,15 @@ logging:
         kafka: INFO
       hibernate: INFO
       postgresql: INFO
-
+grpc:
+  client:
+    vocabulary-read:
+      address: 'static://vocabulary-read-service:0002'   # host:port serwera gRPC
+      negotiationType: PLAINTEXT                         # jeśli bez TLS
+      # (opcjonalnie) keepalive:
+      enableKeepAlive: true
+      keepAliveWithoutCalls: true
+      keepAliveTime: 30s
 server:
   port: ${SERVER_PORT:8004}
 

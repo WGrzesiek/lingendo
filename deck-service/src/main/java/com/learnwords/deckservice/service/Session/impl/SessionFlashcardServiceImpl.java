@@ -6,7 +6,6 @@ import com.learnwords.deckservice.entity.Session;
 import com.learnwords.deckservice.entity.SessionFlashcard;
 import com.learnwords.deckservice.repository.SessionFlashcardRepository;
 import com.learnwords.deckservice.service.Algorithm.AbstractAlgorithm;
-import com.learnwords.deckservice.service.Algorithm.Algorithm;
 import com.learnwords.deckservice.service.Algorithm.AlgorithmFactory;
 import com.learnwords.deckservice.service.Session.FlashcardFetchStrategy.FlashcardFetchStrategy;
 import com.learnwords.deckservice.service.Session.FlashcardFetchStrategy.impl.FlashcardFetchStrategyServiceImpl;
@@ -15,8 +14,6 @@ import com.learnwords.deckservice.service.Session.SessionFlashcardService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -38,9 +35,6 @@ public class SessionFlashcardServiceImpl implements SessionFlashcardService {
     }
 
     @Override
-//    @Transactional
-//    @Transactional(propagation = Propagation.REQUIRED)
-
     public String addFlashcardsToSession(Session session, Deck deck, FlashcardFetchStrategy flashcardFetchStrategy) {
         log.info("Dodawanie {} fiszek do sesji: {}", deck.getFlashcards().size(), session.getId());
         AbstractAlgorithm algorithm = algorithmFactory.get(deck.getLearnAlgorithm());
