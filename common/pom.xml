@@ -4,7 +4,7 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>com.learnwords</groupId>
-        <artifactId>learnwords-parent</artifactId>
+        <artifactId>learnwords-services</artifactId>
         <version>0.0.1-SNAPSHOT</version>
     </parent>
     <artifactId>common</artifactId>
@@ -35,12 +35,6 @@
     </dependencies>
 
     <build>
-<!--        <plugins>-->
-<!--            <plugin>-->
-<!--                <groupId>org.springframework.boot</groupId>-->
-<!--                <artifactId>spring-boot-maven-plugin</artifactId>-->
-<!--            </plugin>-->
-<!--        </plugins>-->
     </build>
 
 </project>
