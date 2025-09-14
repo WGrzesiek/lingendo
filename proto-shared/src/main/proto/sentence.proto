@@ -1,0 +1,42 @@
+syntax = "proto3";
+
+package com.learnwords.sentence.v1;
+
+option java_multiple_files = true;
+option java_package = "com.learnwords.sentence.v1";
+option java_outer_classname = "SentenceProto";
+
+import "google/protobuf/timestamp.proto";
+
+message Sentence {
+  string id = 1;
+  string sentence = 2;
+  string translation = 3;
+
+}
+
+message GetSentenceRequest {
+  string id = 1;
+}
+message BatchGetSentencesRequest {
+  repeated string ids = 1;
+}
+message ListSentencesRequest {
+  int32 page_size = 1;
+  string page_token = 2;
+}
+
+message ListSentencesResponse {
+  repeated Sentence sentences = 1;
+  string next_page_token = 2;
+}
+
+message BatchGetSentencesResponse {
+  repeated Sentence sentences = 1;
+}
+
+service SentenceReadService {
+  rpc GetSentence(GetSentenceRequest) returns (Sentence);
+  rpc BatchGetSentences(BatchGetSentencesRequest) returns (BatchGetSentencesResponse);
+  rpc ListSentences(ListSentencesRequest) returns (ListSentencesResponse);
+}

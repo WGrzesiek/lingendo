@@ -1,0 +1,54 @@
+syntax = "proto3";
+
+package com.learnwords.vocabulary.v1;
+
+option java_multiple_files = true;
+option java_package = "com.learnwords.vocabulary.v1";
+option java_outer_classname = "VocabularyProto";
+
+import "google/protobuf/timestamp.proto";
+
+message Vocabulary {
+  string id = 1;
+  string word = 2;
+  repeated string translations = 3;
+  repeated string sentence_ids = 4;
+}
+
+message OnlyWord {
+  string id = 1;
+  string word = 2;
+}
+
+message GetVocabularyRequest {
+  string id = 1;
+}
+
+message BatchGetVocabulariesRequest {
+  repeated string ids = 1;
+}
+
+message ListVocabulariesRequest {
+  int32 page_size = 1;
+  string page_token = 2;
+}
+
+message ListVocabulariesResponse{
+  repeated Vocabulary vocabularies = 1;
+  string next_page_token = 2;
+}
+
+message BatchGetVocabulariesResponse {
+  repeated Vocabulary vocabularies = 1;
+}
+
+message BatchGetOnlyWordResponse {
+  repeated OnlyWord word = 1;
+}
+
+service VocabularyReadService {
+  rpc GetVocabulary(GetVocabularyRequest) returns (Vocabulary);
+  rpc BatchGetVocabularies(BatchGetVocabulariesRequest) returns (BatchGetVocabulariesResponse);
+  rpc BatchGetOnlyWord(BatchGetVocabulariesRequest) returns (BatchGetOnlyWordResponse);
+  rpc ListVocabularies(ListVocabulariesRequest) returns (ListVocabulariesResponse);
+}
