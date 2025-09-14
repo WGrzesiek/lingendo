@@ -22,7 +22,6 @@ public class SentenceController {
 
     @PostMapping("/create/{deckId}")
     public ResponseEntity<SentenceDto> createSentence(@PathVariable String deckId, @Valid @RequestBody CreateSentenceDto sentenceDto, @AuthenticationPrincipal Jwt jwt) {
-
         SentenceDto savedSentence = sentenceService.createSentence(sentenceDto, deckId);
         return ResponseEntity.status(HttpStatus.CREATED).body(savedSentence);
     }
