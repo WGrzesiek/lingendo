@@ -35,8 +35,8 @@ public class RsaKeyConfig {
 
     private PrivateKey readPrivateKey(Resource pem) throws Exception {
         String text = pem.getContentAsString(StandardCharsets.UTF_8)
-                .replaceAll("-----BEGIN PRIVATE KEY-----", "")  // Poprawka: PRIVATE zamiast PUBLIC
-                .replaceAll("-----END PRIVATE KEY-----", "")    // Poprawka: PRIVATE zamiast PUBLIC
+                .replaceAll("-----BEGIN PRIVATE KEY-----", "")
+                .replaceAll("-----END PRIVATE KEY-----", "")
                 .replaceAll("\\s", "");
         byte[] der = Base64.getDecoder().decode(text);
         return KeyFactory.getInstance("RSA")
