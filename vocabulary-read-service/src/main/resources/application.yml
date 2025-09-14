@@ -8,6 +8,9 @@ logging:
                 kafka: INFO
             hibernate: INFO
             postgresql: INFO
+grpc:
+  server:
+    port: ${SERVER_PORT:2}
 server:
     port: ${SERVER_PORT:2}
 spring:

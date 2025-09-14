@@ -4,7 +4,7 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>com.learnwords</groupId>
-        <artifactId>learnwords-parent</artifactId>
+        <artifactId>learnwords-services</artifactId>
         <version>0.0.1-SNAPSHOT</version>
     </parent>
     <artifactId>vocabulary-read-service</artifactId>
@@ -30,16 +30,19 @@
             <groupId>com.learnwords</groupId>
             <artifactId>common</artifactId>
         </dependency>
-        <!-- ====== SPRING STARTERY ====== -->
         <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-data-mongodb</artifactId>
+            <groupId>com.learnwords</groupId>
+            <artifactId>proto-shared</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>net.devh</groupId>
+            <artifactId>grpc-server-spring-boot-starter</artifactId>
+            <version>3.1.0.RELEASE</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-web</artifactId>
+            <artifactId>spring-boot-starter-data-mongodb-reactive</artifactId>
         </dependency>
-        <!-- ====== RESZTA ====== -->
         <dependency>
             <groupId>org.springframework.kafka</groupId>
             <artifactId>spring-kafka</artifactId>
@@ -47,6 +50,10 @@
         <dependency>
             <groupId>jakarta.persistence</groupId>
             <artifactId>jakarta.persistence-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
         </dependency>
     </dependencies>
     <build>
@@ -57,5 +64,4 @@
             </plugin>
         </plugins>
     </build>
-
 </project>
