@@ -16,9 +16,9 @@ pipeline {
 
         stage('Start Databases') {
 			steps {
-				dir('Infra') {
+
 					sh 'docker compose -f docker-compose.db.yml up -d'
-                }
+
             }
         }
     }
