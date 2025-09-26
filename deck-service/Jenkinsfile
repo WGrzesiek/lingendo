@@ -120,8 +120,7 @@ pipeline {
     post {
         always {
             node {
-                cleanWs()
-            }
+                deleteDir()
         }
         success {
             echo "Build zakończony sukcesem"
