@@ -2,14 +2,16 @@ package com.learnwords.vocabularyreadservice.service.grpc.impl;
 
 
 import com.learnwords.common.dto.ResponseSentenceDto;
-import com.learnwords.sentence.v1.GetSentenceRequest;
-import com.learnwords.sentence.v1.Sentence;
-import com.learnwords.sentence.v1.SentenceReadServiceGrpc;
+import com.learnwords.sentence.v1.*;
+import com.learnwords.vocabularyreadservice.enums.FetchStrategy;
 import com.learnwords.vocabularyreadservice.service.SentenceService;
 import com.learnwords.vocabularyreadservice.service.grpc.SentenceServiceGrpc;
 import io.grpc.stub.StreamObserver;
 import lombok.extern.slf4j.Slf4j;
 import net.devh.boot.grpc.server.service.GrpcService;
+import reactor.core.publisher.Mono;
+
+import java.util.List;
 
 @Slf4j
 @GrpcService
@@ -22,27 +24,70 @@ public class SentenceServiceGrpcImpl extends SentenceReadServiceGrpc.SentenceRea
     }
 
     @Override
-    public void getSentence(GetSentenceRequest request, StreamObserver<Sentence> responseObserver) {
-        log.info("Pobieranie zdania o id: {}", request.getId());
-        sentenceService.getSentenceById(request.getId())
-                .map(this::mapToGrpcSentence)
-                .subscribe(
-                        sentence -> {
-                            responseObserver.onNext(sentence);
-                            responseObserver.onCompleted();
-                        },
-                        error -> {
-                            log.error("Błąd podczas pobierania zdania", error);
-                            responseObserver.onError(error);
-                        }
-                );
+    public void getSentenceById(GetSentenceByIdRequest request, StreamObserver<SentenceResponse> response) {
+        try {
+            log.info("Pobieranie zdania o id: {}", request.getId());
+            Mono<ResponseSentenceDto> sentenceDto = sentenceService.getSentenceById(request.getId());
+
+            var sentences = sentenceDto.map(dto -> SentenceResponse.newBuilder()
+                    .setId(dto.id())
+                    .setSentence(dto.sentence())
+                    .setTranslation(dto.translation())
+                    .build());
+            response.onNext(sentences.block());
+            response.onCompleted();
+        }
+        catch (Exception e) {
+            log.error("Błąd podczas pobierania zdania", e);
+            response.onError(e);
+        }
     }
 
-    private Sentence mapToGrpcSentence(ResponseSentenceDto dto) {
-        return Sentence.newBuilder()
-                .setId(dto.id())
-                .setSentence(dto.sentence())
-                .setTranslation(dto.translation())
-                .build();
+    @Override
+    public void batchGetSentencesByIds(BatchGetSentencesByIdsRequest request, StreamObserver<ListSentencesResponse> response) {
+        try{
+            log.info("Pobieranie zdań o id: {}", request.getIdsList());
+            Mono<List<ResponseSentenceDto>> sentenceDtos = sentenceService.getSentencesByIds(request.getIdsList());
+
+            var sentences = sentenceDtos.map(dtos -> {
+                ListSentencesResponse.Builder builder = ListSentencesResponse.newBuilder();
+                dtos.forEach(dto -> builder.addSentences(SentenceResponse.newBuilder()
+                        .setId(dto.id())
+                        .setSentence(dto.sentence())
+                        .setTranslation(dto.translation())
+                        .build()));
+                return builder.build();
+            });
+            response.onNext(sentences.block());
+            response.onCompleted();
+        }
+        catch (Exception e) {
+            log.error("Błąd podczas pobierania zdań", e);
+            response.onError(e);
+        }
+    }
+
+    @Override
+    public void listSentences(ListSentencesRequest request, StreamObserver<ListSentencesResponse> response) {
+        try{
+            log.info("Pobieranie {} zdań, strategia: {}", request.getPageSize(), request.getFetchStrategy());
+            Mono<List<ResponseSentenceDto>> sentenceDtos = sentenceService.getSentences(request.getPageSize(), FetchStrategy.valueOf(request.getFetchStrategy()));
+
+            var sentences = sentenceDtos.map(dtos -> {
+                ListSentencesResponse.Builder builder = ListSentencesResponse.newBuilder();
+                dtos.forEach(dto -> builder.addSentences(SentenceResponse.newBuilder()
+                        .setId(dto.id())
+                        .setSentence(dto.sentence())
+                        .setTranslation(dto.translation())
+                        .build()));
+                return builder.build();
+            });
+            response.onNext(sentences.block());
+            response.onCompleted();
+        }
+        catch (Exception e) {
+            log.error("Błąd podczas pobierania zdań", e);
+            response.onError(e);
+        }
     }
 }

@@ -7,6 +7,4 @@ import reactor.core.publisher.Mono;
 
 @Repository
 public interface VocabularyRepository extends ReactiveMongoRepository<Vocabulary, String> {
-
-    Mono<Vocabulary> findById(String id);
 }

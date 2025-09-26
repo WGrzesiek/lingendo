@@ -1,0 +1,42 @@
+name: learnwords
+
+services:
+  vocabulary-read-service:
+    image: ${IMAGE_NAME:-vocabulary-read-service}:${IMAGE_TAG:-dev}
+    container_name: vocabulary-read-service
+    environment:
+      # Spring profile
+      SPRING_PROFILES_ACTIVE: ${PROFILE:-dev}
+
+      # HTTP / gRPC
+      SERVER_PORT: ${SERVER_PORT:-8813}
+      GRPC_PORT: ${GRPC_PORT:-9099}
+
+      # MongoDB
+      DB_MONGODB_HOST: ${DB_MONGODB_HOST:-mongodb}
+      DB_MONGODB_PORT: ${DB_MONGODB_PORT:-27017}
+      DB_MONGODB_NAME: ${DB_MONGODB_NAME:-vocabulary-command-service}
+      DB_MONGODB_USER: ${DB_MONGODB_USER:-User}
+      DB_MONGODB_PASSWORD: ${DB_MONGODB_PASSWORD:-password}
+
+      # Kafka
+      KAFKA_BOOTSTRAP: ${KAFKA_BOOTSTRAP:-kafka:9092}
+      KAFKA_GROUP:     ${KAFKA_GROUP:-vocabulary-read-service-group}
+
+      # Log levels / JVM (opcjonalnie)
+      LOG_LEVEL_DEBEZIUM:       ${LOG_LEVEL_DEBEZIUM:-INFO}
+      LOG_LEVEL_DEBEZIUM_PG:    ${LOG_LEVEL_DEBEZIUM_PG:-INFO}
+      LOG_LEVEL_KAFKA:          ${LOG_LEVEL_KAFKA:-INFO}
+      LOG_LEVEL_HIBERNATE:      ${LOG_LEVEL_HIBERNATE:-INFO}
+      LOG_LEVEL_POSTGRESQL:     ${LOG_LEVEL_POSTGRESQL:-INFO}
+      JAVA_OPTS:                ${JAVA_OPTS:-}
+
+    ports:
+      - "${SERVER_PORT:-8813}:${SERVER_PORT:-8813}"   # HTTP
+      - "${GRPC_PORT:-9099}:${GRPC_PORT:-9099}"       # gRPC
+
+    networks: [learnwords-net]
+
+networks:
+  learnwords-net:
+    external: true

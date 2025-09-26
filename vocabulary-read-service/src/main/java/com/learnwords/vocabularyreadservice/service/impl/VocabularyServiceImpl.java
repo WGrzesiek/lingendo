@@ -1,6 +1,7 @@
 package com.learnwords.vocabularyreadservice.service.impl;
 
 import com.learnwords.common.dto.OnlyWordDto;
+import com.learnwords.common.dto.ResponseSentenceDto;
 import com.learnwords.common.dto.ResponseVocabularyDto;
 import com.learnwords.vocabularyreadservice.exception.exceptions.SentenceNotFoundException;
 import com.learnwords.vocabularyreadservice.repository.VocabularyRepository;
@@ -39,10 +40,17 @@ public class VocabularyServiceImpl implements VocabularyService {
             return Mono.error(new IllegalArgumentException("id must not be blank"));
         log.info("Pobieranie słów o id: {}", ids);
         return vocabularyRepository.findAllById(ids)
-                .map(v ->new  ResponseVocabularyDto(v.getId(), v.getWord(), v.getTranslations(), v.getSentenceIds()))
+                .map(vocabulary -> new ResponseVocabularyDto(vocabulary.getId(),vocabulary.getWord(), vocabulary.getTranslations(), vocabulary.getSentenceIds()))
                 .collectList()
-                .timeout(Duration.ofSeconds(5), Mono.error(new TimeoutException()))
-                .doOnError(error -> log.error("Blad podczas pobierania slowek o id: {}, {}",ids,error.getMessage()));
+                .flatMap(list -> {
+                    if (list.isEmpty()) {
+                        return Mono.error(new SentenceNotFoundException("Brak zdań o podanych id"));
+                    } else {
+                        return Mono.just(list);
+                    }
+                })
+                .doOnError(error -> log.error("Błąd podczas pobierania zdań o id {}: {}", ids, error.getMessage()))
+                .timeout(Duration.ofSeconds(5), Mono.error(new TimeoutException("Przekroczono czas oczekiwania")));
     }
 
     public Mono<List<OnlyWordDto>> getOnlyWordsByIds(List<String> ids) {

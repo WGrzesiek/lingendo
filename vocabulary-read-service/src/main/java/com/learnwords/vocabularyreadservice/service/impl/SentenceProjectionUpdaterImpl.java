@@ -28,17 +28,14 @@ public class SentenceProjectionUpdaterImpl implements SentenceProjectionUpdater 
     public void processSentenceCreate(SentenceDto sentenceDto) {
         log.info("Otrzymano event: {}", EventType.CREATE_SENTENCE);
         Sentence sentence = new Sentence();
-        try {
-            sentence.setId(sentenceDto.id());
-            sentence.setSentence(sentenceDto.sentence());
-            sentence.setTranslation(sentenceDto.translation());
+        sentence.setId(sentenceDto.id());
+        sentence.setSentence(sentenceDto.sentence());
+        sentence.setTranslation(sentenceDto.translation());
 
-            sentenceRepository.save(sentence);
-            log.info("Zapisano zdanie o id: {}", sentenceDto.id());
-        } catch (DataAccessException e) {
-            log.error("Błąd dostępu do bazy danych: {}", e.getMessage(), e);
-        } catch (Exception e) {
-            log.error("Błąd podczas przetwarzania zdania: {}", e.getMessage(), e);
-        }
+        sentenceRepository.save(sentence)
+                .doOnSuccess(s -> log.info("Zapisano zdanie o id: {}", sentenceDto.id()))
+                .doOnError(e -> log.error("Błąd podczas zapisu: {}", e.getMessage(), e))
+                .subscribe();
     }
+
 }
