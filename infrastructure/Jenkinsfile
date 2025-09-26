@@ -1,41 +1,14 @@
 pipeline {
-	agent any
-
-    stages {
-		stage('Checkout') {
+	agent { dockerfile true }
+  stages {
+		stage('Test') {
 			steps {
-				checkout scm
-            }
-        }
-
-        stage('Debug Workspace') {
-			steps {
-				echo 'Aktualny katalog roboczy:'
-                sh 'pwd'
-                echo 'Zawartość katalogu:'
-                sh 'ls -al'
-            }
-        }
-
-        stage('Create Network') {
-			steps {
-				sh 'docker network create learnwords-net 2>/dev/null || true'
-            }
-        }
-
-        stage('Start Databases') {
-			steps {
-				sh 'docker compose -f docker-compose.db.yml up -d'
-            }
-        }
+				sh '''
+          node --version
+          git --version
+          curl --version
+        '''
+      }
     }
-
-    post {
-		success {
-			echo 'Bazy danych zostały pomyślnie uruchomione'
-        }
-        failure {
-			echo 'Wystąpił błąd podczas uruchamiania baz danych'
-        }
-    }
+  }
 }
