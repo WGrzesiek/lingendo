@@ -1,0 +1,28 @@
+spring:
+  config:
+    activate:
+      on-profile: prod
+
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI}
+          jwk-set-uri: ${SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI}
+        cookie-name: ${ACCESS_TOKEN}
+logging:
+  level:
+    root: INFO
+
+jwt:
+  private-key-location: ${JWT_PRIVATE_KEY_LOCATION:file:/etc/keys/private_key.pem}
+  public-key-location: ${JWT_PUBLIC_KEY_LOCATION:file:/etc/keys/public_key.pem}
+
+server:
+  port: ${SERVER_PORT}
+
+grpc:
+  client:
+    auth:
+      address: ${GRPC_CLIENT_AUTH_ADDRESS}
+      negotiationType: ${GRPC_CLIENT_AUTH_NEGOTIATIONTYPE}
