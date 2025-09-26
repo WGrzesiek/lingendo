@@ -1,0 +1,25 @@
+spring:
+  config:
+    activate:
+      on-profile: dev
+
+  datasource:
+    url: ${DATASOURCE_URL:jdbc:postgresql://postgres:5432/outbox}
+    username: ${DATASOURCE_USERNAME:admin}
+    password: ${DATASOURCE_PASSWORD:adminpassword}
+  jpa:
+    hibernate:
+      ddl-auto: ${HIBERNATE_DDL_AUTO:update}
+
+  kafka:
+    producer:
+      bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:kafka:9092}
+    consumer:
+      bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:kafka:9092}
+
+server:
+  port: ${SERVER_PORT:8810}
+
+logging:
+  level:
+    root: DEBUG
