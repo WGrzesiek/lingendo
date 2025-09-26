@@ -5,7 +5,7 @@
 
 
     <appender name="LOGSTASH" class="net.logstash.logback.appender.LogstashTcpSocketAppender">
-        <destination>34.118.2.23:50000</destination>
+        <destination>${LOGSTASH_HOST:-localhost}:50000</destination>
         <encoder class="co.elastic.logging.logback.EcsEncoder">
             <serviceName>deck-service</serviceName>
         </encoder>
@@ -13,7 +13,7 @@
 
     <!-- Appender dla logów Kafka -->
     <appender name="LOGSTASH_KAFKA" class="net.logstash.logback.appender.LogstashTcpSocketAppender">
-        <destination>34.118.2.23:50000</destination>
+        <destination>${LOGSTASH_HOST:-localhost}:50000</destination>
         <encoder class="co.elastic.logging.logback.EcsEncoder">
             <serviceName>deck-kafka-service</serviceName>
         </encoder>
@@ -32,7 +32,7 @@
 
     <!-- Appender dla logów Debezium -->
     <appender name="LOGSTASH_DEBEZIUM" class="net.logstash.logback.appender.LogstashTcpSocketAppender">
-        <destination>34.118.2.23:50000</destination>
+        <destination>${LOGSTASH_HOST:-localhost}:50000</destination>
         <encoder class="co.elastic.logging.logback.EcsEncoder">
             <serviceName>deck-debezium-service</serviceName>
         </encoder>
@@ -46,7 +46,7 @@
 
     <!-- Appender dla logów PostgreSQL -->
     <appender name="LOGSTASH_POSTGRES" class="net.logstash.logback.appender.LogstashTcpSocketAppender">
-        <destination>34.118.2.23:50000</destination>
+        <destination>${LOGSTASH_HOST:-localhost}:50000</destination>
         <encoder class="co.elastic.logging.logback.EcsEncoder">
             <serviceName>deck-postgres-service</serviceName>
         </encoder>

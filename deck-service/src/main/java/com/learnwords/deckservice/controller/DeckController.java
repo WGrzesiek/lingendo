@@ -8,10 +8,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.Map;
 
 @Slf4j
 @RestController
@@ -25,12 +24,20 @@ public class DeckController {
     }
 
     @PostMapping(path = "/create")
-    public ResponseEntity<ResponseDeckDto> createDeck(@AuthenticationPrincipal Jwt jwt, @Valid @RequestBody CreateDeckDto createDeckDto) {
+    public ResponseEntity<ResponseDeckDto> createDeck(@RequestHeader Map<String, String> headers, @Valid @RequestBody CreateDeckDto createDeckDto) {
         log.info("Creating deck: {}", createDeckDto.getDeckName());
-        String userId = jwt.getClaimAsString("user_id");
+
+        String userId = headers.get("x-client-id");
         deckService.createDeck(userId, createDeckDto);
         log.info("Deck created successfully: {}", createDeckDto.getDeckName());
         ResponseDeckDto responseDeckDto = new ResponseDeckDto(createDeckDto.getDeckName(), "Deck created successfully");
         return ResponseEntity.ok(responseDeckDto);
     }
+    @GetMapping("/debug/headers")
+    public Map<String, String> debugHeaders(@RequestHeader Map<String, String> headers) {
+    headers.forEach((k,v) -> log.info("Header {} = {}", k, v));
+    return headers;
+}
+
+
 }

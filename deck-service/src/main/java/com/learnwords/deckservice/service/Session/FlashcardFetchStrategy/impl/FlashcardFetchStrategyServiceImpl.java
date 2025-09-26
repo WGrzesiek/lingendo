@@ -29,10 +29,11 @@ public class FlashcardFetchStrategyServiceImpl implements FlashcardFetchStrategy
             case ALPHABETICAL -> {
                 List<Flashcard> result = new ArrayList<>();
                 try {
-                    var batchGetOnlyWord = vocabularyClient.batchGetOnlyWord(ids);
+//                    var batchGetOnlyWord = vocabularyClient.batchGetOnlyWord(ids);
+                    var batchGetOnlyWord = vocabularyClient.batchGetVocabularies(ids);
                     List<OnlyWordDto> wordDtos = new ArrayList<>();
-                    if (batchGetOnlyWord.getWordCount() > 0) {
-                        for (var word : batchGetOnlyWord.getWordList()) {
+                    if (batchGetOnlyWord.getVocabulariesCount() > 0) {
+                        for (var word : batchGetOnlyWord.getVocabulariesList()) {
                             wordDtos.add(new OnlyWordDto(word.getId(), word.getWord()));
                         }
                     }
