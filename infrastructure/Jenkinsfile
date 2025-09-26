@@ -1,28 +1,34 @@
 pipeline {
-    agent any
+	agent any
 
     stages {
-        stage('Checkout') {
-            steps {
-                checkout scm
+		stage('Checkout') {
+			steps {
+				checkout scm
             }
         }
 
-        stage('Start DB Infrastructure') {
-            steps {
-                dir('Infra') {
-                    sh 'make infra-db-up'
+        stage('Create Network') {
+			steps {
+				sh 'docker network create learnwords-net 2>/dev/null || true'
+            }
+        }
+
+        stage('Start Databases') {
+			steps {
+				dir('Infra') {
+					sh 'docker compose -f docker-compose.db.yml up -d'
                 }
             }
         }
     }
 
     post {
-        success {
-            echo 'Bazy danych zostały pomyślnie uruchomione'
+		success {
+			echo 'Bazy danych zostały pomyślnie uruchomione'
         }
         failure {
-            echo 'Wystąpił błąd podczas uruchamiania baz danych'
+			echo 'Wystąpił błąd podczas uruchamiania baz danych'
         }
     }
 }
