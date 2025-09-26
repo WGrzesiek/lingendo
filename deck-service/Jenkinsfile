@@ -1,0 +1,131 @@
+pipeline {
+    agent any
+
+    parameters {
+        string(name: 'TAG', defaultValue: 'dev', description: 'Tag obrazu Docker')
+        string(name: 'PROFILE', defaultValue: 'dev', description: 'Profil Spring')
+        string(name: 'PORT', defaultValue: '8814', description: 'Port aplikacji')
+        booleanParam(name: 'SKIP_TESTS', defaultValue: true, description: 'Pominąć testy?')
+    }
+
+    environment {
+        APP_NAME = 'deck-service'
+        IMAGE_NAME = "${APP_NAME}"
+        IMAGE = "${IMAGE_NAME}:${params.TAG}"
+        NETWORK_NAME = 'learnwords-net'
+
+        // DB
+        DB_POSTGRESQL_HOST = 'postgres'
+        DB_POSTGRESQL_PORT = '5432'
+        DB_POSTGRESQL_NAME = 'deck'
+        DB_POSTGRESQL_USER = credentials('db-user')
+        DB_POSTGRESQL_PASSWORD = credentials('db-password')
+
+        // Kafka
+        KAFKA_BOOTSTRAP = 'kafka:9092'
+        KAFKA_GROUP = 'deck-service-group'
+
+        // gRPC
+        GRPC_VOCAB_READ_ADDRESS = 'static://vocabulary-read-service:9099'
+        GRPC_VOCAB_READ_NEGOTIATION = 'PLAINTEXT'
+
+        // Logi
+        LOG_LEVEL_KAFKA = 'INFO'
+        LOG_LEVEL_HIBERNATE = 'INFO'
+        LOG_LEVEL_POSTGRESQL = 'INFO'
+        LOGSTASH_HOST = 'logstash-1'
+    }
+
+    stages {
+        stage('Checkout') {
+            steps {
+                checkout scm
+            }
+        }
+
+        stage('Clean') {
+            steps {
+                dir('learnwords-backend/learnwords-services/deck-service') {
+                    sh './mvnw clean'
+                }
+            }
+        }
+
+        stage('Package') {
+            steps {
+                dir('learnwords-backend/learnwords-services/deck-service') {
+                    sh "./mvnw clean package -DskipTests=${params.SKIP_TESTS}"
+                }
+            }
+        }
+
+        stage('Testy') {
+            when {
+                expression { return !params.SKIP_TESTS }
+            }
+            steps {
+                dir('learnwords-backend/learnwords-services/deck-service') {
+                    sh './mvnw test'
+                }
+            }
+            post {
+                always {
+                    junit '**/target/surefire-reports/*.xml'
+                }
+            }
+        }
+
+        stage('Budowanie obrazu Docker') {
+            steps {
+                dir('learnwords-backend/learnwords-services/deck-service') {
+                    sh "docker build --pull --no-cache -t ${IMAGE} ."
+                }
+            }
+        }
+
+        stage('Publikacja obrazu') {
+            when {
+                expression { return params.TAG != 'dev' }
+            }
+            steps {
+                withCredentials([string(credentialsId: 'docker-registry-credentials', variable: 'DOCKER_CREDENTIALS')]) {
+                    sh "docker push ${IMAGE}"
+                }
+            }
+        }
+
+        stage('Wdrożenie') {
+            when {
+                expression { return params.TAG == 'dev' }
+            }
+            steps {
+                dir('learnwords-backend/learnwords-services/deck-service') {
+                    sh """
+                    docker network create ${NETWORK_NAME} 2>/dev/null || true
+
+                    IMAGE_NAME=${IMAGE_NAME} IMAGE_TAG=${params.TAG} PROFILE=${params.PROFILE} PORT=${params.PORT} \\
+                    DB_POSTGRESQL_HOST=${DB_POSTGRESQL_HOST} DB_POSTGRESQL_PORT=${DB_POSTGRESQL_PORT} \\
+                    DB_POSTGRESQL_NAME=${DB_POSTGRESQL_NAME} DB_POSTGRESQL_USER=${DB_POSTGRESQL_USER} DB_POSTGRESQL_PASSWORD=${DB_POSTGRESQL_PASSWORD} \\
+                    KAFKA_BOOTSTRAP=${KAFKA_BOOTSTRAP} KAFKA_GROUP=${KAFKA_GROUP} \\
+                    GRPC_VOCAB_READ_ADDRESS="${GRPC_VOCAB_READ_ADDRESS}" GRPC_VOCAB_READ_NEGOTIATION="${GRPC_VOCAB_READ_NEGOTIATION}" \\
+                    LOG_LEVEL_KAFKA=${LOG_LEVEL_KAFKA} LOG_LEVEL_HIBERNATE=${LOG_LEVEL_HIBERNATE} LOG_LEVEL_POSTGRESQL=${LOG_LEVEL_POSTGRESQL} \\
+                    LOGSTASH_HOST=${LOGSTASH_HOST} \\
+                    docker compose -f docker-compose.deck.yml up -d
+                    """
+                }
+            }
+        }
+    }
+
+    post {
+        always {
+            cleanWs()
+        }
+        success {
+            echo "Build zakończony sukcesem"
+        }
+        failure {
+            echo "Build zakończony niepowodzeniem"
+        }
+    }
+}
