@@ -8,6 +8,15 @@ pipeline {
             }
         }
 
+        stage('Debug Workspace') {
+			steps {
+				echo 'Aktualny katalog roboczy:'
+                sh 'pwd'
+                echo 'Zawartość katalogu:'
+                sh 'ls -al'
+            }
+        }
+
         stage('Create Network') {
 			steps {
 				sh 'docker network create learnwords-net 2>/dev/null || true'
@@ -16,9 +25,7 @@ pipeline {
 
         stage('Start Databases') {
 			steps {
-
-					sh 'docker compose -f docker-compose.db.yml up -d'
-
+				sh 'docker compose -f docker-compose.db.yml up -d'
             }
         }
     }
