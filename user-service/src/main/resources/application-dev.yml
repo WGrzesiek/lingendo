@@ -1,0 +1,32 @@
+server:
+  port: ${SERVER_PORT:8812}
+
+spring:
+  config:
+    activate:
+      on-profile: dev
+
+  datasource:
+    url: ${DATASOURCE_URL:jdbc:postgresql://postgres:5432/user_management}
+    username: ${DB_POSTGRESQL_USER:admin}
+    password: ${DB_POSTGRESQL_PASSWORD:adminpassword}
+
+  jpa:
+    hibernate:
+      ddl-auto: ${HIBERNATE_DDL_AUTO:update}
+
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          jwk-set-uri: ${SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI:http://api-gateway:8811/.well-known/jwks.json}
+
+grpc:
+  server:
+    port: ${GRPC_PORT:9090}
+    address: 0.0.0.0
+    reflectionServiceEnabled: true
+
+logging:
+  level:
+    root: DEBUG

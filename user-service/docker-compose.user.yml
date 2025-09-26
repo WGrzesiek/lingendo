@@ -1,0 +1,30 @@
+name: learnwords
+
+services:
+  user-service:
+    image: ${IMAGE_NAME:-user-service}:${IMAGE_TAG:-dev}
+    # unikaj container_name – łatwiej skalować i nie kolidować
+    environment:
+      SPRING_PROFILES_ACTIVE: ${PROFILE:-dev}
+
+      # Ports
+      SERVER_PORT: ${PORT:-8812}
+      GRPC_PORT: ${GRPC_PORT:-9090}
+
+      # --- DB (ta sama sieć -> host = postgres) ---
+      DATASOURCE_URL: ${DATASOURCE_URL:-jdbc:postgresql://postgres:5432/user_management}
+      DB_POSTGRESQL_USER: ${DB_POSTGRESQL_USER:-admin}
+      DB_POSTGRESQL_PASSWORD: ${DB_POSTGRESQL_PASSWORD:-adminpassword}
+
+      # (opcjonalnie) log level itp.
+      # LOGGING_LEVEL_ROOT: INFO
+
+    ports:
+      - "${PORT:-8812}:${PORT:-8812}"     # HTTP
+      - "${GRPC_PORT:-9090}:${GRPC_PORT:-9090}" # gRPC (jeśli chcesz wystawiać na hosta)
+    networks: [learnwords-net]
+    # depends_on nie zadziała na zewn. sieci – zakładamy, że postgres już działa
+
+networks:
+  learnwords-net:
+    external: true
