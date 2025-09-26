@@ -1,3 +1,4 @@
+name: learnwords
 services:
 
   # The 'setup' service runs a one-off script which initializes users inside
@@ -36,7 +37,7 @@ services:
       MONITORING_INTERNAL_PASSWORD: ${MONITORING_INTERNAL_PASSWORD:-}
       BEATS_SYSTEM_PASSWORD: ${BEATS_SYSTEM_PASSWORD:-}
     networks:
-      - elk
+      - learnwords-net
     depends_on:
       - elasticsearch
 
@@ -62,7 +63,7 @@ services:
       # see: https://www.elastic.co/docs/deploy-manage/deploy/self-managed/bootstrap-checks
       discovery.type: single-node
     networks:
-      - elk
+      - learnwords-net
     restart: unless-stopped
 
   logstash:
@@ -82,7 +83,7 @@ services:
       LS_JAVA_OPTS: -Xms256m -Xmx256m
       LOGSTASH_INTERNAL_PASSWORD: ${LOGSTASH_INTERNAL_PASSWORD:-}
     networks:
-      - elk
+      - learnwords-net
     depends_on:
       - elasticsearch
     restart: unless-stopped
@@ -99,14 +100,14 @@ services:
     environment:
       KIBANA_SYSTEM_PASSWORD: ${KIBANA_SYSTEM_PASSWORD:-}
     networks:
-      - elk
+      - learnwords-net
     depends_on:
       - elasticsearch
     restart: unless-stopped
 
 networks:
-  elk:
-    driver: bridge
+  learnwords-net:
+    external: true
 
 volumes:
   elasticsearch:

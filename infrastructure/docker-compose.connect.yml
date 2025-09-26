@@ -1,0 +1,46 @@
+name: learnwords
+services:
+  connect:
+    image: quay.io/debezium/connect:3.1.1.Final
+    platform: linux/amd64
+    container_name: connect
+#    depends_on: [kafka, postgres]
+    ports:
+      - "8083:8083"
+    environment:
+      BOOTSTRAP_SERVERS: kafka:9092
+      GROUP_ID: 1
+      CONFIG_STORAGE_TOPIC: connect_configs
+      OFFSET_STORAGE_TOPIC: connect_offsets
+      STATUS_STORAGE_TOPIC: connect_statuses
+    networks: [learnwords-net]
+
+  akhq:
+    image: tchiotludo/akhq:latest
+    container_name: akhq
+    ports:
+      - "8090:8080"   # host:container
+    environment:
+      AKHQ_CONFIGURATION: |
+        akhq:
+          connections:
+            local:
+              properties:
+                bootstrap.servers: "kafka:9092"
+#    depends_on: [kafka]
+    networks: [learnwords-net]
+
+  debezium-ui:
+    image: quay.io/debezium/debezium-ui:latest
+    platform: linux/amd64
+    container_name: debezium-ui
+    ports:
+      - "8091:8080"
+    environment:
+      KAFKA_CONNECT_URIS: http://connect:8083
+    depends_on: [connect]
+    networks: [learnwords-net]
+
+networks:
+  learnwords-net:
+    external: true
