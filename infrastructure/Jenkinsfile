@@ -1,0 +1,28 @@
+pipeline {
+    agent any
+
+    stages {
+        stage('Checkout') {
+            steps {
+                checkout scm
+            }
+        }
+
+        stage('Start DB Infrastructure') {
+            steps {
+                dir('Infra') {
+                    sh 'make infra-db-up'
+                }
+            }
+        }
+    }
+
+    post {
+        success {
+            echo 'Bazy danych zostały pomyślnie uruchomione'
+        }
+        failure {
+            echo 'Wystąpił błąd podczas uruchamiania baz danych'
+        }
+    }
+}
