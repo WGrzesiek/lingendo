@@ -118,9 +118,6 @@ pipeline {
     }
 
     post {
-        always {
-                deleteDir()
-        }
         success {
             echo "Build zakończony sukcesem"
         }
