@@ -1,5 +1,8 @@
 pipeline {
 	agent any
+	  tools {
+		jdk 'JDK21'
+  }
   options { timestamps() }
   parameters {
 		string(name: 'BRANCH', defaultValue: 'main', description: 'Git branch do zbudowania (parent + proto-shared)')
