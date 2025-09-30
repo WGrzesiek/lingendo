@@ -1,11 +1,12 @@
 pipeline {
 	agent any
-	  tools {
+   tools {
 		jdk 'JDK21'
   }
   options { timestamps() }
   parameters {
-		string(name: 'BRANCH', defaultValue: 'main', description: 'Git branch do zbudowania (parent + common)')
+		string(name: 'PARENT_BRANCH', defaultValue: 'main', description: 'Git branch dla parent')
+    string(name: 'COMMON_BRANCH', defaultValue: 'gRCP', description: 'Git branch dla common')
     booleanParam(name: 'SKIP_TESTS', defaultValue: true, description: 'Pominąć testy?')
     booleanParam(name: 'BUILD_PARENT', defaultValue: true, description: 'Zbudować parenta przed common?')
   }
@@ -21,7 +22,7 @@ pipeline {
 		stage('Checkout parent (for relativePath)') {
 			steps {
 				dir("${env.PARENT_DIR}") {
-					git branch: "${params.BRANCH}", credentialsId: "${env.CREDS_ID}", url: "${env.PARENT_REPO}"
+					git branch: "${params.PARENT_BRANCH}", credentialsId: "${env.CREDS_ID}", url: "${env.PARENT_REPO}"
         }
       }
     }
@@ -29,7 +30,7 @@ pipeline {
     stage('Checkout common') {
 			steps {
 				dir("${env.COMMON_DIR}") {
-					git branch: "${params.BRANCH}", credentialsId: "${env.CREDS_ID}", url: "${env.COMMON_REPO}"
+					git branch: "${params.COMMON_BRANCH}", credentialsId: "${env.CREDS_ID}", url: "${env.COMMON_REPO}"
         }
       }
     }
