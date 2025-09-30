@@ -1,0 +1,54 @@
+pipeline {
+	agent any
+	  tools {
+		jdk 'JDK21'
+  }
+  options { timestamps() }
+  parameters {
+		string(name: 'BRANCH', defaultValue: 'main', description: 'Git branch do zbudowania (parent + common)')
+    booleanParam(name: 'SKIP_TESTS', defaultValue: true, description: 'Pominąć testy?')
+    booleanParam(name: 'BUILD_PARENT', defaultValue: true, description: 'Zbudować parenta przed common?')
+  }
+  environment {
+		CREDS_ID = 'bitbucket'
+    PARENT_REPO = 'git@bitbucket.org:grzegorz5/learnwords-parent.git'
+    COMMON_REPO  = 'git@bitbucket.org:grzegorz5/common.git'
+    PARENT_DIR  = 'learnwords-backend/learnwords-services'
+    COMMON_DIR   = 'learnwords-backend/learnwords-services/common'
+    MVN_FLAGS   = "${params.SKIP_TESTS ? '-DskipTests' : ''}"
+  }
+  stages {
+		stage('Checkout parent (for relativePath)') {
+			steps {
+				dir("${env.PARENT_DIR}") {
+					git branch: "${params.BRANCH}", credentialsId: "${env.CREDS_ID}", url: "${env.PARENT_REPO}"
+        }
+      }
+    }
+
+    stage('Checkout common') {
+			steps {
+				dir("${env.COMMON_DIR}") {
+					git branch: "${params.BRANCH}", credentialsId: "${env.CREDS_ID}", url: "${env.COMMON_REPO}"
+        }
+      }
+    }
+
+    stage('Build parent (optional)') {
+			when { expression { return params.BUILD_PARENT } }
+      steps {
+				dir("${env.PARENT_DIR}") {
+					sh "./mvnw -U clean install ${env.MVN_FLAGS}"
+        }
+      }
+    }
+
+    stage('Build & Install common') {
+			steps {
+				dir("${env.COMMON_DIR}") {
+					sh "./mvnw -U clean install ${env.MVN_FLAGS}"
+        }
+      }
+    }
+  }
+}
