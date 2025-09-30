@@ -1,0 +1,61 @@
+pipeline {
+	agent any
+  options { timestamps() }
+
+  environment {
+    REGISTRY_HOST = 'jenkins:5000'
+    IMAGE_NS      = 'learnwords'
+    MVN_ARGS      = '-DskipTests'
+  }
+
+  stages {
+		stage('Checkout (scm)') {
+			steps {
+				checkout scm
+        script {
+					env.GIT_SHA = sh(script: "git rev-parse --short HEAD", returnStdout: true).trim()
+          // Nazwa obrazu = nazwa repo (ostatni segment JOB_NAME bez /branch)
+          def parts = env.JOB_NAME.tokenize('/')
+          env.IMAGE_NAME = (parts.size() >= 2 ? parts[parts.size()-2] : 'api-gateway')
+          echo "Repo: ${env.IMAGE_NAME}, Branch: ${env.BRANCH_NAME}, SHA: ${env.GIT_SHA}"
+        }
+      }
+    }
+
+    stage('Build JAR') {
+			steps {
+				sh "./mvnw -q -U ${env.MVN_ARGS} clean package"
+        archiveArtifacts artifacts: 'target/*.jar', fingerprint: true
+      }
+    }
+
+    stage('Build & Push image') {
+			environment {
+				IMAGE_TAG_SHA = "${env.BRANCH_NAME}-${env.GIT_SHA}"
+        IMAGE_TAG_DEV = "dev-${env.BUILD_NUMBER}"
+      }
+      steps {
+				script {
+					def imgSha = "${env.REGISTRY_HOST}/${env.IMAGE_NS}/${env.IMAGE_NAME}:${env.IMAGE_TAG_SHA}"
+          def imgDev = "${env.REGISTRY_HOST}/${env.IMAGE_NS}/${env.IMAGE_NAME}:${env.IMAGE_TAG_DEV}"
+
+          sh """
+            docker build -t ${imgSha} .
+            docker tag ${imgSha} ${imgDev}
+            docker push ${imgSha}
+            docker push ${imgDev}
+          """
+          echo "Pushed: ${imgSha}"
+          echo "Pushed: ${imgDev}"
+          env.IMAGE_PUBLISHED = imgDev
+        }
+      }
+    }
+
+    stage('Summary') {
+			steps {
+				echo "Użyj w K3s jako image: ${env.IMAGE_PUBLISHED}"
+      }
+    }
+  }
+}
