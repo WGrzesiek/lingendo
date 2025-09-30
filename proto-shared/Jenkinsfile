@@ -2,38 +2,49 @@ pipeline {
 	agent any
   options { timestamps() }
   parameters {
-	string(name: 'BRANCH', defaultValue: 'main', description: 'Git branch do zbudowania (parent + proto-shared)')
+		string(name: 'BRANCH', defaultValue: 'main', description: 'Git branch do zbudowania (parent + proto-shared)')
     booleanParam(name: 'SKIP_TESTS', defaultValue: true, description: 'Pominąć testy?')
+    booleanParam(name: 'BUILD_PARENT', defaultValue: true, description: 'Zbudować parenta przed proto-shared?')
   }
   environment {
+		CREDS_ID = 'bitbucket'
     PARENT_REPO = 'git@bitbucket.org:grzegorz5/learnwords-parent.git'
     PROTO_REPO  = 'git@bitbucket.org:grzegorz5/proto-shared.git'
-    CREDS_ID    = 'bitbucket'
+    PARENT_DIR  = 'learnwords-backend/learnwords-services'
+    PROTO_DIR   = 'learnwords-backend/learnwords-services/proto-shared'
     MVN_FLAGS   = "${params.SKIP_TESTS ? '-DskipTests' : ''}"
   }
   stages {
-		stage('Checkout parent') {
+		stage('Checkout parent (for relativePath)') {
 			steps {
-				dir('parent') {
+				dir("${env.PARENT_DIR}") {
 					git branch: "${params.BRANCH}", credentialsId: "${env.CREDS_ID}", url: "${env.PARENT_REPO}"
         }
       }
     }
-    stage('Install parent') {
-			steps {
-				sh "mvn -U clean install ${env.MVN_FLAGS} -f parent/pom.xml"
-      }
-    }
+
     stage('Checkout proto-shared') {
 			steps {
-				dir('proto-shared') {
+				dir("${env.PROTO_DIR}") {
 					git branch: "${params.BRANCH}", credentialsId: "${env.CREDS_ID}", url: "${env.PROTO_REPO}"
         }
       }
     }
-    stage('Install proto-shared') {
+
+    stage('Build parent (optional)') {
+			when { expression { return params.BUILD_PARENT } }
+      steps {
+				dir("${env.PARENT_DIR}") {
+					sh "./mvnw -U clean install ${env.MVN_FLAGS}"
+        }
+      }
+    }
+
+    stage('Build & Install proto-shared') {
 			steps {
-				sh "mvn -U clean install ${env.MVN_FLAGS} -f proto-shared/pom.xml"
+				dir("${env.PROTO_DIR}") {
+					sh "./mvnw -U clean install ${env.MVN_FLAGS}"
+        }
       }
     }
   }
