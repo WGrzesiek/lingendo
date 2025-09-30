@@ -1,0 +1,40 @@
+pipeline {
+	agent any
+  options { timestamps() }
+  parameters {
+	string(name: 'BRANCH', defaultValue: 'main', description: 'Git branch do zbudowania (parent + proto-shared)')
+    booleanParam(name: 'SKIP_TESTS', defaultValue: true, description: 'Pominąć testy?')
+  }
+  environment {
+    PARENT_REPO = 'git@bitbucket.org:grzegorz5/learnwords-parent.git'
+    PROTO_REPO  = 'git@bitbucket.org:grzegorz5/proto-shared.git'
+    CREDS_ID    = 'bitbucket'
+    MVN_FLAGS   = "${params.SKIP_TESTS ? '-DskipTests' : ''}"
+  }
+  stages {
+		stage('Checkout parent') {
+			steps {
+				dir('parent') {
+					git branch: "${params.BRANCH}", credentialsId: "${env.CREDS_ID}", url: "${env.PARENT_REPO}"
+        }
+      }
+    }
+    stage('Install parent') {
+			steps {
+				sh "mvn -U clean install ${env.MVN_FLAGS} -f parent/pom.xml"
+      }
+    }
+    stage('Checkout proto-shared') {
+			steps {
+				dir('proto-shared') {
+					git branch: "${params.BRANCH}", credentialsId: "${env.CREDS_ID}", url: "${env.PROTO_REPO}"
+        }
+      }
+    }
+    stage('Install proto-shared') {
+			steps {
+				sh "mvn -U clean install ${env.MVN_FLAGS} -f proto-shared/pom.xml"
+      }
+    }
+  }
+}
