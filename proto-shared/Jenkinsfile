@@ -1,11 +1,12 @@
 pipeline {
-	agent any
+	agent { label 'builder' }
 	  tools {
-		jdk 'JDK21'
+		jdk 'JDK24'
+		maven 'Maven'
   }
   options { timestamps() }
   parameters {
-		string(name: 'BRANCH', defaultValue: 'main', description: 'Git branch do zbudowania (parent + proto-shared)')
+	string(name: 'BRANCH', defaultValue: 'main', description: 'Git branch do zbudowania (parent + proto-shared)')
     booleanParam(name: 'SKIP_TESTS', defaultValue: true, description: 'Pominąć testy?')
     booleanParam(name: 'BUILD_PARENT', defaultValue: true, description: 'Zbudować parenta przed proto-shared?')
   }
