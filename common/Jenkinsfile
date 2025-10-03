@@ -1,55 +1,61 @@
 pipeline {
 	agent { label 'builder' }
-   tools {
+
+  tools {
 		jdk 'JDK24'
-		maven 'Maven'
+    maven 'Maven'
   }
+
   options { timestamps() }
+
   parameters {
 		string(name: 'PARENT_BRANCH', defaultValue: 'main', description: 'Git branch dla parent')
     string(name: 'COMMON_BRANCH', defaultValue: 'gRCP', description: 'Git branch dla common')
     booleanParam(name: 'SKIP_TESTS', defaultValue: true, description: 'Pominąć testy?')
     booleanParam(name: 'BUILD_PARENT', defaultValue: true, description: 'Zbudować parenta przed common?')
   }
+
   environment {
-		CREDS_ID = 'bitbucket'
-    PARENT_REPO = 'git@bitbucket.org:grzegorz5/learnwords-parent.git'
-    COMMON_REPO  = 'git@bitbucket.org:grzegorz5/common.git'
-    PARENT_DIR  = 'learnwords-backend/learnwords-services'
-    COMMON_DIR   = 'learnwords-backend/learnwords-services/common'
-    MVN_FLAGS   = "${params.SKIP_TESTS ? '-DskipTests' : ''}"
+		CREDS_ID   = 'bitbucket'
+    PARENT_REPO= 'git@bitbucket.org:grzegorz5/learnwords-parent.git' // POM-only parent
+    COMMON_REPO= 'git@bitbucket.org:grzegorz5/common.git'
   }
+
   stages {
 		stage('Checkout parent (for relativePath)') {
 			steps {
-
-					git branch: "${params.PARENT_BRANCH}", credentialsId: "${env.CREDS_ID}", url: "${env.PARENT_REPO}"
-
+				dir('parent') {
+					git branch: params.PARENT_BRANCH, credentialsId: env.CREDS_ID, url: env.PARENT_REPO
+        }
       }
     }
 
     stage('Checkout common') {
 			steps {
-
-					git branch: "${params.COMMON_BRANCH}", credentialsId: "${env.CREDS_ID}", url: "${env.COMMON_REPO}"
-
+				dir('common') {
+					git branch: params.COMMON_BRANCH, credentialsId: env.CREDS_ID, url: env.COMMON_REPO
+        }
       }
     }
 
     stage('Build parent (optional)') {
 			when { expression { return params.BUILD_PARENT } }
       steps {
-
-					sh "mvn -U clean install ${env.MVN_FLAGS}"
-
+				dir('parent') {
+					// tylko POM (non-recursive) trafia do ~/.m2
+          sh 'mvn -U -B -N -f pom.xml install'
+        }
       }
     }
 
     stage('Build & Install common') {
 			steps {
-
-					sh "mvn -U clean install ${env.MVN_FLAGS}"
-
+				dir('common') {
+					script {
+						def flags = params.SKIP_TESTS ? '-DskipTests' : ''
+            sh "mvn -U -B clean install ${flags}"
+          }
+        }
       }
     }
   }
