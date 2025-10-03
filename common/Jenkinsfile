@@ -22,26 +22,26 @@ pipeline {
   stages {
 		stage('Checkout parent (for relativePath)') {
 			steps {
-				dir("${env.PARENT_DIR}") {
+
 					git branch: "${params.PARENT_BRANCH}", credentialsId: "${env.CREDS_ID}", url: "${env.PARENT_REPO}"
-        }
+
       }
     }
 
     stage('Checkout common') {
 			steps {
-				dir("${env.COMMON_DIR}") {
+
 					git branch: "${params.COMMON_BRANCH}", credentialsId: "${env.CREDS_ID}", url: "${env.COMMON_REPO}"
-        }
+
       }
     }
 
     stage('Build parent (optional)') {
 			when { expression { return params.BUILD_PARENT } }
       steps {
-				dir("${env.PARENT_DIR}") {
+
 					sh "./mvn -U clean install ${env.MVN_FLAGS}"
-        }
+
       }
     }
 
