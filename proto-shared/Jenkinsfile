@@ -39,7 +39,7 @@ pipeline {
 			when { expression { return params.BUILD_PARENT } }
       steps {
 				dir("${env.PARENT_DIR}") {
-					sh "./mvnw -U clean install ${env.MVN_FLAGS}"
+					sh "./mvn -U clean install ${env.MVN_FLAGS}"
         }
       }
     }
@@ -47,7 +47,7 @@ pipeline {
     stage('Build & Install proto-shared') {
 			steps {
 				dir("${env.PROTO_DIR}") {
-					sh "./mvnw -U clean install ${env.MVN_FLAGS}"
+					sh "./mvn -U clean install ${env.MVN_FLAGS}"
         }
       }
     }
