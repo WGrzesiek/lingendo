@@ -29,7 +29,7 @@ pipeline {
 
     stage('Build JAR') {
 			steps {
-				sh "./mvnw -q -U ${env.MVN_ARGS} clean package"
+				sh "./mvn -q -U ${env.MVN_ARGS} clean package"
         //archiveArtifacts artifacts: 'target/*.jar', fingerprint: true
       }
     }
