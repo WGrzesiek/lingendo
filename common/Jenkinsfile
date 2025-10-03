@@ -47,9 +47,9 @@ pipeline {
 
     stage('Build & Install common') {
 			steps {
-				{
+
 					sh "mvn -U clean install ${env.MVN_FLAGS}"
-        }
+
       }
     }
   }
