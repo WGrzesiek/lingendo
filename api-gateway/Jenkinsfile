@@ -1,5 +1,10 @@
 pipeline {
-	agent any
+
+	agent { label 'builder' }
+	  tools {
+		jdk 'JDK24'
+		maven 'Maven'
+  }
   options { timestamps() }
 
   environment {
