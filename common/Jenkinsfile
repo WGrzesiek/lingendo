@@ -40,7 +40,7 @@ pipeline {
 			when { expression { return params.BUILD_PARENT } }
       steps {
 
-					sh "./mvn -U clean install ${env.MVN_FLAGS}"
+					sh "mvn -U clean install ${env.MVN_FLAGS}"
 
       }
     }
