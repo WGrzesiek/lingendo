@@ -10,6 +10,9 @@ pipeline {
 
   parameters {
     booleanParam(name: 'SKIP_TESTS', defaultValue: true, description: 'Pominąć testy?')
+    string(name: 'REGISTRY', defaultValue: 'localhost:5000', description: 'Local Docker registry')
+    string(name: 'IMAGE_NAME', defaultValue: 'learnwords/deck-service', description: 'Nazwa obrazu')
+    string(name: 'TAG', defaultValue: '', description: 'Tag obrazu (puste => auto)')
   }
 
   environment {
@@ -31,5 +34,19 @@ pipeline {
         }
       }
     }
+        stage('Build Docker image') {
+			steps {
+				dir('api-gateway') {
+					script {
+						def tag = params.TAG?.trim() ? parms.TAG.trim() : "${env.BUILD_NUMBER}"
+						def image = "${env.REGISTRY}/${env.IMAGE_NAME}:${tag}"
+						sh "docker build -t ${image} ."
+						sh "docker push ${image}"
+						echo "Pushed Docker image: ${image}"
+					}
+
+		}
+	  }
+	}
   }
 }
