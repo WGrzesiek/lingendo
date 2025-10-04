@@ -1,44 +1,54 @@
 pipeline {
-  agent { docker { image 'maven:3.9-eclipse-temurin-21' } }
-  environment {
-    APP_NAME = 'deck-service'
-    IMAGE_NAME = "${APP_NAME}"
-    TAG = "${env.BRANCH_NAME?.replaceAll('/','-') ?: 'dev'}"
-    IMAGE = "${IMAGE_NAME}:${TAG}"
-    SKIP_TESTS = 'true'
+	agent { label 'builder' }
+
+  tools {
+		jdk 'JDK24'
+    	maven 'Maven'
   }
+
   options { timestamps() }
+
+  parameters {
+		string(name: 'PARENT_BRANCH', defaultValue: 'main', description: 'Git branch dla parent')
+	booleanParam(name: 'BUILD_PARENT', defaultValue: true, description: 'Zbudować parent?')
+    booleanParam(name: 'SKIP_TESTS', defaultValue: true, description: 'Pominąć testy?')
+  }
+
+  environment {
+		CREDS_ID   = 'bitbucket'
+    PARENT_REPO= 'git@bitbucket.org:grzegorz5/learnwords-parent.git'
+    MVN_FLAGS = "${params.SKIP_TESTS ? '-DskipTests' : ''}"
+  }
+
   stages {
-    stage('Checkout both repos') {
-      steps {
-        dir('parent') {
-          git branch: 'main', url: 'git@bitbucket.org:grzegorz5/learnwords-parent.git'
-        }
-        dir('deck-service') {
-          git branch: 'main', url: 'git@bitbucket.org:grzegorz5/deck-service.git'
+		stage('Checkout parent') {
+			steps {
+				dir('parent') {
+					git branch: params.PARENT_BRANCH, credentialsId: env.CREDS_ID, url: env.PARENT_REPO
         }
       }
     }
-    stage('Install parent POM') {
+
+    stage('Checkout deck-service') {
+			steps {
+				dir('deck-service') {
+					checkout scm        }
+      }
+    }
+
+    stage('Build parent (optional)') {
+			when { expression { return params.BUILD_PARENT } }
       steps {
-        dir('parent') {
-          sh 'mvn -N -q -B -DskipTests install'
+				dir('parent') {
+					sh 'mvn -U -B -N -f pom.xml install'
         }
       }
     }
-    stage('Build service JAR') {
-      steps {
-        dir('deck-service') {
-          sh './mvnw -q -B -DskipTests=${SKIP_TESTS} clean package'
-          archiveArtifacts artifacts: 'target/*.jar', fingerprint: true
-        }
-      }
-    }
-    stage('Build Docker image') {
-      agent any
-      steps {
-        dir('deck-service') {
-          sh 'docker build --pull --no-cache -t ${IMAGE} .'
+
+    stage('Build & Install deck-service') {
+			steps {
+				dir('deck-service') {
+					sh "mvn -U -B clean install ${env.MVN_FLAGS}"
         }
       }
     }
