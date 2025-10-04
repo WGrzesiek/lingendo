@@ -3,26 +3,25 @@ pipeline {
 
   tools {
 		jdk 'JDK24'
-    maven 'Maven'
+    	maven 'Maven'
   }
 
   options { timestamps() }
 
   parameters {
-		string(name: 'PARENT_BRANCH', defaultValue: 'main', description: 'Git branch dla parent')
-    string(name: 'COMMON_BRANCH', defaultValue: 'gRCP', description: 'Git branch dla common')
+	string(name: 'PARENT_BRANCH', defaultValue: 'main', description: 'Git branch dla parent')
+	booleanParam(name: 'BUILD_PARENT', defaultValue: true, description: 'Zbudować parent?')
     booleanParam(name: 'SKIP_TESTS', defaultValue: true, description: 'Pominąć testy?')
-    booleanParam(name: 'BUILD_PARENT', defaultValue: true, description: 'Zbudować parenta przed common?')
   }
 
   environment {
-		CREDS_ID   = 'bitbucket'
-    PARENT_REPO= 'git@bitbucket.org:grzegorz5/learnwords-parent.git' // POM-only parent
-    COMMON_REPO= 'git@bitbucket.org:grzegorz5/common.git'
+	CREDS_ID   = 'bitbucket'
+    PARENT_REPO= 'git@bitbucket.org:grzegorz5/learnwords-parent.git'
+    MVN_FLAGS = "${params.SKIP_TESTS ? '-DskipTests' : ''}"
   }
 
   stages {
-		stage('Checkout parent (for relativePath)') {
+		stage('Checkout parent') {
 			steps {
 				dir('parent') {
 					git branch: params.PARENT_BRANCH, credentialsId: env.CREDS_ID, url: env.PARENT_REPO
@@ -33,8 +32,7 @@ pipeline {
     stage('Checkout common') {
 			steps {
 				dir('common') {
-					git branch: params.COMMON_BRANCH, credentialsId: env.CREDS_ID, url: env.COMMON_REPO
-        }
+					checkout scm        }
       }
     }
 
@@ -42,7 +40,6 @@ pipeline {
 			when { expression { return params.BUILD_PARENT } }
       steps {
 				dir('parent') {
-					// tylko POM (non-recursive) trafia do ~/.m2
           sh 'mvn -U -B -N -f pom.xml install'
         }
       }
@@ -51,10 +48,7 @@ pipeline {
     stage('Build & Install common') {
 			steps {
 				dir('common') {
-					script {
-						def flags = params.SKIP_TESTS ? '-DskipTests' : ''
-            sh "mvn -U -B clean install ${flags}"
-          }
+					sh "mvn -U -B clean install ${env.MVN_FLAGS}"
         }
       }
     }
