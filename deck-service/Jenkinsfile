@@ -59,13 +59,13 @@ pipeline {
     stage('Build Docker image') {
 			steps {
 				dir('deck-service') {
-					script {
-						def tag = params.TAG?.trim() ? parms.TAG.trim() : "${env.BUILD_NUMBER}"
-						def image = "${env.REGISTRY}/${env.IMAGE_NAME}:${tag}"
-						sh "docker build -t ${image} ."
-						sh "docker push ${image}"
-						echo "Pushed Docker image: ${image}"
-					}
+            script {
+                def tag = params.TAG?.trim() ? params.TAG.trim() : "${env.BUILD_NUMBER}"
+                def image = "${env.REGISTRY}/${env.IMAGE_NAME}:${tag}"
+                sh "docker build -t ${image} ."
+                sh "docker push ${image}"
+                echo "Pushed Docker image: ${image}"
+            }
 
 		}
 	  }
