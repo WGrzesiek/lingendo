@@ -55,7 +55,6 @@ pipeline {
         }
       }
     }
-...existing code...
 stage('Build Docker image') {
     steps {
         dir('vocabulary-read-service') {
@@ -69,6 +68,5 @@ stage('Build Docker image') {
         }
     }
 }
-...existing code...
   }
 }
