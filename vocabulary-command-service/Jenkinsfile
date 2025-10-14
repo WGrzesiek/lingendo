@@ -54,6 +54,7 @@ pipeline {
 					sh "mvn -U -B clean install ${env.MVN_FLAGS}"
         }
       }
+    }
 stage('Build Docker image') {
     steps {
         dir('vocabulary-command-service') {
