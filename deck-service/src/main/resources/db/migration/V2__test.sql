@@ -1,1 +1,0 @@
-ALTER TABLE deck ADD COLUMN category varchar(100);
