@@ -39,18 +39,82 @@ pipeline {
             }
         }
         }
-        stage('Flyway Migration') {
-            steps {
-                dir('deck-service') {
-                sh """
-                    mvn -B -q -DskipTests flyway:migrate \
-                        -Dflyway.url="${params.FLYWAY_URL}" \
-                        -Dflyway.user="${params.FLYWAY_USER}" \
-                        -Dflyway.password="${params.FLYWAY_PASSWORD}" \
-                        -Dflyway.schemas="${params.FLYWAY_SCHEMAS}"
-                """
-            }}
+    stage('Flyway INFO (before)') {
+      steps {
+        dir('deck-service') {
+          withEnv([
+            "FW_URL=${params.FLYWAY_URL}",
+            "FW_USER=${params.FLYWAY_USER}",
+            "FW_PASS=${params.FLYWAY_PASSWORD}",
+            "FW_SCHEMAS=${params.FLYWAY_SCHEMAS}"
+          ]) {
+            sh '''
+              mvn -B -DskipTests flyway:info \
+                -Dflyway.url="$FW_URL" \
+                -Dflyway.user="$FW_USER" \
+                -Dflyway.password="$FW_PASS" \
+                -Dflyway.schemas="$FW_SCHEMAS" \
+              | tee flyway-info-before.txt
+            '''
+          }
         }
+      }
+    }
+
+    stage('Flyway MIGRATE') {
+      steps {
+        dir('deck-service') {
+          withEnv([
+            "FW_URL=${params.FLYWAY_URL}",
+            "FW_USER=${params.FLYWAY_USER}",
+            "FW_PASS=${params.FLYWAY_PASSWORD}",
+            "FW_SCHEMAS=${params.FLYWAY_SCHEMAS}"
+          ]) {
+            sh '''
+              mvn -B -DskipTests flyway:migrate \
+                -Dflyway.url="$FW_URL" \
+                -Dflyway.user="$FW_USER" \
+                -Dflyway.password="$FW_PASS" \
+                -Dflyway.schemas="$FW_SCHEMAS"
+            '''
+          }
+        }
+      }
+    }
+
+    stage('Flyway INFO (after)') {
+      steps {
+        dir('deck-service') {
+          withEnv([
+            "FW_URL=${params.FLYWAY_URL}",
+            "FW_USER=${params.FLYWAY_USER}",
+            "FW_PASS=${params.FLYWAY_PASSWORD}",
+            "FW_SCHEMAS=${params.FLYWAY_SCHEMAS}"
+          ]) {
+            sh '''
+              mvn -B -DskipTests flyway:info \
+                -Dflyway.url="$FW_URL" \
+                -Dflyway.user="$FW_USER" \
+                -Dflyway.password="$FW_PASS" \
+                -Dflyway.schemas="$FW_SCHEMAS" \
+              | tee flyway-info-after.txt
+            '''
+          }
+          archiveArtifacts artifacts: 'flyway-info-*.txt', fingerprint: true
+        }
+      }
+    }
+
+    stage('Flyway Delta (diff)') {
+      steps {
+        dir('deck-service') {
+          sh '''
+            diff -u flyway-info-before.txt flyway-info-after.txt > flyway-delta.diff || true
+          '''
+          archiveArtifacts artifacts: 'flyway-delta.diff', fingerprint: true, allowEmptyArchive: true
+        }
+      }
+    }
     }
     post {
         always  { echo "========always========" }
