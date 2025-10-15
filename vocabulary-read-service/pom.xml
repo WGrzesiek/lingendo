@@ -4,8 +4,9 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>com.learnwords</groupId>
-        <artifactId>learnwords-parent</artifactId>
+        <artifactId>learnwords-services</artifactId>
         <version>0.0.1-SNAPSHOT</version>
+        <relativePath>../parent/pom.xml</relativePath>
     </parent>
     <artifactId>vocabulary-read-service</artifactId>
     <version>0.0.1-SNAPSHOT</version>
@@ -30,16 +31,28 @@
             <groupId>com.learnwords</groupId>
             <artifactId>common</artifactId>
         </dependency>
-        <!-- ====== SPRING STARTERY ====== -->
+        <!-- gRPC server starter -->
         <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-data-mongodb</artifactId>
+            <groupId>net.devh</groupId>
+            <artifactId>grpc-server-spring-boot-starter</artifactId>
+        </dependency>
+
+        <!-- Reflection serwisu gRPC (dla grpcurl) -->
+        <dependency>
+            <groupId>io.grpc</groupId>
+            <artifactId>grpc-services</artifactId>
+        </dependency>
+
+        <!-- Shared protos -->
+        <dependency>
+            <groupId>com.learnwords</groupId>
+            <artifactId>proto-shared</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-web</artifactId>
+            <artifactId>spring-boot-starter-data-mongodb-reactive</artifactId>
         </dependency>
-        <!-- ====== RESZTA ====== -->
         <dependency>
             <groupId>org.springframework.kafka</groupId>
             <artifactId>spring-kafka</artifactId>
@@ -47,6 +60,10 @@
         <dependency>
             <groupId>jakarta.persistence</groupId>
             <artifactId>jakarta.persistence-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
         </dependency>
     </dependencies>
     <build>
@@ -57,5 +74,4 @@
             </plugin>
         </plugins>
     </build>
-
 </project>
