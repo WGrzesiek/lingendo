@@ -1,5 +1,5 @@
 pipeline {
-    agent { label "deploy" }
+    agent { label "builder" }
     tools {
         jdk   'JDK24'
         maven 'Maven'
@@ -7,8 +7,8 @@ pipeline {
     parameters {
         string(name: 'PARENT_BRANCH', defaultValue: 'main', description: 'Git branch dla parent')
         string(name: 'BRANCH_NAME', defaultValue: 'main', description: 'Branch z migracjami')
-        string(name: 'FLYWAY_URL',  defaultValue: 'jdbc:postgresql://postgres:5432/deck', description: 'JDBC URL do DB')
-        string(name: 'FLYWAY_USER', defaultValue: 'postgres', description: 'Użytkownik DB')
+        string(name: 'FLYWAY_URL',  defaultValue: 'jdbc:postgresql://192.168.23.9:5432/deck', description: 'JDBC URL do DB')
+        string(name: 'FLYWAY_USER', defaultValue: 'admin', description: 'Użytkownik DB')
         password(name: 'FLYWAY_PASSWORD', defaultValue: '', description: 'Hasło DB')
         string(name: 'FLYWAY_SCHEMAS', defaultValue: 'public', description: 'Schemat(y) DB')
     }
@@ -41,6 +41,7 @@ pipeline {
         }
         stage('Flyway Migration') {
             steps {
+                dir('deck-service') {
                 sh """
                     mvn -B -q -DskipTests flyway:migrate \
                         -Dflyway.url="${params.FLYWAY_URL}" \
@@ -48,7 +49,7 @@ pipeline {
                         -Dflyway.password="${params.FLYWAY_PASSWORD}" \
                         -Dflyway.schemas="${params.FLYWAY_SCHEMAS}"
                 """
-            }
+            }}
         }
     }
     post {
