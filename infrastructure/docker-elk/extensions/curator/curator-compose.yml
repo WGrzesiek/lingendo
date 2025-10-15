@@ -9,6 +9,6 @@ services:
     environment:
       ELASTIC_PASSWORD: ${ELASTIC_PASSWORD:-}
     networks:
-      - elk
+      - learnwords-net
     depends_on:
       - elasticsearch

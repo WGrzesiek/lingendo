@@ -1,0 +1,4 @@
+networks:
+  learnwords-net:
+    driver: bridge
+    name: learnwords-net

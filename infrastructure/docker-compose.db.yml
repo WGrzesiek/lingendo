@@ -1,0 +1,59 @@
+name: learnwords
+services:
+  postgres:
+    image: postgres:15
+    container_name: postgres
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: adminpassword
+      POSTGRES_DB: outbox
+    ports: ["5432:5432"]
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    networks: [learnwords-net]
+
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: LearnWorldsOutboxAdmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@admin.com
+      PGADMIN_DEFAULT_PASSWORD: adminpassword
+    ports:
+      - "8081:80"
+    depends_on: [postgres]
+    networks: [learnwords-net]
+
+  mongodb:
+    image: mongo:8.0.9
+    container_name: LearnWorldsMongodb
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: secretpassword
+    volumes:
+      - mongodb-data:/data/db
+    networks: [learnwords-net]
+
+  mongo-express:
+    image: mongo-express:1.0.2-20
+    container_name: LearnWorldsMongo-Express
+    restart: unless-stopped
+    ports:
+      - "8092:8081"  # UI: http://localhost:8092
+    environment:
+      # root user zwykle wymaga authSource=admin
+      ME_CONFIG_MONGODB_URL: "mongodb://admin:secretpassword@mongodb:27017/?authSource=admin"
+      ME_CONFIG_BASICAUTH_USERNAME: admin
+      ME_CONFIG_BASICAUTH_PASSWORD: secretpassword
+    depends_on: [mongodb]
+    networks: [learnwords-net]
+
+volumes:
+  pgdata:
+  mongodb-data:
+
+networks:
+  learnwords-net:
+    external: true
