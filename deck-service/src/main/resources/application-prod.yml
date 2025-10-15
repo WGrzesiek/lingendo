@@ -7,11 +7,8 @@ spring:
     url: jdbc:postgresql://${DB_POSTGRESQL_HOST}:${DB_POSTGRESQL_PORT}/${DB_POSTGRESQL_NAME}
     username: ${DB_POSTGRESQL_USER}
     password: ${DB_POSTGRESQL_PASSWORD}
-
-  jpa:
-    hibernate:
-      ddl-auto: validate
-
+  flyway:
+    validate-on-migrate: true
   kafka:
     consumer:
       bootstrap-servers: ${KAFKA_BOOTSTRAP}
