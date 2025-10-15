@@ -1,0 +1,25 @@
+name: learnwords
+services:
+  vocabulary-command-service:
+    image: ${IMAGE_NAME:-vocabulary-command-service}:${IMAGE_TAG:-dev}
+    container_name: vocabulary-command-service
+    environment:
+      SPRING_PROFILES_ACTIVE: ${PROFILE:-dev}
+      SERVER_PORT: ${PORT:-8810}
+
+      # --- DB ---
+      DATASOURCE_URL: ${DATASOURCE_URL:-jdbc:postgresql://postgres:5432/outbox}
+      DATASOURCE_USERNAME: ${DATASOURCE_USERNAME:-admin}
+      DATASOURCE_PASSWORD: ${DATASOURCE_PASSWORD:-adminpassword}
+
+      # --- Kafka ---
+      KAFKA_BOOTSTRAP_SERVERS: ${KAFKA_BOOTSTRAP_SERVERS:-kafka:9092}
+
+    ports:
+      - "${PORT:-8810}:${PORT:-8810}"
+    networks:
+      - learnwords-net
+
+networks:
+  learnwords-net:
+    external: true

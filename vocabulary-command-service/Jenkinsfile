@@ -1,0 +1,72 @@
+pipeline {
+	agent { label 'builder' }
+
+  tools {
+		jdk 'JDK24'
+    	maven 'Maven'
+  }
+
+  options { timestamps() }
+
+  parameters {
+	string(name: 'PARENT_BRANCH', defaultValue: 'main', description: 'Git branch dla parent')
+	booleanParam(name: 'BUILD_PARENT', defaultValue: true, description: 'Zbudować parent?')
+    booleanParam(name: 'SKIP_TESTS', defaultValue: true, description: 'Pominąć testy?')
+    string(name: 'REGISTRY', defaultValue: 'localhost:5000', description: 'Local Docker registry')
+    string(name: 'IMAGE_NAME', defaultValue: 'learnwords/vocabulary-command-service', description: 'Nazwa obrazu')
+    string(name: 'TAG', defaultValue: '', description: 'Tag obrazu (puste => auto)')
+  }
+
+  environment {
+		CREDS_ID   = 'bitbucket'
+    PARENT_REPO= 'git@bitbucket.org:grzegorz5/learnwords-parent.git'
+    MVN_FLAGS = "${params.SKIP_TESTS ? '-DskipTests' : ''}"
+  }
+
+  stages {
+		stage('Checkout parent') {
+			steps {
+				dir('parent') {
+					git branch: params.PARENT_BRANCH, credentialsId: env.CREDS_ID, url: env.PARENT_REPO
+        }
+      }
+    }
+
+    stage('Checkout vocabulary-command-service') {
+			steps {
+				dir('vocabulary-command-service') {
+					checkout scm        }
+      }
+    }
+
+    stage('Build parent (optional)') {
+			when { expression { return params.BUILD_PARENT } }
+      steps {
+				dir('parent') {
+					sh 'mvn -U -B -N -f pom.xml install'
+        }
+      }
+    }
+
+    stage('Build & Install vocabulary-command-service') {
+			steps {
+				dir('vocabulary-command-service') {
+					sh "mvn -U -B clean install ${env.MVN_FLAGS}"
+        }
+      }
+    }
+stage('Build Docker image') {
+    steps {
+        dir('vocabulary-command-service') {
+            script {
+                def tag = params.TAG?.trim() ? params.TAG.trim() : "${env.BUILD_NUMBER}"
+                def image = "${env.REGISTRY}/${env.IMAGE_NAME}:${tag}"
+                sh "docker build -t ${image} ."
+                sh "docker push ${image}"
+                echo "Pushed Docker image: ${image}"
+            }
+        }
+    }
+}
+  }
+}
