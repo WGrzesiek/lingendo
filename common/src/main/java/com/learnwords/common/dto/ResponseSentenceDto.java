@@ -1,4 +1,4 @@
 package com.learnwords.common.dto;
 
-public record ResponseSentenceDto(String sentence, String translation) {
+public record ResponseSentenceDto(String id, String sentence, String translation) {
 }
