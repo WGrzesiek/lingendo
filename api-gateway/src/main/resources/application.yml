@@ -1,0 +1,86 @@
+spring:
+  application:
+    name: api-gateway
+  cloud:
+    gateway:
+      server:
+        webflux:
+          routes:
+            - id: api-gateway-service
+              uri: http://api-gateway:8811
+              predicates:
+                - Path=/openapi/api-gateway-service
+              filters:
+                - SetPath=/v3/api-docs
+            - id: user-service
+              uri: http://user-service:8812
+              predicates:
+                - Path=/openapi/user-service
+              filters:
+                - SetPath=/api-docs
+            - id: vocabulary-command-service
+              uri: http://vocabulary-command-service:8810
+              predicates:
+                - Path=/openapi/vocabulary-command-service
+              filters:
+                - SetPath=/api-docs
+            - id: vocabulary-read-service
+              uri: http://vocabulary-read-service:8813
+              predicates:
+                - Path=/openapi/vocabulary-read-service
+              filters:
+                - SetPath=/api-docs
+            - id: deck-service
+              uri: http://deck-service:8814
+              predicates:
+                - Path=/openapi/deck-service
+              filters:
+                - SetPath=/api-docs
+            - id: deck-api
+              uri: http://deck-service:8814
+              predicates:
+                - Path=/api/v1/decks/**
+              filters:
+                - RemoveRequestHeader=X-User-Id
+                - RemoveRequestHeader=X-Client-Id
+                - RemoveRequestHeader=X-Roles
+          globalcors:
+            cors-configurations:
+              '[/**]':
+                          allowedOrigins:
+                            - "http://localhost:8811"
+                            - "http://localhost:3000"
+                            - "http://127.0.0.1:8811"
+                          allowedMethods:
+                            - GET
+                            - POST
+                            - PUT
+                            - DELETE
+                            - OPTIONS
+                          allowedHeaders: "*"
+                          allowCredentials: true
+                          maxAge: 3600
+server:
+  error:
+    include-message: always
+    include-binding-errors: always
+
+logging:
+  level:
+    org.springframework.web: ${LOG_LEVEL_WEB:INFO}
+    org.springframework.http.converter: ${LOG_LEVEL_HTTP_CONVERTER:INFO}
+
+springdoc:
+  swagger-ui:
+    path: /api-docs
+    urls:
+      - name: api-gateway-service
+        url: /openapi/api-gateway-service
+      - name: user-service
+        url: /openapi/user-service
+      - name: vocabulary-command-service
+        url: /openapi/vocabulary-command-service
+      - name: vocabulary-read-service
+        url: /openapi/vocabulary-read-service
+      - name: deck-service
+        url: /openapi/deck-service
