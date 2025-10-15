@@ -1,0 +1,29 @@
+spring:
+  config:
+    activate:
+      on-profile: prod
+
+  datasource:
+    url: jdbc:postgresql://${DB_POSTGRESQL_HOST}:${DB_POSTGRESQL_PORT}/${DB_POSTGRESQL_NAME}
+    username: ${DB_POSTGRESQL_USER}
+    password: ${DB_POSTGRESQL_PASSWORD}
+
+  jpa:
+    hibernate:
+      ddl-auto: validate
+
+  kafka:
+    consumer:
+      bootstrap-servers: ${KAFKA_BOOTSTRAP}
+
+server:
+  port: ${SERVER_PORT:8814}
+
+grpc:
+  client:
+    vocabulary-read:
+      address: ${GRPC_VOCAB_READ_ADDRESS}
+      negotiationType: ${GRPC_VOCAB_READ_NEGOTIATION:TLS}
+logging:
+  logstash:
+    host: ${LOGSTASH_HOST}
