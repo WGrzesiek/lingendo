@@ -9,6 +9,10 @@ spring:
     url: jdbc:postgresql://${DB_POSTGRESQL_HOST:localhost}:${DB_POSTGRESQL_PORT:5432}/${DB_POSTGRESQL_NAME:user_management}
     username: ${DATASOURCE_USERNAME:admin}
     password: ${DATASOURCE_PASSWORD:adminpassword}
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+    baseline-on-migrate: true
   jpa:
     properties:
       hibernate:
