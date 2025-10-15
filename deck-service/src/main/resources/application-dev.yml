@@ -13,10 +13,6 @@ spring:
       username: ${DATASOURCE_USERNAME:admin}
       password: ${DATASOURCE_PASSWORD:adminpassword}
 
-  jpa:
-    hibernate:
-      ddl-auto: update
-
   kafka:
     consumer:
       bootstrap-servers: ${KAFKA_BOOTSTRAP:kafka:9092}
