@@ -1,0 +1,38 @@
+server:
+  port: ${SERVER_PORT:8812}
+
+spring:
+  config:
+    activate:
+      on-profile: prod
+
+  datasource:
+    url: ${DATASOURCE_URL}
+    username: ${DB_POSTGRESQL_USER}
+    password: ${DB_POSTGRESQL_PASSWORD}
+
+  jpa:
+    hibernate:
+      ddl-auto: ${HIBERNATE_DDL_AUTO:validate}
+
+  kafka:
+    producer:
+      bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS}
+    consumer:
+      bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS}
+
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          jwk-set-uri: ${SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI}
+
+grpc:
+  server:
+    port: ${GRPC_PORT}
+    address: 0.0.0.0
+    reflectionServiceEnabled: true
+
+logging:
+  level:
+    root: INFO

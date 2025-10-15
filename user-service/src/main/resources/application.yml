@@ -1,34 +1,25 @@
-jwt:
-    expire-in: 86400000
-    private-key-location: classpath:jwt/private_key.pem
-    public-key-location: classpath:jwt/public_key.pem
 server:
-    port: ${SERVER_PORT:8003}
+  port: ${SERVER_PORT:8812}
+
 spring:
-    application:
-        name: user-service
-    config:
-      import:
-        - optional:file:../.env[.properties]
-        - optional:file:.env[.properties]
+  application:
+    name: ${SPRING_APPLICATION_NAME:user-service}
+
     datasource:
       url: jdbc:postgresql://${DB_POSTGRESQL_HOST:localhost}:${DB_POSTGRESQL_PORT:5432}/${DB_POSTGRESQL_NAME:user_management}
       username: ${DB_POSTGRESQL_USER:admin}
-      password: ${DB_POSTGRESQL_PASSWORD:}
-    jpa:
-        hibernate:
-            ddl-auto: update
-        properties:
-            hibernate:
-                dialect: org.hibernate.dialect.PostgreSQLDialect
-    security:
-        oauth2:
-            resourceserver:
-                jwt:
-                    issuer-uri: ${JWK_ISSUER_URI:http://localhost:0003}
-                    jwk-set-uri: ${JWK_SET_URI:http://localhost:0003/.well-known/jwks.json}
+      password: ${DB_POSTGRESQL_PASSWORD:adminpassword}
+  jpa:
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+
 springdoc:
-    api-docs:
-        path: /api-docs
-    swagger-ui:
-        path: /user-api-docs-ui.html
+  api-docs:
+    path: /api-docs
+  swagger-ui:
+    enabled: false
+
+logging:
+  level:
+    root: ${LOG_LEVEL_ROOT:INFO}

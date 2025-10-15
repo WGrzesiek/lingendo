@@ -9,11 +9,12 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class LoginResponse{
+public class LoginResponseDTO {
+    private String id;
     private String username;
-    private String message;
-    private String token;
-    private Long expiryTime;
+    private String role;
+    private boolean isEnabled;
+
 
 
 
