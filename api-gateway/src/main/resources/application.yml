@@ -40,10 +40,20 @@ spring:
               uri: http://deck-service:8814
               predicates:
                 - Path=/api/v1/decks/**
+                - Path=/api/v1/sessions/**
               filters:
                 - RemoveRequestHeader=X-User-Id
                 - RemoveRequestHeader=X-Client-Id
                 - RemoveRequestHeader=X-Roles
+            - id: user-api
+              uri: http://user-service:8812
+              predicates:
+                - Path=/api/v1/users/**
+            - id: vocabulary-command-api
+              uri: http://vocabulary-command-service:8810
+              predicates:
+                - Path=/api/v1/vocabulary/**
+                - Path=/api/v1/sentences/**
           globalcors:
             cors-configurations:
               '[/**]':
