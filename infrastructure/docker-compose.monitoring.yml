@@ -1,15 +1,15 @@
 services:
   prometheus:
-    image: prom/prometheus:latest
+    image: prom/prometheus:v3.7.1
     container_name: prometheus
     ports:
       - "9090:9090"
     volumes:
-      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
     networks: [learnwords-net]
 
   grafana:
-    image: grafana/grafana:latest
+    image: grafana/grafana:12.2
     container_name: grafana
     ports:
       - "3000:3000"
@@ -19,7 +19,7 @@ services:
     networks: [learnwords-net]
 
   zipkin:
-    image: openzipkin/zipkin:latest
+    image: openzipkin/zipkin:3.5.1
     container_name: zipkin
     ports:
       - "9411:9411"
