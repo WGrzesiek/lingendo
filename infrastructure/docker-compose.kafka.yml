@@ -31,6 +31,12 @@ services:
       KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
     networks: [learnwords-net]
 
+  kafka-exporter:
+    image: danielqsj/kafka-exporter:v1.9.0
+    command: ["--kafka.server=kafka:9092"]
+    ports:
+      - 9308:9308
+
 networks:
   learnwords-net:
     external: true
