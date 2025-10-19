@@ -1,5 +1,5 @@
 pipeline{
-	agent { label 'builder' }
+	agent { label 'deploy' }
 
     parameters{
 		string(name: 'ACTION', defaultValue: 'up', description: 'Dostępne akcje: up, down, restart')

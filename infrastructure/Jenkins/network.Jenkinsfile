@@ -1,5 +1,5 @@
 pipeline{
-	agent { label 'builder' }
+	agent { label 'deploy' }
 
 	stages{
 		stage('Create network') {
