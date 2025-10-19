@@ -18,7 +18,7 @@ JWT_EXPIRE_IN            ?= 86400000
 ISSUER_URI               ?= http://api-gateway:8811
 JWKS_URI                 ?= http://api-gateway:8811/.well-known/jwks.json
 
-GRPC_CLIENT_AUTH_ADDRESS         ?= static://user-service:9098
+GRPC_CLIENT_AUTH_ADDRESS         ?= static://user-service:9090
 GRPC_CLIENT_AUTH_NEGOTIATIONTYPE ?= PLAINTEXT
 
 # Opcjonalnie: JVM flags
