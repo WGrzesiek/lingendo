@@ -13,3 +13,10 @@ scrape_configs:
         labels:
           application: 'kafka'
     scrape_interval: 10s
+
+  - job_name: 'kafka-exporter'
+    static_configs:
+      - targets: ['kafka_exporter:9308']
+        labels:
+          application: 'kafka-exporter'
+    scrape_interval: 10s
