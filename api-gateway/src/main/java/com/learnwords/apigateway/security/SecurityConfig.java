@@ -47,6 +47,7 @@ public class SecurityConfig {
                 .authorizeExchange(ex -> ex
                         .pathMatchers("/openapi/**","/docs", "/swagger-ui/**", "/v3/api-docs/**", "/.well-known/**", "/login").permitAll()
                         .pathMatchers(HttpMethod.POST, "/api/v1/users/register").permitAll()
+                        .pathMatchers("/actuator/prometheus").permitAll()
                         .anyExchange().authenticated()
                 )
                 .oauth2ResourceServer(oauth2 -> oauth2

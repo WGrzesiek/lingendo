@@ -92,3 +92,11 @@ springdoc:
         url: /openapi/vocabulary-read-service
       - name: deck-service
         url: /openapi/deck-service
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus
+  endpoint:
+    health:
+      show-details: always
