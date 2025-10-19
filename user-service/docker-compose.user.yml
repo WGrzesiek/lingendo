@@ -9,7 +9,7 @@ services:
 
       # Ports
       SERVER_PORT: ${PORT:-8812}
-      GRPC_PORT: ${GRPC_PORT:-9090}
+      GRPC_PORT: ${GRPC_PORT:-9092}
 
       # --- DB (ta sama sieć -> host = postgres) ---
       DATASOURCE_URL: ${DATASOURCE_URL:-jdbc:postgresql://postgres:5432/user_management}
@@ -21,7 +21,7 @@ services:
 
     ports:
       - "${PORT:-8812}:${PORT:-8812}"     # HTTP
-      - "${GRPC_PORT:-9090}:${GRPC_PORT:-9090}" # gRPC (jeśli chcesz wystawiać na hosta)
+      - "${GRPC_PORT:-9092}:${GRPC_PORT:-9092}" # gRPC (jeśli chcesz wystawiać na hosta)
     networks: [learnwords-net]
     # depends_on nie zadziała na zewn. sieci – zakładamy, że postgres już działa
 
