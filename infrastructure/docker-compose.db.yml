@@ -41,9 +41,8 @@ services:
     container_name: LearnWorldsMongo-Express
     restart: unless-stopped
     ports:
-      - "8092:8081"  # UI: http://localhost:8092
+      - "8092:8081"
     environment:
-      # root user zwykle wymaga authSource=admin
       ME_CONFIG_MONGODB_URL: "mongodb://admin:secretpassword@mongodb:27017/?authSource=admin"
       ME_CONFIG_BASICAUTH_USERNAME: admin
       ME_CONFIG_BASICAUTH_PASSWORD: secretpassword

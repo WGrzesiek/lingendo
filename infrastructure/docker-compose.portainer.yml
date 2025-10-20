@@ -1,3 +1,4 @@
+name: learnwords
 services:
   portainer:
     container_name: portainer
