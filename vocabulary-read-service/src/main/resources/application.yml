@@ -35,7 +35,8 @@ logging:
         kafka: ${LOG_LEVEL_KAFKA:INFO}
       hibernate: ${LOG_LEVEL_HIBERNATE:INFO}
       postgresql: ${LOG_LEVEL_POSTGRESQL:INFO}
-
+  logstash:
+    host: ${LOGSTASH_HOST:localhost}
 server:
   port: ${SERVER_PORT:8813}
 

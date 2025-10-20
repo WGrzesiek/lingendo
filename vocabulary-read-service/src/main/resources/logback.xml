@@ -4,7 +4,7 @@
 
 
     <appender name="LOGSTASH" class="net.logstash.logback.appender.LogstashTcpSocketAppender">
-        <destination>localhost:50000</destination>
+        <destination>${LOGSTASH_HOST:-localhost}:50000</destination>
         <encoder class="co.elastic.logging.logback.EcsEncoder">
             <serviceName>vocabulary-read-service</serviceName>
         </encoder>
@@ -12,7 +12,7 @@
 
     <!-- Appender dla logów Kafka -->
     <appender name="LOGSTASH_KAFKA" class="net.logstash.logback.appender.LogstashTcpSocketAppender">
-        <destination>localhost:50000</destination>
+        <destination>${LOGSTASH_HOST:-localhost}:50000</destination>
         <encoder class="co.elastic.logging.logback.EcsEncoder">
             <serviceName>vocabulary-read-kafka-service</serviceName>
         </encoder>
@@ -31,7 +31,7 @@
 
     <!-- Appender dla logów MongoDB -->
     <appender name="LOGSTASH_MONGODB" class="net.logstash.logback.appender.LogstashTcpSocketAppender">
-        <destination>localhost:50000</destination>
+        <destination>${LOGSTASH_HOST:-localhost}:50000</destination>
         <encoder class="co.elastic.logging.logback.EcsEncoder">
             <serviceName>vocabulary-read-mongodb-service</serviceName>
         </encoder>
