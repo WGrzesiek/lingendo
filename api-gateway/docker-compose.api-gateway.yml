@@ -3,6 +3,7 @@ name: learnwords
 services:
   api-gateway:
     image: ${IMAGE_NAME:-api-gateway}:${IMAGE_TAG:-dev}
+    container_name: api-gateway
     environment:
       SPRING_PROFILES_ACTIVE: ${PROFILE:-dev}
 
