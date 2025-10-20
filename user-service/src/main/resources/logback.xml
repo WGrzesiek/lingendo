@@ -5,7 +5,7 @@
 
 
     <appender name="LOGSTASH" class="net.logstash.logback.appender.LogstashTcpSocketAppender">
-        <destination>localhost:50000</destination>
+        <destination>${LOGSTASH_HOST:-localhost}:50000</destination>
         <encoder class="co.elastic.logging.logback.EcsEncoder">
             <serviceName>user-service</serviceName>
         </encoder>
@@ -14,7 +14,7 @@
 
     <!-- Appender dla logów PostgreSQL -->
     <appender name="LOGSTASH_POSTGRES" class="net.logstash.logback.appender.LogstashTcpSocketAppender">
-        <destination>localhost:50000</destination>
+        <destination>${LOGSTASH_HOST:-localhost}:50000</destination>
         <encoder class="co.elastic.logging.logback.EcsEncoder">
             <serviceName>user-postgres-service</serviceName>
         </encoder>

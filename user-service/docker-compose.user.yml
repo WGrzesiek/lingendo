@@ -13,6 +13,7 @@ services:
       DATASOURCE_URL: ${DATASOURCE_URL:-jdbc:postgresql://postgres:5432/user_management}
       DB_POSTGRESQL_USER: ${DB_POSTGRESQL_USER:-admin}
       DB_POSTGRESQL_PASSWORD: ${DB_POSTGRESQL_PASSWORD:-adminpassword}
+      LOGSTASH_HOST: ${LOGSTASH_HOST:-logstash}
 
     ports:
       - "${PORT:-8812}:${PORT:-8812}"
