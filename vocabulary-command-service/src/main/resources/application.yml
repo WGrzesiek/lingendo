@@ -46,3 +46,5 @@ logging:
     io.debezium.connector.postgresql: ${LOG_LEVEL_DEBEZIUM_PG:INFO}
     org.mongodb: ${LOG_LEVEL_MONGO:INFO}
     org.springframework.data.mongodb: ${LOG_LEVEL_SDMONGO:INFO}
+  logstash:
+    host: ${LOGSTASH_HOST:localhost}
