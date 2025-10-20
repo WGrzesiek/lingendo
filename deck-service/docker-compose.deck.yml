@@ -31,7 +31,7 @@ services:
       LOG_LEVEL_HIBERNATE: ${LOG_LEVEL_HIBERNATE:-INFO}
       LOG_LEVEL_POSTGRESQL: ${LOG_LEVEL_POSTGRESQL:-INFO}
       JAVA_OPTS: ${JAVA_OPTS:-}
-      LOGSTASH_HOST: ${LOGSTASH_HOST:-logstash-1}
+      LOGSTASH_HOST: ${LOGSTASH_HOST:-logstash}
 
     ports:
       - "${PORT:-8814}:${PORT:-8814}"
