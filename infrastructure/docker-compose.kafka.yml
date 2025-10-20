@@ -33,6 +33,7 @@ services:
 
   kafka-exporter:
     image: danielqsj/kafka-exporter:v1.9.0
+    container_name: kafka-exporter
     command: ["--kafka.server=kafka:9092"]
     ports:
       - 9308:9308
