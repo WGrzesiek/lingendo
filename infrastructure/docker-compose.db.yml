@@ -13,7 +13,7 @@ services:
 
   pgadmin:
     image: dpage/pgadmin4
-    container_name: LearnWorldsOutboxAdmin
+    container_name: pgadmin
     environment:
       PGADMIN_DEFAULT_EMAIL: admin@admin.com
       PGADMIN_DEFAULT_PASSWORD: adminpassword
@@ -36,7 +36,7 @@ services:
 
   mongo-express:
     image: mongo-express:1.0.2-20
-    container_name: LearnWorldsMongo-Express
+    container_name: mongo-express
     ports:
       - "8092:8081"
     environment:
