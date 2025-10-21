@@ -65,7 +65,6 @@ services:
       discovery.type: single-node
     networks:
       - learnwords-net
-    restart: unless-stopped
 
   logstash:
     container_name: logstash
@@ -88,7 +87,6 @@ services:
       - learnwords-net
     depends_on:
       - elasticsearch
-    restart: unless-stopped
 
   kibana:
     container_name: kibana
@@ -106,7 +104,6 @@ services:
       - learnwords-net
     depends_on:
       - elasticsearch
-    restart: unless-stopped
 
 networks:
   learnwords-net:

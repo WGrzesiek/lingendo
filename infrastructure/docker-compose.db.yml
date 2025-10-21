@@ -26,7 +26,6 @@ services:
   mongodb:
     image: mongo:8.0.9
     container_name: LearnWorldsMongodb
-    restart: unless-stopped
     ports:
       - "27017:27017"
     environment:
@@ -39,7 +38,6 @@ services:
   mongo-express:
     image: mongo-express:1.0.2-20
     container_name: LearnWorldsMongo-Express
-    restart: unless-stopped
     ports:
       - "8092:8081"
     environment:
