@@ -9,7 +9,7 @@ scrape_configs:
 
   - job_name: 'kafka-exporter'
     static_configs:
-      - targets: ['kafka_exporter:9308']
+      - targets: ['kafka-exporter:9308']
         labels:
           application: 'kafka-exporter'
     scrape_interval: 10s
