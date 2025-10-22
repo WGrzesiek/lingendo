@@ -13,3 +13,35 @@ scrape_configs:
         labels:
           application: 'kafka-exporter'
     scrape_interval: 10s
+
+  - job_name: 'user-service'
+    metrics_path: '/actuator/prometheus'
+    scrape_interval: 10s
+    static_configs:
+      - targets: ['user-service:8812']
+        labels:
+          application: 'user-service'
+
+  - job_name: 'vocabulary-command-service'
+    metrics_path: '/actuator/prometheus'
+    scrape_interval: 10s
+    static_configs:
+      - targets: ['vocabulary-command-service:8810']
+        labels:
+          application: 'vocabulary-command-service'
+
+  - job_name: 'vocabulary-read-service'
+    metrics_path: '/actuator/prometheus'
+    scrape_interval: 10s
+    static_configs:
+      - targets: ['vocabulary-read-service:8813']
+        labels:
+          application: 'vocabulary-read-service'
+
+  - job_name: 'deck-service'
+    metrics_path: '/actuator/prometheus'
+    scrape_interval: 10s
+    static_configs:
+      - targets: ['deck-service:8814']
+        labels:
+          application: 'deck-service'
