@@ -15,8 +15,8 @@ services:
     container_name: kafka
     depends_on: [zookeeper]
     ports:
-      - "9092:9092"     # internal (dla kontenerów)
-      - "29092:29092"   # external (dla hosta)
+      - "9092:9092"
+      - "29092:29092"
     environment:
       ZOOKEEPER_CONNECT: zookeeper:2181
       KAFKA_BROKER_ID: 1
@@ -33,11 +33,12 @@ services:
   kafka-exporter:
     image: danielqsj/kafka-exporter:v1.9.0
     container_name: kafka-exporter
-    command: ["--kafka.server=kafka:9092"]
-    ports:
-      - 9308:9308
-    depends_on: [ kafka ]
-    networks: [ learnwords-net ]
+    command:
+      - --kafka.server=kafka:9092
+      - --web.listen-address=:9308
+    depends_on: [kafka]
+    ports: ["9308:9308"]
+    networks: [learnwords-net]
 
 networks:
   learnwords-net:
