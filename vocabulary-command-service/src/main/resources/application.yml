@@ -48,3 +48,14 @@ logging:
     org.springframework.data.mongodb: ${LOG_LEVEL_SDMONGO:INFO}
   logstash:
     host: ${LOGSTASH_HOST:localhost}
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus
+  endpoint:
+    health:
+      show-details: always
+  tracing:
+    sampling:
+      probability: 1
