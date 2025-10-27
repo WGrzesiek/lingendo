@@ -25,6 +25,7 @@
         <spring-boot-starter-test>3.5.3</spring-boot-starter-test>
         <spring-boot-starter-data-redis>3.5.3</spring-boot-starter-data-redis>
         <spring-boot-starter-cache>3.5.3</spring-boot-starter-cache>
+        <spring-boot-starter-actuator-version>3.5.7</spring-boot-starter-actuator-version>
         <spring-cloud-starter-openfeign>4.3.0</spring-cloud-starter-openfeign>
         <spring-boot-starter-data-mongodb-reactive>3.5.4</spring-boot-starter-data-mongodb-reactive>
         <jakarta-persistence-api>3.1.0</jakarta-persistence-api>
@@ -36,7 +37,7 @@
         <jjwt-jackson>0.11.5</jjwt-jackson>
         <jjwt-impl>0.11.5</jjwt-impl>
         <jjwt-api>0.11.5</jjwt-api>
-<!--        <bcpkix-jdk18on>1.76</bcpkix-jdk18on>-->
+        <!--        <bcpkix-jdk18on>1.76</bcpkix-jdk18on>-->
         <bcpkix-jdk18on>1.81</bcpkix-jdk18on>
         <kafka>3.3.7</kafka>
         <lombok-version>1.18.38</lombok-version>
@@ -46,17 +47,21 @@
         <hibernate-types-60>2.21.1</hibernate-types-60>
         <h2>2.3.232</h2>
         <spring-cloud-version>2025.0.0</spring-cloud-version>
-<!--        Grcp-->
+        <!--        Grcp-->
         <protobuf-java-version>3.25.5</protobuf-java-version>
         <grpc.version>1.75.0</grpc.version>
-<!--        <grpc-stub-version>1.75.0</grpc-stub-version>-->
-<!--        <grpc-protobuf-version>1.75.0</grpc-protobuf-version>-->
-<!--        <grpc-netty-shaded-version>1.75.0</grpc-netty-shaded-version>-->
-<!--        <grpc-services-version>1.75.0</grpc-services-version>-->
+        <flyway.version>11.14.0</flyway.version>
+        <!--        <grpc-stub-version>1.75.0</grpc-stub-version>-->
+        <!--        <grpc-protobuf-version>1.75.0</grpc-protobuf-version>-->
+        <!--        <grpc-netty-shaded-version>1.75.0</grpc-netty-shaded-version>-->
+        <!--        <grpc-services-version>1.75.0</grpc-services-version>-->
 
         <grpc-spring-boot-starter-version>3.1.0.RELEASE</grpc-spring-boot-starter-version>
+        <micrometer-tracing-bridge-brave-version>1.5.5</micrometer-tracing-bridge-brave-version>
+        <zipkin-reporter-brave-version>3.5.1</zipkin-reporter-brave-version>
+        <micrometer-registry-prometheus-version>1.15.5</micrometer-registry-prometheus-version>
 
-<!--        Koniec Grcp-->
+        <!--        Koniec Grcp-->
     </properties>
 
     <dependencyManagement>
@@ -280,6 +285,45 @@
                 <artifactId>spring-boot-starter-cache</artifactId>
                 <version>${spring-boot-starter-cache}</version>
             </dependency>
+            <!-- https://mvnrepository.com/artifact/org.flywaydb/flyway-core -->
+            <dependency>
+                <groupId>org.flywaydb</groupId>
+                <artifactId>flyway-core</artifactId>
+                <version>${flyway.version}</version>
+            </dependency>
+            <!-- https://mvnrepository.com/artifact/org.flywaydb/flyway-database-postgresql -->
+            <dependency>
+                <groupId>org.flywaydb</groupId>
+                <artifactId>flyway-database-postgresql</artifactId>
+                <version>${flyway.version}</version>
+            </dependency>
+            <!-- https://mvnrepository.com/artifact/org.flywaydb/flyway-maven-plugin -->
+            <dependency>
+                <groupId>org.flywaydb</groupId>
+                <artifactId>flyway-maven-plugin</artifactId>
+                <version>${flyway.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-starter-actuator</artifactId>
+                <version>${spring-boot-starter-actuator-version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.micrometer</groupId>
+                <artifactId>micrometer-registry-prometheus</artifactId>
+                <version>${micrometer-registry-prometheus-version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.zipkin.reporter2</groupId>
+                <artifactId>zipkin-reporter-brave</artifactId>
+                <version>${zipkin-reporter-brave-version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.micrometer</groupId>
+                <artifactId>micrometer-tracing-bridge-brave</artifactId>
+                <version>${micrometer-tracing-bridge-brave-version}</version>
+            </dependency>
+
         </dependencies>
     </dependencyManagement>
 
@@ -289,6 +333,14 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.flywaydb</groupId>
+            <artifactId>flyway-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.flywaydb</groupId>
+            <artifactId>flyway-maven-plugin</artifactId>
         </dependency>
         <dependency>
             <groupId>org.projectlombok</groupId>
@@ -305,6 +357,22 @@
         <dependency>
             <groupId>org.springdoc</groupId>
             <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-actuator</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.micrometer</groupId>
+            <artifactId>micrometer-registry-prometheus</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.zipkin.reporter2</groupId>
+            <artifactId>zipkin-reporter-brave</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.micrometer</groupId>
+            <artifactId>micrometer-tracing-bridge-brave</artifactId>
         </dependency>
     </dependencies>
 
