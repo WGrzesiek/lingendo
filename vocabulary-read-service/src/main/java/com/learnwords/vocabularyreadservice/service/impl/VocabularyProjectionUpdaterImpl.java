@@ -31,9 +31,6 @@ public class VocabularyProjectionUpdaterImpl implements VocabularyProjectionUpda
         vocabulary.setWord(vocabularyDto.word());
         vocabulary.setTranslations(vocabularyDto.translations());
         vocabulary.setSentenceIds(vocabularyDto.sentenceIds());
-        vocabularyRepository.save(vocabulary)
-                .doOnSuccess(s -> log.info("Zapisano zdanie o id: {}", vocabularyDto.id()))
-                .doOnError(e -> log.error("Błąd podczas zapisu: {}", e.getMessage(), e))
-                .subscribe();
+        vocabularyRepository.save(vocabulary);
     }
 }

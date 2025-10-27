@@ -9,7 +9,6 @@ import com.learnwords.vocabularyreadservice.repository.SentenceRepository;
 import com.learnwords.vocabularyreadservice.service.SentenceProjectionUpdater;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.dao.DataAccessException;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -32,10 +31,7 @@ public class SentenceProjectionUpdaterImpl implements SentenceProjectionUpdater 
         sentence.setSentence(sentenceDto.sentence());
         sentence.setTranslation(sentenceDto.translation());
 
-        sentenceRepository.save(sentence)
-                .doOnSuccess(s -> log.info("Zapisano zdanie o id: {}", sentenceDto.id()))
-                .doOnError(e -> log.error("Błąd podczas zapisu: {}", e.getMessage(), e))
-                .subscribe();
+        sentenceRepository.save(sentence);
     }
 
 }

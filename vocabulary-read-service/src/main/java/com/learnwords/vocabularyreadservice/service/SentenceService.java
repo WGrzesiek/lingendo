@@ -2,12 +2,12 @@ package com.learnwords.vocabularyreadservice.service;
 
 import com.learnwords.common.dto.ResponseSentenceDto;
 import com.learnwords.vocabularyreadservice.enums.FetchStrategy;
-import reactor.core.publisher.Mono;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface SentenceService {
-    Mono<ResponseSentenceDto> getSentenceById(String id);
-    Mono<List<ResponseSentenceDto>> getSentencesByIds(List<String> ids);
-    Mono<List<ResponseSentenceDto>> getSentences(int page_size, FetchStrategy fetchStrategy);
+    Optional<ResponseSentenceDto> getSentenceById(String id);
+    List<ResponseSentenceDto> getSentencesByIds(List<String> ids);
+    List<ResponseSentenceDto> getSentences(int page_size, FetchStrategy fetchStrategy);
 }

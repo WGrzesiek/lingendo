@@ -9,9 +9,9 @@ import com.learnwords.vocabularyreadservice.service.grpc.SentenceServiceGrpc;
 import io.grpc.stub.StreamObserver;
 import lombok.extern.slf4j.Slf4j;
 import net.devh.boot.grpc.server.service.GrpcService;
-import reactor.core.publisher.Mono;
 
 import java.util.List;
+import java.util.Optional;
 
 @Slf4j
 @GrpcService
@@ -27,14 +27,14 @@ public class SentenceServiceGrpcImpl extends SentenceReadServiceGrpc.SentenceRea
     public void getSentenceById(GetSentenceByIdRequest request, StreamObserver<SentenceResponse> response) {
         try {
             log.info("Pobieranie zdania o id: {}", request.getId());
-            Mono<ResponseSentenceDto> sentenceDto = sentenceService.getSentenceById(request.getId());
+            Optional<ResponseSentenceDto> sentenceDto = sentenceService.getSentenceById(request.getId());
 
             var sentences = sentenceDto.map(dto -> SentenceResponse.newBuilder()
                     .setId(dto.id())
                     .setSentence(dto.sentence())
                     .setTranslation(dto.translation())
                     .build());
-            response.onNext(sentences.block());
+            response.onNext(sentences.orElseThrow(() -> new RuntimeException("Nie znaleziono zdania o id: " + request.getId())));
             response.onCompleted();
         }
         catch (Exception e) {
@@ -47,18 +47,16 @@ public class SentenceServiceGrpcImpl extends SentenceReadServiceGrpc.SentenceRea
     public void batchGetSentencesByIds(BatchGetSentencesByIdsRequest request, StreamObserver<ListSentencesResponse> response) {
         try{
             log.info("Pobieranie zdań o id: {}", request.getIdsList());
-            Mono<List<ResponseSentenceDto>> sentenceDtos = sentenceService.getSentencesByIds(request.getIdsList());
+            List<ResponseSentenceDto> sentenceDtos = sentenceService.getSentencesByIds(request.getIdsList());
+            ListSentencesResponse.Builder builder = ListSentencesResponse.newBuilder();
 
-            var sentences = sentenceDtos.map(dtos -> {
-                ListSentencesResponse.Builder builder = ListSentencesResponse.newBuilder();
-                dtos.forEach(dto -> builder.addSentences(SentenceResponse.newBuilder()
-                        .setId(dto.id())
-                        .setSentence(dto.sentence())
-                        .setTranslation(dto.translation())
-                        .build()));
-                return builder.build();
-            });
-            response.onNext(sentences.block());
+            sentenceDtos.forEach(dto -> builder.addSentences(SentenceResponse.newBuilder()
+                    .setId(dto.id())
+                    .setSentence(dto.sentence())
+                    .setTranslation(dto.translation())
+                    .build()));
+
+            response.onNext(builder.build());
             response.onCompleted();
         }
         catch (Exception e) {
@@ -69,20 +67,18 @@ public class SentenceServiceGrpcImpl extends SentenceReadServiceGrpc.SentenceRea
 
     @Override
     public void listSentences(ListSentencesRequest request, StreamObserver<ListSentencesResponse> response) {
-        try{
+        try {
             log.info("Pobieranie {} zdań, strategia: {}", request.getPageSize(), request.getFetchStrategy());
-            Mono<List<ResponseSentenceDto>> sentenceDtos = sentenceService.getSentences(request.getPageSize(), FetchStrategy.valueOf(request.getFetchStrategy()));
+            List<ResponseSentenceDto> sentenceDtos = sentenceService.getSentences(request.getPageSize(), FetchStrategy.valueOf(request.getFetchStrategy()));
 
-            var sentences = sentenceDtos.map(dtos -> {
-                ListSentencesResponse.Builder builder = ListSentencesResponse.newBuilder();
-                dtos.forEach(dto -> builder.addSentences(SentenceResponse.newBuilder()
-                        .setId(dto.id())
-                        .setSentence(dto.sentence())
-                        .setTranslation(dto.translation())
-                        .build()));
-                return builder.build();
-            });
-            response.onNext(sentences.block());
+            ListSentencesResponse.Builder builder = ListSentencesResponse.newBuilder();
+            sentenceDtos.forEach(dto -> builder.addSentences(SentenceResponse.newBuilder()
+                    .setId(dto.id())
+                    .setSentence(dto.sentence())
+                    .setTranslation(dto.translation())
+                    .build()));
+
+            response.onNext(builder.build());
             response.onCompleted();
         }
         catch (Exception e) {
