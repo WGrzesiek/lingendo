@@ -27,9 +27,8 @@
         <spring-boot-starter-cache>3.5.3</spring-boot-starter-cache>
         <spring-boot-starter-actuator-version>3.5.7</spring-boot-starter-actuator-version>
         <spring-cloud-starter-openfeign>4.3.0</spring-cloud-starter-openfeign>
-        <spring-boot-starter-data-mongodb-reactive>3.5.4</spring-boot-starter-data-mongodb-reactive>
         <jakarta-persistence-api>3.1.0</jakarta-persistence-api>
-        <spring-boot-starter-data-mongodb>3.5.2</spring-boot-starter-data-mongodb>
+        <spring-boot-starter-data-mongodb>3.5.7</spring-boot-starter-data-mongodb>
         <postgresql>42.7.7</postgresql>
         <spring-boot-starter-oauth2-resource-server>3.5.3</spring-boot-starter-oauth2-resource-server>
         <spring-security-oauth2-jose>6.5.1</spring-security-oauth2-jose>
@@ -51,11 +50,6 @@
         <protobuf-java-version>3.25.5</protobuf-java-version>
         <grpc.version>1.75.0</grpc.version>
         <flyway.version>11.14.0</flyway.version>
-        <!--        <grpc-stub-version>1.75.0</grpc-stub-version>-->
-        <!--        <grpc-protobuf-version>1.75.0</grpc-protobuf-version>-->
-        <!--        <grpc-netty-shaded-version>1.75.0</grpc-netty-shaded-version>-->
-        <!--        <grpc-services-version>1.75.0</grpc-services-version>-->
-
         <grpc-spring-boot-starter-version>3.1.0.RELEASE</grpc-spring-boot-starter-version>
         <micrometer-tracing-bridge-brave-version>1.5.5</micrometer-tracing-bridge-brave-version>
         <zipkin-reporter-brave-version>3.5.1</zipkin-reporter-brave-version>
@@ -88,19 +82,6 @@
                 <version>${grpc-spring-boot-starter-version}</version>
             </dependency>
             <!-- ====== Koniec GRPC ====== -->
-
-
-
-
-
-            <!-- https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-data-mongodb-reactive -->
-            <dependency>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-starter-data-mongodb-reactive</artifactId>
-                <version>${spring-boot-starter-data-mongodb-reactive}</version>
-            </dependency>
-
-
 
             <dependency>
                 <groupId>org.springframework.cloud</groupId>
@@ -377,12 +358,12 @@
     </dependencies>
 
     <modules>
-        <module>common</module>
-        <module>vocabulary-command-service</module>
-        <module>vocabulary-read-service</module>
-        <module>user-service</module>
-        <module>deck-service</module>
-        <module>proto-shared</module>
+        <module>../common</module>
+        <module>../vocabulary-command-service</module>
+        <module>../vocabulary-read-service</module>
+        <module>../user-service</module>
+        <module>../deck-service</module>
+        <module>../proto-shared</module>
     </modules>
 
     <build>
