@@ -3,6 +3,7 @@ name: learnwords
 services:
   api-gateway:
     image: ${IMAGE_NAME:-api-gateway}:${IMAGE_TAG:-dev}
+    container_name: api-gateway
     environment:
       SPRING_PROFILES_ACTIVE: ${PROFILE:-dev}
 
@@ -19,7 +20,7 @@ services:
       SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI: ${JWKS_URI:-http://api-gateway:8811/.well-known/jwks.json}
 
       # gRPC klient do user-service (adres po nazwie serwisu w tej samej sieci)
-      GRPC_CLIENT_AUTH_ADDRESS: ${GRPC_CLIENT_AUTH_ADDRESS:-static://user-service:9090}
+      GRPC_CLIENT_AUTH_ADDRESS: ${GRPC_CLIENT_AUTH_ADDRESS:-static://user-service:9098}
       GRPC_CLIENT_AUTH_NEGOTIATIONTYPE: ${GRPC_CLIENT_AUTH_NEGOTIATIONTYPE:-PLAINTEXT}
 
       # Logi / JVM (opcjonalnie)

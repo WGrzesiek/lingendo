@@ -25,5 +25,5 @@ jwt:
 grpc:
   client:
     auth:
-      address: ${GRPC_CLIENT_AUTH_ADDRESS:static://user-service:9090}
+      address: ${GRPC_CLIENT_AUTH_ADDRESS:static://user-service:9098}
       negotiationType: ${GRPC_CLIENT_AUTH_NEGOTIATIONTYPE:PLAINTEXT}
