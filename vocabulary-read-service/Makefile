@@ -13,7 +13,7 @@ COMPOSE_FILE    ?= docker-compose.vocabulary-read.yml
 NETWORK_NAME    ?= learnwords-net
 
 # MongoDB
-DB_MONGODB_HOST ?= mongodb
+DB_MONGODB_HOST ?= staging.ibis-tautara.ts.net
 DB_MONGODB_PORT ?= 27017
 DB_MONGODB_NAME ?= vocabulary-command-service
 DB_MONGODB_USER ?= User
