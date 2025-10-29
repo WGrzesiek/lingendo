@@ -11,19 +11,25 @@ spring:
       port: ${DB_MONGODB_PORT:27017}
 
   kafka:
+    producer:
+      bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:127.0.0.1:9092}
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
     consumer:
-      auto-offset-reset: earliest
-      bootstrap-servers: ${KAFKA_BOOTSTRAP:127.0.0.1:29092}
-      group-id: ${KAFKA_GROUP:sentence-service-group}
+      bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:127.0.0.1:9092}
+#      group-id: ${KAFKA_GROUP_ID:learnwords-group}
+      auto-offset-reset: ${KAFKA_AUTO_OFFSET_RESET:earliest}
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
-      properties:
-        spring:
-          deserializer:
-            value:
-              delegate:
-                class: org.springframework.kafka.support.serializer.JsonDeserializer
       value-deserializer: org.springframework.kafka.support.serializer.ErrorHandlingDeserializer
-
+      properties:
+        #        spring:
+        #          deserializer:
+        #            value:
+        #              delegate:
+        #                class: org.springframework.kafka.support.serializer.JsonDeserializer
+        json:
+          trusted:
+            packages: "*"
 logging:
   level:
     root: ${LOG_LEVEL_ROOT:INFO}
