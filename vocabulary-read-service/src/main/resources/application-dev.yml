@@ -18,7 +18,8 @@ spring:
   kafka:
     consumer:
       bootstrap-servers: ${KAFKA_BOOTSTRAP:kafka:9092}
-      group-id: ${KAFKA_GROUP:vocabulary-read-service-group}
+    producer:
+      bootstrap-servers: ${KAFKA_BOOTSTRAP:kafka:9092}
 
 server:
   port: ${SERVER_PORT:8813}
