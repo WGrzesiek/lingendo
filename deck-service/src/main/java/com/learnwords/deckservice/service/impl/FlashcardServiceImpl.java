@@ -35,7 +35,9 @@ public class FlashcardServiceImpl implements FlashcardService {
 
     @Override
     @Transactional
-    @KafkaListener(topics = KafkaTopic.CREATE_VOCABULARY_TOPIC, groupId = KafkaGroup.DECK_SERVICE_GROUP, containerFactory = "vocabularyKafkaListenerFactory")
+    @KafkaListener(topics = KafkaTopic.CREATE_VOCABULARY_TOPIC, groupId = KafkaGroup.DECK_SERVICE_GROUP, properties = {
+            "spring.json.value.default.type=com.learnwords.common.dto.VocabularyDto"
+    })
     public void processFlashcardCreate(VocabularyDto vocabularyDto) {
         log.info("Otrzymano event: {}", KafkaTopic.CREATE_VOCABULARY_TOPIC);
         String flashcardId = UUID.randomUUID().toString();
