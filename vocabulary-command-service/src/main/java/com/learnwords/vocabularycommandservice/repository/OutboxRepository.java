@@ -12,6 +12,10 @@ public interface OutboxRepository extends JpaRepository<Outbox, String> {
 
     @Modifying
     @Transactional
-    @Query("UPDATE Outbox o SET o.eventStatus = :eventStatus WHERE o.aggregateId = :aggregateId")
+    @Query(value = """
+  UPDATE outbox
+     SET event_status = :eventStatus
+   WHERE aggregate_id     = :aggregate_id
+""", nativeQuery = true)
     void updateOutboxEventStatus(@Param("aggregateId") String aggregate_id, @Param("eventStatus") String eventStatus);
 }
