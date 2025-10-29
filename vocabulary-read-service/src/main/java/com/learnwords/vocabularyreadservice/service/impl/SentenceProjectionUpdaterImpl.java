@@ -29,7 +29,10 @@ public class SentenceProjectionUpdaterImpl implements SentenceProjectionUpdater 
     }
 
     @Transactional
-    @KafkaListener(topics = KafkaTopic.CREATE_SENTENCE_TOPIC, groupId = KafkaGroup.VOCABULARY_READ_SERVICE_GROUP)
+    @KafkaListener(topics = KafkaTopic.CREATE_SENTENCE_TOPIC, groupId = KafkaGroup.VOCABULARY_READ_SERVICE_GROUP,
+            properties = {
+                    "spring.json.value.default.type=com.learnwords.common.dto.SentenceDto"
+            })
     public void processSentenceCreate(SentenceDto sentenceDto) {
         updateOutboxEvent.processUpdateOutboxEvent(new UpdateOutboxEventDto(sentenceDto.id(), EventStatus.RECEIVED));
         try{

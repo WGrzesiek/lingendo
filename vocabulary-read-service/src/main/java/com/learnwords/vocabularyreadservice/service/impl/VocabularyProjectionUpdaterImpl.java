@@ -28,7 +28,9 @@ public class VocabularyProjectionUpdaterImpl implements VocabularyProjectionUpda
     }
 
     @Transactional
-    @KafkaListener(topics = KafkaTopic.CREATE_VOCABULARY_TOPIC, groupId = KafkaGroup.VOCABULARY_READ_SERVICE_GROUP)
+    @KafkaListener(topics = KafkaTopic.CREATE_VOCABULARY_TOPIC, groupId = KafkaGroup.VOCABULARY_READ_SERVICE_GROUP,    properties = {
+            "spring.json.value.default.type=com.learnwords.common.dto.VocabularyDto"
+    })
     public void processSentenceCreate(VocabularyDto vocabularyDto) {
         updateOutboxEvent.processUpdateOutboxEvent(new UpdateOutboxEventDto(vocabularyDto.id(), EventStatus.RECEIVED));
         try {
