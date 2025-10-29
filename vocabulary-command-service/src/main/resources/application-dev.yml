@@ -12,10 +12,10 @@ spring:
       ddl-auto: ${HIBERNATE_DDL_AUTO:update}
 
   kafka:
-    producer:
-      bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:kafka:9092}
     consumer:
-      bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:kafka:9092}
+      bootstrap-servers: ${KAFKA_BOOTSTRAP:kafka:9092}
+    producer:
+      bootstrap-servers: ${KAFKA_BOOTSTRAP:kafka:9092}
 
 server:
   port: ${SERVER_PORT:8810}
