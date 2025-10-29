@@ -22,7 +22,7 @@ public class UpdateOutboxEventImpl implements UpdateOutboxEvent {
 
     @Override
     @Transactional
-    @KafkaListener(topics = KafkaTopic.UPPATED_STATUS, groupId = KafkaGroup.OUTBOX_EVENT_SERVICE_GROUP, containerFactory = "vocabularyKafkaListenerFactory")
+    @KafkaListener(topics = KafkaTopic.UPPATED_STATUS, groupId = KafkaGroup.OUTBOX_EVENT_SERVICE_GROUP)
     public void updateOutboxEvent(UpdateOutboxEventDto updateOutboxEventDto) {
         try{
             outboxRepository.updateOutboxEventStatus(updateOutboxEventDto.aggregateId(), updateOutboxEventDto.eventStatus().name());
