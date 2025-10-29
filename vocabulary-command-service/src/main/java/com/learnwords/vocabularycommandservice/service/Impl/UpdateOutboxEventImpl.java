@@ -22,7 +22,10 @@ public class UpdateOutboxEventImpl implements UpdateOutboxEvent {
 
     @Override
     @Transactional
-    @KafkaListener(topics = KafkaTopic.UPPATED_STATUS, groupId = KafkaGroup.OUTBOX_EVENT_SERVICE_GROUP)
+    @KafkaListener(topics = KafkaTopic.UPPATED_STATUS, groupId = KafkaGroup.OUTBOX_EVENT_SERVICE_GROUP,
+            properties = {
+                    "spring.json.value.default.type=com.learnwords.common.dto.UpdateOutboxEventDto"
+            })
     public void updateOutboxEvent(UpdateOutboxEventDto updateOutboxEventDto) {
         try{
             outboxRepository.updateOutboxEventStatus(updateOutboxEventDto.aggregateId(), updateOutboxEventDto.eventStatus().name());
