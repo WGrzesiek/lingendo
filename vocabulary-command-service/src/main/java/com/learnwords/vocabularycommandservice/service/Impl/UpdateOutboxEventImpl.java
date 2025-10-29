@@ -28,7 +28,7 @@ public class UpdateOutboxEventImpl implements UpdateOutboxEvent {
             })
     public void updateOutboxEvent(UpdateOutboxEventDto updateOutboxEventDto) {
         try{
-            outboxRepository.updateOutboxEventStatus(updateOutboxEventDto.aggregateId(), updateOutboxEventDto.eventStatus().name());
+            outboxRepository.updateOutboxEventStatus(updateOutboxEventDto.aggregateId(), updateOutboxEventDto.eventStatus().toString());
         } catch (Exception e){
             throw new RuntimeException("Błąd podczas aktualizacji statusu eventu w outbox: " + e.getMessage(), e);
         }
