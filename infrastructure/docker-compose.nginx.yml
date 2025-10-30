@@ -7,6 +7,14 @@ services:
     ports:
       - "80:80"
     networks: [learnwords-net]
+  nginx-exporter:
+    image: nginx/nginx-prometheus-exporter:1.4.2
+    command:
+      - '-nginx.scrape-uri=http://nginx:80/stub_status'
+    ports:
+      - "9113:9113"
+    networks: [learnwords-net]
+
 networks:
   learnwords-net:
     external: true

@@ -45,3 +45,7 @@ scrape_configs:
       - targets: ['deck-service:8814']
         labels:
           application: 'deck-service'
+
+  - job_name: 'nginx'
+    static_configs:
+      - targets: ['nginx-exporter:9113']
