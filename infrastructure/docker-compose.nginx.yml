@@ -7,3 +7,6 @@ services:
     ports:
       - "80:80"
     networks: [learnwords-net]
+networks:
+  learnwords-net:
+    external: true
