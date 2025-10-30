@@ -5,7 +5,7 @@ pipeline {
 
 	parameters {
     string(name: 'REGISTRY', defaultValue: 'localhost:5000', description: 'Local Docker registry')
-		string(name: 'IMAGE_NAME', defaultValue: 'learnwords/deck-service', description: 'Nazwa obrazu')
+		string(name: 'IMAGE_NAME', defaultValue: 'learnwords/frontend', description: 'Nazwa obrazu')
 		string(name: 'TAG', defaultValue: 'dev', description: 'Tag obrazu (puste => auto)')
 
 	}
