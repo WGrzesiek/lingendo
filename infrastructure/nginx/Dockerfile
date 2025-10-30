@@ -1,6 +1,6 @@
 FROM nginx:alpine
 
-COPY nginx.conf /etc/nginx/nginx.conf
+COPY app.conf /etc/nginx/conf.d/app.conf
 COPY monitoring /etc/nginx/html/monitoring
 COPY .htpasswd /etc/nginx/.htpasswd
 
