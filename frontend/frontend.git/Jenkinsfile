@@ -5,9 +5,7 @@ pipeline {
 
 
 
-	optio
-		s { timestam
-	s() }
+	options { timestams() }
 
 	parameters {
     string(name: 'REGISTRY', defaultValue: 'localhost:5000', description: 'Local Docker registry')
