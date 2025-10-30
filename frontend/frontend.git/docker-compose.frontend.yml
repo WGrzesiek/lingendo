@@ -1,0 +1,22 @@
+version: '3.9'
+
+services:
+  nextjs:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: nextjs
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+    volumes:
+      - .:/app
+      - /app/node_modules
+    networks:
+      [learnwords-net]
+
+networks:
+  learnwords-net:
+    external: true
