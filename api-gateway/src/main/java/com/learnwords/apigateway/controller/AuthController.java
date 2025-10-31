@@ -3,6 +3,7 @@ package com.learnwords.apigateway.controller;
 import com.learnwords.apigateway.dto.LoginRequest;
 import com.learnwords.apigateway.service.GrpcClient.UserGrpcClient;
 import com.learnwords.apigateway.service.GrpcClient.impl.UserGrpcClientImpl;
+import com.learnwords.apigateway.service.SessionService;
 import com.learnwords.apigateway.service.impl.AuthenticationServiceImpl;
 
 import com.learnwords.auth.v1.AuthenticateRequest;
@@ -30,14 +31,16 @@ public class AuthController {
 
     private final UserGrpcClientImpl userService;
     private final AuthenticationServiceImpl authenticationService;
+    private final SessionService sessionService;
 
     @Value("${spring.security.oauth2.resourceserver.jwt.cookie-name:access_token}")
     private String tokenCookieName;
 
 
-    public AuthController(UserGrpcClientImpl userService, AuthenticationServiceImpl authenticationService) {
+    public AuthController(UserGrpcClientImpl userService, AuthenticationServiceImpl authenticationService, SessionService sessionService) {
         this.userService = userService;
         this.authenticationService = authenticationService;
+        this.sessionService = sessionService;
     }
 
     @PostMapping(path = "/login/web")
@@ -61,6 +64,7 @@ public class AuthController {
                                     .path("/")
                                     .maxAge(Duration.ofMillis(expireInMillis))
                                     .build();
+                            sessionService.createSession(res.getUserId(), token, res.getRoles(0), "WEB_USER", expireInMillis);
 
                             response.addCookie(jwtCookie);
 
