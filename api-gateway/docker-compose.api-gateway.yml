@@ -28,6 +28,12 @@ services:
       LOG_LEVEL_HTTP_CONVERTER: ${LOG_LEVEL_HTTP_CONVERTER:-INFO}
       JAVA_OPTS: ${JAVA_OPTS:-}
 
+      # Redis
+      SPRING_DATA_REDIS_HOST: ${REDIS_HOST:-redis}
+      SPRING_DATA_REDIS_PORT: ${REDIS_PORT:-6379}
+      SPRING_DATA_REDIS_PASSWORD: ${REDIS_PASSWORD:-SuperSecret123}
+
+
     volumes:
       - ./secrets:/etc/keys:ro   # w secrets/ umieść private_key.pem i public_key.pem
     ports:

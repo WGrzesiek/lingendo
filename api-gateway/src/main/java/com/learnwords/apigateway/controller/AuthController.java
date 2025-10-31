@@ -15,6 +15,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 
@@ -24,6 +25,7 @@ import java.util.stream.Collectors;
 
 @Slf4j
 @RestController
+@RequestMapping(path = "/api/v1/gateway")
 public class AuthController {
 
     private final UserGrpcClientImpl userService;
@@ -38,7 +40,7 @@ public class AuthController {
         this.authenticationService = authenticationService;
     }
 
-    @PostMapping(path = "/login")
+    @PostMapping(path = "/login/web")
     public ResponseEntity<Map<String,String>> login(@Valid @RequestBody LoginRequest loginRequest, ServerHttpResponse response) {
         var req = AuthenticateRequest.newBuilder()
                 .setUsername(loginRequest.username())
