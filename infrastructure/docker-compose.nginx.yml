@@ -11,7 +11,7 @@ services:
     image: nginx/nginx-prometheus-exporter:1.4.2
     container_name: nginx-exporter
     command:
-      - '-nginx.scrape-uri=http://nginx:80/stub_status'
+      - "--nginx.scrape-uri=http://nginx:80/stub_status"
     ports:
       - "9113:9113"
     networks: [learnwords-net]

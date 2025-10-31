@@ -46,9 +46,32 @@ services:
     depends_on: [mongodb]
     networks: [learnwords-net]
 
+  redis:
+    image: redis:8.2.2
+    container_name: redis
+    command: [
+      "redis-server",
+      "--requirepass", "SuperSecret123",
+      "--appendonly", "yes"
+    ]
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks: [learnwords-net]
+
+
+  redisinsight:
+    image: redis/redisinsight:2.70
+    container_name: redisinsight
+    ports:
+      - "5540:5540"
+    networks: [learnwords-net]
+
 volumes:
   pgdata:
   mongodb-data:
+  redis_data:
 
 networks:
   learnwords-net:

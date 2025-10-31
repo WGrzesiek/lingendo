@@ -8,6 +8,8 @@ pipeline{
         booleanParam(name: 'ENABLE_PGADMIN', defaultValue: false, description: 'Uruchom PGAdmin')
         booleanParam(name: 'ENABLE_MONGODB', defaultValue: true, description: 'Uruchom MongoDB')
         booleanParam(name: 'ENABLE_MONGOEXPRESS', defaultValue: false, description: 'Uruchom Mongo Express')
+		booleanParam(name: 'ENABLE_REDIS', defaultValue: true, description: 'Uruchom Redis')
+		booleanParam(name: 'ENABLE_REDISINSIGHT', defaultValue: false, description: 'Uruchom RedisInsight')
         string(name: 'COMPOSE_PATH', defaultValue: 'docker-compose.db.yml', description: 'Ścieżka do pliku docker-compose.yml')
     }
 
@@ -41,6 +43,12 @@ pipeline{
           if (params.ENABLE_MONGOEXPRESS) {
             composeEnvVars += " mongo-express "
           }
+		  if (params.ENABLE_REDIS) {
+			composeEnvVars += " redis "
+		  }
+		  if (params.ENABLE_REDISINSIGHT) {
+			composeEnvVars += " redisinsight "
+		  }
           sh """
             docker compose -f ${params.COMPOSE_PATH} ${params.ACTION} -d ${composeEnvVars}
           """
