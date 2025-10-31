@@ -45,7 +45,7 @@ public class SecurityConfig {
                 .csrf(ServerHttpSecurity.CsrfSpec::disable)
                 .securityContextRepository(NoOpServerSecurityContextRepository.getInstance()) // stateless
                 .authorizeExchange(ex -> ex
-                        .pathMatchers("/openapi/**","/docs", "/swagger-ui/**", "/v3/api-docs/**", "/.well-known/**", "/login").permitAll()
+                        .pathMatchers("/openapi/**","/docs", "/swagger-ui/**", "/v3/api-docs/**", "/.well-known/**", "/api/v1/gateway/login/web").permitAll()
                         .pathMatchers(HttpMethod.POST, "/api/v1/users/register").permitAll()
                         .pathMatchers("/actuator/health", "/actuator/info", "/actuator/prometheus").permitAll()
                         .anyExchange().authenticated()
