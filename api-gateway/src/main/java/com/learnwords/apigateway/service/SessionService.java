@@ -5,8 +5,11 @@ import com.learnwords.apigateway.entity.Session;
 import java.util.Optional;
 
 public interface SessionService {
-    String createSession(String userId, String token, String accountType, String userType, Long expireInMillis);
-    Optional<Session> getSession(String sessionId);
-    void deleteSession(String sessionId);
+    void create(Session session);
+    Optional<Session> getBySessionId(String sessionId);
+    Optional<Session> getByUserId(String userId);
+    boolean updateByUserId(String userId, Session patch);
+    boolean deleteBySessionId(String sessionId);
+    boolean deleteByUserId(String userId);
 }
 

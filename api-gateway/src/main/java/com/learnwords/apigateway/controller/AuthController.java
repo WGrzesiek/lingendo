@@ -1,6 +1,7 @@
 package com.learnwords.apigateway.controller;
 
 import com.learnwords.apigateway.dto.LoginRequest;
+import com.learnwords.apigateway.entity.Session;
 import com.learnwords.apigateway.service.GrpcClient.UserGrpcClient;
 import com.learnwords.apigateway.service.GrpcClient.impl.UserGrpcClientImpl;
 import com.learnwords.apigateway.service.SessionService;
@@ -21,7 +22,9 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 
 import java.time.Duration;
+import java.time.Instant;
 import java.util.Map;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -56,7 +59,7 @@ public class AuthController {
                                             .collect(Collectors.toList())
                             );
 
-                            long expireInMillis = authenticationService.getExpireIn();
+                            Long expireInMillis = authenticationService.getExpireIn();
 
                             ResponseCookie jwtCookie = ResponseCookie.from(tokenCookieName, token)
                                     .httpOnly(true)
@@ -64,9 +67,26 @@ public class AuthController {
                                     .path("/")
                                     .maxAge(Duration.ofMillis(expireInMillis))
                                     .build();
-                            sessionService.createSession(res.getUserId(), token, res.getRoles(0), "WEB_USER", expireInMillis);
-
+                            String sessionId = UUID.randomUUID().toString();
+        Session session = Session.builder()
+                .id(sessionId)
+                .userId(res.getUserId())
+                .token(token)
+                .accountType("TEST")
+                .userType(res.getRolesList().stream().toString())
+                .expiration(Instant.now().plusMillis(expireInMillis))
+                .createdAt(Instant.now())
+                .updatedAt(Instant.now())
+                .build();
+                            sessionService.create(session);
+                            ResponseCookie sessionCookie = ResponseCookie.from("SESSIONID", sessionId)
+                                    .httpOnly(true)
+                                    .secure(false)
+                                    .path("/")
+                                    .maxAge(Duration.ofMillis(expireInMillis))
+                                    .build();
                             response.addCookie(jwtCookie);
+                            response.addCookie(sessionCookie);
 
                             log.info("User logged in successfully: {}", res.getUsername());
 
