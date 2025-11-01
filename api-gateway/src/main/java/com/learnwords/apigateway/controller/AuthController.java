@@ -73,11 +73,12 @@ public class AuthController {
                 .userId(res.getUserId())
                 .token(token)
                 .accountType("TEST")
-                .userType(res.getRolesList().stream().toString())
+                .userType(String.join(",", res.getRolesList()))
                 .expiration(Instant.now().plusMillis(expireInMillis))
                 .createdAt(Instant.now())
                 .updatedAt(Instant.now())
                 .build();
+
                             sessionService.create(session);
                             ResponseCookie sessionCookie = ResponseCookie.from("SESSIONID", sessionId)
                                     .httpOnly(true)
