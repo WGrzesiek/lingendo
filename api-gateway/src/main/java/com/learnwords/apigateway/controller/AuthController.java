@@ -13,15 +13,13 @@ import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 import reactor.core.publisher.Mono;
 
 import java.time.Duration;
 import java.time.Instant;
+import java.util.List;
 import java.util.UUID;
 
 @Slf4j
@@ -65,6 +63,31 @@ public class AuthController {
                 setRefreshCookie(rsp, refresh, refreshTtl);
                 return ResponseEntity.ok(new TokenRes(access));
             });
+        });
+    }
+
+    @PostMapping("/refresh")
+    public Mono<ResponseEntity<TokenRes>> refresh(@CookieValue(name="refresh_token", required=false) String old) {
+        if (old == null) return Mono.just(ResponseEntity.status(401).build());
+        return tokens.parseRefresh(old).flatMap(opt -> {
+            if (opt.isEmpty()) return Mono.just(ResponseEntity.status(401).build());
+            var p = opt.get();
+            var newAccess = tokens.createAccessToken(p.userId(), List.of()); // roles odczytaj skądinąd
+            var newRefresh = tokens.createRefreshToken(p.userId(), p.deviceId());
+            return tokens.rotateRefresh(old, newRefresh, refreshTtl).map(ok -> {
+                if (!ok) return ResponseEntity.status(401).build();
+                return ResponseEntity.ok(new TokenRes(newAccess));
+            });
+        });
+    }
+
+    @PostMapping("/logout")
+    public Mono<ResponseEntity<Void>> logout(@CookieValue(name="refresh_token", required=false) String token,
+                                             ServerHttpResponse rsp) {
+        if (token == null) return Mono.just(ResponseEntity.noContent().build());
+        return tokens.revokeRefresh(token).map(x -> {
+            clearRefreshCookie(rsp);
+            return ResponseEntity.noContent().build();
         });
     }
 
