@@ -29,8 +29,8 @@ public class SecurityConfig {
 
     @Bean
     SecurityWebFilterChain securityWebFilterChain(ServerHttpSecurity http) {
-        var defaultConverter = new ServerBearerTokenAuthenticationConverter();
 
+        var defaultConverter = new ServerBearerTokenAuthenticationConverter();
         ServerAuthenticationConverter cookieFirst = exchange -> {
             var cookie = exchange.getRequest().getCookies().getFirst(tokenCookieName);
             if (cookie != null && StringUtils.hasText(cookie.getValue())) {
@@ -40,6 +40,7 @@ public class SecurityConfig {
             }
             return defaultConverter.convert(exchange);
         };
+
 
         return http
                 .csrf(ServerHttpSecurity.CsrfSpec::disable)
@@ -56,4 +57,5 @@ public class SecurityConfig {
                 )
                 .build();
     }
+
 }

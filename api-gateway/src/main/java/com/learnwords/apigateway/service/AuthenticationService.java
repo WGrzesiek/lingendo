@@ -1,10 +1,10 @@
 package com.learnwords.apigateway.service;
 
-import org.springframework.security.core.GrantedAuthority;
+import com.learnwords.auth.v1.AuthenticateResponse;
 
-import java.util.Collection;
+import java.util.Map;
 
 public interface AuthenticationService {
-    String generateToken(String username, String id, Collection<? extends GrantedAuthority> authorities);
+    Map<String, Object> login(AuthenticateResponse response);
 
 }

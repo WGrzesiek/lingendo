@@ -15,6 +15,7 @@ spring:
           jwk-set-uri: ${SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI:http://api-gateway:8811/.well-known/jwks.json}
           cookie-name: ${ACCESS_TOKEN:access_token}
 
+
 logging:
   level:
     root: DEBUG
@@ -26,9 +27,19 @@ jwt:
   private-key-location: ${JWT_PRIVATE_KEY_LOCATION:classpath:jwt/private_key.pem}
   public-key-location: ${JWT_PUBLIC_KEY_LOCATION:classpath:jwt/public_key.pem}
   expire-in: ${JWT_EXPIRE_IN:86400000}
+  keys:
+    kid: ${KID:gateway-kid}
+
 
 grpc:
   client:
     auth:
       address: ${GRPC_CLIENT_AUTH_ADDRESS:static://user-service:9098}
       negotiationType: ${GRPC_CLIENT_AUTH_NEGOTIATIONTYPE:PLAINTEXT}
+
+security:
+  jwt:
+    issuer: "learnwords-api"
+    kid: "gateway-kid"
+    access-ttl: 15m
+    refresh-ttl: 30d

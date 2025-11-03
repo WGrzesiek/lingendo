@@ -26,3 +26,16 @@ grpc:
     auth:
       address: ${GRPC_CLIENT_AUTH_ADDRESS}
       negotiationType: ${GRPC_CLIENT_AUTH_NEGOTIATIONTYPE}
+security:
+  jwt:
+    issuer: api-gateway
+    audience: learnwords
+    access-ttl: 5m
+    refresh-ttl: 30d
+    cookie:
+      refresh:
+        name: refresh
+        path: /auth
+        same-site: Lax
+        secure: true
+        http-only: true

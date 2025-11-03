@@ -12,7 +12,7 @@ import reactor.core.publisher.Mono;
 
 @Component
 public class AuthContextPropagationFilter implements GlobalFilter, Ordered {
-
+//NOTE zaraz nie bedzie potrzebne bo w redis siedzi info o userze
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
         // Po Spring Security Authentication jest już na exchange/principal
