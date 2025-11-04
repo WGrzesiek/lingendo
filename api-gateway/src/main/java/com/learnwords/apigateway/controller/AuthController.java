@@ -95,7 +95,7 @@ public class AuthController {
         ResponseCookie cookie = ResponseCookie.from("refresh_token", token)
                 .httpOnly(true)
                 .secure(true)
-                .path("/auth")
+                .path("/")
                 .sameSite("Strict")
                 .maxAge(ttl)
                 .build();
@@ -106,43 +106,10 @@ public class AuthController {
         ResponseCookie cookie = ResponseCookie.from("refresh_token", "")
                 .httpOnly(true)
                 .secure(true)
-                .path("/auth")
+                .path("/")
                 .sameSite("Strict")
                 .maxAge(Duration.ZERO)
                 .build();
         rsp.addCookie(cookie);
     }
 }
-//    @PostMapping(path = "/login/web")
-//    public ResponseEntity<Map<String,String>> login(@Valid @RequestBody LoginRequest loginRequest, ServerHttpResponse response) {
-//        var req = AuthenticateRequest.newBuilder()
-//                .setUsername(loginRequest.username())
-//                .setPassword(loginRequest.password())
-//                .build();
-//        var res = userService.authenticate(req);
-//        Map<String, Object> session = authenticationService.login(res);
-//
-//
-//        ResponseCookie jwtCookie = ResponseCookie.from(tokenCookieName, (String) session.get("token"))
-//                .httpOnly(true)
-//                .secure(false)
-//                .path("/")
-//                .maxAge(Duration.ofMillis((Long) session.get("expireIn")))
-//                .build();
-//
-//        ResponseCookie sessionCookie = ResponseCookie.from("SESSIONID", (String) session.get("sessionId"))
-//                .httpOnly(true)
-//                .secure(false)
-//                .path("/")
-//                .maxAge(Duration.ofMillis((Long) session.get("expireIn")))
-//                .build();
-//        response.addCookie(jwtCookie);
-//        response.addCookie(sessionCookie);
-//
-//        log.info("User logged in successfully: {}", res.getUsername());
-//
-//        return ResponseEntity.ok(Map.of(
-//                "message", "Authorization successful",
-//                "username", res.getUsername()
-//        ));
-//    }}
