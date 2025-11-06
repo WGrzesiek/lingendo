@@ -1,35 +1,3 @@
-// import apiClient from "@/lib/api/axios";
-// import { TokenStore } from "@/lib/tokenStore";
-
-// interface LoginResponse {
-//   accessToken: string;
-// }
-
-// export const login = async (
-//   email: string,
-//   password: string
-// ): Promise<string> => {
-//   const response = await apiClient.post<LoginResponse>("/login", {
-//     email,
-//     password,
-//   });
-
-//   const { accessToken } = response.data;
-
-//   TokenStore.set(accessToken);
-
-//   return accessToken;
-// };
-
-// export const logout = async () => {
-//   try {
-//     await apiClient.post("/logout");
-//   } catch (error) {
-//     console.error("Logout error:", error);
-//   } finally {
-//     TokenStore.set(null);
-//   }
-// };
 import apiClient from "@/lib/api/axios";
 import { TokenStore } from "@/lib/tokenStore";
 import type { LoginRequest, LoginResponse, SignupRequest } from "../types";
