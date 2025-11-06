@@ -1,9 +1,15 @@
-import Image from "next/image";
+import HeroSection from "@/components/home/hero-section/HeroSection";
+import { FeaturesSection } from "@/components/home/features/FeaturesSection";
+import CtaSection from "@/components/home/cta/CtaSection";
+import { PricingSection } from "@/components/pricing/PricingSection";
 
 export default function Home() {
   return (
-    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-      <h1 className="text-4xl font-bold text-center">Learn Words</h1>
-    </div>
+    <main className="">
+      <HeroSection />
+      <FeaturesSection />
+      <CtaSection />
+      <PricingSection />
+    </main>
   );
 }
