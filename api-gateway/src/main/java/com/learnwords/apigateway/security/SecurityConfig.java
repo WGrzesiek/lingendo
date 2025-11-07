@@ -39,10 +39,14 @@ public class SecurityConfig {
                         ).permitAll()
 
                         .pathMatchers(HttpMethod.POST, "/api/v1/gateway/login").permitAll()
+                        .pathMatchers(HttpMethod.POST, "/login").permitAll()
                         .pathMatchers(HttpMethod.POST, "/api/v1/gateway/refresh").permitAll()
+                        .pathMatchers(HttpMethod.POST, "/refresh").permitAll()
                         .pathMatchers(HttpMethod.POST, "/api/v1/gateway/logout").permitAll()
+                        .pathMatchers(HttpMethod.POST, "/logout").permitAll()
 
                         .pathMatchers(HttpMethod.POST, "/api/v1/users/register").permitAll()
+                        .pathMatchers(HttpMethod.POST, "/register").permitAll()
 
                         .pathMatchers("/actuator/health", "/actuator/info", "/actuator/prometheus").permitAll()
 

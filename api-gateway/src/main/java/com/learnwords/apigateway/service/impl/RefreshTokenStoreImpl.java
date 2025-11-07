@@ -63,7 +63,8 @@ public class RefreshTokenStoreImpl implements RefreshTokenStore {
 
         return redis.opsForHash().get(k, "userId")
                 .cast(String.class)
-                .defaultIfEmpty(null)
+//                .defaultIfEmpty(null)
+                .switchIfEmpty(Mono.just(""))
                 .flatMap(uid -> {
                     Mono<Long> delHash = redis.delete(k);
                     Mono<Long> delIdx  = (uid == null)
