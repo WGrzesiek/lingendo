@@ -33,7 +33,7 @@ services:
     # Elastic Agent does not retry failed connections to Kibana upon the initial enrollment phase.
     restart: on-failure
     networks:
-      - learnwords-net
+      - elk
     depends_on:
       - elasticsearch
       - kibana

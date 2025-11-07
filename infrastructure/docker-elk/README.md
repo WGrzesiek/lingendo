@@ -1,8 +1,7 @@
 # Elastic stack (ELK) on Docker
 
-[![Elastic Stack version](https://img.shields.io/badge/Elastic%20Stack-9.0.1-00bfb3?style=flat&logo=elastic-stack)](https://www.elastic.co/blog/category/releases)
+[![Elastic Stack version](https://img.shields.io/badge/Elastic%20Stack-9.2.0-00bfb3?style=flat&logo=elastic-stack)](https://www.elastic.co/blog/category/releases)
 [![Build Status](https://github.com/deviantony/docker-elk/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/deviantony/docker-elk/actions/workflows/ci.yml?query=branch%3Amain)
-[![Join the chat](https://badges.gitter.im/Join%20Chat.svg)](https://app.gitter.im/#/room/#deviantony_docker-elk:gitter.im)
 
 Run the latest version of the [Elastic stack][elk-stack] with Docker and Docker Compose.
 
@@ -47,13 +46,12 @@ docker compose up
 
 ## Philosophy
 
-We aim at providing the simplest possible entry into the Elastic stack for anybody who feels like experimenting with
-this powerful combo of technologies. This project's default configuration is purposely minimal and unopinionated. It
-does not rely on any external dependency, and uses as little custom automation as necessary to get things up and
-running.
+The main goal of docker-elk is to make the Elastic stack as easy as possible to get into. It is **not a blueprint for a
+production-ready deployment**, but rather a _template_ that promotes tweaking and exploration.
 
-Instead, we believe in good documentation so that you can use this repository as a template, tweak it, and make it _your
-own_. [sherifabdlnaby/elastdocker][elastdocker] is one example among others of project that builds upon this idea.
+The authors believe in good documentation over elaborate automation. The project's default configuration is purposely
+minimal and unopinionated. The initial setup does not rely on any external dependency, and uses as little scripting as
+necessary to get things up and running.
 
 ---
 
@@ -145,6 +143,13 @@ Then, initialize the Elasticsearch users and groups required by docker-elk by ex
 
 ```sh
 docker compose up setup
+```
+
+Optionally (but highly recommended), generate encryption keys for Kibana using the following command and copy its output
+to the Kibana configuration file (`kibana/config/kibana.yml`):
+
+```sh
+docker compose up kibana-genkeys
 ```
 
 If everything went well and the setup completed without error, start the other stack components:
@@ -262,7 +267,7 @@ Elasticsearch data is persisted inside a volume by default.
 In order to entirely shutdown the stack and remove all persisted data, use the following Docker Compose command:
 
 ```sh
-docker compose down -v
+docker compose --profile=setup down -v
 ```
 
 ### Version selection
@@ -470,8 +475,6 @@ See the following Wiki pages:
 [license-mngmt]: https://www.elastic.co/docs/deploy-manage/license/manage-your-license-in-self-managed-cluster
 [license-apis]: https://www.elastic.co/docs/api/doc/elasticsearch/group/endpoint-license
 
-[elastdocker]: https://github.com/sherifabdlnaby/elastdocker
-
 [docker-install]: https://docs.docker.com/get-started/get-docker/
 [compose-install]: https://docs.docker.com/compose/install/
 [linux-postinstall]: https://docs.docker.com/engine/install/linux-postinstall/
@@ -499,9 +502,6 @@ See the following Wiki pages:
 {
   "MD033": {
     "allowed_elements": [ "picture", "source", "img" ]
-
-
-
   }
 }
 -->
