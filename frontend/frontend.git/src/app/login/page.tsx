@@ -1,7 +1,12 @@
+"use client";
+
 import Link from "next/link";
 import { LoginForm } from "@/features/auth/components/LoginForm";
+import { useRedirectIfAuthenticated } from "@/features/auth/hooks/useRedirectIfAuthenticated";
 
 const SigninPage = () => {
+  useRedirectIfAuthenticated();
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-background">
       <div className="w-full max-w-md p-8 bg-card rounded-lg shadow-md border">

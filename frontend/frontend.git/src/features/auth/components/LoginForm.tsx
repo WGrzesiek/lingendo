@@ -6,25 +6,25 @@ import { useAuth } from "../hooks/useAuth";
 
 export const LoginForm = () => {
   const { login, isLoading, error } = useAuth();
-  const [email, setEmail] = useState("");
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    await login({ email, password });
+    await login({ username, password });
   };
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4 w-full max-w-md">
       <div>
-        <label htmlFor="email" className="block text-sm font-medium mb-1">
-          Email
+        <label htmlFor="username" className="block text-sm font-medium mb-1">
+          Username
         </label>
         <input
-          id="email"
+          id="username"
           type="text"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
+          value={username}
+          onChange={(e) => setUsername(e.target.value)}
           required
           className="w-full px-3 py-2 bg-background border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-ring"
           disabled={isLoading}
