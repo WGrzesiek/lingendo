@@ -2,6 +2,7 @@ package com.learnwords.userservice.controller;
 
 import com.learnwords.userservice.dtos.RegisterRequest;
 import com.learnwords.userservice.dtos.RegisterResponse;
+import com.learnwords.userservice.security.AppUserDetails;
 import com.learnwords.userservice.service.UserService;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
@@ -12,6 +13,7 @@ import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @Slf4j
 @RestController
@@ -35,22 +37,4 @@ public class UserController {
                 .build();
         return ResponseEntity.status(HttpStatus.CREATED.value()).body(registerResponse);
         }
-
-//    @PostMapping(path = "/login")
-//    public ResponseEntity<LoginResponseDTO> loginUser(@Valid @RequestBody LoginRequest loginRequest){
-//        AppUserDetails userDetails = userService.authenticate(loginRequest.getUsername(), loginRequest.getPassword());
-//        log.info("User logged in successfully with username: {}", loginRequest.getUsername());
-//        String token = authenticationService.generateToken(userDetails.getUsername(),userDetails.getId(), userDetails.getAuthorities());
-//        log.info("Generated token for user: {}", loginRequest.getUsername());
-//        Long expireIn = authenticationService.getExpireIn();
-//        LoginResponseDTO loginResponse = new LoginResponseDTO(loginRequest.getUsername(), "User logged in successfully", token, expireIn );
-//
-//        return ResponseEntity.ok(loginResponse);
-//    }
-
-    @GetMapping("/me")
-    public List<String> me(@AuthenticationPrincipal Jwt jwt) {
-        return List.of(jwt.getClaimAsString("user_id"), jwt.getClaimAsString("authorities"));
-    }
-
 }
