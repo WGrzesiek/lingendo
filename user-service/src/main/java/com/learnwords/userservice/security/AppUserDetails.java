@@ -63,4 +63,12 @@ public class AppUserDetails implements UserDetails {
     public boolean isEnabled() {
         return user.isEnabled();
     }
+
+    public String getUserType() {
+        return user.getUserType().name();
+    }
+
+    public String getAccountType() {
+        return user.getAccountType().name();
+    }
 }

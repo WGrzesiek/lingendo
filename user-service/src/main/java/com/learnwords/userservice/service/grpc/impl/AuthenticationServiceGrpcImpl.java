@@ -47,7 +47,10 @@ public class AuthenticationServiceGrpcImpl extends AuthServiceGrpc.AuthServiceIm
                     .setUsername(userDetails.getUsername())
                     .addAllRoles(roles)
                     .setIsEnabled(true)
+                    .putClaims("accountType", userDetails.getAccountType())
+                    .putClaims("userType", userDetails.getUserType())
                     .build();
+
             responseObserver.onNext(response);
             responseObserver.onCompleted();
         } catch (WrongPasswordException | UsernameNotFoundException e) {
