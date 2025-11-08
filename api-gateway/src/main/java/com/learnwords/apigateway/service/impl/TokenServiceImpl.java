@@ -52,7 +52,7 @@ class TokenServiceImpl implements TokenService {
     }
 
     @Override
-    public String createRefreshToken(String userId, String deviceId) {
+    public String createRefreshToken(String userId, String deviceId, String accountType, String userType) {
         var now = new Date();
         var exp = new Date(now.getTime() + refreshTtl.toMillis());
         var jti = UUID.randomUUID().toString();
@@ -62,6 +62,8 @@ class TokenServiceImpl implements TokenService {
                 .setSubject(userId)
                 .setId(jti)
                 .claim("deviceId", deviceId)
+                .claim("accountType",accountType)
+                .claim("userType", userType)
                 .setIssuedAt(now).setExpiration(exp)
                 .signWith(keyPair.getPrivate(), SignatureAlgorithm.RS256)
                 .compact();

@@ -49,7 +49,7 @@ public class AuthController {
         String deviceId = UUID.randomUUID().toString();
         var res = userService.authenticate(req);
         var access = tokens.createAccessToken(res.getUserId(),res.getClaimsOrThrow("accountType"), res.getClaimsOrThrow("userType"));
-        var refresh = tokens.createRefreshToken(res.getUserId(), deviceId);
+        var refresh = tokens.createRefreshToken(res.getUserId(), deviceId, res.getClaimsOrThrow("accountType"), res.getClaimsOrThrow("userType"));
 
         return tokens.parseRefresh(refresh).flatMap(opt -> {
             if (opt.isEmpty()) return Mono.just(ResponseEntity.status(500).build());
@@ -72,7 +72,7 @@ public class AuthController {
             if (opt.isEmpty()) return Mono.just(ResponseEntity.status(401).build());
             var p = opt.get();
             var newAccess = tokens.createAccessToken(p.userId(), p.accountType(), p.userType());
-            var newRefresh = tokens.createRefreshToken(p.userId(), p.deviceId());
+            var newRefresh = tokens.createRefreshToken(p.userId(), p.deviceId(), p.accountType(), p.userType());
             return tokens.rotateRefresh(old, newRefresh, refreshTtl).map(ok -> {
                 if (!ok) return ResponseEntity.status(401).build();
                 return ResponseEntity.ok(new TokenRes(newAccess));
