@@ -19,6 +19,18 @@ message AuthenticateRequest{
   string password = 2;
 }
 
+message GetUserByIdRequest{
+  string user_id = 1;
+}
+
+message GetUserByIdResponse{
+  string user_id = 1;
+  string username = 2;
+  bool is_enabled = 4;
+  map<string, string> claims = 5;
+}
+
 service AuthService{
   rpc Authenticate(AuthenticateRequest) returns (AuthenticateResponse);
+  rpc GetUserById(GetUserByIdRequest) returns (GetUserByIdResponse);
 }
