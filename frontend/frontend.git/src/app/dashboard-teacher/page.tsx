@@ -1,8 +1,10 @@
 "use client";
+import { useRequireAuth } from "@/features/auth/hooks/useRequireAuth";
 
 import { useRequireRole } from "@/features/auth/hooks/useRequireRole";
 
 const DashboardTeacherPage = () => {
+  useRequireAuth();
   const { user, isLoading } = useRequireRole("TEACHER", "NORMAL");
 
   if (isLoading) {
