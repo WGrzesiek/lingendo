@@ -14,10 +14,10 @@ export interface SignupRequest {
 }
 
 export interface User {
-  id: string;
-  email: string;
-  name?: string;
-  roles: string[];
+  userId: string;
+  username: string;
+  accountType: "BASIC" | "PREMIUM" | "STUDENT" | "TEACHER";
+  userType: "NORMAL" | "ADMIN";
 }
 
 export interface AuthError {
