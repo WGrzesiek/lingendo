@@ -24,10 +24,7 @@ auth/
 ├── hooks/              # React hooks
 │   ├── useAuth.ts              # Login, signup, logout
 │   ├── useCurrentUser.ts       # Pobieranie danych z /me
-│   ├── useProtectedRoute.ts    # ⭐ Główny hook do zabezpieczeń
-│   ├── useRequireAuth.ts       # Stary hook (deprecated)
-│   ├── useRequireRole.ts       # Stary hook (deprecated)
-│   └── useRedirectIfAuthenticated.ts
+│   └── useProtectedRoute.ts    # Główny hook do zabezpieczeń
 ├── services/           # API calls
 │   └── auth.ts
 ├── types/             # TypeScript types
@@ -173,12 +170,3 @@ interface SignupRequest {
 ✅ **Backend weryfikuje** - Frontend nie musi się martwić o token
 ✅ **Weryfikacja uprawnień** - Hook sprawdza accountType, userType, isEnabled
 ✅ **CSRF protection** - withCredentials w axios
-
-## Migracja ze starych hooków
-
-| Stary hook                            | Nowy hook                                               |
-| ------------------------------------- | ------------------------------------------------------- |
-| `useRequireAuth()`                    | `useProtectedRoute()`                                   |
-| `useRequireRole("TEACHER", "NORMAL")` | `useProtectedRoute({ requiredAccountType: "TEACHER" })` |
-
-Stare hooki nadal działają, ale zalecamy używanie `useProtectedRoute`.

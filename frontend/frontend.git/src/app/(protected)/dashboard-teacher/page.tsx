@@ -5,6 +5,7 @@ import { useProtectedRoute } from "@/features/auth/hooks/useProtectedRoute";
 const DashboardTeacherPage = () => {
   const { user, isLoading } = useProtectedRoute({
     requiredAccountType: "TEACHER",
+    redirectTo: "/dashboard-teacher",
   });
 
   if (isLoading) {

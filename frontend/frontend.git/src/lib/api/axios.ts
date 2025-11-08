@@ -1,5 +1,10 @@
 import axios from "axios";
 
+/**
+ * Skonfigurowana instancja klienta Axios do komunikacji z API
+ * Automatycznie dołącza credentials (cookies) do każdego zapytania
+ * Obsługuje automatyczne odświeżanie tokenów przy błędzie 401
+ */
 const apiClient = axios.create({
   // baseURL: "http://staging.ibis-tautara.ts.net:8811/api/v1/gateway",
   baseURL: "/api",
@@ -8,16 +13,16 @@ const apiClient = axios.create({
     "Content-Type": "application/json",
     Accept: "application/json",
   },
-  // Ważne: withCredentials pozwala wysyłać cookies do backendu
   withCredentials: true,
 });
 
-// REQUEST INTERCEPTOR - nie potrzebny, bo token jest w cookie
-// Backend automatycznie odbiera cookie z access tokenem
+/**
+ * Interceptor requestów - loguje informacje o każdym wychodzącym zapytaniu
+ */
 apiClient.interceptors.request.use(
   (config) => {
     console.log(
-      "� [Axios] Wysyłam request:",
+      "[Axios] Wysyłam request:",
       config.method?.toUpperCase(),
       config.url
     );
@@ -26,18 +31,25 @@ apiClient.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-// Zapobiega wielokrotnemu refresh jednocześnie
+/**
+ * Promise przechowujący aktualny proces odświeżania tokenu
+ * Zapobiega wielokrotnym jednoczesnym próbom odświeżenia
+ */
 let refreshing: Promise<void> | null = null;
 
+/**
+ * Odświeża access token używając refresh token z cookies
+ * Zapobiega wielokrotnym jednoczesnym wywołaniom refresh
+ * @returns Promise z boolean - true jeśli odświeżenie się powiodło, false w przeciwnym razie
+ */
 async function refreshAccess(): Promise<boolean> {
   if (!refreshing) {
     refreshing = (async () => {
       try {
-        // Backend odświeży access token w cookie na podstawie refresh tokenu
-        await axios.post("/api/refresh", {}, { withCredentials: true });
-        console.log("✅ [Axios] Token odświeżony pomyślnie");
+        await axios.post("/refresh", {}, { withCredentials: true });
+        console.log("[Axios] Token odświeżony pomyślnie");
       } catch (error) {
-        console.error("❌ [Axios] Nie udało się odświeżyć tokenu");
+        console.error("[Axios] Nie udało się odświeżyć tokenu");
         throw error;
       } finally {
         refreshing = null;
@@ -53,27 +65,28 @@ async function refreshAccess(): Promise<boolean> {
   }
 }
 
-// RESPONSE INTERCEPTOR - auto-refresh przy 401
+/**
+ * Interceptor odpowiedzi - automatycznie odświeża token przy błędzie 401
+ * Jeśli odświeżenie się powiedzie, ponawia oryginalny request
+ * Jeśli odświeżenie się nie powiedzie, przekierowuje na stronę logowania
+ */
 apiClient.interceptors.response.use(
   (response) => response,
   async (error) => {
     const originalRequest = error.config;
 
-    // Jeśli otrzymaliśmy 401 i jeszcze nie próbowaliśmy odświeżyć
     if (error.response?.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true;
 
-      console.log("🔄 [Axios] Otrzymano 401, próba odświeżenia tokenu...");
+      console.log("[Axios] Otrzymano 401, próba odświeżenia tokenu...");
 
       const refreshed = await refreshAccess();
 
       if (refreshed) {
-        // Ponów request - backend ma już nowy token w cookie
-        console.log("🔄 [Axios] Ponawiam oryginalny request...");
+        console.log("[Axios] Ponawiam oryginalny request...");
         return apiClient(originalRequest);
       } else {
-        // Refresh się nie udał - przekieruj na login
-        console.log("🔒 [Axios] Refresh nieudany, przekierowanie na /login");
+        console.log("[Axios] Refresh nieudany, przekierowanie na /login");
         if (typeof window !== "undefined") {
           window.location.href = "/login";
         }

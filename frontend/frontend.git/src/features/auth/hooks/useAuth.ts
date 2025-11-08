@@ -2,23 +2,37 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { login, signup, logout } from "../services/auth";
+import { login, signup, logout, getCurrentUser } from "../services/auth";
 import type { LoginRequest, SignupRequest } from "../types";
 import { AxiosError } from "axios";
 
+/**
+ * Hook do zarządzania procesami uwierzytelniania użytkownika
+ * Obsługuje logowanie, rejestrację i wylogowanie
+ * Automatycznie przekierowuje użytkownika do odpowiedniego dashboardu na podstawie roli
+ */
 export const useAuth = () => {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  /**
+   * Obsługuje proces logowania użytkownika
+   * Po udanym logowaniu pobiera dane użytkownika i przekierowuje do odpowiedniego dashboardu
+   * @param data - Dane logowania (username i password)
+   */
   const handleLogin = async (data: LoginRequest) => {
     setIsLoading(true);
     setError(null);
 
     try {
       await login(data);
-      // Token jest już w cookie, backend będzie go automatycznie sprawdzał
-      router.push("/dashboard");
+      const user = await getCurrentUser();
+      if (user.accountType === "TEACHER") {
+        router.push("/dashboard-teacher");
+      } else {
+        router.push("/dashboard");
+      }
     } catch (err) {
       const message =
         err instanceof AxiosError
@@ -31,6 +45,11 @@ export const useAuth = () => {
     }
   };
 
+  /**
+   * Obsługuje proces rejestracji nowego użytkownika
+   * Po udanej rejestracji przekierowuje do strony logowania
+   * @param data - Dane rejestracyjne (email, password, opcjonalnie name)
+   */
   const handleSignup = async (data: SignupRequest) => {
     setIsLoading(true);
     setError(null);
@@ -50,12 +69,15 @@ export const useAuth = () => {
     }
   };
 
+  /**
+   * Obsługuje proces wylogowania użytkownika
+   * Usuwa token uwierzytelniający i przekierowuje do strony logowania
+   */
   const handleLogout = async () => {
     setIsLoading(true);
 
     try {
       await logout();
-      // Backend usunął cookie z tokenem
       router.push("/login");
     } catch (err) {
       console.error("Logout error:", err);
