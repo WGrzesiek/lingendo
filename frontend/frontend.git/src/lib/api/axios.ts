@@ -3,8 +3,8 @@ import { redirect } from "next/navigation";
 import { TokenStore } from "@/lib/tokenStore";
 
 const apiClient = axios.create({
-  baseURL: "http://staging.ibis-tautara.ts.net:8811/api/v1/gateway",
-  // baseURL: "/api",
+  // baseURL: "http://staging.ibis-tautara.ts.net:8811/api/v1/gateway",
+  baseURL: "/api",
   timeout: 10000,
   headers: {
     "Content-Type": "application/json",
