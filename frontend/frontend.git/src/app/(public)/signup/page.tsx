@@ -2,10 +2,10 @@
 
 import Link from "next/link";
 import { SignupForm } from "@/features/auth/components/SignupForm";
-import { useRedirectIfAuthenticated } from "@/features/auth/hooks/useRedirectIfAuthenticated";
+// import { useRedirectIfAuthenticated } from "@/features/auth/hooks/useRedirectIfAuthenticated";
 
 const SignupPage = () => {
-  useRedirectIfAuthenticated();
+  // useRedirectIfAuthenticated();
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-background">
