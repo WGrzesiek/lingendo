@@ -10,8 +10,8 @@ spring:
     oauth2:
       resourceserver:
         jwt:
-          issuer-uri: ${SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI:http://api-gateway:8811}
-          jwk-set-uri: ${SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI:http://api-gateway:8811/.well-known/jwks.json}
+          issuer-uri: ${SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI:http://192.168.23.9:8811}
+          jwk-set-uri: ${SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI:http://192.168.23.9:8811/.well-known/jwks.json}
           cookie-name: ${ACCESS_TOKEN:access_token}
   cloud:
     gateway:

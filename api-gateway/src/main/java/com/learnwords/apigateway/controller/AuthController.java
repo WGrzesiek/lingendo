@@ -2,6 +2,7 @@ package com.learnwords.apigateway.controller;
 
 import com.learnwords.apigateway.dto.LoginRequest;
 import com.learnwords.apigateway.dto.TokenRes;
+import com.learnwords.apigateway.dto.UserMeDto;
 import com.learnwords.apigateway.entity.RefreshSession;
 import com.learnwords.apigateway.service.GrpcClient.impl.UserGrpcClientImpl;
 import com.learnwords.apigateway.service.RefreshTokenStore;
@@ -13,6 +14,8 @@ import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 import reactor.core.publisher.Mono;
@@ -89,6 +92,21 @@ public class AuthController {
             return ResponseEntity.noContent().build();
         });
     }
+
+    @GetMapping("/me")
+    public Mono<ResponseEntity<UserMeDto>> me(@AuthenticationPrincipal Jwt jwt) {
+        String userId = jwt.getSubject();
+        var response =  userService.getUserById(userId);
+        var dto = new UserMeDto(
+                response.getUserId(),
+                response.getUsername(),
+                response.getClaimsOrThrow("accountType"),
+                response.getClaimsOrThrow("userType"),
+                response.getIsEnabled()
+        );
+        return Mono.just(ResponseEntity.ok(dto));
+    }
+
 
     private static void setRefreshCookie(ServerHttpResponse rsp, String token, Duration ttl) {
         ResponseCookie cookie = ResponseCookie.from("refresh_token", token)
