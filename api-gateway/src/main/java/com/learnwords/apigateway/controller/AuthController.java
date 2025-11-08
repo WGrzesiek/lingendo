@@ -32,8 +32,8 @@ public class AuthController {
     private final UserGrpcClientImpl userService;
     private final TokenService tokens;
     private final RefreshTokenStore store;
-    @Value("${security.jwt.refresh-ttl}")
-    Duration refreshTtl;
+    @Value("${security.jwt.access-ttl}") Duration accessTtl;
+    @Value("${security.jwt.refresh-ttl}") Duration refreshTtl;
 
 
     public AuthController(UserGrpcClientImpl userService, TokenService tokens, RefreshTokenStore store) {
@@ -62,14 +62,15 @@ public class AuthController {
                     Instant.now().plus(refreshTtl), Instant.now(), Instant.now()
             );
             return store.save(session, refreshTtl).map(ok -> {
-                setRefreshCookie(rsp, refresh, refreshTtl);
+                setCookie("access_token",rsp, access, accessTtl); //15 min
+                setCookie("refresh_token",rsp, refresh, refreshTtl); // 30d
                 return ResponseEntity.ok(new TokenRes(access));
             });
         });
     }
 
     @PostMapping("/refresh")
-    public Mono<ResponseEntity<TokenRes>> refresh(@CookieValue(name="refresh_token", required=false) String old) {
+    public Mono<ResponseEntity<TokenRes>> refresh(@CookieValue(name="refresh_token", required=false) String old, ServerHttpResponse rsp) {
         if (old == null) return Mono.just(ResponseEntity.status(401).build());
         return tokens.parseRefresh(old).flatMap(opt -> {
             if (opt.isEmpty()) return Mono.just(ResponseEntity.status(401).build());
@@ -78,6 +79,8 @@ public class AuthController {
             var newRefresh = tokens.createRefreshToken(p.userId(), p.deviceId(), p.accountType(), p.userType());
             return tokens.rotateRefresh(old, newRefresh, refreshTtl).map(ok -> {
                 if (!ok) return ResponseEntity.status(401).build();
+                setCookie("access_token",rsp, newAccess, accessTtl); //15 min
+                setCookie("refresh_token",rsp, newRefresh, refreshTtl); // 30d
                 return ResponseEntity.ok(new TokenRes(newAccess));
             });
         });
@@ -88,7 +91,8 @@ public class AuthController {
                                              ServerHttpResponse rsp) {
         if (token == null) return Mono.just(ResponseEntity.noContent().build());
         return tokens.revokeRefresh(token).map(x -> {
-            clearRefreshCookie(rsp);
+            clearCookie(rsp, "access_token");
+            clearCookie(rsp, "refresh_token");
             return ResponseEntity.noContent().build();
         });
     }
@@ -108,10 +112,10 @@ public class AuthController {
     }
 
 
-    private static void setRefreshCookie(ServerHttpResponse rsp, String token, Duration ttl) {
-        ResponseCookie cookie = ResponseCookie.from("refresh_token", token)
+    private static void setCookie(String name, ServerHttpResponse rsp, String token, Duration ttl) {
+        ResponseCookie cookie = ResponseCookie.from(name, token)
                 .httpOnly(true)
-                .secure(true)
+//                .secure(true)
                 .path("/")
                 .sameSite("Lax")
                 .maxAge(ttl)
@@ -119,10 +123,10 @@ public class AuthController {
         rsp.addCookie(cookie);
     }
 
-    private static void clearRefreshCookie(ServerHttpResponse rsp) {
-        ResponseCookie cookie = ResponseCookie.from("refresh_token", "")
+    private static void clearCookie(ServerHttpResponse rsp, String name) {
+        ResponseCookie cookie = ResponseCookie.from(name, "")
                 .httpOnly(true)
-                .secure(true)
+//                .secure(true)
                 .path("/")
                 .sameSite("Lax")
                 .maxAge(Duration.ZERO)

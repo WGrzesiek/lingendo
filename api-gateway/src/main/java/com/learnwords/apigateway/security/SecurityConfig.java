@@ -4,29 +4,36 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
-import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity;
 import org.springframework.security.config.web.server.ServerHttpSecurity;
-import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
-import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
-import org.springframework.security.oauth2.server.resource.authentication.ReactiveJwtAuthenticationConverterAdapter;
 import org.springframework.security.web.server.SecurityWebFilterChain;
 import org.springframework.security.web.server.context.NoOpServerSecurityContextRepository;
+import org.springframework.util.StringUtils;
+import reactor.core.publisher.Mono;
+
+import org.springframework.security.web.server.authentication.ServerAuthenticationConverter;
+import org.springframework.security.oauth2.server.resource.authentication.BearerTokenAuthenticationToken;
+import org.springframework.security.oauth2.server.resource.web.server.authentication.ServerBearerTokenAuthenticationConverter;
 
 @Configuration
 @EnableWebFluxSecurity
 public class SecurityConfig {
 
-    /**
-     * Jeśli korzystasz z JWKS endpointu (np. "/.well-known/jwks.json"),
-     * podaj tutaj pełny URL (zalecane) lub poprawną ścieżkę względną.
-     */
     @Value("${spring.security.oauth2.resourceserver.jwt.jwk-set-uri}")
     private String jwkSetUri;
 
     @Bean
     SecurityWebFilterChain securityWebFilterChain(ServerHttpSecurity http) {
+        var defaultConverter = new ServerBearerTokenAuthenticationConverter();
 
+        ServerAuthenticationConverter cookieFirst = exchange -> {
+            var cookie = exchange.getRequest().getCookies().getFirst("access_token");
+            if (cookie != null && StringUtils.hasText(cookie.getValue())) {
+                var token = cookie.getValue();
+                return Mono.just(new BearerTokenAuthenticationToken(token));
+            }
+            return defaultConverter.convert(exchange);
+        };
 
 
         return http
@@ -53,6 +60,7 @@ public class SecurityConfig {
                         .anyExchange().authenticated()
                 )
                 .oauth2ResourceServer(oauth2 -> oauth2
+                        .bearerTokenConverter(cookieFirst)
                         .jwt(jwt -> jwt
                                 .jwkSetUri(jwkSetUri)
                         )
