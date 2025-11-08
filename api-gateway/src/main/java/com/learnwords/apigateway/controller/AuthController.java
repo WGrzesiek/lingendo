@@ -55,7 +55,7 @@ public class AuthController {
             if (opt.isEmpty()) return Mono.just(ResponseEntity.status(500).build());
             var p = opt.get();
             var session = new RefreshSession(
-                    p.jti(), p.userId(), p.deviceId(), null, null,
+                    p.jti(), p.userId(), p.deviceId(), p.accountType(), p.userType(),
                     Instant.now().plus(refreshTtl), Instant.now(), Instant.now()
             );
             return store.save(session, refreshTtl).map(ok -> {
