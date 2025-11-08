@@ -19,7 +19,6 @@ import reactor.core.publisher.Mono;
 
 import java.time.Duration;
 import java.time.Instant;
-import java.util.List;
 import java.util.UUID;
 
 @Slf4j
@@ -49,7 +48,7 @@ public class AuthController {
                 .build();
         String deviceId = UUID.randomUUID().toString();
         var res = userService.authenticate(req);
-        var access = tokens.createAccessToken(res.getUserId(), res.getRolesList());
+        var access = tokens.createAccessToken(res.getUserId(),res.getClaimsOrThrow("accountType"), res.getClaimsOrThrow("userType"));
         var refresh = tokens.createRefreshToken(res.getUserId(), deviceId);
 
         return tokens.parseRefresh(refresh).flatMap(opt -> {
@@ -72,7 +71,7 @@ public class AuthController {
         return tokens.parseRefresh(old).flatMap(opt -> {
             if (opt.isEmpty()) return Mono.just(ResponseEntity.status(401).build());
             var p = opt.get();
-            var newAccess = tokens.createAccessToken(p.userId(), List.of()); // roles odczytaj skądinąd
+            var newAccess = tokens.createAccessToken(p.userId(), p.accountType(), p.userType());
             var newRefresh = tokens.createRefreshToken(p.userId(), p.deviceId());
             return tokens.rotateRefresh(old, newRefresh, refreshTtl).map(ok -> {
                 if (!ok) return ResponseEntity.status(401).build();

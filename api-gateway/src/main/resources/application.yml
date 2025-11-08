@@ -1,6 +1,18 @@
 spring:
   application:
     name: api-gateway
+  data:
+    redis:
+      host: ${SPRING_DATA_REDIS_HOST:192.168.23.9}
+      port: ${SPRING_DATA_REDIS_PORT:6379}
+      password: ${SPRING_DATA_REDIS_PASSWORD:SuperSecret123}
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI:http://api-gateway:8811}
+          jwk-set-uri: ${SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI:http://api-gateway:8811/.well-known/jwks.json}
+          cookie-name: ${ACCESS_TOKEN:access_token}
   cloud:
     gateway:
       server:
@@ -72,6 +84,7 @@ server:
   error:
     include-message: always
     include-binding-errors: always
+  port: ${SERVER_PORT:8811}
 
 logging:
   level:
@@ -106,3 +119,25 @@ management:
   tracing:
     sampling:
       probability: 1
+
+
+jwt:
+  private-key-location: classpath:jwt/private_key.pem
+  public-key-location: classpath:jwt/public_key.pem
+  expire-in: ${JWT_EXPIRE_IN:86400000}
+  keys:
+    kid: ${KID:gateway-kid}
+
+
+grpc:
+  client:
+    auth:
+      address: ${GRPC_CLIENT_AUTH_ADDRESS:static://192.168.23.9:9098}
+      negotiationType: ${GRPC_CLIENT_AUTH_NEGOTIATIONTYPE:PLAINTEXT}
+
+security:
+  jwt:
+    issuer: "learnwords-api"
+    kid: "gateway-kid"
+    access-ttl: 15m
+    refresh-ttl: 30d

@@ -4,6 +4,8 @@ import com.learnwords.apigateway.entity.RefreshSession;
 import com.learnwords.apigateway.security.RsaKeyConfig;
 import com.learnwords.apigateway.service.RefreshTokenStore;
 import com.learnwords.apigateway.service.TokenService;
+import com.learnwords.auth.v1.AuthenticateRequest;
+import com.learnwords.auth.v1.AuthenticateResponse;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import org.springframework.beans.factory.annotation.Value;
@@ -35,14 +37,15 @@ class TokenServiceImpl implements TokenService {
     @Value("${security.jwt.refresh-ttl}") Duration refreshTtl;
 
     @Override
-    public String createAccessToken(String userId, Collection<String> roles) {
+    public String createAccessToken(String userId, String accountType, String userType) {
         var now = new Date();
         var exp = new Date(now.getTime() + accessTtl.toMillis());
         return Jwts.builder()
                 .setHeaderParam("kid", kid)
                 .setIssuer(issuer)
                 .setSubject(userId)
-                .claim("roles", roles)
+                .claim("accountType", accountType)
+                .claim("userType", userType)
                 .setIssuedAt(now).setExpiration(exp)
                 .signWith(keyPair.getPrivate(), SignatureAlgorithm.RS256)
                 .compact();
@@ -69,7 +72,7 @@ class TokenServiceImpl implements TokenService {
         return parseRefresh(oldToken).flatMap(oldOpt -> oldOpt
                 .map(old -> parseRefresh(newToken).flatMap(newOpt -> newOpt
                         .map(n -> store.rotate(old.jti(), new RefreshSession(
-                                        n.jti(), n.userId(), n.deviceId(), /* accountType */ null, /* userType */ null,
+                                        n.jti(), n.userId(), n.deviceId(), n.accountType(), n.userType(),
                                         nExp(newToken), iat(newToken), Instant.now()),
                                 ttl))
                         .orElseGet(() -> Mono.just(false))))
@@ -89,8 +92,10 @@ class TokenServiceImpl implements TokenService {
                     .parseClaimsJws(token).getBody();
             var userId = claims.getSubject();
             var deviceId = claims.get("deviceId", String.class);
+            var accountType = claims.get("accountType", String.class);
+            var userType = claims.get("userType", String.class);
             var jti = claims.getId();
-            return Mono.just(Optional.of(new RefreshPayload(userId, deviceId, jti)));
+            return Mono.just(Optional.of(new RefreshPayload(userId, deviceId, jti, accountType, userType)));
         } catch (Exception e) {
             return Mono.just(Optional.empty());
         }
