@@ -1,6 +1,4 @@
 import axios from "axios";
-import { redirect } from "next/navigation";
-import { TokenStore } from "@/lib/tokenStore";
 
 const apiClient = axios.create({
   // baseURL: "http://staging.ibis-tautara.ts.net:8811/api/v1/gateway",
@@ -10,45 +8,49 @@ const apiClient = axios.create({
     "Content-Type": "application/json",
     Accept: "application/json",
   },
+  // Ważne: withCredentials pozwala wysyłać cookies do backendu
   withCredentials: true,
 });
 
-// REQUEST INTERCEPTOR - dodaje token
+// REQUEST INTERCEPTOR - nie potrzebny, bo token jest w cookie
+// Backend automatycznie odbiera cookie z access tokenem
 apiClient.interceptors.request.use(
   (config) => {
-    const token = TokenStore.get();
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
+    console.log(
+      "� [Axios] Wysyłam request:",
+      config.method?.toUpperCase(),
+      config.url
+    );
     return config;
   },
   (error) => Promise.reject(error)
 );
 
 // Zapobiega wielokrotnemu refresh jednocześnie
-let refreshing: Promise<string | null> | null = null;
+let refreshing: Promise<void> | null = null;
 
-async function refreshAccess(): Promise<string | null> {
+async function refreshAccess(): Promise<boolean> {
   if (!refreshing) {
     refreshing = (async () => {
       try {
-        const res = await axios.post(
-          `${process.env.NEXT_PUBLIC_API_URL}/refresh`,
-          {},
-          { withCredentials: true }
-        );
-        const accessToken = res.data?.accessToken;
-        TokenStore.set(accessToken ?? null);
-        return accessToken ?? null;
-      } catch {
-        TokenStore.set(null);
-        return null;
+        // Backend odświeży access token w cookie na podstawie refresh tokenu
+        await axios.post("/api/refresh", {}, { withCredentials: true });
+        console.log("✅ [Axios] Token odświeżony pomyślnie");
+      } catch (error) {
+        console.error("❌ [Axios] Nie udało się odświeżyć tokenu");
+        throw error;
       } finally {
         refreshing = null;
       }
     })();
   }
-  return refreshing;
+
+  try {
+    await refreshing;
+    return true;
+  } catch {
+    return false;
+  }
 }
 
 // RESPONSE INTERCEPTOR - auto-refresh przy 401
@@ -57,18 +59,24 @@ apiClient.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config;
 
+    // Jeśli otrzymaliśmy 401 i jeszcze nie próbowaliśmy odświeżyć
     if (error.response?.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true;
 
-      const newToken = await refreshAccess();
+      console.log("🔄 [Axios] Otrzymano 401, próba odświeżenia tokenu...");
 
-      if (newToken) {
-        // Ponów request z nowym tokenem
-        originalRequest.headers.Authorization = `Bearer ${newToken}`;
+      const refreshed = await refreshAccess();
+
+      if (refreshed) {
+        // Ponów request - backend ma już nowy token w cookie
+        console.log("🔄 [Axios] Ponawiam oryginalny request...");
         return apiClient(originalRequest);
       } else {
-        // Refresh się nie udał - redirect do loginu
-        redirect("/login");
+        // Refresh się nie udał - przekieruj na login
+        console.log("🔒 [Axios] Refresh nieudany, przekierowanie na /login");
+        if (typeof window !== "undefined") {
+          window.location.href = "/login";
+        }
       }
     }
 

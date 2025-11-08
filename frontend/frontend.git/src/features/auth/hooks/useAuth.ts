@@ -17,6 +17,7 @@ export const useAuth = () => {
 
     try {
       await login(data);
+      // Token jest już w cookie, backend będzie go automatycznie sprawdzał
       router.push("/dashboard");
     } catch (err) {
       const message =
@@ -36,7 +37,7 @@ export const useAuth = () => {
 
     try {
       await signup(data);
-      router.push("/signin");
+      router.push("/login");
     } catch (err) {
       const message =
         err instanceof AxiosError
@@ -54,7 +55,8 @@ export const useAuth = () => {
 
     try {
       await logout();
-      router.push("/signin");
+      // Backend usunął cookie z tokenem
+      router.push("/login");
     } catch (err) {
       console.error("Logout error:", err);
     } finally {

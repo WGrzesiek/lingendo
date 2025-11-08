@@ -3,10 +3,6 @@ export interface LoginRequest {
   password: string;
 }
 
-export interface LoginResponse {
-  accessToken: string;
-}
-
 export interface SignupRequest {
   email: string;
   password: string;
@@ -18,6 +14,7 @@ export interface User {
   username: string;
   accountType: "BASIC" | "PREMIUM" | "STUDENT" | "TEACHER";
   userType: "NORMAL" | "ADMIN";
+  isEnabled: boolean;
 }
 
 export interface AuthError {
