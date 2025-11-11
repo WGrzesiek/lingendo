@@ -72,7 +72,7 @@ services:
     container_name: clickhouse
     ports:
       - "8123:8123"   # HTTP
-      - "9000:9000"   # Native
+      - "9007:9000"   # Native
     environment:
       - CLICKHOUSE_DB=learnwords
       - CLICKHOUSE_USER=wawrzen
@@ -90,7 +90,7 @@ services:
     image: spoonest/clickhouse-tabix-web-client
     container_name: clickhouse-tabix
     ports:
-      - "8080:80"
+      - "8072:80"
     networks: [learnwords-net]
     depends_on: [clickhouse]
 
