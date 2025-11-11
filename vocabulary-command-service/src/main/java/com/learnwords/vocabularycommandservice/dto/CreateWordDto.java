@@ -13,7 +13,7 @@ import java.util.List;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class CreateVocabularyDto {
+public class CreateWordDto {
     @Valid
 
     @NotNull(message = "To pole jest wymagane")
