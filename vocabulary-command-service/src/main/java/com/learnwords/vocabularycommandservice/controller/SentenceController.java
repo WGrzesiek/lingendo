@@ -1,6 +1,7 @@
 package com.learnwords.vocabularycommandservice.controller;
 
 import com.learnwords.common.dto.SentenceDto;
+import com.learnwords.vocabularycommandservice.dto.SendSentenceDto;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
 import com.learnwords.vocabularycommandservice.dto.CreateSentenceDto;
@@ -21,8 +22,8 @@ public class SentenceController {
     }
 
     @PostMapping("/create/{deckId}")
-    public ResponseEntity<SentenceDto> createSentence(@PathVariable String deckId, @Valid @RequestBody CreateSentenceDto sentenceDto, @AuthenticationPrincipal Jwt jwt) {
-        SentenceDto savedSentence = sentenceService.createSentence(sentenceDto, deckId);
+    public ResponseEntity<SendSentenceDto> createSentence(@PathVariable String deckId, @Valid @RequestBody CreateSentenceDto sentenceDto) {
+        SendSentenceDto savedSentence = sentenceService.createSentence(sentenceDto, deckId);
         return ResponseEntity.status(HttpStatus.CREATED).body(savedSentence);
     }
 }
