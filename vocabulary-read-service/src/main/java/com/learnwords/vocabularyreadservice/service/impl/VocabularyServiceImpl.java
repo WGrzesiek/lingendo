@@ -136,15 +136,23 @@ public class VocabularyServiceImpl implements VocabularyService {
         log.info("Pobieranie pełnego słowa o id: {}", id);
 
         return vocabularyRepository.findById(id).map(vocabulary -> {
-            List<SentenceDto> sentences = sentenceRepository.findAllById(vocabulary.getSentenceIds())
-                    .stream()
-                    .map(s -> new SentenceDto(s.getId(), s.getSentence(), s.getTranslation()))
-                    .toList();
+            // Pobieranie normalnych zdań - tylko jeśli lista nie jest null i nie jest pusta
+            List<SentenceDto> sentences = List.of();
+            if (vocabulary.getSentenceIds() != null && !vocabulary.getSentenceIds().isEmpty()) {
+                sentences = sentenceRepository.findAllById(vocabulary.getSentenceIds())
+                        .stream()
+                        .map(s -> new SentenceDto(s.getId(), s.getSentence(), s.getTranslation()))
+                        .toList();
+            }
 
-            List<SentenceDto> sentencesAI = sentenceAIRepository.findAllById(vocabulary.getSentenceAIds())
-                    .stream()
-                    .map(s -> new SentenceDto(s.getId(), s.getSentenceAI(), s.getTranslationAI()))
-                    .toList();
+            // Pobieranie zdań AI - tylko jeśli lista nie jest null i nie jest pusta
+            List<SentenceDto> sentencesAI = List.of();
+            if (vocabulary.getSentenceAIds() != null && !vocabulary.getSentenceAIds().isEmpty()) {
+                sentencesAI = sentenceAIRepository.findAllById(vocabulary.getSentenceAIds())
+                        .stream()
+                        .map(s -> new SentenceDto(s.getId(), s.getSentenceAI(), s.getTranslationAI()))
+                        .toList();
+            }
 
             return new WordDto(
                     vocabulary.getId(),
@@ -182,15 +190,20 @@ public class VocabularyServiceImpl implements VocabularyService {
 
         return vocabularyRepository.findAllById(ids).stream()
                 .map(vocabulary -> {
-                    List<SentenceDto> sentences = sentenceRepository.findAllById(vocabulary.getSentenceIds())
-                            .stream()
-                            .map(s -> new SentenceDto(s.getId(), s.getSentence(), s.getTranslation()))
-                            .toList();
-
-                    List<SentenceDto> sentencesAI = sentenceAIRepository.findAllById(vocabulary.getSentenceAIds())
-                            .stream()
-                            .map(s -> new SentenceDto(s.getId(), s.getSentenceAI(), s.getTranslationAI()))
-                            .toList();
+                    List<SentenceDto> sentences = List.of();
+                    if (vocabulary.getSentenceIds() != null && !vocabulary.getSentenceIds().isEmpty()) {
+                        sentences = sentenceRepository.findAllById(vocabulary.getSentenceIds())
+                                .stream()
+                                .map(s -> new SentenceDto(s.getId(), s.getSentence(), s.getTranslation()))
+                                .toList();
+                    }
+                    List<SentenceDto> sentencesAI = List.of();
+                    if (vocabulary.getSentenceAIds() != null && !vocabulary.getSentenceAIds().isEmpty()) {
+                        sentencesAI = sentenceAIRepository.findAllById(vocabulary.getSentenceAIds())
+                                .stream()
+                                .map(s -> new SentenceDto(s.getId(), s.getSentenceAI(), s.getTranslationAI()))
+                                .toList();
+                    }
 
                     return new WordDto(
                             vocabulary.getId(),
