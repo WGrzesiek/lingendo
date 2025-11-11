@@ -1,6 +1,5 @@
 package com.learnwords.vocabularycommandservice.repository;
 
-import com.learnwords.common.EventStatus;
 import com.learnwords.vocabularycommandservice.entity.Outbox;
 import jakarta.transaction.Transactional;
 import org.springframework.data.jpa.repository.JpaRepository;

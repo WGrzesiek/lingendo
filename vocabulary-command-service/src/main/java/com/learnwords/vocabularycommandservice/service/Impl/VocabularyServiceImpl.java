@@ -5,6 +5,7 @@ import com.learnwords.common.EventType;
 import com.learnwords.common.dto.SentenceDto;
 import com.learnwords.vocabularycommandservice.dto.CreateSentenceDto;
 import com.learnwords.vocabularycommandservice.dto.CreateWordDto;
+import com.learnwords.vocabularycommandservice.dto.SendSentenceDto;
 import com.learnwords.vocabularycommandservice.dto.SendWordDto;
 import com.learnwords.vocabularycommandservice.entity.Outbox;
 import com.learnwords.vocabularycommandservice.mapper.EntityToOutboxEntityMapper;
@@ -73,7 +74,7 @@ public class VocabularyServiceImpl implements VocabularyService {
             }
             if (createWordDto.getSentences() != null && !createWordDto.getSentences().isEmpty()) {
                 for (CreateSentenceDto createSentenceDto : createWordDto.getSentences()){
-                    SentenceDto sentenceDto = sentenceService.createSentence(createSentenceDto, deckId);
+                    SendSentenceDto sentenceDto = sentenceService.createSentence(createSentenceDto, deckId);
                     sentenceIds.add(sentenceDto.id());
                     log.info("Stworzono nowe zdania: {}, dla slowka: {}", sentenceDto.id(), createWordDto.getWord());
                 }

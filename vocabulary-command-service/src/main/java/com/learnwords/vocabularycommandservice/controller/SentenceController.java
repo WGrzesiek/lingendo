@@ -1,9 +1,6 @@
 package com.learnwords.vocabularycommandservice.controller;
 
-import com.learnwords.common.dto.SentenceDto;
 import com.learnwords.vocabularycommandservice.dto.SendSentenceDto;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.oauth2.jwt.Jwt;
 import com.learnwords.vocabularycommandservice.dto.CreateSentenceDto;
 import com.learnwords.vocabularycommandservice.service.SentenceService;
 import jakarta.validation.Valid;
