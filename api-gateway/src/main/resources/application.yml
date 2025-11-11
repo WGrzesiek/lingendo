@@ -67,7 +67,7 @@ spring:
             - id: vocabulary-read-api
               uri: http://vocabulary-read-service:8813
               predicates:
-                - Path=/api/v1/vocabulary/**,/api/v1/sentences/**
+                - Path=/api/v1/read/vocabulary/**,/api/v1/read/sentences/**
           globalcors:
             cors-configurations:
               '[/**]':
