@@ -64,6 +64,10 @@ spring:
               uri: http://vocabulary-command-service:8810
               predicates:
                 - Path=/api/v1/vocabulary/**,/api/v1/sentences/**
+            - id: vocabulary-read-api
+              uri: http://vocabulary-read-service:8813
+              predicates:
+                - Path=/api/v1/vocabulary/**,/api/v1/sentences/**
           globalcors:
             cors-configurations:
               '[/**]':
