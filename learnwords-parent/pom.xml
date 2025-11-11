@@ -54,6 +54,8 @@
         <micrometer-tracing-bridge-brave-version>1.5.5</micrometer-tracing-bridge-brave-version>
         <zipkin-reporter-brave-version>3.5.1</zipkin-reporter-brave-version>
         <micrometer-registry-prometheus-version>1.15.5</micrometer-registry-prometheus-version>
+        <clickhouse-jdbc-version>0.9.4</clickhouse-jdbc-version>
+        <flyway-database-clickhouse-version>10.24.0</flyway-database-clickhouse-version>
 
         <!--        Koniec Grcp-->
     </properties>
@@ -68,7 +70,6 @@
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
-
             <!-- https://mvnrepository.com/artifact/com.google.protobuf/protobuf-java -->
             <dependency>
                 <groupId>com.google.protobuf</groupId>
@@ -167,7 +168,6 @@
                 <artifactId>spring-cloud-starter-openfeign</artifactId>
                 <version>${spring-cloud-starter-openfeign}</version>
             </dependency>
-
             <!-- ====== AUTORYZACJA ====== -->
             <!-- https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-oauth2-resource-server -->
             <dependency>
@@ -304,7 +304,19 @@
                 <artifactId>micrometer-tracing-bridge-brave</artifactId>
                 <version>${micrometer-tracing-bridge-brave-version}</version>
             </dependency>
-
+            <!-- https://mvnrepository.com/artifact/com.clickhouse/clickhouse-jdbc -->
+            <dependency>
+                <groupId>com.clickhouse</groupId>
+                <artifactId>clickhouse-jdbc</artifactId>
+                <version>${clickhouse-jdbc-version}</version>
+            </dependency>
+            <!-- https://mvnrepository.com/artifact/org.flywaydb/flyway-database-clickhouse -->
+            <dependency>
+                <groupId>org.flywaydb</groupId>
+                <artifactId>flyway-database-clickhouse</artifactId>
+                <version>${flyway-database-clickhouse-version}</version>
+                <scope>runtime</scope>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
