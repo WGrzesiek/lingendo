@@ -38,7 +38,7 @@ import java.util.Optional;
  */
 @Slf4j
 @RestController
-@RequestMapping("/api/v1/sentences")
+@RequestMapping("/api/v1/read/sentences")
 @Tag(name = "Sentences", description = "Operacje odczytu przykładowych zdań")
 public class SentenceController {
 

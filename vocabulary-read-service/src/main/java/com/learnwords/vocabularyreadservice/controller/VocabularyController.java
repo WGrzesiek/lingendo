@@ -40,7 +40,7 @@ import java.util.Optional;
  */
 @Slf4j
 @RestController
-@RequestMapping("/api/v1/vocabulary")
+@RequestMapping("/api/v1/read/vocabulary")
 @Tag(name = "Vocabulary", description = "Operacje odczytu słownictwa")
 public class VocabularyController {
 
