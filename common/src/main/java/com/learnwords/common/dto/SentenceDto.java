@@ -1,6 +1,10 @@
 package com.learnwords.common.dto;
 
-
-public record SentenceDto(String id, String sentence,String translation)
-{
-}
+/**
+ * Reprezentacja przykładowego zdania ze słowem i tłumaczeniem.
+ */
+public record SentenceDto(
+        String id,
+        String sentence,
+        String translation
+) {}

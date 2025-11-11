@@ -4,4 +4,7 @@ public class KafkaTopic {
     public static final String CREATE_SENTENCE_TOPIC = "outbox.event.SENTENCE";
     public static final String CREATE_VOCABULARY_TOPIC = "outbox.event.VOCABULARY";
     public static final String UPPATED_STATUS = "outbox.event.UPDATE_STATUS";
+    public static final String FLASHCARD_ANSWERED_TOPIC = "deck.flashcard.answered";
+    public static final String SESSION_COMPLETED_TOPIC = "deck.session.completed";
+    public static final String FLASHCARD_PROGRESS_TOPIC = "deck.flashcard.progress";
 }

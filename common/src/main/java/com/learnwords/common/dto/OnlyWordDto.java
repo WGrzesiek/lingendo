@@ -1,4 +1,7 @@
 package com.learnwords.common.dto;
 
-public record OnlyWordDto(String id, String word) {
-}
+/**
+ * Minimalna reprezentacja słowa - tylko ID i słowo.
+ * Używana gdy nie potrzeba tłumaczeń ani zdań.
+ */
+public record OnlyWordDto(String id, String word) {}
