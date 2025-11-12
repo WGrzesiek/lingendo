@@ -1,4 +1,4 @@
-CREATE TABLE deck (
+ CREATE TABLE deck (
     id varchar(36) PRIMARY KEY NOT NULL,
     user_id varchar(36) NOT NULL,
     name varchar(100) NOT NULL,

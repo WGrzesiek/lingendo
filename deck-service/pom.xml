@@ -71,14 +71,6 @@
             <artifactId>hibernate-types-60</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-oauth2-resource-server</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.security</groupId>
-            <artifactId>spring-security-oauth2-jose</artifactId>
-        </dependency>
-        <dependency>
             <groupId>com.google.code.gson</groupId>
             <artifactId>gson</artifactId>
         </dependency>
@@ -133,8 +125,6 @@
                 <groupId>org.flywaydb</groupId>
                 <artifactId>flyway-maven-plugin</artifactId>
                 <version>11.14.0</version>
-
-                <!-- WAŻNE: zależności pluginu (nie projektu!) -->
                 <dependencies>
                     <dependency>
                         <groupId>org.flywaydb</groupId>
