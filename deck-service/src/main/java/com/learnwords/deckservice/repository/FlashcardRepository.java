@@ -9,6 +9,9 @@ import org.springframework.data.repository.query.Param;
 public interface FlashcardRepository extends JpaRepository<Flashcard, String> {
     List<Flashcard> findByDeckId(String deckId);
 
+    long countByDeckId(String deckId);
+    long countByDeckIdAndIsLearned(String deckId, boolean isLearned);
+
     @Query("SELECT f FROM Flashcard f WHERE " +
             "(:deckId IS NULL OR f.deck.id = :deckId) AND " +
             "(:isLearned IS NULL OR f.isLearned = :isLearned) AND " +

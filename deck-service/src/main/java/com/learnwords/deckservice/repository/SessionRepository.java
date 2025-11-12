@@ -49,4 +49,22 @@ public interface SessionRepository extends JpaRepository<Session, String> {
             @Param("deckId") String deckId,
             @Param("status") SessionStatus status
     );
+    
+    /**
+     * Liczy wszystkie sesje dla talii.
+     * 
+     * @param deckId ID talii
+     * @return liczba sesji
+     */
+    long countByDeckId(String deckId);
+    
+    /**
+     * Liczy sesje dla talii z danym statusem.
+     * 
+     * @param deckId ID talii
+     * @param status status sesji
+     * @return liczba sesji
+     */
+    @Query("SELECT COUNT(s) FROM Session s WHERE s.deck.id = :deckId AND s.status = :status")
+    long countByDeckIdAndStatus(@Param("deckId") String deckId, @Param("status") SessionStatus status);
 }

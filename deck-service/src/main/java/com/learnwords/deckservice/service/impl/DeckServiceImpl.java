@@ -1,13 +1,14 @@
 package com.learnwords.deckservice.service.impl;
 
-import com.learnwords.deckservice.dto.CreateDeckDto;
-import com.learnwords.deckservice.dto.DeckDetailsDto;
-import com.learnwords.deckservice.dto.DeckDto;
+import com.learnwords.deckservice.dto.*;
 import com.learnwords.deckservice.entity.Deck;
 import com.learnwords.deckservice.enums.DeckOwner;
 import com.learnwords.deckservice.enums.LearnAlgorithm;
+import com.learnwords.deckservice.enums.SessionStatus;
 import com.learnwords.deckservice.exception.exceptions.DeckWithThisNameForThisUserAlreadyExistsException;
 import com.learnwords.deckservice.repository.DeckRepository;
+import com.learnwords.deckservice.repository.FlashcardRepository;
+import com.learnwords.deckservice.repository.SessionRepository;
 import com.learnwords.deckservice.service.DeckService;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
@@ -46,9 +47,16 @@ import java.util.UUID;
 @Service
 public class DeckServiceImpl implements DeckService {
     private final DeckRepository deckRepository;
+    private final FlashcardRepository flashcardRepository;
+    private final SessionRepository sessionRepository;
 
-    public DeckServiceImpl(DeckRepository deckRepository) {
+    public DeckServiceImpl(
+            DeckRepository deckRepository,
+            FlashcardRepository flashcardRepository,
+            SessionRepository sessionRepository) {
         this.deckRepository = deckRepository;
+        this.flashcardRepository = flashcardRepository;
+        this.sessionRepository = sessionRepository;
     }
 
     /**
@@ -410,4 +418,99 @@ public class DeckServiceImpl implements DeckService {
             throw new RuntimeException("Błąd podczas aktualizacji liczby fiszek na sesję: {}", e);
         }
     }
+
+    @Override
+    public UserDeckCountDto getUserDeckCount(String userId) {
+        if (userId == null || userId.isBlank()) {
+            log.error("UserId is null or blank");
+            throw new IllegalArgumentException("UserId nie może być pusty");
+        }
+        
+        try {
+            log.debug("Getting deck count for user: {}", userId);
+            long totalDecks = deckRepository.countByUserId(userId);
+            long publicDecks = deckRepository.countByUserIdAndIsPublic(userId, true);
+            long privateDecks = deckRepository.countByUserIdAndIsPublic(userId, false);
+            
+            log.info("User {} has {} total decks ({} public, {} private)", userId, totalDecks, publicDecks, privateDecks);
+            return new UserDeckCountDto(userId, totalDecks, publicDecks, privateDecks);
+        } catch (DataAccessException e) {
+            log.error("Database error while getting deck count for user {}: {}", userId, e.getMessage());
+            throw new RuntimeException("Błąd dostępu do bazy danych podczas pobierania liczby talii", e);
+        } catch (Exception e) {
+            log.error("Error while getting deck count for user {}: {}", userId, e.getMessage());
+            throw new RuntimeException("Błąd podczas pobierania liczby talii użytkownika", e);
+        }
+    }
+
+    @Override
+    public DeckStatisticsDto getDeckStatistics(String deckId) {
+        if (deckId == null || deckId.isBlank()) {
+            log.error("DeckId is null or blank");
+            throw new IllegalArgumentException("DeckId nie może być pusty");
+        }
+        
+        try {
+            log.debug("Getting statistics for deck: {}", deckId);
+            Deck deck = deckRepository.findById(deckId)
+                    .orElseThrow(() -> new RuntimeException("Talia o ID " + deckId + " nie została znaleziona"));
+            
+            long totalFlashcards = flashcardRepository.countByDeckId(deckId);
+            long learnedFlashcards = flashcardRepository.countByDeckIdAndIsLearned(deckId, true);
+            long unlearnedFlashcards = totalFlashcards - learnedFlashcards;
+            double progressPercentage = totalFlashcards > 0 
+                    ? Math.round((learnedFlashcards * 100.0 / totalFlashcards) * 100.0) / 100.0 
+                    : 0.0;
+            
+            long totalSessions = sessionRepository.countByDeckId(deckId);
+            long completedSessions = sessionRepository.countByDeckIdAndStatus(deckId, SessionStatus.COMPLETED);
+            
+            DeckStatisticsDto stats = DeckStatisticsDto.builder()
+                    .deckId(deckId)
+                    .deckName(deck.getName())
+                    .totalFlashcards((int) totalFlashcards)
+                    .learnedFlashcards((int) learnedFlashcards)
+                    .unlearnedFlashcards((int) unlearnedFlashcards)
+                    .progressPercentage(progressPercentage)
+                    .totalSessions((int) totalSessions)
+                    .completedSessions((int) completedSessions)
+                    .build();
+            
+            log.info("Statistics for deck {}: {} flashcards ({}% learned), {} sessions ({} completed)", 
+                    deckId, totalFlashcards, progressPercentage, totalSessions, completedSessions);
+            return stats;
+        } catch (DataAccessException e) {
+            log.error("Database error while getting statistics for deck {}: {}", deckId, e.getMessage());
+            throw new RuntimeException("Błąd dostępu do bazy danych podczas pobierania statystyk talii", e);
+        } catch (Exception e) {
+            log.error("Error while getting statistics for deck {}: {}", deckId, e.getMessage());
+            throw new RuntimeException("Błąd podczas pobierania statystyk talii", e);
+        }
+    }
+
+    @Override
+    public boolean isDeckNameTaken(String userId, String deckName) {
+        if (userId == null || userId.isBlank()) {
+            log.error("UserId is null or blank");
+            throw new IllegalArgumentException("UserId nie może być pusty");
+        }
+        if (deckName == null || deckName.isBlank()) {
+            log.error("DeckName is null or blank");
+            throw new IllegalArgumentException("Nazwa talii nie może być pusta");
+        }
+        
+        try {
+            log.debug("Checking if deck name '{}' is taken for user {}", deckName, userId);
+            boolean isTaken = deckRepository.existsByNameAndUserId(deckName, userId);
+            log.info("Deck name '{}' for user {} is {}", deckName, userId, isTaken ? "taken" : "available");
+            return isTaken;
+        } catch (DataAccessException e) {
+            log.error("Database error while checking deck name availability: {}", e.getMessage());
+            throw new RuntimeException("Błąd dostępu do bazy danych podczas sprawdzania nazwy talii", e);
+        } catch (Exception e) {
+            log.error("Error while checking deck name availability: {}", e.getMessage());
+            throw new RuntimeException("Błąd podczas sprawdzania dostępności nazwy talii", e);
+        }
+    }
 }
+

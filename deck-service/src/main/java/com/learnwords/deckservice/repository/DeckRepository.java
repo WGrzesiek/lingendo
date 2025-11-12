@@ -18,6 +18,9 @@ public interface DeckRepository extends JpaRepository<Deck, String> {
     List<Deck> findByIsPublic(boolean isPublic);
     List<Deck> findByOwner(DeckOwner owner);
     
+    long countByUserId(String userId);
+    long countByUserIdAndIsPublic(String userId, boolean isPublic);
+    
     @Query("SELECT d FROM Deck d WHERE " +
            "(:userId IS NULL OR d.userId = :userId) AND " +
            "(:isPublic IS NULL OR d.isPublic = :isPublic) AND " +

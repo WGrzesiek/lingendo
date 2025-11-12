@@ -3,8 +3,6 @@ package com.learnwords.deckservice.service;
 import com.learnwords.deckservice.dto.*;
 import com.learnwords.deckservice.enums.DeckOwner;
 import com.learnwords.deckservice.enums.LearnAlgorithm;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 
@@ -30,5 +28,8 @@ public interface DeckService {
     public long getTotalFlashcardsCount(String deckId);
     public void updateLearnAlgorithm(String deckId, LearnAlgorithm algorithm);
     public void updateFlashcardsPerSession(String deckId, Long count);
+    public UserDeckCountDto getUserDeckCount(String userId);
+    public DeckStatisticsDto getDeckStatistics(String deckId);
+    public boolean isDeckNameTaken(String userId, String deckName);
 
 }
