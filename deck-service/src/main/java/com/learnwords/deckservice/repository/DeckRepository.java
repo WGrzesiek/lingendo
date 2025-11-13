@@ -22,7 +22,7 @@ public interface DeckRepository extends JpaRepository<Deck, String> {
     long countByUserIdAndIsPublic(String userId, boolean isPublic);
     
     @Query("SELECT d FROM Deck d WHERE " +
-           "(:userId IS NULL OR d.userId = :userId) AND " +
+           "(d.userId = :userId) AND " +
            "(:isPublic IS NULL OR d.isPublic = :isPublic) AND " +
            "(:owner IS NULL OR d.owner = :owner)")
     List<Deck> findByFilters(

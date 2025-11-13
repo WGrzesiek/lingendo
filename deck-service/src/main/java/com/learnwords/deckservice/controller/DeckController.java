@@ -3,6 +3,8 @@ package com.learnwords.deckservice.controller;
 import com.learnwords.deckservice.dto.*;
 import com.learnwords.deckservice.enums.DeckOwner;
 import com.learnwords.deckservice.exception.exceptions.DeckNotFoundException;
+import com.learnwords.deckservice.exception.exceptions.DeckWithThisNameForThisUserAlreadyExistsException;
+import com.learnwords.deckservice.exception.exceptions.UserPermissionsMissing;
 import com.learnwords.deckservice.service.DeckService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -134,6 +136,7 @@ import java.util.List;
 @RequestMapping(path = "/api/v1/decks")
 @Tag(name = "Deck Management", description = "API do zarządzania taliami fiszek")
 public class DeckController {
+    private static final String USER_ID_HEADER = "x-client-id";
     private final DeckService deckService;
 
     public DeckController(DeckService deckService) {
@@ -152,7 +155,7 @@ public class DeckController {
      * 
      * <p>Jeśli nie podano żadnego filtru, zwracane są wszystkie talie.
      * 
-     * @param userId ID użytkownika (opcjonalny)
+     * @param userId ID użytkownika
      * @param isPublic czy talia jest publiczna (opcjonalny)
      * @param owner typ właściciela talii (opcjonalny)
      * @return lista talii spełniających kryteria filtrowania
@@ -175,15 +178,12 @@ public class DeckController {
     })
     @GetMapping()
     public ResponseEntity<List<DeckDto>> getDecksByFilter(
-            @Parameter(description = "ID użytkownika do filtrowania", example = "user-123")
-            @RequestParam(required = false) String userId,
-            @Parameter(description = "Czy talia jest publiczna", example = "true")
-            @RequestParam(required = false) Boolean isPublic,
-            @Parameter(description = "Typ właściciela talii", schema = @Schema(implementation = DeckOwner.class))
-            @RequestParam(required = false) DeckOwner owner) {
-        log.debug("Getting decks by filter - userId: {}, isPublic: {}, owner: {}", userId, isPublic, owner);
+            @Parameter(description = "ID użytkownika z nagłówka", required = true, example = "user-123") @RequestHeader(USER_ID_HEADER) String userId,
+            @Parameter(description = "Czy talia jest publiczna", example = "true") @RequestParam(required = false) Boolean isPublic,
+            @Parameter(description = "Typ właściciela talii", schema = @Schema(implementation = DeckOwner.class)) @RequestParam(required = false) DeckOwner owner) {
+        log.debug("Pobieranie talii z filtrami - userId: {}, isPublic: {}, owner: {}", userId, isPublic, owner);
         List<DeckDto> decks = deckService.getDecksByFilter(userId, isPublic, owner);
-        log.info("Found {} decks matching filters", decks.size());
+        log.info("Znaleziono {} talii spełniających kryteria", decks.size());
         return ResponseEntity.ok(decks);
     }
 
@@ -228,21 +228,15 @@ public class DeckController {
         )
     })
     @PostMapping()
-    public ResponseEntity<ResponseDeckDto> createDeck(
-            @Parameter(description = "ID użytkownika z nagłówka", required = true, example = "user-123")
-            @RequestHeader("x-client-id") String userId,
-            @Parameter(description = "Dane nowej talii", required = true)
-            @Valid @RequestBody CreateDeckDto createDeckDto) {
-        if (userId == null || userId.isBlank()) {
-            log.error("Missing or empty x-client-id header");
-            throw new IllegalArgumentException("Brak identyfikatora użytkownika");
-        }
-        log.debug("Creating deck '{}' for user {}", createDeckDto.getDeckName(), userId);
+    public ResponseEntity<ResponseDeckDto> createDeck(@Parameter(description = "ID użytkownika z nagłówka", required = true, example = "user-123") @RequestHeader(USER_ID_HEADER) String userId,
+                                                      @Parameter(description = "Dane nowej talii", required = true)
+                                                      @Valid @RequestBody CreateDeckDto createDeckDto) {
+        log.debug("Tworzenie tali o nazwie {}, przez {}", createDeckDto.getDeckName(), userId);
         deckService.createDeck(userId, createDeckDto);
-        log.info("Deck '{}' created successfully for user {}", createDeckDto.getDeckName(), userId);
+        log.info("Talia {} utworzona pomyślnie dla użytkownika {}", createDeckDto.getDeckName(), userId);
         ResponseDeckDto responseDeckDto = new ResponseDeckDto(
             createDeckDto.getDeckName(), 
-            "Deck created successfully"
+            "Talia została pomyślnie utworzona."
         );
         return ResponseEntity.status(HttpStatus.CREATED).body(responseDeckDto);
     }
@@ -262,9 +256,11 @@ public class DeckController {
      * <p>Do pobrania pełnych szczegółów użyj endpointu GET /{deckId}/details.
      * 
      * @param deckId ID talii do pobrania
+     * @param userId ID użytkownika z nagłówka x-client-id
      * @return podstawowe dane talii
      * @throws IllegalArgumentException jeśli deckId jest pusty
      * @throws DeckNotFoundException jeśli talia o podanym ID nie istnieje
+     * @throws UserPermissionsMissing jeśli użytkownik nie ma dostępu do talii
      */
     @Operation(
         summary = "Pobierz talię po ID",
@@ -285,22 +281,20 @@ public class DeckController {
             responseCode = "404",
             description = "Talia nie znaleziona",
             content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))
+        ),
+        @ApiResponse(
+            responseCode = "403",
+            description = "Brak dostępu do talii",
+            content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))
         )
     })
     @GetMapping("/{deckId}")
     public ResponseEntity<DeckDto> getDeckById(
-            @Parameter(description = "ID talii", required = true, example = "deck-123")
-            @PathVariable String deckId) {
-        if (deckId == null || deckId.isBlank()) {
-            throw new IllegalArgumentException("ID talii nie może być puste");
-        }
-        log.debug("Getting deck by ID: {}", deckId);
-        DeckDto deckDto = deckService.getDeckById(deckId);
-        if (deckDto == null) {
-            log.warn("Deck not found: {}", deckId);
-            throw new DeckNotFoundException(deckId);
-        }
-        log.info("Deck found: {}", deckId);
+            @Parameter(description = "ID talii", required = true, example = "deck-123") @PathVariable String deckId,
+            @Parameter(description = "ID użytkownika z nagłówka", required = true, example = "user-123") @RequestHeader(USER_ID_HEADER) String userId) {
+        log.debug("Pobieranie talii o ID: {} dla użytkownika: {}", deckId, userId);
+        DeckDto deckDto = deckService.getDeckById(deckId, userId);
+        log.info("Talia {} pobrana pomyślnie dla użytkownika {}", deckId, userId);
         return ResponseEntity.ok(deckDto);
     }
 
@@ -320,9 +314,11 @@ public class DeckController {
      * <p>To DTO jest używane zarówno do odczytu jak i do edycji talii.
      * 
      * @param deckId ID talii
+     * @param userId ID użytkownika z nagłówka x-client-id
      * @return szczegółowe dane talii
      * @throws IllegalArgumentException jeśli deckId jest pusty
      * @throws DeckNotFoundException jeśli talia o podanym ID nie istnieje
+     * @throws UserPermissionsMissing jeśli użytkownik nie ma dostępu do talii
      */
     @Operation(
         summary = "Pobierz szczegóły talii",
@@ -343,22 +339,20 @@ public class DeckController {
             responseCode = "404",
             description = "Talia nie znaleziona",
             content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))
+        ),
+        @ApiResponse(
+            responseCode = "403",
+            description = "Brak dostępu do talii",
+            content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))
         )
     })
     @GetMapping("/{deckId}/details")
     public ResponseEntity<DeckDetailsDto> getDeckDetails(
-            @Parameter(description = "ID talii", required = true, example = "deck-123")
-            @PathVariable String deckId) {
-        if (deckId == null || deckId.isBlank()) {
-            throw new IllegalArgumentException("ID talii nie może być puste");
-        }
-        log.debug("Getting deck details for ID: {}", deckId);
-        DeckDetailsDto details = deckService.getDeckDetailsById(deckId);
-        if (details == null) {
-            log.warn("Deck details not found: {}", deckId);
-            throw new DeckNotFoundException(deckId);
-        }
-        log.info("Deck details retrieved for: {}", deckId);
+            @Parameter(description = "ID talii", required = true, example = "deck-123") @PathVariable String deckId,
+            @Parameter(description = "ID użytkownika z nagłówka", required = true, example = "user-123") @RequestHeader(USER_ID_HEADER) String userId) {
+        log.debug("Pobieranie szczegółów talii o ID: {} dla użytkownika: {}", deckId, userId);
+        DeckDetailsDto details = deckService.getDeckDetailsById(deckId, userId);
+        log.info("Szczegóły talii {} pobrane pomyślnie dla użytkownika {}", deckId, userId);
         return ResponseEntity.ok(details);
     }
 
@@ -379,9 +373,11 @@ public class DeckController {
      * 
      * @param deckId ID talii do aktualizacji
      * @param deckDetailsDto nowe dane talii z walidacją
+     * @param userId ID użytkownika z nagłówka x-client-id
      * @return zaktualizowane szczegóły talii
      * @throws IllegalArgumentException jeśli deckId jest pusty lub dane są nieprawidłowe
      * @throws DeckNotFoundException jeśli talia o podanym ID nie istnieje
+     * @throws UserPermissionsMissing jeśli użytkownik nie ma dostępu do talii
      */
     @Operation(
         summary = "Aktualizuj szczegóły talii",
@@ -402,24 +398,21 @@ public class DeckController {
             responseCode = "404",
             description = "Talia nie znaleziona",
             content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))
+        ),
+        @ApiResponse(
+            responseCode = "403",
+            description = "Brak dostępu do talii",
+            content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))
         )
     })
     @PutMapping("/{deckId}/details")
     public ResponseEntity<DeckDetailsDto> updateDeckDetails(
-            @Parameter(description = "ID talii do aktualizacji", required = true, example = "deck-123")
-            @PathVariable String deckId,
-            @Parameter(description = "Nowe dane talii", required = true)
-            @Valid @RequestBody DeckDetailsDto deckDetailsDto) {
-        if (deckId == null || deckId.isBlank()) {
-            throw new IllegalArgumentException("ID talii nie może być puste");
-        }
-        log.debug("Updating deck details for ID: {}", deckId);
-        DeckDetailsDto updatedDetails = deckService.editDeckDetails(deckId, deckDetailsDto);
-        if (updatedDetails == null) {
-            log.warn("Deck not found for update: {}", deckId);
-            throw new DeckNotFoundException(deckId);
-        }
-        log.info("Deck details updated for: {}", deckId);
+            @Parameter(description = "ID talii do aktualizacji", required = true, example = "deck-123") @PathVariable String deckId,
+            @Parameter(description = "Nowe dane talii", required = true) @Valid @RequestBody DeckDetailsDto deckDetailsDto,
+            @Parameter(description = "ID użytkownika z nagłówka", required = true, example = "user-123") @RequestHeader(USER_ID_HEADER) String userId) {
+        log.debug("Aktualizacja szczegółów talii o ID: {} dla użytkownika: {}", deckId, userId);
+        DeckDetailsDto updatedDetails = deckService.editDeckDetails(deckId, deckDetailsDto, userId);
+        log.info("Talia {} zaktualizowana pomyślnie dla użytkownika {}", deckId, userId);
         return ResponseEntity.ok(updatedDetails);
     }
 
@@ -459,19 +452,12 @@ public class DeckController {
     })
     @GetMapping("/user/filter")
     public ResponseEntity<List<DeckDto>> filterUserDecks(
-            @Parameter(description = "ID użytkownika z nagłówka", required = true, example = "user-123")
-            @RequestHeader("x-client-id") String userId,
-            @Parameter(description = "Czy talia jest publiczna", example = "true")
-            @RequestParam(required = false) Boolean isPublic,
-            @Parameter(description = "Typ właściciela talii", schema = @Schema(implementation = DeckOwner.class))
-            @RequestParam(required = false) DeckOwner owner) {
-        if (userId == null || userId.isBlank()) {
-            log.error("Missing or empty x-client-id header");
-            throw new IllegalArgumentException("Brak identyfikatora użytkownika");
-        }
-        log.debug("Filtering decks for user {} - isPublic: {}, owner: {}", userId, isPublic, owner);
+            @Parameter(description = "ID użytkownika z nagłówka", required = true, example = "user-123") @RequestHeader(USER_ID_HEADER) String userId,
+            @Parameter(description = "Czy talia jest publiczna", example = "true") @RequestParam(required = false) Boolean isPublic,
+            @Parameter(description = "Typ właściciela talii", schema = @Schema(implementation = DeckOwner.class)) @RequestParam(required = false) DeckOwner owner) {
+        log.debug("Filtrowanie talii użytkownika {} - isPublic: {}, owner: {}", userId, isPublic, owner);
         List<DeckDto> decks = deckService.getDecksByFilter(userId, isPublic, owner);
-        log.info("Found {} decks for user {}", decks.size(), userId);
+        log.info("Znaleziono {} talii użytkownika {} spełniających kryteria", decks.size(), userId);
         return ResponseEntity.ok(decks);
     }
 
@@ -506,15 +492,10 @@ public class DeckController {
     })
     @GetMapping("/user")
     public ResponseEntity<List<DeckDto>> getUserDecks(
-            @Parameter(description = "ID użytkownika z nagłówka", required = true, example = "user-123")
-            @RequestHeader("x-client-id") String userId) {
-        if (userId == null || userId.isBlank()) {
-            log.error("Missing or empty x-client-id header");
-            throw new IllegalArgumentException("Brak identyfikatora użytkownika");
-        }
-        log.debug("Getting all decks for user: {}", userId);
+            @Parameter(description = "ID użytkownika z nagłówka", required = true, example = "user-123") @RequestHeader(USER_ID_HEADER) String userId) {
+        log.debug("Pobieranie wszystkich talii użytkownika {}", userId);
         List<DeckDto> decks = deckService.getDecksByFilter(userId);
-        log.info("Found {} decks for user {}", decks.size(), userId);
+        log.info("Znaleziono {} talii użytkownika {}", decks.size(), userId);
         return ResponseEntity.ok(decks);
     }
 
@@ -546,9 +527,9 @@ public class DeckController {
     })
     @GetMapping("/public")
     public ResponseEntity<List<DeckDto>> getPublicDecks() {
-        log.debug("Getting all public decks");
-        List<DeckDto> decks = deckService.getDecksByFilter(true);
-        log.info("Found {} public decks", decks.size());
+        log.debug("Pobieranie wszystkich talii publicznych");
+        List<DeckDto> decks = deckService.getPublicDecks();
+        log.info("Znaleziono {} talii publicznych", decks.size());
         return ResponseEntity.ok(decks);
     }
 
@@ -566,10 +547,13 @@ public class DeckController {
      * użyj PUT /{deckId}/details.
      * 
      * @param deckId ID talii do zaktualizowania
+     * @param userId ID użytkownika z nagłówka x-client-id
      * @param request obiekt zawierający nową nazwę z walidacją
      * @return zaktualizowana nazwa talii
      * @throws IllegalArgumentException jeśli deckId jest pusty lub nazwa nieprawidłowa
      * @throws DeckNotFoundException jeśli talia o podanym ID nie istnieje
+     * @throws DeckWithThisNameForThisUserAlreadyExistsException jeśli nazwa nie jest unikalna dla użytkownika
+     * @throws UserPermissionsMissing jeśli użytkownik nie ma dostępu do talii
      */
     @Operation(
         summary = "Zmień nazwę talii",
@@ -590,24 +574,26 @@ public class DeckController {
             responseCode = "404",
             description = "Talia nie znaleziona",
             content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))
+        ),
+        @ApiResponse(
+            responseCode = "409",
+            description = "Talia o tej nazwie już istnieje dla tego użytkownika",
+            content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))
+        ),
+        @ApiResponse(
+            responseCode = "403",
+            description = "Brak dostępu do talii",
+            content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))
         )
     })
     @PutMapping("/{deckId}/name")
     public ResponseEntity<UpdateDeckNameRequest> updateDeckName(
-            @Parameter(description = "ID talii", required = true, example = "deck-123")
-            @PathVariable String deckId,
-            @Parameter(description = "Nowa nazwa talii", required = true)
-            @Valid @RequestBody UpdateDeckNameRequest request) {
-        if (deckId == null || deckId.isBlank()) {
-            throw new IllegalArgumentException("ID talii nie może być puste");
-        }
-        log.debug("Updating deck name for ID: {} to '{}'", deckId, request.deckName());
-        String updatedName = deckService.renameDeck(deckId, request.deckName());
-        if (updatedName == null) {
-            log.warn("Deck not found for name update: {}", deckId);
-            throw new DeckNotFoundException(deckId);
-        }
-        log.info("Deck name updated for {}: '{}'", deckId, updatedName);
+            @Parameter(description = "ID talii", required = true, example = "deck-123") @PathVariable String deckId,
+            @Parameter(description = "Nowa nazwa talii", required = true) @Valid @RequestBody UpdateDeckNameRequest request,
+            @Parameter(description = "ID użytkownika z nagłówka", required = true, example = "user-123") @RequestHeader(USER_ID_HEADER) String userId) {
+        log.debug("Aktualizacja nazwy talii o ID: {} dla użytkownika: {} na '{}'", deckId, userId, request.deckName());
+        String updatedName = deckService.renameDeck(deckId, request.deckName(), userId);
+        log.info("Nazwa talii {} zaktualizowana pomyślnie dla użytkownika {} na '{}'", deckId, userId, updatedName);
         return ResponseEntity.ok(request);
     }
 
@@ -625,9 +611,11 @@ public class DeckController {
      * 
      * @param deckId ID talii do zaktualizowania
      * @param request obiekt zawierający nową wartość widoczności
+     * @param userId ID użytkownika z nagłówka x-client-id
      * @return zaktualizowana wartość widoczności
      * @throws IllegalArgumentException jeśli deckId jest pusty
      * @throws DeckNotFoundException jeśli talia o podanym ID nie istnieje
+     * @throws UserPermissionsMissing jeśli użytkownik nie ma dostępu do talii
      */
     @Operation(
         summary = "Zmień widoczność talii",
@@ -648,24 +636,21 @@ public class DeckController {
             responseCode = "404",
             description = "Talia nie znaleziona",
             content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))
+        ),
+        @ApiResponse(
+            responseCode = "403",
+            description = "Brak dostępu do talii",
+            content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))
         )
     })
     @PutMapping("/{deckId}/visibility")
     public ResponseEntity<UpdateDeckVisibilityRequest> updateDeckVisibility(
-            @Parameter(description = "ID talii", required = true, example = "deck-123")
-            @PathVariable String deckId,
-            @Parameter(description = "Nowa widoczność talii", required = true)
-            @Valid @RequestBody UpdateDeckVisibilityRequest request) {
-        if (deckId == null || deckId.isBlank()) {
-            throw new IllegalArgumentException("ID talii nie może być puste");
-        }
-        log.debug("Updating deck visibility for ID: {} to {}", deckId, request.isPublic());
-        boolean result = deckService.changeDeckVisibility(deckId, request.isPublic());
-        if (!result) {
-            log.warn("Deck not found for visibility update: {}", deckId);
-            throw new DeckNotFoundException(deckId);
-        }
-        log.info("Deck visibility updated for {}: {}", deckId, request.isPublic());
+            @Parameter(description = "ID talii", required = true, example = "deck-123") @PathVariable String deckId,
+            @Parameter(description = "Nowa widoczność talii", required = true) @Valid @RequestBody UpdateDeckVisibilityRequest request,
+            @Parameter(description = "ID użytkownika z nagłówka", required = true, example = "user-123") @RequestHeader(USER_ID_HEADER) String userId) {
+        log.debug("Aktualizacja widoczności talii o ID: {} dla użytkownika: {} na '{}'", deckId, userId, request.isPublic());
+        boolean result = deckService.changeDeckVisibility(deckId, userId, request.isPublic());
+        log.info("Widzoczność talii {} zaktualizowana pomyślnie dla użytkownika {} na '{}'", deckId, userId, result);
         return ResponseEntity.ok(request);
     }
 
@@ -684,9 +669,11 @@ public class DeckController {
      * 
      * @param deckId ID talii do zaktualizowania
      * @param request obiekt zawierający nowy typ właściciela
+     * @param userId ID użytkownika z nagłówka x-client-id
      * @return zaktualizowany typ właściciela
      * @throws IllegalArgumentException jeśli deckId jest pusty
      * @throws DeckNotFoundException jeśli talia o podanym ID nie istnieje
+     * @throws UserPermissionsMissing
      */
     @Operation(
         summary = "Zmień właściciela talii",
@@ -707,24 +694,21 @@ public class DeckController {
             responseCode = "404",
             description = "Talia nie znaleziona",
             content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))
+        ),
+        @ApiResponse(
+            responseCode = "403",
+            description = "Brak dostępu do talii",
+            content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))
         )
     })
     @PutMapping("/{deckId}/owner")
     public ResponseEntity<UpdateDeckOwnerRequest> updateDeckOwner(
-            @Parameter(description = "ID talii", required = true, example = "deck-123")
-            @PathVariable String deckId,
-            @Parameter(description = "Nowy typ właściciela talii", required = true)
-            @Valid @RequestBody UpdateDeckOwnerRequest request) {
-        if (deckId == null || deckId.isBlank()) {
-            throw new IllegalArgumentException("ID talii nie może być puste");
-        }
-        log.debug("Updating deck owner for ID: {} to {}", deckId, request.newOwner());
-        DeckOwner updatedOwner = deckService.changeDeckOwner(deckId, request.newOwner());
-        if (updatedOwner == null) {
-            log.warn("Deck not found for owner update: {}", deckId);
-            throw new DeckNotFoundException(deckId);
-        }
-        log.info("Deck owner updated for {}: {}", deckId, updatedOwner);
+            @Parameter(description = "ID talii", required = true, example = "deck-123") @PathVariable String deckId,
+            @Parameter(description = "Nowy typ właściciela talii", required = true) @Valid @RequestBody UpdateDeckOwnerRequest request,
+            @Parameter(description = "ID użytkownika z nagłówka", required = true, example = "user-123") @RequestHeader(USER_ID_HEADER) String userId) {
+        log.debug("Aktualizacja właściciela talii o ID: {} dla użytkownika: {} na '{}'", deckId, userId, request.newOwner());
+        DeckOwner updatedOwner = deckService.changeDeckOwner(deckId, userId, request.newOwner());
+        log.info("Właściciel talii {} zaktualizowany pomyślnie dla użytkownika {} na '{}'", deckId, userId, updatedOwner);
         return ResponseEntity.ok(request);
     }
 
@@ -750,9 +734,11 @@ public class DeckController {
      * 
      * @param deckId ID talii do zaktualizowania
      * @param request obiekt zawierający nową liczbę fiszek (1-100)
+     * @param userId ID użytkownika z nagłówka x-client-id
      * @return zaktualizowana liczba fiszek na sesję
      * @throws IllegalArgumentException jeśli deckId jest pusty lub liczba poza zakresem
      * @throws DeckNotFoundException jeśli talia o podanym ID nie istnieje
+     * @throws UserPermissionsMissing jeśli użytkownik nie ma dostępu do talii
      */
     @Operation(
         summary = "Zmień liczbę fiszek na sesję",
@@ -773,20 +759,21 @@ public class DeckController {
             responseCode = "404",
             description = "Talia nie znaleziona",
             content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))
+        ),
+        @ApiResponse(
+            responseCode = "403",
+            description = "Brak dostępu do talii",
+            content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))
         )
     })
     @PutMapping("/{deckId}/flashcardsPerSession")
     public ResponseEntity<UpdateFlashcardsPerSessionRequest> updateFlashcardsPerSession(
-            @Parameter(description = "ID talii", required = true, example = "deck-123")
-            @PathVariable String deckId,
-            @Parameter(description = "Liczba fiszek na sesję (1-100)", required = true)
-            @Valid @RequestBody UpdateFlashcardsPerSessionRequest request) {
-        if (deckId == null || deckId.isBlank()) {
-            throw new IllegalArgumentException("ID talii nie może być puste");
-        }
-        log.debug("Updating flashcards per session for deck {}: {}", deckId, request.flashcardsPerSession());
-        deckService.updateFlashcardsPerSession(deckId, request.flashcardsPerSession());
-        log.info("Flashcards per session updated for {}: {}", deckId, request.flashcardsPerSession());
+            @Parameter(description = "ID talii", required = true, example = "deck-123") @PathVariable String deckId,
+            @Parameter(description = "Liczba fiszek na sesję (1-100)", required = true) @Valid @RequestBody UpdateFlashcardsPerSessionRequest request,
+            @Parameter(description = "ID użytkownika z nagłówka", required = true, example = "user-123") @RequestHeader(USER_ID_HEADER) String userId) {
+        log.debug("Aktualizacja liczby fiszek na sesję dla talii o ID: {} dla użytkownika: {} na '{}'", deckId, userId, request.flashcardsPerSession());
+        deckService.updateFlashcardsPerSession(deckId, request.flashcardsPerSession(), userId);
+        log.info("Liczba fiszek na sesję dla talii {} zaktualizowana pomyślnie dla użytkownika {} na '{}'", deckId, userId, request.flashcardsPerSession());
         return ResponseEntity.ok(request);
     }
 
@@ -808,6 +795,7 @@ public class DeckController {
      * 
      * @param deckId ID talii do zaktualizowania
      * @param request obiekt zawierający nowy algorytm nauki
+     * @param userId ID użytkownika z nagłówka x-client-id
      * @return zaktualizowany algorytm nauki
      * @throws IllegalArgumentException jeśli deckId jest pusty lub algorytm nieprawidłowy
      * @throws DeckNotFoundException jeśli talia o podanym ID nie istnieje
@@ -831,20 +819,21 @@ public class DeckController {
             responseCode = "404",
             description = "Talia nie znaleziona",
             content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))
+        ),
+        @ApiResponse(
+            responseCode = "403",
+            description = "Brak dostępu do talii",
+            content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))
         )
     })
     @PutMapping("/{deckId}/learnAlgorithm")
     public ResponseEntity<UpdateLearnAlgorithmRequest> updateLearnAlgorithm(
-            @Parameter(description = "ID talii", required = true, example = "deck-123")
-            @PathVariable String deckId,
-            @Parameter(description = "Nowy algorytm nauki", required = true)
-            @Valid @RequestBody UpdateLearnAlgorithmRequest request) {
-        if (deckId == null || deckId.isBlank()) {
-            throw new IllegalArgumentException("ID talii nie może być puste");
-        }
-        log.debug("Updating learn algorithm for deck {} to {}", deckId, request.learnAlgorithm());
-        deckService.updateLearnAlgorithm(deckId, request.learnAlgorithm());
-        log.info("Learn algorithm updated for {}: {}", deckId, request.learnAlgorithm());
+            @Parameter(description = "ID talii", required = true, example = "deck-123") @PathVariable String deckId,
+            @Parameter(description = "Nowy algorytm nauki", required = true) @Valid @RequestBody UpdateLearnAlgorithmRequest request,
+            @Parameter(description = "ID użytkownika z nagłówka", required = true, example = "user-123") @RequestHeader(USER_ID_HEADER) String userId) {
+        log.debug("Aktualizacja algorytmu nauki dla talii o ID: {} dla użytkownika: {} na '{}'", deckId, userId, request.learnAlgorithm());
+        deckService.updateLearnAlgorithm(deckId, request.learnAlgorithm(), userId);
+        log.info("Algorytm nauki dla talii {} zaktualizowany pomyślnie dla użytkownika {} na '{}'", deckId, userId, request.learnAlgorithm());
         return ResponseEntity.ok(request);
     }
 
@@ -867,9 +856,11 @@ public class DeckController {
      * w bazie Vocabulary Service i może być użyte w innych taliach.
      * 
      * @param deckId ID talii do usunięcia
+     * @param userId ID użytkownika z nagłówka x-client-id
      * @return potwierdzenie usunięcia talii
      * @throws IllegalArgumentException jeśli deckId jest pusty
      * @throws DeckNotFoundException jeśli talia o podanym ID nie istnieje
+     * @throws UserPermissionsMissing jeśli użytkownik nie ma dostępu do talii
      */
     @Operation(
         summary = "Usuń talię",
@@ -890,24 +881,22 @@ public class DeckController {
             responseCode = "404",
             description = "Talia nie znaleziona",
             content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))
+        ),
+        @ApiResponse(
+            responseCode = "403",
+            description = "Brak dostępu do talii",
+            content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))
         )
     })
     @DeleteMapping("/{deckId}")
     public ResponseEntity<ResponseDeckDto> deleteDeck(
-            @Parameter(description = "ID talii do usunięcia", required = true, example = "deck-123")
-            @PathVariable String deckId) {
-        if (deckId == null || deckId.isBlank()) {
-            throw new IllegalArgumentException("ID talii nie może być puste");
-        }
-        log.debug("Deleting deck: {}", deckId);
-        boolean result = deckService.deleteDeck(deckId);
-        if (!result) {
-            log.warn("Deck not found for deletion: {}", deckId);
-            throw new DeckNotFoundException(deckId);
-        }
-        log.info("Deck deleted successfully: {}", deckId);
+            @Parameter(description = "ID talii do usunięcia", required = true, example = "deck-123") @PathVariable String deckId,
+            @Parameter(description = "ID użytkownika z nagłówka", required = true, example = "user-123") @RequestHeader(USER_ID_HEADER) String userId) {
+        log.debug("Usuwanie talii o ID: {} dla użytkownika: {}", deckId, userId);
+        deckService.deleteDeck(deckId, userId);
+        log.info("Talia {} usunięta pomyślnie dla użytkownika {}", deckId, userId);
         ResponseDeckDto response = ResponseDeckDto.builder()
-            .message("Deck deleted successfully")
+            .message("Talia o ID " + deckId + " została pomyślnie usunięta.")
             .build();
         return ResponseEntity.ok(response);
     }
@@ -951,15 +940,11 @@ public class DeckController {
     })
     @GetMapping("/user/count")
     public ResponseEntity<UserDeckCountDto> getUserDeckCount(
-            @Parameter(description = "ID użytkownika z nagłówka", required = true, example = "user-123")
-            @RequestHeader("x-client-id") String userId) {
-        if (userId == null || userId.isBlank()) {
-            log.error("Missing or empty x-client-id header");
-            throw new IllegalArgumentException("Brak identyfikatora użytkownika");
-        }
-        log.debug("Getting deck count for user: {}", userId);
+            @Parameter(description = "ID użytkownika z nagłówka", required = true, example = "user-123") @RequestHeader(USER_ID_HEADER) String userId) {
+        log.debug("Pobieranie liczby talii użytkownika {}", userId);
         UserDeckCountDto count = deckService.getUserDeckCount(userId);
-        log.info("Deck count retrieved for user {}: {} total decks", userId, count.totalDecks());
+        log.info("Liczba talii użytkownika {}: total={}, public={}, private={}",
+            userId, count.totalDecks(), count.publicDecks(), count.privateDecks());
         return ResponseEntity.ok(count);
     }
 
@@ -993,9 +978,11 @@ public class DeckController {
      * </ul>
      * 
      * @param deckId ID talii
+     * @param userId ID użytkownika z nagłówka x-client-id
      * @return szczegółowe statystyki talii
      * @throws IllegalArgumentException jeśli deckId jest pusty
      * @throws DeckNotFoundException jeśli talia o podanym ID nie istnieje
+     * @throws UserPermissionsMissing jeśli użytkownik nie ma dostępu do talii
      */
     @Operation(
         summary = "Pobierz statystyki talii",
@@ -1016,18 +1003,20 @@ public class DeckController {
             responseCode = "404",
             description = "Talia nie znaleziona",
             content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))
+        ),
+        @ApiResponse(
+            responseCode = "403",
+            description = "Brak dostępu do talii",
+            content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))
         )
     })
     @GetMapping("/{deckId}/statistics")
     public ResponseEntity<DeckStatisticsDto> getDeckStatistics(
-            @Parameter(description = "ID talii", required = true, example = "deck-123")
-            @PathVariable String deckId) {
-        if (deckId == null || deckId.isBlank()) {
-            throw new IllegalArgumentException("ID talii nie może być puste");
-        }
-        log.debug("Getting statistics for deck: {}", deckId);
-        DeckStatisticsDto statistics = deckService.getDeckStatistics(deckId);
-        log.info("Statistics retrieved for deck {}: {}% progress", deckId, statistics.getProgressPercentage());
+            @Parameter(description = "ID talii", required = true, example = "deck-123") @PathVariable String deckId,
+            @Parameter(description = "ID użytkownika z nagłówka", required = true, example = "user-123") @RequestHeader(USER_ID_HEADER) String userId) {
+        log.debug("Pobieranie statystyk talii o ID: {} dla użytkownika: {}", deckId, userId);
+        DeckStatisticsDto statistics = deckService.getDeckStatistics(deckId, userId);
+        log.info("Statystyki talii {} dla użytkownika {} pobrane pomyślnie", deckId, userId);
         return ResponseEntity.ok(statistics);
     }
 
@@ -1056,6 +1045,7 @@ public class DeckController {
      * @param deckName nazwa talii do sprawdzenia
      * @return true jeśli nazwa jest dostępna, false jeśli zajęta
      * @throws IllegalArgumentException jeśli brak userId lub deckName jest pusty
+     * @throws DeckWithThisNameForThisUserAlreadyExistsException
      */
     @Operation(
         summary = "Waliduj dostępność nazwy talii",
@@ -1071,24 +1061,21 @@ public class DeckController {
             responseCode = "400",
             description = "Brak wymaganego nagłówka lub parametru",
             content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))
+        ),
+        @ApiResponse(
+            responseCode = "409",
+            description = "Talia o tej nazwie już istnieje dla tego użytkownika",
+            content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))
         )
     })
     @GetMapping("/validate-name")
     public ResponseEntity<Boolean> validateDeckName(
-            @Parameter(description = "ID użytkownika z nagłówka", required = true, example = "user-123")
-            @RequestHeader("x-client-id") String userId,
-            @Parameter(description = "Nazwa talii do walidacji", required = true, example = "English Words")
-            @RequestParam String deckName) {
-        if (userId == null || userId.isBlank()) {
-            log.error("Missing or empty x-client-id header");
-            throw new IllegalArgumentException("Brak identyfikatora użytkownika");
-        }
-        if (deckName == null || deckName.isBlank()) {
-            throw new IllegalArgumentException("Nazwa talii nie może być pusta");
-        }
-        log.debug("Validating deck name '{}' for user {}", deckName, userId);
-        boolean isAvailable = !deckService.isDeckNameTaken(userId, deckName);
-        log.info("Deck name '{}' for user {} is {}", deckName, userId, isAvailable ? "available" : "taken");
+            @Parameter(description = "ID użytkownika z nagłówka", required = true, example = "user-123") @RequestHeader(USER_ID_HEADER) String userId,
+            @Parameter(description = "Nazwa talii do walidacji", required = true, example = "English Words") @RequestParam String deckName) {
+        log.debug("Walidacja nazwy talii '{}' dla użytkownika {}", deckName, userId);
+        boolean isTaken = deckService.isDeckNameTaken(userId, deckName);
+        boolean isAvailable = !isTaken;
+        log.info("Nazwa talii '{}' dla użytkownika {} jest dostępna: {}", deckName, userId, isAvailable);
         return ResponseEntity.ok(isAvailable);
     }
 }

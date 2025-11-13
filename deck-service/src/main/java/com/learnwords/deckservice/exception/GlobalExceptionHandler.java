@@ -4,6 +4,7 @@ import com.learnwords.deckservice.dto.ApiErrorResponse;
 import com.learnwords.deckservice.exception.exceptions.DeckNotFoundException;
 import com.learnwords.deckservice.exception.exceptions.DeckWithThisNameForThisUserAlreadyExistsException;
 import com.learnwords.deckservice.exception.exceptions.StepWithThisNameNoExist;
+import com.learnwords.deckservice.exception.exceptions.UserPermissionsMissing;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -82,5 +83,12 @@ public class GlobalExceptionHandler {
             "Wystąpił nieoczekiwany błąd. Spróbuj ponownie później."
         );
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
+    }
+
+    @ExceptionHandler(UserPermissionsMissing.class)
+    public ResponseEntity<ApiErrorResponse> handleUserPermissionsMissing(UserPermissionsMissing ex) {
+        log.error("User permissions missing: {}", ex.getMessage());
+        ApiErrorResponse errorResponse = new ApiErrorResponse(HttpStatus.FORBIDDEN.value(), ex.getMessage());
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(errorResponse);
     }
 }

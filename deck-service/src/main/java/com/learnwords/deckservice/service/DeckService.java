@@ -7,29 +7,26 @@ import com.learnwords.deckservice.enums.LearnAlgorithm;
 import java.util.List;
 
 public interface DeckService {
-    public boolean createDeck(String userId, CreateDeckDto createDeckDto);
-    public boolean deleteDeck(String deckId);
-    public String renameDeck(String deckId, String newName);
-    public boolean changeDeckVisibility(String deckId, boolean isPublic);
-    public DeckOwner changeDeckOwner(String deckId, DeckOwner newOwner);
-    public DeckDto getDeckById(String deckId);
+    void createDeck(String userId, CreateDeckDto createDeckDto);
+    void deleteDeck(String deckId, String userId);
+    String renameDeck(String deckId, String newName, String userId);
+    boolean changeDeckVisibility(String deckId, String userId, boolean isPublic);
+    DeckOwner changeDeckOwner(String deckId, String userId, DeckOwner newOwner);
+    DeckDto getDeckById(String deckId, String userId);
     List<DeckDto> getDecksByFilter(String userId, Boolean isPublic, DeckOwner owner);
     default List<DeckDto> getDecksByFilter(String userId, DeckOwner owner) {
-        return getDecksByFilter(userId, null,  owner);
+        return getDecksByFilter(userId, null, owner);
     }
     default List<DeckDto> getDecksByFilter(String userId) {
         return getDecksByFilter(userId, null, null);
     }
-    default List<DeckDto> getDecksByFilter(boolean isPublic) {
-        return getDecksByFilter(null, isPublic, null);
-    }
-    public DeckDetailsDto getDeckDetailsById(String deckId);
-    public DeckDetailsDto editDeckDetails(String deckId, DeckDetailsDto deckDetailsDto);
-    public long getTotalFlashcardsCount(String deckId);
-    public void updateLearnAlgorithm(String deckId, LearnAlgorithm algorithm);
-    public void updateFlashcardsPerSession(String deckId, Long count);
-    public UserDeckCountDto getUserDeckCount(String userId);
-    public DeckStatisticsDto getDeckStatistics(String deckId);
-    public boolean isDeckNameTaken(String userId, String deckName);
-
+    List<DeckDto> getPublicDecks();
+    DeckDetailsDto getDeckDetailsById(String deckId, String userId);
+    DeckDetailsDto editDeckDetails(String deckId, DeckDetailsDto deckDetailsDto, String userId);
+    long getTotalFlashcardsCount(String deckId, String userId);
+    String updateLearnAlgorithm(String deckId, LearnAlgorithm algorithm, String userId);
+    Long updateFlashcardsPerSession(String deckId, Long count, String userId);
+    UserDeckCountDto getUserDeckCount(String userId);
+    DeckStatisticsDto getDeckStatistics(String deckId, String userId);
+    boolean isDeckNameTaken(String userId, String deckName);
 }
