@@ -136,7 +136,7 @@ import java.util.List;
 @RequestMapping(path = "/api/v1/decks")
 @Tag(name = "Deck Management", description = "API do zarządzania taliami fiszek")
 public class DeckController {
-    private static final String USER_ID_HEADER = "x-client-id";
+    private static final String USER_ID_HEADER = "X-Client-Id";
     private final DeckService deckService;
 
     public DeckController(DeckService deckService) {
