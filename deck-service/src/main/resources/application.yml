@@ -13,7 +13,7 @@ spring:
     username: ${DB_POSTGRESQL_USER:admin}
     password: ${DB_POSTGRESQL_PASSWORD:adminpassword}
   flyway:
-    enabled: true
+    enabled: false
     locations: classpath:db/migration
     baseline-on-migrate: true
 
