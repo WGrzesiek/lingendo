@@ -1,5 +1,6 @@
 package com.learnwords.deckservice.dto;
 
+import com.learnwords.deckservice.enums.DeckOwner;
 import com.learnwords.deckservice.enums.Language;
 import com.learnwords.deckservice.enums.LearnAlgorithm;
 import jakarta.validation.constraints.NotBlank;
@@ -34,6 +35,9 @@ public class CreateDeckDto {
 
     @NotNull(message = "Należy wybrać język docelowy")
     private Language languageTo;
+
+    @NotNull(message = "Należy określić właściciela talii")
+    private DeckOwner owner;
 
     @Builder.Default
     @NotNull(message = "Określ, czy talia ma być publiczna czy prywatna")

@@ -83,6 +83,7 @@ public class DeckServiceImpl implements DeckService {
                 .learnAlgorithm(createDeckDto.getLearnAlgorithm())
                 .languageFrom(createDeckDto.getLanguageFrom())
                 .languageTo(createDeckDto.getLanguageTo())
+                .owner(createDeckDto.getOwner())
                 .build();
 
         deckRepository.save(deck);
