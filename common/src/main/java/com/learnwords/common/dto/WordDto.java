@@ -1,8 +1,6 @@
 package com.learnwords.common.dto;
 
 import java.util.List;
-import java.util.Map;
-
 /**
  * Pełna reprezentacja słowa ze wszystkimi szczegółami.
  * Używana przez deck-service do wyświetlania fiszek w sesji nauki.
