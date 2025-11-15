@@ -17,54 +17,19 @@ import java.util.Optional;
  * @since 2025-11-12
  */
 public interface SessionRepository extends JpaRepository<Session, String> {
-    
-    /**
-     * Znajduje wszystkie sesje użytkownika.
-     * 
-     * @param userId ID użytkownika
-     * @return lista sesji użytkownika
-     */
     List<Session> findByUserId(String userId);
-    
-    /**
-     * Znajduje wszystkie sesje dla talii.
-     * 
-     * @param deckId ID talii
-     * @return lista sesji talii
-     */
-    @Query("SELECT s FROM Session s WHERE s.deck.id = :deckId")
-    List<Session> findByDeckId(@Param("deckId") String deckId);
-    
-    /**
-     * Znajduje aktywną sesję użytkownika dla talii.
-     * 
-     * @param userId ID użytkownika
-     * @param deckId ID talii
-     * @param status status sesji (IN_PROGRESS)
-     * @return Optional z aktywną sesją jeśli istnieje
-     */
+
+    @Query("SELECT s FROM Session s WHERE s.deck.id = :deckId AND s.userId = :userId")
+    List<Session> findByDeckIdAndUserId(@Param("deckId") String deckId, @Param("userId") String userId);
+
     @Query("SELECT s FROM Session s WHERE s.userId = :userId AND s.deck.id = :deckId AND s.status = :status")
     Optional<Session> findByUserIdAndDeckIdAndStatus(
             @Param("userId") String userId, 
             @Param("deckId") String deckId,
             @Param("status") SessionStatus status
     );
-    
-    /**
-     * Liczy wszystkie sesje dla talii.
-     * 
-     * @param deckId ID talii
-     * @return liczba sesji
-     */
     long countByDeckId(String deckId);
-    
-    /**
-     * Liczy sesje dla talii z danym statusem.
-     * 
-     * @param deckId ID talii
-     * @param status status sesji
-     * @return liczba sesji
-     */
+
     @Query("SELECT COUNT(s) FROM Session s WHERE s.deck.id = :deckId AND s.status = :status")
     long countByDeckIdAndStatus(@Param("deckId") String deckId, @Param("status") SessionStatus status);
 }

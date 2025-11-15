@@ -9,6 +9,11 @@ import com.learnwords.deckservice.dto.GetWordFromKafkaDto;
 import com.learnwords.deckservice.entity.Deck;
 import com.learnwords.deckservice.entity.Flashcard;
 import com.learnwords.deckservice.enums.LearnAlgorithm;
+import com.learnwords.deckservice.exception.exceptions.DeckNotFoundException;
+import com.learnwords.deckservice.exception.exceptions.FlashcardNotFoundException;
+import com.learnwords.deckservice.exception.exceptions.InvalidFlashcardIdException;
+import com.learnwords.deckservice.exception.exceptions.InvalidWordDataException;
+import com.learnwords.deckservice.exception.exceptions.UserPermissionsMissing;
 import com.learnwords.deckservice.repository.DeckRepository;
 import com.learnwords.deckservice.repository.FlashcardRepository;
 import com.learnwords.deckservice.service.Algorithm.GrzesiekAlgorithm;
@@ -18,7 +23,6 @@ import com.learnwords.vocabulary.v1.Word;
 
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.dao.DataAccessException;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Service;
 
@@ -96,40 +100,36 @@ public class FlashcardServiceImpl implements FlashcardService {
      * albo rollback w przypadku błędu.
      * 
      * @param getWordFromKafkaDto DTO ze zdarzenia Kafka zawierające ID słówka i talii
-     * @throws RuntimeException jeśli talia nie istnieje lub wystąpi błąd bazy danych
+     * @param userId ID użytkownika, który utworzył słówko
+     * @throws DeckNotFoundException jeśli talia o podanym ID nie istnieje
+     * @throws UserPermissionsMissing jeśli użytkownik nie ma uprawnień do talii
      */
     @Override
     @Transactional
     @KafkaListener(topics = KafkaTopic.CREATE_VOCABULARY_TOPIC, groupId = KafkaGroup.DECK_SERVICE_GROUP, properties = {
             "spring.json.value.default.type=com.learnwords.common.dto.WordDto"
     })
-    public void processFlashcardCreateFromKafka(GetWordFromKafkaDto getWordFromKafkaDto) {
-        log.info("Otrzymano event: {}", KafkaTopic.CREATE_VOCABULARY_TOPIC);
+    public void processFlashcardCreateFromKafka(GetWordFromKafkaDto getWordFromKafkaDto, String userId) {
+        log.info("Otrzymano zdarzenie utworzenia słówka - wordId: '{}', deckId: '{}', userId: '{}'", 
+                getWordFromKafkaDto.id(), getWordFromKafkaDto.deckId(), userId);
+        
+        Deck deck = getDeckIfUserHasPermissions(getWordFromKafkaDto.deckId(), userId);
         String flashcardId = UUID.randomUUID().toString();
-        Flashcard flashcard = new Flashcard();
 
-        try {
-            Deck deck = deckRepository.findById(getWordFromKafkaDto.deckId())
-                    .orElseThrow(() -> new RuntimeException("Nie znaleziono talii o id: " + getWordFromKafkaDto.deckId()));
-
-            flashcard.setId(flashcardId);
-            flashcard.setWordId(getWordFromKafkaDto.id());
-            flashcard.setDeck(deck);
-            setInitialFlashcardState(getWordFromKafkaDto.deckId(), flashcard);
-            flashcardRepository.save(flashcard);
-            log.info("Zapisano fiszke o id: {}", flashcardId);
-            deck.setWordCount(deck.getWordCount() + 1);
-            deckRepository.save(deck);
-            log.info("Zaktualizowano talię o id: {}", getWordFromKafkaDto.deckId());
-        }
-        catch (DataAccessException e) {
-            log.error("Błąd dostępu do bazy danych: {}", e.getMessage(), e);
-            throw new RuntimeException("Błąd dostępu do bazy danych: " + e.getMessage(), e);
-        }
-        catch (Exception e) {
-            log.error("Błąd podczas tworzenia fiszki: {}", e.getMessage(), e);
-            throw new RuntimeException("Błąd podczas tworzenia fiszki: " + e.getMessage(), e);
-        }
+        Flashcard flashcard = Flashcard.builder()
+                .id(flashcardId)
+                .wordId(getWordFromKafkaDto.id())
+                .deck(deck)
+                .build();
+        setInitialFlashcardState(getWordFromKafkaDto.deckId(), flashcard, userId);
+        flashcardRepository.save(flashcard);
+        log.info("Utworzono fiszkę - flashcardId: '{}', wordId: '{}', deckId: '{}'", 
+                flashcardId, getWordFromKafkaDto.id(), getWordFromKafkaDto.deckId());
+        
+        deck.setWordCount(deck.getWordCount() + 1);
+        deckRepository.save(deck);
+        log.info("Zaktualizowano licznik słówek w talii - deckId: '{}', wordCount: {}", 
+                getWordFromKafkaDto.deckId(), deck.getWordCount());
     }
 
     /**
@@ -145,28 +145,26 @@ public class FlashcardServiceImpl implements FlashcardService {
      * 
      * @param deckId ID talii, z której pobierany jest algorytm
      * @param flashcard fiszka do inicjalizacji (stan zostanie ustawiony)
-     * @throws RuntimeException jeśli talia nie istnieje lub wystąpi błąd bazy danych
+     * @param userId ID użytkownika wykonującego operację
+     * @throws DeckNotFoundException jeśli talia o podanym ID nie istnieje
+     * @throws UserPermissionsMissing jeśli użytkownik nie ma uprawnień do talii
      */
     @Override
-    public void setInitialFlashcardState(String deckId, Flashcard flashcard) {
-        try{
-            LearnAlgorithm algorithm = deckRepository.findById(deckId)
-                    .orElseThrow(() -> new RuntimeException("Nie znaleziono talii o id: " + deckId))
-                    .getLearnAlgorithm();
-            switch (algorithm) {
-                case GRZESIEK_ALGORITHM -> flashcard.setAlgorithmState(grzesiekAlgorithm.initialize().serialize());
-            }
-            log.info("Ustawianie początkowego stanu fiszki dla talii: {}", deckId);
+    public void setInitialFlashcardState(String deckId, Flashcard flashcard, String userId) {
+        log.debug("Inicjalizacja stanu fiszki - flashcardId: '{}', deckId: '{}', userId: '{}'", 
+                flashcard.getId(), deckId, userId);
+        
+        checkDeckIsExistsAndUserHasPermissions(deckId, userId);
+        LearnAlgorithm algorithm = getDeckAlgorithm(deckId);
+
+        switch (algorithm) {
+            case GRZESIEK_ALGORITHM -> flashcard.setAlgorithmState(grzesiekAlgorithm.initialize().serialize());
         }
-        catch (DataAccessException e) {
-            log.error("Błąd dostępu do bazy danych: {}", e.getMessage(), e);
-            throw new RuntimeException("Błąd dostępu do bazy danych: " + e.getMessage(), e);
-        }
-        catch (Exception e) {
-            log.error("Błąd podczas ustawiania początkowego stanu fiszki: {}", e.getMessage(), e);
-            throw new RuntimeException("Błąd podczas ustawiania początkowego stanu fiszki: " + e.getMessage(), e);
-        }
+        flashcardRepository.save(flashcard);
+        log.debug("Ustawiono początkowy stan algorytmu nauki - flashcardId: '{}', algorithm: '{}'", 
+                flashcard.getId(), algorithm);
     }
+
 
     /**
      * Pobiera wszystkie fiszki z talii wraz z pełnymi danymi słówek.
@@ -183,41 +181,25 @@ public class FlashcardServiceImpl implements FlashcardService {
      * <p>Używa batch gRPC call dla wydajności - jedno wywołanie dla wszystkich słówek.
      * 
      * @param deckId ID talii, z której pobierane są fiszki
+     * @param userId ID użytkownika wykonującego operację
      * @return lista fiszek z pełnymi danymi słówek (słowo, tłumaczenia, zdania)
-     * @throws RuntimeException jeśli talia nie istnieje lub wystąpi błąd gRPC/DB
+     * @throws DeckNotFoundException jeśli talia o podanym ID nie istnieje
+     * @throws UserPermissionsMissing jeśli użytkownik nie ma uprawnień do talii
      */
     @Override
-    public List<FlashcardDto> getAllFlashcardsFromDeck(String deckId) {
-        log.debug("Pobieranie wszystkich fiszek z talii: {}", deckId);
+    public List<FlashcardDto> getAllFlashcardsFromDeck(String deckId, String userId) {
+        log.debug("Pobieranie wszystkich fiszek - deckId: '{}', userId: '{}'", deckId, userId);
         
-        try {
-            if (deckId == null || deckId.isBlank()) {
-                log.error("DeckId jest null lub pusty");
-                throw new IllegalArgumentException("DeckId nie może być pusty");
-            }
-            
-            if (!deckRepository.existsById(deckId)) {
-                log.error("Nie znaleziono talii o id: {}", deckId);
-                throw new RuntimeException("Nie znaleziono talii o id: " + deckId);
-            }
+            checkDeckIsExistsAndUserHasPermissions(deckId, userId);
             
             List<Flashcard> flashcards = flashcardRepository.findByDeckId(deckId);
-            log.debug("Znaleziono {} fiszek w talii {}", flashcards.size(), deckId);
-            
             if (flashcards.isEmpty()) {
-                log.debug("Talia {} nie zawiera żadnych fiszek", deckId);
+                log.debug("Brak fiszek w talii - deckId: '{}'", deckId);
                 return Collections.emptyList();
             }
             
+            log.debug("Znaleziono fiszki w talii - deckId: '{}', count: {}", deckId, flashcards.size());
             return mapFlashcardsToDto(flashcards);
-            
-        } catch (DataAccessException e) {
-            log.error("Błąd dostępu do bazy danych: {}", e.getMessage(), e);
-            throw new RuntimeException("Błąd dostępu do bazy danych: " + e.getMessage(), e);
-        } catch (Exception e) {
-            log.error("Błąd podczas pobierania fiszek z talii: {}", e.getMessage(), e);
-            throw new RuntimeException("Błąd podczas pobierania fiszek z talii: " + e.getMessage(), e);
-        }
     }
 
     /**
@@ -235,41 +217,27 @@ public class FlashcardServiceImpl implements FlashcardService {
      * @param deckId ID talii
      * @param isLearned flaga filtrująca nauczone fiszki
      * @param isSkipped flaga filtrująca pominięte fiszki
+     * @param userId ID użytkownika wykonującego operację
      * @return lista fiszek spełniających kryteria wraz z pełnymi danymi słówek
-     * @throws RuntimeException jeśli talia nie istnieje lub wystąpi błąd gRPC/DB
+     * @throws DeckNotFoundException jeśli talia o podanym ID nie istnieje
+     * @throws UserPermissionsMissing jeśli użytkownik nie ma uprawnień do talii
      */
     @Override
-    public List<FlashcardDto> getFlashcardsFromDeckByFilter(String deckId, boolean isLearned, boolean isSkipped) {
-        log.debug("Pobieranie fiszek z talii {} z filtrami: learned={}, skipped={}", deckId, isLearned, isSkipped);
-        
-        try {
-            if (deckId == null || deckId.isBlank()) {
-                log.error("DeckId jest null lub pusty");
-                throw new IllegalArgumentException("DeckId nie może być pusty");
-            }
-            
-            if (!deckRepository.existsById(deckId)) {
-                log.error("Nie znaleziono talii o id: {}", deckId);
-                throw new RuntimeException("Nie znaleziono talii o id: " + deckId);
-            }
-            
+    public List<FlashcardDto> getFlashcardsFromDeckByFilter(String deckId, boolean isLearned, boolean isSkipped, String userId) {
+        log.debug("Pobieranie fiszek z filtrami - deckId: '{}', userId: '{}', learned: {}, skipped: {}", 
+                deckId, userId, isLearned, isSkipped);
+
+            checkDeckIsExistsAndUserHasPermissions(deckId, userId);
             List<Flashcard> flashcards = flashcardRepository.findByFilters(deckId, isLearned, isSkipped);
-            log.debug("Znaleziono {} fiszek w talii {} spełniających kryteria", flashcards.size(), deckId);
-            
+
             if (flashcards.isEmpty()) {
-                log.debug("Brak fiszek spełniających kryteria w talii {}", deckId);
+                log.debug("Brak fiszek spełniających kryteria - deckId: '{}', learned: {}, skipped: {}", 
+                        deckId, isLearned, isSkipped);
                 return Collections.emptyList();
             }
-            
+
+            log.debug("Znaleziono fiszki spełniające kryteria - deckId: '{}', count: {}", deckId, flashcards.size());
             return mapFlashcardsToDto(flashcards);
-            
-        } catch (DataAccessException e) {
-            log.error("Błąd dostępu do bazy danych: {}", e.getMessage(), e);
-            throw new RuntimeException("Błąd dostępu do bazy danych: " + e.getMessage(), e);
-        } catch (Exception e) {
-            log.error("Błąd podczas pobierania fiszek z talii: {}", e.getMessage(), e);
-            throw new RuntimeException("Błąd podczas pobierania fiszek z talii: " + e.getMessage(), e);
-        }
     }
 
     /**
@@ -280,36 +248,28 @@ public class FlashcardServiceImpl implements FlashcardService {
      * 
      * @param flashcardId ID fiszki do aktualizacji
      * @param newWord nowe słówko (używane jest tylko ID)
-     * @throws RuntimeException jeśli fiszka nie istnieje lub wystąpi błąd DB
+     * @param userId ID użytkownika wykonującego operację
+     * @throws InvalidFlashcardIdException jeśli flashcardId jest null lub pusty
+     * @throws InvalidWordDataException jeśli newWord lub jego ID jest null
+     * @throws FlashcardNotFoundException jeśli fiszka o podanym ID nie istnieje
+     * @throws UserPermissionsMissing jeśli użytkownik nie ma uprawnień do fiszki
      */
     @Override
     @Transactional
-    public void updateFlashcard(String flashcardId, WordDto newWord) {
-        log.debug("Aktualizacja fiszki {} na nowe słówko {}", flashcardId, newWord.id());
+    public void updateFlashcard(String flashcardId, WordDto newWord, String userId) {
+        log.debug("Aktualizacja słówka w fiszce - flashcardId: '{}', userId: '{}'", flashcardId, userId);
         
-        try {
-            if (flashcardId == null || flashcardId.isBlank()) {
-                log.error("FlashcardId jest null lub pusty");
-                throw new IllegalArgumentException("FlashcardId nie może być pusty");
-            }
-            
-            if (newWord == null || newWord.id() == null) {
-                log.error("NewWord lub newWord.id() jest null");
-                throw new IllegalArgumentException("NewWord nie może być null");
-            }
-            
-            Flashcard flashcard = flashcardRepository.findById(flashcardId)
-                    .orElseThrow(() -> new RuntimeException("Nie znaleziono fiszki o id: " + flashcardId));
-            flashcard.setWordId(newWord.id());
-            flashcardRepository.save(flashcard);
-            log.info("Zaktualizowano fiszkę o id: {} na słówko {}", flashcardId, newWord.id());
-        } catch (DataAccessException e) {
-            log.error("Błąd dostępu do bazy danych: {}", e.getMessage(), e);
-            throw new RuntimeException("Błąd dostępu do bazy danych: " + e.getMessage(), e);
-        } catch (Exception e) {
-            log.error("Błąd podczas aktualizacji fiszki: {}", e.getMessage(), e);
-            throw new RuntimeException("Błąd podczas aktualizacji fiszki: " + e.getMessage(), e);
+        if (newWord == null || newWord.id() == null) {
+            log.error("Próba aktualizacji fiszki z pustymi danymi słówka - flashcardId: '{}'", flashcardId);
+            throw new InvalidWordDataException();
         }
+
+        Flashcard flashcard = getFlashcardIfUserHasPermissions(flashcardId, userId);
+        String oldWordId = flashcard.getWordId();
+        flashcard.setWordId(newWord.id());
+        flashcardRepository.save(flashcard);
+        log.info("Zaktualizowano słówko w fiszce - flashcardId: '{}', oldWordId: '{}', newWordId: '{}'", 
+                flashcardId, oldWordId, newWord.id());
     }
 
     /**
@@ -326,34 +286,22 @@ public class FlashcardServiceImpl implements FlashcardService {
      * <p>Używane gdy użytkownik chce zacząć naukę fiszki od nowa.
      * 
      * @param flashcardId ID fiszki do zresetowania
-     * @throws RuntimeException jeśli fiszka nie istnieje lub wystąpi błąd DB
+     * @param userId ID użytkownika wykonującego operację
+     * @throws FlashcardNotFoundException jeśli fiszka o podanym ID nie istnieje
+     * @throws UserPermissionsMissing jeśli użytkownik nie ma uprawnień do fiszki
      */
     @Override
     @Transactional
-    public void resetFlashcardProgress(String flashcardId) {
-        log.debug("Resetowanie postępu fiszki: {}", flashcardId);
-        
-        try {
-            if (flashcardId == null || flashcardId.isBlank()) {
-                log.error("FlashcardId jest null lub pusty");
-                throw new IllegalArgumentException("FlashcardId nie może być pusty");
-            }
-            
-            Flashcard flashcard = flashcardRepository.findById(flashcardId)
-                    .orElseThrow(() -> new RuntimeException("Nie znaleziono fiszki o id: " + flashcardId));
-            flashcard.setCorrectAnswers(0);
-            flashcard.setTotalAttempts(0);
-            flashcard.setLearned(false);
-            flashcard.setSkipped(false);
-            flashcardRepository.save(flashcard);
-            log.info("Zresetowano postęp fiszki o id: {}", flashcardId);
-        } catch (DataAccessException e) {
-            log.error("Błąd dostępu do bazy danych: {}", e.getMessage(), e);
-            throw new RuntimeException("Błąd dostępu do bazy danych: " + e.getMessage(), e);
-        } catch (Exception e) {
-            log.error("Błąd podczas resetowania postępu fiszki: {}", e.getMessage(), e);
-            throw new RuntimeException("Błąd podczas resetowania postępu fiszki: " + e.getMessage(), e);
-        }
+    public void resetFlashcardProgress(String flashcardId, String userId) {
+        log.debug("Resetowanie postępu fiszki - flashcardId: '{}', userId: '{}'", flashcardId, userId);
+
+        Flashcard flashcard = getFlashcardIfUserHasPermissions(flashcardId, userId);
+        flashcard.setCorrectAnswers(0);
+        flashcard.setTotalAttempts(0);
+        flashcard.setLearned(false);
+        flashcard.setSkipped(false);
+        flashcardRepository.save(flashcard);
+        log.info("Zresetowano postęp fiszki - flashcardId: '{}'", flashcardId);
     }
 
     /**
@@ -364,31 +312,20 @@ public class FlashcardServiceImpl implements FlashcardService {
      * 
      * @param flashcardId ID fiszki
      * @param learned nowy status nauki (true = nauczona, false = do nauki)
-     * @throws RuntimeException jeśli fiszka nie istnieje lub wystąpi błąd DB
+     * @param userId ID użytkownika wykonującego operację
+     * @throws FlashcardNotFoundException jeśli fiszka o podanym ID nie istnieje
+     * @throws UserPermissionsMissing jeśli użytkownik nie ma uprawnień do fiszki
      */
     @Override
     @Transactional
-    public void markAsLearned(String flashcardId, boolean learned) {
-        log.debug("Oznaczanie fiszki {} jako learned={}", flashcardId, learned);
+    public void markAsLearned(String flashcardId, boolean learned, String userId) {
+        log.debug("Oznaczanie fiszki jako nauczona - flashcardId: '{}', userId: '{}', learned: {}", 
+                flashcardId, userId, learned);
         
-        try {
-            if (flashcardId == null || flashcardId.isBlank()) {
-                log.error("FlashcardId jest null lub pusty");
-                throw new IllegalArgumentException("FlashcardId nie może być pusty");
-            }
-            
-            Flashcard flashcard = flashcardRepository.findById(flashcardId)
-                    .orElseThrow(() -> new RuntimeException("Nie znaleziono fiszki o id: " + flashcardId));
-            flashcard.setLearned(learned);
-            flashcardRepository.save(flashcard);
-            log.info("Ustawiono stan nauczonej fiszki o id: {} na {}", flashcardId, learned);
-        } catch (DataAccessException e) {
-            log.error("Błąd dostępu do bazy danych: {}", e.getMessage(), e);
-            throw new RuntimeException("Błąd dostępu do bazy danych: " + e.getMessage(), e);
-        } catch (Exception e) {
-            log.error("Błąd podczas oznaczania fiszki jako nauczonej: {}", e.getMessage(), e);
-            throw new RuntimeException("Błąd podczas oznaczania fiszki jako nauczonej: " + e.getMessage(), e);
-        }
+        Flashcard flashcard = getFlashcardIfUserHasPermissions(flashcardId, userId);
+        flashcard.setLearned(learned);
+        flashcardRepository.save(flashcard);
+        log.info("Zaktualizowano status nauki fiszki - flashcardId: '{}', learned: {}", flashcardId, learned);
     }
 
     /**
@@ -415,16 +352,19 @@ public class FlashcardServiceImpl implements FlashcardService {
                 .map(Flashcard::getWordId)
                 .toList();
         
-        log.debug("Pobieranie {} słówek przez gRPC batch request", wordIds.size());
+        log.debug("Pobieranie słówek przez gRPC - wordCount: {}", wordIds.size());
         var wordsResponse = vocabularyGrpcClient.batchGetWordsByIds(wordIds);
-        log.debug("Otrzymano {} słówek z gRPC", wordsResponse.getWordsCount());
+        log.debug("Otrzymano słówka z gRPC - responseCount: {}", wordsResponse.getWordsCount());
         
         return flashcards.stream()
                 .map(flashcard -> {
                     var wordProto = wordsResponse.getWordsList().stream()
                             .filter(w -> w.getId().equals(flashcard.getWordId()))
                             .findFirst()
-                            .orElseThrow(() -> new RuntimeException("Nie znaleziono słówka: " + flashcard.getWordId()));
+                            .orElseThrow(() -> {
+                                log.error("Nie znaleziono słówka w odpowiedzi gRPC - wordId: '{}'", flashcard.getWordId());
+                                return new RuntimeException("Nie znaleziono słówka: " + flashcard.getWordId());
+                            });
                     
                     WordDto wordDto = mapProtoToWordDto(wordProto);
                     
@@ -452,24 +392,128 @@ public class FlashcardServiceImpl implements FlashcardService {
      * @return WordDto z pełnymi danymi (słowo, tłumaczenia, zdania)
      */
     private WordDto mapProtoToWordDto(Word wordProto) {
-    return new WordDto(
-            wordProto.getId(),
-            wordProto.getWord(),
-            wordProto.getTranslationsList(),
-            wordProto.getSentencesList().stream()
-                    .map(s -> new SentenceDto(
-                            s.getId(),
-                            s.getSentence(),
-                            s.getTranslation()
-                    ))
-                    .toList(),
-            wordProto.getSentencesAiList().stream()
-                    .map(s -> new SentenceDto(
-                            s.getId(),
-                            s.getSentence(),
-                            s.getTranslation()
-                    ))                    
-                    .toList() 
-    );
-}
+        return new WordDto(
+                wordProto.getId(),
+                wordProto.getWord(),
+                wordProto.getTranslationsList(),
+                wordProto.getSentencesList().stream()
+                        .map(s -> new SentenceDto(
+                                s.getId(),
+                                s.getSentence(),
+                                s.getTranslation()
+                        ))
+                        .toList(),
+                wordProto.getSentencesAiList().stream()
+                        .map(s -> new SentenceDto(
+                                s.getId(),
+                                s.getSentence(),
+                                s.getTranslation()
+                        ))
+                        .toList()
+        );
+    }
+    /**
+     * Pobiera talię jeśli użytkownik ma do niej uprawnienia.
+     *
+     * @param deckId ID talii
+     * @param userId ID użytkownika
+     * @return talia jeśli użytkownik ma uprawnienia
+     * @throws IllegalArgumentException gdy userId lub deckId są null lub puste
+     * @throws DeckNotFoundException gdy talia o podanym ID nie istnieje
+     * @throws UserPermissionsMissing gdy użytkownik nie ma uprawnień do talii
+     */
+    private Deck getDeckIfUserHasPermissions(String deckId, String userId) {
+        if (userId == null || userId.isBlank() || deckId == null || deckId.isBlank()) {
+            log.error("Próba dostępu do talii z pustym parametrem - userId: '{}', deckId: '{}'", userId, deckId);
+            throw new IllegalArgumentException("UserId lub DeckId nie może być pusty");
+        }
+        Deck deck = deckRepository.findById(deckId)
+                .orElseThrow(() -> {
+                    log.error("Nie znaleziono talii - deckId: '{}'", deckId);
+                    return new DeckNotFoundException(deckId);
+                });
+
+        if (!deck.getUserId().equals(userId)) {
+            log.warn("Brak uprawnień do talii - userId: '{}', deckId: '{}', deckOwnerId: '{}'", 
+                    userId, deckId, deck.getUserId());
+            throw new UserPermissionsMissing("Użytkownik nie ma uprawnień do tej talii");
+        }
+        return deck;
+    }
+
+    /**
+     * Sprawdza czy talia istnieje i czy użytkownik ma do niej uprawnienia.
+     *
+     * @param deckId ID talii
+     * @param userId ID użytkownika
+     * @throws IllegalArgumentException gdy userId lub deckId są null lub puste
+     * @throws DeckNotFoundException gdy talia o podanym ID nie istnieje
+     * @throws UserPermissionsMissing gdy użytkownik nie ma uprawnień do talii
+     */
+    private void checkDeckIsExistsAndUserHasPermissions(String deckId, String userId) {
+        if (userId == null || userId.isBlank() || deckId == null || deckId.isBlank()) {
+            log.error("Próba sprawdzenia uprawnień z pustym parametrem - userId: '{}', deckId: '{}'", userId, deckId);
+            throw new IllegalArgumentException("UserId lub DeckId nie może być pusty");
+        }
+        Deck deck = deckRepository.findById(deckId)
+                .orElseThrow(() -> {
+                    log.error("Nie znaleziono talii - deckId: '{}'", deckId);
+                    return new DeckNotFoundException(deckId);
+                });
+
+        if (!deck.getUserId().equals(userId)) {
+            log.warn("Brak uprawnień do talii - userId: '{}', deckId: '{}', deckOwnerId: '{}'", 
+                    userId, deckId, deck.getUserId());
+            throw new UserPermissionsMissing("Użytkownik nie ma uprawnień do tej talii");
+        }
+    }
+
+    /**
+     * Pobiera algorytm nauki przypisany do talii.
+     *
+     * @param deckId ID talii
+     * @return algorytm nauki talii
+     * @throws DeckNotFoundException gdy talia o podanym ID nie istnieje
+     */
+    private LearnAlgorithm getDeckAlgorithm(String deckId) {
+        return deckRepository.findById(deckId)
+                .orElseThrow(() -> {
+                    log.error("Nie znaleziono talii podczas pobierania algorytmu - deckId: '{}'", deckId);
+                    return new DeckNotFoundException(deckId);
+                })
+                .getLearnAlgorithm();
+    }
+
+    /**
+     * Pobiera fiszkę jeśli użytkownik ma do niej uprawnienia.
+     *
+     * @param flashcardId ID fiszki
+     * @param userId ID użytkownika
+     * @return fiszka jeśli użytkownik ma uprawnienia
+     * @throws InvalidFlashcardIdException gdy flashcardId jest null lub pusty
+     * @throws IllegalArgumentException gdy userId jest null lub pusty
+     * @throws FlashcardNotFoundException gdy fiszka o podanym ID nie istnieje
+     * @throws UserPermissionsMissing gdy użytkownik nie ma uprawnień do fiszki
+     */
+    private Flashcard getFlashcardIfUserHasPermissions(String flashcardId, String userId) {
+        if (flashcardId == null || flashcardId.isBlank()) {
+            log.error("Próba dostępu do fiszki z pustym flashcardId");
+            throw new InvalidFlashcardIdException();
+        }
+        if (userId == null || userId.isBlank()) {
+            log.error("Próba dostępu do fiszki z pustym userId - flashcardId: '{}'", flashcardId);
+            throw new IllegalArgumentException("UserId nie może być pusty");
+        }
+        Flashcard flashcard = flashcardRepository.findById(flashcardId)
+                .orElseThrow(() -> {
+                    log.error("Nie znaleziono fiszki - flashcardId: '{}'", flashcardId);
+                    return new FlashcardNotFoundException(flashcardId);
+                });
+        if (!flashcard.getDeck().getUserId().equals(userId)) {
+            log.warn("Brak uprawnień do fiszki - userId: '{}', flashcardId: '{}', deckOwnerId: '{}'", 
+                    userId, flashcardId, flashcard.getDeck().getUserId());
+            throw new UserPermissionsMissing("Użytkownik nie ma uprawnień do tej fiszki");
+        }
+        return flashcard;
+    }
 }

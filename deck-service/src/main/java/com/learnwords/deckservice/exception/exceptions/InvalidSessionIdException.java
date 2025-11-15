@@ -4,24 +4,24 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
 /**
- * Wyjątek rzucany gdy użytkownik nie ma wymaganych uprawnień do wykonania operacji.
+ * Wyjątek rzucany gdy ID sesji jest null lub puste.
  */
-@ResponseStatus(HttpStatus.FORBIDDEN)
-public class UserPermissionsMissing extends RuntimeException {
-    
+@ResponseStatus(HttpStatus.BAD_REQUEST)
+public class InvalidSessionIdException extends RuntimeException {
+
     /**
      * Tworzy wyjątek z domyślnym komunikatem.
      */
-    public UserPermissionsMissing() {
-        super("Brak wymaganych uprawnień do wykonania tej operacji");
+    public InvalidSessionIdException() {
+        super("ID sesji nie może być puste");
     }
-    
+
     /**
      * Tworzy wyjątek z niestandardowym komunikatem.
      *
      * @param message komunikat błędu
      */
-    public UserPermissionsMissing(String message) {
+    public InvalidSessionIdException(String message) {
         super(message);
     }
 }

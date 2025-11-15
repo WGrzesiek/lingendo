@@ -3,6 +3,9 @@ package com.learnwords.deckservice.exception;
 import com.learnwords.deckservice.dto.ApiErrorResponse;
 import com.learnwords.deckservice.exception.exceptions.DeckNotFoundException;
 import com.learnwords.deckservice.exception.exceptions.DeckWithThisNameForThisUserAlreadyExistsException;
+import com.learnwords.deckservice.exception.exceptions.FlashcardNotFoundException;
+import com.learnwords.deckservice.exception.exceptions.InvalidFlashcardIdException;
+import com.learnwords.deckservice.exception.exceptions.InvalidWordDataException;
 import com.learnwords.deckservice.exception.exceptions.StepWithThisNameNoExist;
 import com.learnwords.deckservice.exception.exceptions.UserPermissionsMissing;
 import lombok.extern.slf4j.Slf4j;
@@ -41,6 +44,27 @@ public class GlobalExceptionHandler {
         log.error("Deck not found: {}", ex.getMessage());
         ApiErrorResponse errorResponse = new ApiErrorResponse(HttpStatus.NOT_FOUND.value(), ex.getMessage());
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
+    }
+
+    @ExceptionHandler(FlashcardNotFoundException.class)
+    public ResponseEntity<ApiErrorResponse> handleFlashcardNotFoundException(FlashcardNotFoundException ex) {
+        log.error("Flashcard not found: {}", ex.getMessage());
+        ApiErrorResponse errorResponse = new ApiErrorResponse(HttpStatus.NOT_FOUND.value(), ex.getMessage());
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
+    }
+
+    @ExceptionHandler(InvalidFlashcardIdException.class)
+    public ResponseEntity<ApiErrorResponse> handleInvalidFlashcardIdException(InvalidFlashcardIdException ex) {
+        log.error("Invalid flashcard ID: {}", ex.getMessage());
+        ApiErrorResponse errorResponse = new ApiErrorResponse(HttpStatus.BAD_REQUEST.value(), ex.getMessage());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+    }
+
+    @ExceptionHandler(InvalidWordDataException.class)
+    public ResponseEntity<ApiErrorResponse> handleInvalidWordDataException(InvalidWordDataException ex) {
+        log.error("Invalid word data: {}", ex.getMessage());
+        ApiErrorResponse errorResponse = new ApiErrorResponse(HttpStatus.BAD_REQUEST.value(), ex.getMessage());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
