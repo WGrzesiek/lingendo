@@ -109,11 +109,15 @@ public class FlashcardServiceImpl implements FlashcardService {
     @KafkaListener(topics = KafkaTopic.CREATE_VOCABULARY_FOR_DECK_TOPIC, groupId = KafkaGroup.DECK_SERVICE_GROUP, properties = {
             "spring.json.value.default.type=com.learnwords.common.dto.SendWordFromKafkaDto"
     })
-    public void processFlashcardCreateFromKafka(SendWordFromKafkaDto getWordFromKafkaDto, String userId) {
-        log.info("Otrzymano zdarzenie utworzenia słówka - wordId: '{}', deckId: '{}', userId: '{}'",
-                getWordFromKafkaDto.id(), getWordFromKafkaDto.deckId(), userId);
+    public void processFlashcardCreateFromKafka(SendWordFromKafkaDto getWordFromKafkaDto) {
+        log.info("Otrzymano zdarzenie utworzenia słówka - wordId: '{}', deckId: '{}'",
+                getWordFromKafkaDto.id(), getWordFromKafkaDto.deckId());
 
-        Deck deck = getDeckIfUserHasPermissions(getWordFromKafkaDto.deckId(), userId);
+        Deck deck = deckRepository.findById(getWordFromKafkaDto.deckId())
+                .orElseThrow(() -> {
+                    log.error("Nie znaleziono talii podczas tworzenia fiszki - deckId: '{}'", getWordFromKafkaDto.deckId());
+                    return new DeckNotFoundException(getWordFromKafkaDto.deckId());
+                });
         String flashcardId = UUID.randomUUID().toString();
 
         Flashcard flashcard = Flashcard.builder()
@@ -121,7 +125,7 @@ public class FlashcardServiceImpl implements FlashcardService {
                 .wordId(getWordFromKafkaDto.id())
                 .deck(deck)
                 .build();
-        setInitialFlashcardState(getWordFromKafkaDto.deckId(), flashcard, userId);
+        setInitialFlashcardState(getWordFromKafkaDto.deckId(), flashcard, deck.getUserId());
         flashcardRepository.save(flashcard);
         log.info("Utworzono fiszkę - flashcardId: '{}', wordId: '{}', deckId: '{}'", 
                 flashcardId, getWordFromKafkaDto.id(), getWordFromKafkaDto.deckId());

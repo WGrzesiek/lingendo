@@ -46,7 +46,7 @@ import java.util.List;
  */
 public interface FlashcardService {
 
-    public void processFlashcardCreateFromKafka(SendWordFromKafkaDto sendWordFromKafkaDto, String userId);
+    public void processFlashcardCreateFromKafka(SendWordFromKafkaDto sendWordFromKafkaDto);
     public void setInitialFlashcardState(String deckId, Flashcard flashcard, String userId);
     public List<FlashcardDto> getAllFlashcardsFromDeck(String deckId, String userId);
     public List<FlashcardDto> getFlashcardsFromDeckByFilter(String deckId, boolean isLearned, boolean isSkipped, String userId);
