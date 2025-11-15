@@ -2,7 +2,6 @@ package com.learnwords.vocabularycommandservice.controller;
 
 import com.learnwords.common.dto.SendWordFromKafkaDto;
 import com.learnwords.vocabularycommandservice.dto.CreateWordDto;
-import com.learnwords.vocabularycommandservice.dto.SendWordDto;
 import com.learnwords.vocabularycommandservice.service.VocabularyService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -24,22 +23,58 @@ import java.util.List;
  * <p>Udostępnia endpointy do tworzenia nowych słów wraz z tłumaczeniami 
  * i przykładowymi zdaniami. Implementuje wzorzec CQRS - odpowiada tylko za zapis danych.
  * 
- * <p>Dostępne endpointy:
+ * <h2>Główne funkcjonalności:</h2>
  * <ul>
- *   <li>POST /api/v1/vocabulary/create - tworzy pojedyncze słówko (standalone)</li>
- *   <li>POST /api/v1/vocabulary/deck/{deckId}/create - tworzy słówko dla konkretnego decka</li>
- *   <li>POST /api/v1/vocabulary/create-batch - tworzy wiele słówek (batch)</li>
- *   <li>POST /api/v1/vocabulary/deck/{deckId}/create-batch - tworzy wiele słówek dla decka (batch)</li>
+ *   <li><b>Tworzenie pojedynczych słów:</b>
+ *     <ul>
+ *       <li>Tworzenie słówka standalone (bez przypisania do decka)</li>
+ *       <li>Tworzenie słówka przypisanego do konkretnego decka</li>
+ *       <li>Automatyczne tworzenie powiązanych zdań przykładowych</li>
+ *     </ul>
+ *   </li>
+ *   <li><b>Operacje batch:</b>
+ *     <ul>
+ *       <li>Tworzenie wielu słów jednocześnie</li>
+ *       <li>Tworzenie wielu słów dla decka (batch)</li>
+ *       <li>Mechanizm fail-safe - błędy pojedynczych słów nie blokują pozostałych</li>
+ *     </ul>
+ *   </li>
+ *   <li><b>Eventual Consistency:</b>
+ *     <ul>
+ *       <li>Używanie wzorca Outbox Pattern do publikacji eventów</li>
+ *       <li>Gwarancja dostarczenia eventów do message brokera</li>
+ *       <li>Synchronizacja między Command i Read Side</li>
+ *     </ul>
+ *   </li>
  * </ul>
  * 
- * <p>Wszystkie operacje używają wzorca Outbox Pattern do zapewnienia eventual consistency.
+ * <h2>Endpointy:</h2>
+ * <ul>
+ *   <li>POST /api/v1/vocabulary/create - Utwórz słówko (standalone)</li>
+ *   <li>POST /api/v1/vocabulary/deck/{deckId}/create - Utwórz słówko dla decka</li>
+ *   <li>POST /api/v1/vocabulary/create-batch - Utwórz wiele słówek (batch)</li>
+ *   <li>POST /api/v1/vocabulary/deck/{deckId}/create-batch - Utwórz wiele słówek dla decka (batch)</li>
+ * </ul>
+ * 
+ * <h2>Autoryzacja:</h2>
+ * <p>Wszystkie endpointy wymagają autoryzacji użytkownika.
+ * 
+ * <h2>Obsługa błędów:</h2>
+ * <p>Kontroler korzysta z globalnej obsługi wyjątków. Możliwe kody odpowiedzi:
+ * <ul>
+ *   <li><b>201 Created:</b> Słówko/słówka utworzone pomyślnie</li>
+ *   <li><b>400 Bad Request:</b> Błędne dane wejściowe lub walidacja niepomyślna</li>
+ *   <li><b>401 Unauthorized:</b> Brak autoryzacji</li>
+ *   <li><b>404 Not Found:</b> Deck nie istnieje</li>
+ *   <li><b>500 Internal Server Error:</b> Nieoczekiwany błąd serwera</li>
+ * </ul>
  * 
  * @author Grzegorz Wawrzeń
  * @version 1.0
  * @since 2025-11-11
  * @see VocabularyService
  * @see CreateWordDto
- * @see SendWordDto
+ * @see SendWordFromKafkaDto
  */
 @RestController
 @RequestMapping("/api/v1/vocabulary")
@@ -52,14 +87,10 @@ public class VocabularyController {
     }
 
     /**
-     * Tworzy nowe słówko bez przypisania do konkretnego decka.
+     * Tworzy nowe słówko bez przypisania do decka.
      * 
-     * <p>Słówko zostanie zapisane jako standalone i może zostać później dodane do decka.
-     * Można dołączyć przykładowe zdania w request body.
-     * 
-     * @param createWordDto dane nowego słówka (słowo, tłumaczenia, opcjonalne zdania)
-     * @return ResponseEntity z danymi utworzonego słówka (201 CREATED)
-     * @throws IllegalArgumentException gdy słowo lub tłumaczenia są null
+     * @param createWordDto dane nowego słówka
+     * @return dane utworzonego słówka
      */
     @Operation(
         summary = "Utwórz słówko", 
@@ -72,8 +103,7 @@ public class VocabularyController {
             content = @Content(schema = @Schema(implementation = SendWordFromKafkaDto.class))
         ),
         @ApiResponse(responseCode = "400", description = "Nieprawidłowe dane wejściowe"),
-        @ApiResponse(responseCode = "401", description = "Brak autoryzacji"),
-        @ApiResponse(responseCode = "500", description = "Błąd serwera podczas zapisu")
+        @ApiResponse(responseCode = "500", description = "Błąd serwera")
     })
     @PostMapping("/create")
     public ResponseEntity<SendWordFromKafkaDto> createVocabulary(
@@ -88,30 +118,25 @@ public class VocabularyController {
     }
 
     /**
-     * Tworzy nowe słówko przypisane do konkretnego decka.
+     * Tworzy nowe słówko przypisane do decka.
      * 
-     * <p>Słówko zostanie automatycznie dodane do wskazanego decka.
-     * Zalecane gdy wiesz, że słówko ma należeć do konkretnego zestawu.
-     * 
-     * @param deckId ID decka, do którego zostanie dodane słówko
-     * @param createWordDto dane nowego słówka (słowo, tłumaczenia, opcjonalne zdania)
-     * @return ResponseEntity z danymi utworzonego słówka (201 CREATED)
-     * @throws IllegalArgumentException gdy deckId jest null/pusty lub dane słówka nieprawidłowe
+     * @param deckId ID decka
+     * @param createWordDto dane nowego słówka
+     * @return dane utworzonego słówka
      */
     @Operation(
         summary = "Utwórz słówko dla decka", 
-        description = "Tworzy nowe słówko i automatycznie przypisuje do wskazanego decka"
+        description = "Tworzy nowe słówko i przypisuje do wskazanego decka"
     )
     @ApiResponses(value = {
         @ApiResponse(
             responseCode = "201", 
             description = "Słówko utworzone i przypisane do decka",
-            content = @Content(schema = @Schema(implementation = SendWordDto.class))
+            content = @Content(schema = @Schema(implementation = SendWordFromKafkaDto.class))
         ),
         @ApiResponse(responseCode = "400", description = "Nieprawidłowe dane lub brak deckId"),
-        @ApiResponse(responseCode = "401", description = "Brak autoryzacji"),
         @ApiResponse(responseCode = "404", description = "Deck nie istnieje"),
-        @ApiResponse(responseCode = "500", description = "Błąd serwera podczas zapisu")
+        @ApiResponse(responseCode = "500", description = "Błąd serwera")
     })
     @PostMapping("/deck/{deckId}/create")
     public ResponseEntity<SendWordFromKafkaDto> createVocabularyForDeck(
@@ -128,28 +153,23 @@ public class VocabularyController {
     }
 
     /**
-     * Tworzy wiele słówek jednocześnie (batch operation).
-     * 
-     * <p>Operacja batch pozwala zaoszczędzić czas przy dodawaniu większej liczby słów.
-     * W przypadku błędu przy jednym słówku, pozostałe są nadal zapisywane.
+     * Tworzy wiele słówek jednocześnie (batch).
      * 
      * @param createWordDtos lista danych nowych słówek
-     * @return ResponseEntity z listą utworzonych słówek (201 CREATED)
-     * @throws IllegalArgumentException gdy lista jest null lub pusta
+     * @return lista utworzonych słówek
      */
     @Operation(
         summary = "Utwórz wiele słówek (batch)", 
-        description = "Tworzy wiele słówek jednocześnie bez przypisania do decka. Operacja kontynuuje mimo błędów pojedynczych elementów."
+        description = "Tworzy wiele słówek jednocześnie. Operacja kontynuuje mimo błędów pojedynczych elementów."
     )
     @ApiResponses(value = {
         @ApiResponse(
             responseCode = "201", 
-            description = "Słówka utworzone pomyślnie (może być częściowo)",
-            content = @Content(schema = @Schema(implementation = SendWordDto.class))
+            description = "Słówka utworzone pomyślnie",
+            content = @Content(schema = @Schema(implementation = SendWordFromKafkaDto.class))
         ),
         @ApiResponse(responseCode = "400", description = "Pusta lista lub nieprawidłowe dane"),
-        @ApiResponse(responseCode = "401", description = "Brak autoryzacji"),
-        @ApiResponse(responseCode = "500", description = "Błąd serwera podczas zapisu")
+        @ApiResponse(responseCode = "500", description = "Błąd serwera")
     })
     @PostMapping("/create-batch")
     public ResponseEntity<List<SendWordFromKafkaDto>> createVocabularies(
@@ -163,30 +183,25 @@ public class VocabularyController {
     }
 
     /**
-     * Tworzy wiele słówek jednocześnie i przypisuje je do decka (batch operation).
+     * Tworzy wiele słówek dla decka jednocześnie (batch).
      * 
-     * <p>Najszybszy sposób na dodanie wielu słów do konkretnego decka naraz.
-     * W przypadku błędu przy jednym słówku, pozostałe są nadal zapisywane.
-     * 
-     * @param deckId ID decka, do którego zostaną dodane wszystkie słówka
+     * @param deckId ID decka
      * @param createWordDtos lista danych nowych słówek
-     * @return ResponseEntity z listą utworzonych słówek (201 CREATED)
-     * @throws IllegalArgumentException gdy deckId jest null/pusty lub lista jest pusta
+     * @return lista utworzonych słówek
      */
     @Operation(
         summary = "Utwórz wiele słówek dla decka (batch)", 
-        description = "Tworzy wiele słówek jednocześnie i przypisuje wszystkie do wskazanego decka. Operacja kontynuuje mimo błędów pojedynczych elementów."
+        description = "Tworzy wiele słówek jednocześnie i przypisuje wszystkie do decka. Operacja kontynuuje mimo błędów pojedynczych elementów."
     )
     @ApiResponses(value = {
         @ApiResponse(
             responseCode = "201", 
-            description = "Słówka utworzone i przypisane do decka (może być częściowo)",
-            content = @Content(schema = @Schema(implementation = SendWordDto.class))
+            description = "Słówka utworzone i przypisane do decka",
+            content = @Content(schema = @Schema(implementation = SendWordFromKafkaDto.class))
         ),
         @ApiResponse(responseCode = "400", description = "Brak deckId, pusta lista lub nieprawidłowe dane"),
-        @ApiResponse(responseCode = "401", description = "Brak autoryzacji"),
         @ApiResponse(responseCode = "404", description = "Deck nie istnieje"),
-        @ApiResponse(responseCode = "500", description = "Błąd serwera podczas zapisu")
+        @ApiResponse(responseCode = "500", description = "Błąd serwera")
     })
     @PostMapping("/deck/{deckId}/create-batch")
     public ResponseEntity<List<SendWordFromKafkaDto>> createVocabulariesForDeck(

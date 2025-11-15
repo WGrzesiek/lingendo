@@ -2,7 +2,6 @@ package com.learnwords.vocabularycommandservice.service;
 
 import com.learnwords.common.dto.SendWordFromKafkaDto;
 import com.learnwords.vocabularycommandservice.dto.CreateWordDto;
-import com.learnwords.vocabularycommandservice.dto.SendWordDto;
 
 import java.util.List;
 
@@ -30,7 +29,7 @@ import java.util.List;
  * @version 1.0
  * @since 2025-11-11
  * @see CreateWordDto
- * @see SendWordDto
+ * @see SendWordFromKafkaDto
  */
 public interface VocabularyService {
 

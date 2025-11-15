@@ -83,6 +83,7 @@ public class VocabularyServiceImpl implements VocabularyService {
      */
     @Override
     public SendWordFromKafkaDto createVocabulary(CreateWordDto createWordDto) {
+        log.debug("Tworzenie słówka - słowo: '{}'", createWordDto.getWord());
         return createVocabularyInternal(createWordDto, null);
     }
 
@@ -101,9 +102,9 @@ public class VocabularyServiceImpl implements VocabularyService {
      */
     @Override
     public SendWordFromKafkaDto createVocabularyForDeck(CreateWordDto createWordDto, String deckId) {
-        log.info("Rozpoczęcie tworzenia słówka dla decka: {}", deckId);
+        log.debug("Tworzenie słówka dla decka - deckId: '{}', słowo: '{}'", deckId, createWordDto.getWord());
         if (deckId == null || deckId.isEmpty()) {
-            log.error("DeckId nie może być null lub pusty");
+            log.error("Tworzenie słówka - brak deckId");
             throw new IllegalArgumentException("DeckId must not be null or empty");
         }
         return createVocabularyInternal(createWordDto, deckId);
@@ -121,6 +122,7 @@ public class VocabularyServiceImpl implements VocabularyService {
      */
     @Override
     public List<SendWordFromKafkaDto> createVocabularies(List<CreateWordDto> createWordDtos) {
+        log.debug("Tworzenie słówek batch - liczba: {}", createWordDtos.size());
         return createVocabulariesInternal(createWordDtos, null);
     }
 
@@ -137,9 +139,9 @@ public class VocabularyServiceImpl implements VocabularyService {
      */
     @Override
     public List<SendWordFromKafkaDto> createVocabulariesForDeck(List<CreateWordDto> createWordDtos, String deckId) {
-        log.info("Rozpoczęcie tworzenia {} słówek dla decka: {}", createWordDtos.size(), deckId);
+        log.debug("Tworzenie słówek batch dla decka - deckId: '{}', liczba: {}", deckId, createWordDtos.size());
         if (deckId == null || deckId.trim().isEmpty()) {
-            log.error("DeckId nie może być null lub pusty");
+            log.error("Tworzenie słówek batch - brak deckId");
             throw new IllegalArgumentException("DeckId must not be null or empty");
         }
         return createVocabulariesInternal(createWordDtos, deckId);
@@ -169,13 +171,11 @@ public class VocabularyServiceImpl implements VocabularyService {
      * @throws RuntimeException gdy wystąpi nieoczekiwany błąd
      */
     private SendWordFromKafkaDto createVocabularyInternal(CreateWordDto createWordDto, String deckId) {
-        log.info("Rozpoczęcie tworzenia słówka: {}", createWordDto.getWord());
         String aggregateId = UUID.randomUUID().toString();
         List<String> sentenceIds = new ArrayList<>();
         try {
-
             if (createWordDto.getWord() == null || createWordDto.getTranslations() == null) {
-                log.error("Nie można utworzyć słówka, ponieważ brak jest wymaganych pól.");
+                log.error("Tworzenie słówka - brak wymaganych pól");
                 throw new IllegalArgumentException("Word and translations must not be null");
             }
             
@@ -183,7 +183,7 @@ public class VocabularyServiceImpl implements VocabularyService {
                 for (CreateSentenceDto createSentenceDto : createWordDto.getSentences()){
                     SendSentenceDto sentenceDto = sentenceService.createSentence(createSentenceDto, deckId);
                     sentenceIds.add(sentenceDto.id());
-                    log.info("Stworzono nowe zdania: {}, dla slowka: {}", sentenceDto.id(), createWordDto.getWord());
+                    log.debug("Utworzono zdanie - sentenceId: '{}', słowo: '{}'", sentenceDto.id(), createWordDto.getWord());
                 }
             }
 
@@ -194,7 +194,7 @@ public class VocabularyServiceImpl implements VocabularyService {
                     sentenceIds,
                     deckId
             );
-            log.info("Stworzono słówko z aggregateId: {}", aggregateId);
+            
             AggregateType aggregateType = deckId != null
                     ? AggregateType.VOCABULARYFORDECK
                     : AggregateType.VOCABULARY;
@@ -208,15 +208,14 @@ public class VocabularyServiceImpl implements VocabularyService {
             );
             outboxRepository.save(outbox);
 
-            log.info("Stworzono słówko: ID: {}, słowo: '{}', tłumaczenia: {}, powiązane zdania: {}",
-                    eventPayload.id(), eventPayload.word(), eventPayload.translations(), eventPayload.sentenceIds());
+            log.info("Słówko '{}' zostało utworzone - wordId: '{}'", eventPayload.word(), eventPayload.id());
             return eventPayload;
 
         } catch(DataAccessException e){
-            log.error("Błąd podczas zapisywania słówka: {}", e.getMessage(), e);
+            log.error("Błąd zapisu słówka - słowo: '{}', błąd: {}", createWordDto.getWord(), e.getMessage());
             throw e;
         } catch(Exception e){
-            log.error("Błąd podczas zapisywania słówka: {}", e.getMessage(), e);
+            log.error("Nieoczekiwany błąd podczas tworzenia słówka - słowo: '{}', błąd: {}", createWordDto.getWord(), e.getMessage());
             throw new RuntimeException("Nie udało się zapisać słówka", e);
         }
     }
@@ -243,10 +242,8 @@ public class VocabularyServiceImpl implements VocabularyService {
      * @throws IllegalArgumentException gdy lista jest null lub pusta
      */
     private List<SendWordFromKafkaDto> createVocabulariesInternal(List<CreateWordDto> createWordDtos, String deckId) {
-        log.info("Rozpoczęcie tworzenia {} słówek", createWordDtos.size());
-        
         if (createWordDtos == null || createWordDtos.isEmpty()) {
-            log.error("Lista słówek nie może być null lub pusta");
+            log.error("Tworzenie słówek batch - pusta lista");
             throw new IllegalArgumentException("CreateWordDtos list must not be null or empty");
         }
 
@@ -258,19 +255,18 @@ public class VocabularyServiceImpl implements VocabularyService {
             try {
                 SendWordFromKafkaDto createdWord = createVocabularyInternal(createWordDto, deckId);
                 createdVocabularies.add(createdWord);
-                log.info("Pomyślnie utworzono słówko {}/{}: '{}'", i + 1, createWordDtos.size(), createWordDto.getWord());
             } catch (Exception e) {
-                log.error("Błąd podczas tworzenia słówka {}/{}: '{}' - {}", 
-                    i + 1, createWordDtos.size(), createWordDto.getWord(), e.getMessage(), e);
+                log.error("Błąd tworzenia słówka batch - indeks: {}, słowo: '{}', błąd: {}", 
+                    i + 1, createWordDto.getWord(), e.getMessage());
                 failedWords.add(createWordDto.getWord());
             }
         }
 
         if (!failedWords.isEmpty()) {
-            log.warn("Utworzono {}/{} słówek. Błędy podczas tworzenia: {}", 
+            log.warn("Utworzono słówka batch - sukces: {}/{}, błędy: {}", 
                 createdVocabularies.size(), createWordDtos.size(), failedWords);
         } else {
-            log.info("Pomyślnie utworzono wszystkie {} słówek", createdVocabularies.size());
+            log.info("Utworzono słówka batch - liczba: {}", createdVocabularies.size());
         }
 
         return createdVocabularies;

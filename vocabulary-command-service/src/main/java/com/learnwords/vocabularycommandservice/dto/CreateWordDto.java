@@ -2,6 +2,7 @@ package com.learnwords.vocabularycommandservice.dto;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
@@ -51,7 +52,6 @@ import java.util.List;
  * @author Grzegorz Wawrzeń
  * @version 1.0
  * @since 2025-11-11
- * @see SendWordDto
  * @see CreateSentenceDto
  */
 @Data
@@ -72,11 +72,11 @@ public class CreateWordDto {
      * Lista tłumaczeń słowa.
      * 
      * <p>Musi zawierać przynajmniej jedno tłumaczenie. To pole jest wymagane.
-     * Walidowane przez {@code @NotNull} i {@code @Size(min=1)}.
+     * Walidowane przez {@code @NotEmpty} i {@code @Size(min=1)}.
      * 
      * <p>Przykład: {@code ["cześć", "witaj", "hej"]}
      */
-    @NotBlank(message = "Podaj przynajmniej jedno tłumaczenie")
+    @NotEmpty(message = "Podaj przynajmniej jedno tłumaczenie")
     @Size(min = 1, message = "Podaj przynajmniej jedno tłumaczenie")
     private List<String> translations;
 
