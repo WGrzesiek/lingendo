@@ -1,9 +1,6 @@
 package com.learnwords.deckservice.controller;
 
-import com.learnwords.deckservice.dto.ApiErrorResponse;
-import com.learnwords.deckservice.dto.SessionDetailDto;
-import com.learnwords.deckservice.dto.SessionDto;
-import com.learnwords.deckservice.dto.SessionStatsDto;
+import com.learnwords.deckservice.dto.*;
 import com.learnwords.deckservice.exception.exceptions.InvalidFlashcardIdException;
 import com.learnwords.deckservice.exception.exceptions.InvalidSessionIdException;
 import com.learnwords.deckservice.exception.exceptions.SessionNotActiveException;
@@ -452,8 +449,7 @@ public class SessionController {
      * <p>Sesja musi być w statusie IN_PROGRESS.
      * 
      * @param sessionId ID sesji
-     * @param flashcardId ID fiszki, na którą udzielono odpowiedzi
-     * @param isCorrect czy odpowiedź była poprawna
+     * @param request request zawierający ID fiszki i informację o poprawności odpowiedzi
      * @param userId ID użytkownika z nagłówka X-User-Id
      * @return potwierdzenie rejestracji odpowiedzi
      * @throws InvalidSessionIdException jeśli sessionId jest pusty
@@ -496,16 +492,15 @@ public class SessionController {
     @PostMapping("/{sessionId}/answer")
     public ResponseEntity<Void> recordAnswer(
             @Parameter(description = "ID sesji", required = true, example = "session-123") @PathVariable String sessionId,
-            @Parameter(description = "ID fiszki", required = true, example = "flashcard-456") @RequestParam String flashcardId,
-            @Parameter(description = "Czy odpowiedź jest poprawna", required = true, example = "true") @RequestParam boolean isCorrect,
+            @Parameter(description = "Request zawierający ID fiszki i informację o poprawności odpowiedzi", required = true) @Valid @RequestBody RecordAnswerRequest request,
             @Parameter(description = "ID użytkownika z nagłówka", required = true, example = "user-123") @RequestHeader(USER_ID_HEADER) String userId) {
-        log.debug("Rejestrowanie odpowiedzi - sessionId: '{}', flashcardId: '{}', isCorrect: {}, userId: '{}'", 
-                sessionId, flashcardId, isCorrect, userId);
-        
-        sessionService.recordAnswer(sessionId, flashcardId, isCorrect, userId);
-        
-        log.info("Zarejestrowano odpowiedź - sessionId: '{}', flashcardId: '{}', isCorrect: {}", 
-                sessionId, flashcardId, isCorrect);
+        log.debug("Rejestrowanie odpowiedzi - sessionId: '{}', flashcardId: '{}', isCorrect: {}, userId: '{}'",
+                sessionId, request.flashcardId(), request.isCorrect(), userId);
+
+        sessionService.recordAnswer(sessionId, request.flashcardId(), request.isCorrect(), userId);
+
+        log.info("Zarejestrowano odpowiedź - sessionId: '{}', flashcardId: '{}', isCorrect: {}",
+                sessionId, request.flashcardId(), request.isCorrect());
         return ResponseEntity.ok().build();
     }
 

@@ -91,7 +91,7 @@ public class SessionServiceImpl implements SessionService {
         Session session = Session.builder()
                 .id(UUID.randomUUID().toString())
                 .deck(deck)
-                .userId(deck.getUserId())
+                .userId(userId)
                 .totalFlashcards(flashcardsCount)
                 .status(SessionStatus.IN_PROGRESS)
                 .type(SessionType.LEARNING)
