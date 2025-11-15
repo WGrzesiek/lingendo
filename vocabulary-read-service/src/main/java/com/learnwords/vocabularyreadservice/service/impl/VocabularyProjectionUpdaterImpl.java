@@ -4,14 +4,15 @@ import com.learnwords.common.EventStatus;
 import com.learnwords.common.EventType;
 import com.learnwords.common.KafkaGroup;
 import com.learnwords.common.KafkaTopic;
+import com.learnwords.common.dto.SendWordFromKafkaDto;
 import com.learnwords.common.dto.UpdateOutboxEventDto;
-import com.learnwords.common.dto.VocabularyDto;
+import com.learnwords.common.dto.WordDto;
+import com.learnwords.vocabularyreadservice.dto.GetWordFromKafkaDto;
 import com.learnwords.vocabularyreadservice.entity.Vocabulary;
 import com.learnwords.vocabularyreadservice.repository.VocabularyRepository;
 import com.learnwords.vocabularyreadservice.service.UpdateOutboxEvent;
 import com.learnwords.vocabularyreadservice.service.VocabularyProjectionUpdater;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.dao.DataAccessException;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,31 +29,22 @@ public class VocabularyProjectionUpdaterImpl implements VocabularyProjectionUpda
     }
 
     @Transactional
-    @KafkaListener(topics = KafkaTopic.CREATE_VOCABULARY_TOPIC, groupId = KafkaGroup.VOCABULARY_READ_SERVICE_GROUP,    properties = {
-            "spring.json.value.default.type=com.learnwords.common.dto.VocabularyDto"
+    @KafkaListener(topics = {
+            KafkaTopic.CREATE_VOCABULARY_TOPIC,
+            KafkaTopic.CREATE_VOCABULARY_FOR_DECK_TOPIC
+    }, groupId = KafkaGroup.VOCABULARY_READ_SERVICE_GROUP,    properties = {
+            "spring.json.value.default.type=com.learnwords.common.dto.SendWordFromKafkaDto"
     })
-    public void processSentenceCreate(VocabularyDto vocabularyDto) {
-        updateOutboxEvent.processUpdateOutboxEvent(new UpdateOutboxEventDto(vocabularyDto.id(), EventStatus.RECEIVED));
-        try {
-            updateOutboxEvent.processUpdateOutboxEvent(new UpdateOutboxEventDto(vocabularyDto.id(), EventStatus.PROCESSING));
+    public void processVocabularyCreate(SendWordFromKafkaDto sendWordFromKafkaDto) {
+        updateOutboxEvent.processUpdateOutboxEvent(new UpdateOutboxEventDto(sendWordFromKafkaDto.id(), EventStatus.RECEIVED));
+            updateOutboxEvent.processUpdateOutboxEvent(new UpdateOutboxEventDto(sendWordFromKafkaDto.id(), EventStatus.PROCESSING));
             log.info("Otrzymano event: {}", EventType.CREATE_VOCABULARY);
             Vocabulary vocabulary = new Vocabulary();
-            vocabulary.setId(vocabularyDto.id());
-            vocabulary.setWord(vocabularyDto.word());
-            vocabulary.setTranslations(vocabularyDto.translations());
-            vocabulary.setSentenceIds(vocabularyDto.sentenceIds());
+            vocabulary.setId(sendWordFromKafkaDto.id());
+            vocabulary.setWord(sendWordFromKafkaDto.word());
+            vocabulary.setTranslations(sendWordFromKafkaDto.translations());
+            vocabulary.setSentenceIds(sendWordFromKafkaDto.sentenceIds());
             vocabularyRepository.save(vocabulary);
             updateOutboxEvent.processUpdateOutboxEvent(new UpdateOutboxEventDto(vocabulary.getId(), EventStatus.COMPLETED));
-        }
-        catch (DataAccessException e){
-            log.error("Błąd podczas zapisywania słowa: {}", e.getMessage(), e);
-            updateOutboxEvent.processUpdateOutboxEvent(new UpdateOutboxEventDto(vocabularyDto.id(), EventStatus.RETRYING));
-            throw e;
-        }
-        catch (Exception e){
-            log.error("Błąd podczas przetwarzania słowa: {}", e.getMessage(), e);
-            updateOutboxEvent.processUpdateOutboxEvent(new UpdateOutboxEventDto(vocabularyDto.id(), EventStatus.FAILED));
-            throw e;
-        }
     }
 }
