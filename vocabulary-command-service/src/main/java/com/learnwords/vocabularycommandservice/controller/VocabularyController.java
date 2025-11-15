@@ -1,5 +1,6 @@
 package com.learnwords.vocabularycommandservice.controller;
 
+import com.learnwords.common.dto.SendWordFromKafkaDto;
 import com.learnwords.vocabularycommandservice.dto.CreateWordDto;
 import com.learnwords.vocabularycommandservice.dto.SendWordDto;
 import com.learnwords.vocabularycommandservice.service.VocabularyService;
@@ -68,21 +69,21 @@ public class VocabularyController {
         @ApiResponse(
             responseCode = "201", 
             description = "Słówko utworzone pomyślnie",
-            content = @Content(schema = @Schema(implementation = SendWordDto.class))
+            content = @Content(schema = @Schema(implementation = SendWordFromKafkaDto.class))
         ),
         @ApiResponse(responseCode = "400", description = "Nieprawidłowe dane wejściowe"),
         @ApiResponse(responseCode = "401", description = "Brak autoryzacji"),
         @ApiResponse(responseCode = "500", description = "Błąd serwera podczas zapisu")
     })
     @PostMapping("/create")
-    public ResponseEntity<SendWordDto> createVocabulary(
+    public ResponseEntity<SendWordFromKafkaDto> createVocabulary(
             @io.swagger.v3.oas.annotations.parameters.RequestBody(
                 description = "Dane nowego słówka",
                 required = true,
                 content = @Content(schema = @Schema(implementation = CreateWordDto.class))
             )
             @Valid @RequestBody CreateWordDto createWordDto) {
-        SendWordDto saveVocabulary = vocabularyService.createVocabulary(createWordDto);
+        SendWordFromKafkaDto saveVocabulary = vocabularyService.createVocabulary(createWordDto);
         return ResponseEntity.status(HttpStatus.CREATED).body(saveVocabulary);
     }
 
@@ -113,7 +114,7 @@ public class VocabularyController {
         @ApiResponse(responseCode = "500", description = "Błąd serwera podczas zapisu")
     })
     @PostMapping("/deck/{deckId}/create")
-    public ResponseEntity<SendWordDto> createVocabularyForDeck(
+    public ResponseEntity<SendWordFromKafkaDto> createVocabularyForDeck(
             @Parameter(description = "ID decka", required = true, example = "deck-123")
             @PathVariable String deckId,
             @io.swagger.v3.oas.annotations.parameters.RequestBody(
@@ -122,7 +123,7 @@ public class VocabularyController {
                 content = @Content(schema = @Schema(implementation = CreateWordDto.class))
             )
             @Valid @RequestBody CreateWordDto createWordDto) {
-        SendWordDto saveVocabulary = vocabularyService.createVocabularyForDeck(createWordDto, deckId);
+        SendWordFromKafkaDto saveVocabulary = vocabularyService.createVocabularyForDeck(createWordDto, deckId);
         return ResponseEntity.status(HttpStatus.CREATED).body(saveVocabulary);
     }
 
@@ -151,13 +152,13 @@ public class VocabularyController {
         @ApiResponse(responseCode = "500", description = "Błąd serwera podczas zapisu")
     })
     @PostMapping("/create-batch")
-    public ResponseEntity<List<SendWordDto>> createVocabularies(
+    public ResponseEntity<List<SendWordFromKafkaDto>> createVocabularies(
             @io.swagger.v3.oas.annotations.parameters.RequestBody(
                 description = "Lista danych nowych słówek",
                 required = true
             )
             @Valid @RequestBody List<CreateWordDto> createWordDtos) {
-        List<SendWordDto> saveVocabularies = vocabularyService.createVocabularies(createWordDtos);
+        List<SendWordFromKafkaDto> saveVocabularies = vocabularyService.createVocabularies(createWordDtos);
         return ResponseEntity.status(HttpStatus.CREATED).body(saveVocabularies);
     }
 
@@ -188,7 +189,7 @@ public class VocabularyController {
         @ApiResponse(responseCode = "500", description = "Błąd serwera podczas zapisu")
     })
     @PostMapping("/deck/{deckId}/create-batch")
-    public ResponseEntity<List<SendWordDto>> createVocabulariesForDeck(
+    public ResponseEntity<List<SendWordFromKafkaDto>> createVocabulariesForDeck(
             @Parameter(description = "ID decka", required = true, example = "deck-123")
             @PathVariable String deckId,
             @io.swagger.v3.oas.annotations.parameters.RequestBody(
@@ -196,7 +197,7 @@ public class VocabularyController {
                 required = true
             )
             @Valid @RequestBody List<CreateWordDto> createWordDtos) {
-        List<SendWordDto> saveVocabularies = vocabularyService.createVocabulariesForDeck(createWordDtos, deckId);
+        List<SendWordFromKafkaDto> saveVocabularies = vocabularyService.createVocabulariesForDeck(createWordDtos, deckId);
         return ResponseEntity.status(HttpStatus.CREATED).body(saveVocabularies);
     }
 }

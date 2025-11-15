@@ -2,10 +2,10 @@ package com.learnwords.vocabularycommandservice.service.Impl;
 
 import com.learnwords.common.AggregateType;
 import com.learnwords.common.EventType;
+import com.learnwords.common.dto.SendWordFromKafkaDto;
 import com.learnwords.vocabularycommandservice.dto.CreateSentenceDto;
 import com.learnwords.vocabularycommandservice.dto.CreateWordDto;
 import com.learnwords.vocabularycommandservice.dto.SendSentenceDto;
-import com.learnwords.vocabularycommandservice.dto.SendWordDto;
 import com.learnwords.vocabularycommandservice.entity.Outbox;
 import com.learnwords.vocabularycommandservice.mapper.EntityToOutboxEntityMapper;
 import com.learnwords.vocabularycommandservice.repository.OutboxRepository;
@@ -53,7 +53,7 @@ import java.util.UUID;
  * @since 2025-11-11
  * @see VocabularyService
  * @see CreateWordDto
- * @see SendWordDto
+ * @see SendWordFromKafkaDto
  * @see SentenceService
  */
 @Slf4j
@@ -82,7 +82,7 @@ public class VocabularyServiceImpl implements VocabularyService {
      * @throws RuntimeException gdy wystąpi nieoczekiwany błąd
      */
     @Override
-    public SendWordDto createVocabulary(CreateWordDto createWordDto) {
+    public SendWordFromKafkaDto createVocabulary(CreateWordDto createWordDto) {
         return createVocabularyInternal(createWordDto, null);
     }
 
@@ -100,7 +100,7 @@ public class VocabularyServiceImpl implements VocabularyService {
      * @throws RuntimeException gdy wystąpi nieoczekiwany błąd
      */
     @Override
-    public SendWordDto createVocabularyForDeck(CreateWordDto createWordDto, String deckId) {
+    public SendWordFromKafkaDto createVocabularyForDeck(CreateWordDto createWordDto, String deckId) {
         log.info("Rozpoczęcie tworzenia słówka dla decka: {}", deckId);
         if (deckId == null || deckId.isEmpty()) {
             log.error("DeckId nie może być null lub pusty");
@@ -120,7 +120,7 @@ public class VocabularyServiceImpl implements VocabularyService {
      * @throws IllegalArgumentException gdy lista jest null lub pusta
      */
     @Override
-    public List<SendWordDto> createVocabularies(List<CreateWordDto> createWordDtos) {
+    public List<SendWordFromKafkaDto> createVocabularies(List<CreateWordDto> createWordDtos) {
         return createVocabulariesInternal(createWordDtos, null);
     }
 
@@ -136,7 +136,7 @@ public class VocabularyServiceImpl implements VocabularyService {
      * @throws IllegalArgumentException gdy lista jest null/pusta lub deckId jest null/pusty
      */
     @Override
-    public List<SendWordDto> createVocabulariesForDeck(List<CreateWordDto> createWordDtos, String deckId) {
+    public List<SendWordFromKafkaDto> createVocabulariesForDeck(List<CreateWordDto> createWordDtos, String deckId) {
         log.info("Rozpoczęcie tworzenia {} słówek dla decka: {}", createWordDtos.size(), deckId);
         if (deckId == null || deckId.trim().isEmpty()) {
             log.error("DeckId nie może być null lub pusty");
@@ -168,7 +168,7 @@ public class VocabularyServiceImpl implements VocabularyService {
      * @throws DataAccessException gdy wystąpi błąd podczas zapisu do bazy
      * @throws RuntimeException gdy wystąpi nieoczekiwany błąd
      */
-    private SendWordDto createVocabularyInternal(CreateWordDto createWordDto, String deckId) {
+    private SendWordFromKafkaDto createVocabularyInternal(CreateWordDto createWordDto, String deckId) {
         log.info("Rozpoczęcie tworzenia słówka: {}", createWordDto.getWord());
         String aggregateId = UUID.randomUUID().toString();
         List<String> sentenceIds = new ArrayList<>();
@@ -186,8 +186,8 @@ public class VocabularyServiceImpl implements VocabularyService {
                     log.info("Stworzono nowe zdania: {}, dla slowka: {}", sentenceDto.id(), createWordDto.getWord());
                 }
             }
-            
-            SendWordDto eventPayload = new SendWordDto(
+
+            SendWordFromKafkaDto eventPayload = new SendWordFromKafkaDto(
                     aggregateId,
                     createWordDto.getWord(),
                     createWordDto.getTranslations(),
@@ -195,15 +195,19 @@ public class VocabularyServiceImpl implements VocabularyService {
                     deckId
             );
             log.info("Stworzono słówko z aggregateId: {}", aggregateId);
-            
+            AggregateType aggregateType = deckId != null
+                    ? AggregateType.VOCABULARYFORDECK
+                    : AggregateType.VOCABULARY;
+
             Outbox outbox = entityToOutboxEntityMapper.map(
                     aggregateId,
-                    AggregateType.VOCABULARY,
+                    aggregateType,
                     eventPayload,
                     EventType.CREATE_VOCABULARY,
                     deckId
             );
             outboxRepository.save(outbox);
+
             log.info("Stworzono słówko: ID: {}, słowo: '{}', tłumaczenia: {}, powiązane zdania: {}",
                     eventPayload.id(), eventPayload.word(), eventPayload.translations(), eventPayload.sentenceIds());
             return eventPayload;
@@ -238,7 +242,7 @@ public class VocabularyServiceImpl implements VocabularyService {
      * @return lista SendWordDto z pomyślnie utworzonymi słówkami (może być mniejsza niż wejściowa)
      * @throws IllegalArgumentException gdy lista jest null lub pusta
      */
-    private List<SendWordDto> createVocabulariesInternal(List<CreateWordDto> createWordDtos, String deckId) {
+    private List<SendWordFromKafkaDto> createVocabulariesInternal(List<CreateWordDto> createWordDtos, String deckId) {
         log.info("Rozpoczęcie tworzenia {} słówek", createWordDtos.size());
         
         if (createWordDtos == null || createWordDtos.isEmpty()) {
@@ -246,13 +250,13 @@ public class VocabularyServiceImpl implements VocabularyService {
             throw new IllegalArgumentException("CreateWordDtos list must not be null or empty");
         }
 
-        List<SendWordDto> createdVocabularies = new ArrayList<>();
+        List<SendWordFromKafkaDto> createdVocabularies = new ArrayList<>();
         List<String> failedWords = new ArrayList<>();
 
         for (int i = 0; i < createWordDtos.size(); i++) {
             CreateWordDto createWordDto = createWordDtos.get(i);
             try {
-                SendWordDto createdWord = createVocabularyInternal(createWordDto, deckId);
+                SendWordFromKafkaDto createdWord = createVocabularyInternal(createWordDto, deckId);
                 createdVocabularies.add(createdWord);
                 log.info("Pomyślnie utworzono słówko {}/{}: '{}'", i + 1, createWordDtos.size(), createWordDto.getWord());
             } catch (Exception e) {
