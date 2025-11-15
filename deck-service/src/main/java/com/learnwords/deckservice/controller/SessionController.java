@@ -175,6 +175,7 @@ public class SessionController {
      * @throws IllegalArgumentException jeśli deckId jest pusty lub brak userId
      * @throws com.learnwords.deckservice.exception.exceptions.DeckNotFoundException jeśli talia nie istnieje
      * @throws com.learnwords.deckservice.exception.exceptions.UserPermissionsMissing jeśli użytkownik nie ma dostępu do talii
+     * @throws com.learnwords.deckservice.exception.exceptions.NoFlashcardsAvailableException jeśli brak dostępnych fiszek do nauki (talia pusta, wszystkie fiszki na max poziomie lub nie pasują do strategii)
      */
     @Operation(
         summary = "Zainicjuj nową sesję nauki",
@@ -188,7 +189,7 @@ public class SessionController {
         ),
         @ApiResponse(
             responseCode = "400",
-            description = "Błędne dane wejściowe lub brak wymaganego nagłówka",
+            description = "Błędne dane wejściowe, brak wymaganego nagłówka lub brak dostępnych fiszek do nauki",
             content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))
         ),
         @ApiResponse(

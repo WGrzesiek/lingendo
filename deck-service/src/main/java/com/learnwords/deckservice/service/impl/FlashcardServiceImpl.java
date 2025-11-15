@@ -2,10 +2,10 @@ package com.learnwords.deckservice.service.impl;
 
 import com.learnwords.common.KafkaGroup;
 import com.learnwords.common.KafkaTopic;
+import com.learnwords.common.dto.SendWordFromKafkaDto;
 import com.learnwords.common.dto.SentenceDto;
 import com.learnwords.common.dto.WordDto;
 import com.learnwords.deckservice.dto.FlashcardDto;
-import com.learnwords.deckservice.dto.GetWordFromKafkaDto;
 import com.learnwords.deckservice.entity.Deck;
 import com.learnwords.deckservice.entity.Flashcard;
 import com.learnwords.deckservice.enums.LearnAlgorithm;
@@ -106,13 +106,13 @@ public class FlashcardServiceImpl implements FlashcardService {
      */
     @Override
     @Transactional
-    @KafkaListener(topics = KafkaTopic.CREATE_VOCABULARY_TOPIC, groupId = KafkaGroup.DECK_SERVICE_GROUP, properties = {
-            "spring.json.value.default.type=com.learnwords.common.dto.WordDto"
+    @KafkaListener(topics = KafkaTopic.CREATE_VOCABULARY_FOR_DECK_TOPIC, groupId = KafkaGroup.DECK_SERVICE_GROUP, properties = {
+            "spring.json.value.default.type=com.learnwords.common.dto.SendWordFromKafkaDto"
     })
-    public void processFlashcardCreateFromKafka(GetWordFromKafkaDto getWordFromKafkaDto, String userId) {
-        log.info("Otrzymano zdarzenie utworzenia słówka - wordId: '{}', deckId: '{}', userId: '{}'", 
+    public void processFlashcardCreateFromKafka(SendWordFromKafkaDto getWordFromKafkaDto, String userId) {
+        log.info("Otrzymano zdarzenie utworzenia słówka - wordId: '{}', deckId: '{}', userId: '{}'",
                 getWordFromKafkaDto.id(), getWordFromKafkaDto.deckId(), userId);
-        
+
         Deck deck = getDeckIfUserHasPermissions(getWordFromKafkaDto.deckId(), userId);
         String flashcardId = UUID.randomUUID().toString();
 
@@ -125,7 +125,7 @@ public class FlashcardServiceImpl implements FlashcardService {
         flashcardRepository.save(flashcard);
         log.info("Utworzono fiszkę - flashcardId: '{}', wordId: '{}', deckId: '{}'", 
                 flashcardId, getWordFromKafkaDto.id(), getWordFromKafkaDto.deckId());
-        
+
         deck.setWordCount(deck.getWordCount() + 1);
         deckRepository.save(deck);
         log.info("Zaktualizowano licznik słówek w talii - deckId: '{}', wordCount: {}", 

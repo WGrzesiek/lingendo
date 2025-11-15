@@ -1,8 +1,8 @@
 package com.learnwords.deckservice.service;
 
+import com.learnwords.common.dto.SendWordFromKafkaDto;
 import com.learnwords.common.dto.WordDto;
 import com.learnwords.deckservice.dto.FlashcardDto;
-import com.learnwords.deckservice.dto.GetWordFromKafkaDto;
 import com.learnwords.deckservice.entity.Flashcard;
 
 import java.util.List;
@@ -46,7 +46,7 @@ import java.util.List;
  */
 public interface FlashcardService {
 
-    public void processFlashcardCreateFromKafka(GetWordFromKafkaDto getWordFromKafkaDto, String userId);
+    public void processFlashcardCreateFromKafka(SendWordFromKafkaDto sendWordFromKafkaDto, String userId);
     public void setInitialFlashcardState(String deckId, Flashcard flashcard, String userId);
     public List<FlashcardDto> getAllFlashcardsFromDeck(String deckId, String userId);
     public List<FlashcardDto> getFlashcardsFromDeckByFilter(String deckId, boolean isLearned, boolean isSkipped, String userId);

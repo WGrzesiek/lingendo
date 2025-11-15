@@ -6,6 +6,7 @@ import com.learnwords.deckservice.entity.Deck;
 import com.learnwords.deckservice.entity.Flashcard;
 import com.learnwords.deckservice.entity.Session;
 import com.learnwords.deckservice.entity.SessionFlashcard;
+import com.learnwords.deckservice.exception.exceptions.NoFlashcardsAvailableException;
 import com.learnwords.deckservice.repository.SessionFlashcardRepository;
 import com.learnwords.deckservice.repository.SessionRepository;
 import com.learnwords.deckservice.service.Algorithm.AbstractAlgorithm;
@@ -96,8 +97,8 @@ public class SessionFlashcardServiceImpl implements SessionFlashcardService {
             log.debug("Przefiltrowano {} fiszek (wyłączono max level)", filteredFlashcards.size());
             
             if (filteredFlashcards.isEmpty()) {
-                log.warn("Brak fiszek do dodania do sesji - wszystkie są na max level");
-                throw new RuntimeException("Brak dostępnych fiszek do nauki w talii");
+                log.warn("Brak fiszek do dodania do sesji - wszystkie są na max level - deckId: '{}'", deck.getId());
+                throw new NoFlashcardsAvailableException(deck.getId(), "wszystkie fiszki są na maksymalnym poziomie nauki");
             }
             
             List<Flashcard> filteredFlashcardsList = new ArrayList<>(filteredFlashcards);

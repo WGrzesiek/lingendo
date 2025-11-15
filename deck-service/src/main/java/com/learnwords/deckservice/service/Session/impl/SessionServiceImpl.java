@@ -16,7 +16,6 @@ import com.learnwords.deckservice.service.Session.FlashcardFetchStrategy.Flashca
 import com.learnwords.deckservice.service.Session.SessionFlashcardService;
 import com.learnwords.deckservice.service.Session.SessionService;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 

@@ -5,7 +5,11 @@ import com.learnwords.deckservice.exception.exceptions.DeckNotFoundException;
 import com.learnwords.deckservice.exception.exceptions.DeckWithThisNameForThisUserAlreadyExistsException;
 import com.learnwords.deckservice.exception.exceptions.FlashcardNotFoundException;
 import com.learnwords.deckservice.exception.exceptions.InvalidFlashcardIdException;
+import com.learnwords.deckservice.exception.exceptions.InvalidSessionIdException;
 import com.learnwords.deckservice.exception.exceptions.InvalidWordDataException;
+import com.learnwords.deckservice.exception.exceptions.NoFlashcardsAvailableException;
+import com.learnwords.deckservice.exception.exceptions.SessionNotActiveException;
+import com.learnwords.deckservice.exception.exceptions.SessionNotFoundException;
 import com.learnwords.deckservice.exception.exceptions.StepWithThisNameNoExist;
 import com.learnwords.deckservice.exception.exceptions.UserPermissionsMissing;
 import lombok.extern.slf4j.Slf4j;
@@ -114,5 +118,33 @@ public class GlobalExceptionHandler {
         log.error("User permissions missing: {}", ex.getMessage());
         ApiErrorResponse errorResponse = new ApiErrorResponse(HttpStatus.FORBIDDEN.value(), ex.getMessage());
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(errorResponse);
+    }
+
+    @ExceptionHandler(NoFlashcardsAvailableException.class)
+    public ResponseEntity<ApiErrorResponse> handleNoFlashcardsAvailableException(NoFlashcardsAvailableException ex) {
+        log.error("No flashcards available: {}", ex.getMessage());
+        ApiErrorResponse errorResponse = new ApiErrorResponse(HttpStatus.BAD_REQUEST.value(), ex.getMessage());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+    }
+
+    @ExceptionHandler(SessionNotFoundException.class)
+    public ResponseEntity<ApiErrorResponse> handleSessionNotFoundException(SessionNotFoundException ex) {
+        log.error("Session not found: {}", ex.getMessage());
+        ApiErrorResponse errorResponse = new ApiErrorResponse(HttpStatus.NOT_FOUND.value(), ex.getMessage());
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
+    }
+
+    @ExceptionHandler(SessionNotActiveException.class)
+    public ResponseEntity<ApiErrorResponse> handleSessionNotActiveException(SessionNotActiveException ex) {
+        log.error("Session not active: {}", ex.getMessage());
+        ApiErrorResponse errorResponse = new ApiErrorResponse(HttpStatus.CONFLICT.value(), ex.getMessage());
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(errorResponse);
+    }
+
+    @ExceptionHandler(InvalidSessionIdException.class)
+    public ResponseEntity<ApiErrorResponse> handleInvalidSessionIdException(InvalidSessionIdException ex) {
+        log.error("Invalid session ID: {}", ex.getMessage());
+        ApiErrorResponse errorResponse = new ApiErrorResponse(HttpStatus.BAD_REQUEST.value(), ex.getMessage());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
     }
 }
