@@ -56,6 +56,12 @@ import java.util.List;
  * 
  * <h2>Endpointy według kategorii:</h2>
  * 
+ * <h3>CRUD Operations:</h3>
+ * <ul>
+ *   <li>POST /api/v1/flashcards - Utwórz nową fiszkę w talii</li>
+ *   <li>DELETE /api/v1/flashcards - Usuń fiszkę z talii</li>
+ * </ul>
+ * 
  * <h3>Pobieranie fiszek:</h3>
  * <ul>
  *   <li>GET /api/v1/flashcards/deck/{deckId} - Wszystkie fiszki z talii</li>
@@ -114,6 +120,134 @@ public class FlashcardController {
 
     public FlashcardController(FlashcardService flashcardService) {
         this.flashcardService = flashcardService;
+    }
+
+    /**
+     * Tworzy nową fiszkę w talii.
+     * 
+     * <p>Dodaje istniejące słówko z Vocabulary Service do talii jako nową fiszkę.
+     * Fiszka jest inicjalizowana z:
+     * <ul>
+     *   <li>Wygenerowanym UUID jako ID</li>
+     *   <li>Przypisanym słówkiem (wordId)</li>
+     *   <li>Początkowym stanem algorytmu nauki (zależnym od algorytmu talii)</li>
+     *   <li>Zerowymi statystykami (correctAnswers=0, totalAttempts=0)</li>
+     *   <li>Statusami learned=false, skipped=false</li>
+     * </ul>
+     * 
+     * <p>Po utworzeniu fiszki licznik słówek w talii (wordCount) jest automatycznie
+     * zwiększany o 1.
+     * 
+     * <p><b>UWAGA:</b> Słówko o podanym wordId musi istnieć w Vocabulary Service.
+     * Dane słówka są pobierane przez gRPC przy pierwszym użyciu fiszki.
+     * 
+     * @param userId ID użytkownika z nagłówka X-User-Id
+     * @param deckId ID talii, do której dodawana jest fiszka
+     * @param wordId ID słówka z Vocabulary Service
+     * @return potwierdzenie utworzenia fiszki
+     * @throws IllegalArgumentException jeśli deckId, wordId lub userId jest pusty
+     * @throws DeckNotFoundException jeśli talia o podanym ID nie istnieje
+     * @throws UserPermissionsMissing jeśli użytkownik nie ma dostępu do talii
+     */
+    @Operation(
+        summary = "Utwórz nową fiszkę w talii",
+        description = "Dodaje istniejące słówko z Vocabulary Service do talii jako nową fiszkę z inicjalizacją stanu algorytmu nauki."
+    )
+    @ApiResponses(value = {
+        @ApiResponse(
+            responseCode = "200",
+            description = "Fiszka utworzona pomyślnie"
+        ),
+        @ApiResponse(
+            responseCode = "400",
+            description = "Nieprawidłowe ID talii lub słówka",
+            content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))
+        ),
+        @ApiResponse(
+            responseCode = "403",
+            description = "Brak dostępu do talii",
+            content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))
+        ),
+        @ApiResponse(
+            responseCode = "404",
+            description = "Talia nie znaleziona",
+            content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))
+        )
+    })
+    @PostMapping
+    public ResponseEntity<Void> createFlashcard(
+            @Parameter(description = "ID użytkownika z nagłówka", required = true, example = "user-123") @RequestHeader(USER_ID_HEADER) String userId,
+            @Parameter(description = "ID talii", required = true, example = "deck-123") @RequestParam String deckId,
+            @Parameter(description = "ID słówka z Vocabulary Service", required = true, example = "word-123") @RequestParam String wordId) {
+        log.debug("Tworzenie fiszki w talii o ID: {} dla użytkownika: {}", deckId, userId);
+        flashcardService.addFlashcardToDeck(deckId, wordId, userId);
+        log.info("Fiszka utworzona pomyślnie w talii {} dla użytkownika {}", deckId, userId);
+        return ResponseEntity.ok().build();
+    }
+
+    /**
+     * Usuwa fiszkę z talii.
+     * 
+     * <p>Trwale usuwa fiszkę z talii wraz z całą jej historią nauki:
+     * <ul>
+     *   <li>Postęp nauki (correctAnswers, totalAttempts)</li>
+     *   <li>Statusy (learned, skipped)</li>
+     *   <li>Stan algorytmu nauki</li>
+     *   <li>Powiązanie z talią</li>
+     * </ul>
+     * 
+     * <p><b>UWAGA:</b> Operacja jest nieodwracalna! Wszystkie dane o postępie
+     * nauki tej fiszki zostaną permanentnie usunięte.
+     * 
+     * <p>Samo słówko (Word) w Vocabulary Service NIE jest usuwane - pozostaje
+     * w systemie i może być użyte w innych taliach lub ponownie dodane.
+     * 
+     * <p>Po usunięciu fiszki licznik słówek w talii (wordCount) jest automatycznie
+     * zmniejszany o 1.
+     * 
+     * @param userId ID użytkownika z nagłówka X-User-Id
+     * @param deckId ID talii, z której usuwana jest fiszka
+     * @param flashcardId ID fiszki do usunięcia
+     * @return potwierdzenie usunięcia fiszki
+     * @throws IllegalArgumentException jeśli deckId, flashcardId lub userId jest pusty
+     * @throws DeckNotFoundException jeśli talia o podanym ID nie istnieje
+     * @throws FlashcardNotFoundException jeśli fiszka o podanym ID nie istnieje
+     * @throws UserPermissionsMissing jeśli użytkownik nie ma dostępu do talii lub fiszki
+     */
+    @Operation(
+        summary = "Usuń fiszkę z talii",
+        description = "Trwale usuwa fiszkę z talii wraz z całą historią nauki. Słówko w Vocabulary Service pozostaje niezmienione."
+    )
+    @ApiResponses(value = {
+        @ApiResponse(
+            responseCode = "200",
+            description = "Fiszka usunięta pomyślnie"
+        ),
+        @ApiResponse(
+            responseCode = "400",
+            description = "Nieprawidłowe ID talii lub fiszki",
+            content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))
+        ),
+        @ApiResponse(
+            responseCode = "403",
+            description = "Brak dostępu do talii lub fiszki",
+            content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))
+        ),
+        @ApiResponse(
+            responseCode = "404",
+            description = "Talia lub fiszka nie znaleziona",
+            content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))
+        )
+    })
+    @DeleteMapping
+    public ResponseEntity<Void> deleteFlashcard(
+            @Parameter(description = "ID użytkownika z nagłówka", required = true, example = "user-123") @RequestHeader(USER_ID_HEADER) String userId,
+            @Parameter(description = "ID talii", required = true, example = "deck-123") @RequestParam String deckId,
+            @Parameter(description = "ID fiszki do usunięcia", required = true, example = "flashcard-123") @RequestParam String flashcardId) {
+        log.debug("Usuwanie fiszki o ID: {} z talii o ID: {} dla użytkownika: {}", flashcardId, deckId, userId);
+        flashcardService.removeFlashcardFromDeck(deckId, flashcardId, userId);
+        log.info("Fiszka {} usunięta pomyślnie z talii {} dla użytkownika {}", flashcardId, deckId, userId);
+        return ResponseEntity.ok().build();
     }
 
     /**

@@ -350,6 +350,32 @@ public class SessionFlashcardServiceImpl implements SessionFlashcardService {
         return session;
     }
 
+    /**
+     * Usuwa fiszkę z sesji.
+     *
+     * <p>Sprawdza czy fiszka jest przypisana do sesji i usuwa relację
+     * SessionFlashcard z bazy.
+     *
+     * @param sessionId ID sesji
+     * @param flashcardId ID fiszki do usunięcia
+     * @throws IllegalArgumentException jeśli sessionId lub flashcardId jest null/pusty
+     * @throws RuntimeException jeśli fiszka nie jest w sesji, sesja nie istnieje lub błąd DB
+     */
+    @Override
+    public void removeFlashcardFromSession(String sessionId, String flashcardId, String userId) {
+        log.debug("Usuwanie fiszki {} z sesji {}", flashcardId, sessionId);
+        getSessionIfUserHasPermissions(sessionId, userId);
+
+        SessionFlashcard sessionFlashcard = sessionFlashcardRepository
+                .findBySessionIdAndFlashcardId(sessionId, flashcardId)
+                .orElseThrow(() -> new RuntimeException(
+                        "Fiszka " + flashcardId + " nie jest w sesji " + sessionId));
+
+        sessionFlashcardRepository.delete(sessionFlashcard);
+
+        log.info("Pomyślnie usunięto fiszkę {} z sesji {}", flashcardId, sessionId);
+    }
+
 
     /**
      * Mapuje Proto Word (z gRPC) na domenowy WordDto.

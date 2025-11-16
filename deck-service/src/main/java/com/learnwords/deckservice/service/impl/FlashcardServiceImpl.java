@@ -423,6 +423,113 @@ public class FlashcardServiceImpl implements FlashcardService {
     }
 
     /**
+     * Dodaje nową fiszkę do talii.
+     * 
+     * <p>Tworzy nową fiszkę łączącą talię ze słówkiem z Vocabulary Service.
+     * Proces tworzenia fiszki:
+     * <ol>
+     *   <li>Waliduje uprawnienia użytkownika do talii</li>
+     *   <li>Generuje UUID dla nowej fiszki</li>
+     *   <li>Tworzy encję Flashcard z wordId</li>
+     *   <li>Inicjalizuje stan algorytmu nauki (zależny od algorytmu talii)</li>
+     *   <li>Zapisuje fiszkę do bazy</li>
+     *   <li>Inkrementuje licznik słówek w talii (wordCount)</li>
+     * </ol>
+     * 
+     * <p>Nowa fiszka jest inicjalizowana z:
+     * <ul>
+     *   <li>correctAnswers = 0</li>
+     *   <li>totalAttempts = 0</li>
+     *   <li>learned = false</li>
+     *   <li>skipped = false</li>
+     *   <li>Stan algorytmu = początkowy (serializowany JSON)</li>
+     * </ul>
+     * 
+     * <p>Transakcja zapewnia atomowość - albo fiszka zostanie utworzona
+     * i licznik zaktualizowany, albo rollback w przypadku błędu.
+     * 
+     * @param deckId ID talii, do której dodawana jest fiszka
+     * @param wordId ID słówka z Vocabulary Service
+     * @param userId ID użytkownika wykonującego operację
+     * @throws IllegalArgumentException jeśli deckId, wordId lub userId jest null lub pusty
+     * @throws DeckNotFoundException jeśli talia o podanym ID nie istnieje
+     * @throws UserPermissionsMissing jeśli użytkownik nie ma uprawnień do talii
+     */
+    @Override
+    @Transactional
+    public void addFlashcardToDeck(String deckId, String wordId, String userId) {
+        log.debug("Dodawanie fiszki do talii - deckId: '{}', wordId: '{}', userId: '{}'", deckId, wordId, userId);
+
+        Deck deck = getDeckIfUserHasPermissions(deckId, userId);
+        String flashcardId = UUID.randomUUID().toString();
+
+        Flashcard flashcard = Flashcard.builder()
+                .id(flashcardId)
+                .wordId(wordId)
+                .deck(deck)
+                .build();
+        setInitialFlashcardState(wordId, flashcard, deck.getUserId());
+        flashcardRepository.save(flashcard);
+        log.info("Utworzono fiszkę - flashcardId: '{}', wordId: '{}', deckId: '{}'",
+                flashcardId, wordId, deckId);
+
+        deck.setWordCount(deck.getWordCount() + 1);
+        deckRepository.save(deck);
+        log.info("Zaktualizowano licznik słówek w talii - deckId: '{}', wordCount: {}",
+                deckId, deck.getWordCount());
+
+    }
+
+    /**
+     * Usuwa fiszkę z talii.
+     * 
+     * <p>Trwale usuwa fiszkę z bazy danych wraz z całą historią nauki.
+     * Proces usuwania:
+     * <ol>
+     *   <li>Waliduje uprawnienia użytkownika do talii</li>
+     *   <li>Waliduje uprawnienia użytkownika do fiszki</li>
+     *   <li>Usuwa fiszkę z bazy danych</li>
+     *   <li>Dekrementuje licznik słówek w talii (wordCount)</li>
+     * </ol>
+     * 
+     * <p><b>UWAGA:</b> Operacja jest nieodwracalna! Usunięta zostaje:
+     * <ul>
+     *   <li>Encja fiszki (Flashcard)</li>
+     *   <li>Historia nauki (correctAnswers, totalAttempts)</li>
+     *   <li>Statusy (learned, skipped)</li>
+     *   <li>Stan algorytmu nauki</li>
+     * </ul>
+     * 
+     * <p>Samo słówko (Word) w Vocabulary Service pozostaje niezmienione
+     * i może być użyte w innych taliach.
+     * 
+     * <p>Transakcja zapewnia atomowość - albo fiszka zostanie usunięta
+     * i licznik zaktualizowany, albo rollback w przypadku błędu.
+     * 
+     * @param deckId ID talii, z której usuwana jest fiszka
+     * @param flashcardId ID fiszki do usunięcia
+     * @param userId ID użytkownika wykonującego operację
+     * @throws IllegalArgumentException jeśli deckId, flashcardId lub userId jest null lub pusty
+     * @throws DeckNotFoundException jeśli talia o podanym ID nie istnieje
+     * @throws FlashcardNotFoundException jeśli fiszka o podanym ID nie istnieje
+     * @throws UserPermissionsMissing jeśli użytkownik nie ma uprawnień do talii lub fiszki
+     */
+    @Override
+    @Transactional
+    public void removeFlashcardFromDeck(String deckId, String flashcardId, String userId){
+        log.debug("Usuwanie fiszki z talii - deckId: '{}', flashcardId: '{}', userId: '{}'", deckId, flashcardId, userId);
+        Deck deck = getDeckIfUserHasPermissions(deckId, userId);
+        Flashcard flashcard = getFlashcardIfUserHasPermissions(flashcardId, userId);
+        flashcardRepository.delete(flashcard);
+        log.info("Usunięto fiszkę z talii - flashcardId: '{}', deckId: '{}'", flashcardId, deckId);
+        deck.setWordCount(deck.getWordCount() - 1);
+        deckRepository.save(deck);
+        log.info("Zaktualizowano licznik słówek w talii po usunięciu fiszki - deckId: '{}', wordCount: {}",
+                deckId, deck.getWordCount());
+
+    }
+
+    /**
      * Mapuje listę fiszek wraz z danymi słówek na FlashcardDto.
      * 
      * <p>Wspólna metoda pomocnicza używana przez {@link #getAllFlashcardsFromDeck}
