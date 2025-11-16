@@ -1,8 +1,8 @@
 package com.learnwords.vocabularyreadservice.controller;
 
 import com.learnwords.common.dto.OnlyWordDto;
-import com.learnwords.common.dto.ResponseVocabularyDto;
 import com.learnwords.common.dto.WordDto;
+import com.learnwords.vocabularyreadservice.exception.ApiErrorResponse;
 import com.learnwords.vocabularyreadservice.service.VocabularyService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -61,8 +61,8 @@ public class VocabularyController {
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Słowo znalezione",
                     content = @Content(schema = @Schema(implementation = WordDto.class))),
-        @ApiResponse(responseCode = "404", description = "Słowo nie znalezione"),
-        @ApiResponse(responseCode = "401", description = "Brak autoryzacji")
+        @ApiResponse(responseCode = "400", description = "Nieprawidłowe ID", content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))),
+        @ApiResponse(responseCode = "404", description = "Słowo nie znalezione", content = @Content(schema = @Schema(implementation = ApiErrorResponse.class)))
     })
     @GetMapping("/{id}")
     public ResponseEntity<WordDto> getWordById(
@@ -89,21 +89,16 @@ public class VocabularyController {
                description = "Zwraca pełne dane wielu słów wraz z tłumaczeniami i przykładowymi zdaniami")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Lista słów pobrana pomyślnie"),
-        @ApiResponse(responseCode = "400", description = "Nieprawidłowe parametry"),
-        @ApiResponse(responseCode = "401", description = "Brak autoryzacji")
+        @ApiResponse(responseCode = "400", description = "Nieprawidłowe parametry", content = @Content(schema = @Schema(implementation = ApiErrorResponse.class)))
     })
     @GetMapping("/batch")
     public ResponseEntity<List<WordDto>> getWordsByIds(
             @Parameter(description = "Lista ID słów", required = true)
             @RequestParam List<String> ids) {
         log.info("Żądanie pobrania {} słów", ids.size());
-        
-        if (ids == null || ids.isEmpty()) {
-            log.warn("Pusta lista ID słów");
-            return ResponseEntity.badRequest().build();
-        }
-        
+
         List<WordDto> words = vocabularyService.getWordsByIds(ids);
+
         log.info("Zwrócono {} słów z {} żądanych", words.size(), ids.size());
         
         return ResponseEntity.ok(words);
@@ -119,8 +114,7 @@ public class VocabularyController {
                description = "Zwraca tylko ID i słowo bez tłumaczeń i zdań (lepsza wydajność)")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Lista słów pobrana pomyślnie"),
-        @ApiResponse(responseCode = "400", description = "Nieprawidłowe parametry"),
-        @ApiResponse(responseCode = "401", description = "Brak autoryzacji")
+        @ApiResponse(responseCode = "400", description = "Nieprawidłowe parametry", content = @Content(schema = @Schema(implementation = ApiErrorResponse.class)))
     })
     @GetMapping("/only-words")
     public ResponseEntity<List<OnlyWordDto>> getOnlyWordsByIds(
@@ -128,12 +122,8 @@ public class VocabularyController {
             @RequestParam List<String> ids) {
         log.info("Żądanie pobrania minimalnych danych {} słów", ids.size());
         
-        if (ids == null || ids.isEmpty()) {
-            log.warn("Pusta lista ID słów");
-            return ResponseEntity.badRequest().build();
-        }
-        
         List<OnlyWordDto> words = vocabularyService.getOnlyWordsByIds(ids);
+
         log.info("Zwrócono {} słów z {} żądanych", words.size(), ids.size());
         
         return ResponseEntity.ok(words);

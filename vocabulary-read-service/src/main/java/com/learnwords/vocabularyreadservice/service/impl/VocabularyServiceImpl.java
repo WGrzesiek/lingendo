@@ -1,11 +1,10 @@
 package com.learnwords.vocabularyreadservice.service.impl;
 
 import com.learnwords.common.dto.OnlyWordDto;
-import com.learnwords.common.dto.ResponseVocabularyDto;
 import com.learnwords.common.dto.SentenceDto;
 import com.learnwords.common.dto.WordDto;
-import com.learnwords.vocabularyreadservice.exception.exceptions.SentenceNotFoundException;
-import com.learnwords.vocabularyreadservice.exception.exceptions.VocabularyNotFoundException;
+import com.learnwords.vocabularyreadservice.exception.exceptions.InvalidVocabularyIdException;
+import com.learnwords.vocabularyreadservice.entity.Vocabulary;
 import com.learnwords.vocabularyreadservice.repository.SentenceAIRepository;
 import com.learnwords.vocabularyreadservice.repository.SentenceRepository;
 import com.learnwords.vocabularyreadservice.repository.VocabularyRepository;
@@ -30,9 +29,6 @@ import java.util.Optional;
  *   <li>Integracja ze zdaniami zwykłymi i generowanymi przez AI</li>
  * </ul>
  * 
- * <p><b>Uwaga:</b> Starsze metody zwracające {@link ResponseVocabularyDto} są oznaczone
- * jako deprecated. Preferuj użycie metod zwracających {@link WordDto}.
- * 
  * @author Grzegorz Wawrzeń
  * @version 2.0
  * @since 2025-11-11
@@ -55,164 +51,111 @@ public class VocabularyServiceImpl implements VocabularyService {
     }
 
     /**
-     * Pobiera słownictwo według ID (stara wersja).
-     * 
-     * @param id ID słowa do pobrania
-     * @return Optional zawierający ResponseVocabularyDto z podstawowymi danymi słowa
-     * @throws VocabularyNotFoundException gdy ID jest null lub puste
-     * @deprecated Od wersji 2.0. Użyj {@link #getWordById(String)} zamiast tego.
-     *             Ta metoda zwraca tylko ID zdań zamiast pełnych obiektów.
-     */
-    @Deprecated(since = "2.0", forRemoval = true)
-    public Optional<ResponseVocabularyDto> getVocabularyById(String id) {
-        if (id == null || id.isBlank())
-            throw new VocabularyNotFoundException(id);
-        log.info("Pobieranie słowa o id: {}", id);
-        return vocabularyRepository.findById(id).map(vocabulary -> new ResponseVocabularyDto(vocabulary.getId(), vocabulary.getWord(), vocabulary.getTranslations(), vocabulary.getSentenceIds()));
-    }
-
-    /**
-     * Pobiera listę słownictwa według listy ID (stara wersja).
-     * 
-     * @param ids Lista ID słów do pobrania
-     * @return Lista ResponseVocabularyDto z podstawowymi danymi słów
-     * @throws IllegalArgumentException gdy lista ids jest null lub pusta
-     * @deprecated Od wersji 2.0. Użyj {@link #getWordsByIds(List)} zamiast tego.
-     *             Ta metoda zwraca tylko ID zdań zamiast pełnych obiektów.
-     */
-    @Deprecated(since = "2.0", forRemoval = true)
-    public List<ResponseVocabularyDto> getVocabulariesByIds(List<String> ids) {
-        if(ids == null || ids.isEmpty())
-            throw new IllegalArgumentException("ids must not be blank");
-        log.info("Pobieranie słów o id: {}", ids);
-        return vocabularyRepository.findAllById(ids).stream()
-                .map(vocabulary -> new ResponseVocabularyDto(vocabulary.getId(),vocabulary.getWord(), vocabulary.getTranslations(), vocabulary.getSentenceIds()))
-                .toList();
-    }
-
-    /**
      * Pobiera minimalne dane słów (tylko ID i słowo) według listy ID.
-     * 
-     * <p>Ta metoda jest przydatna gdy potrzebne są tylko podstawowe informacje
-     * o słowach bez tłumaczeń i przykładowych zdań (lepsza wydajność).
      * 
      * @param ids Lista ID słów do pobrania
      * @return Lista OnlyWordDto zawierająca tylko ID i słowo
-     * @throws IllegalArgumentException gdy lista ids jest null lub pusta
-     * @deprecated Od wersji 2.0. Ta metoda pozostanie, ale preferuj użycie {@link #getWordsByIds(List)}
-     *             dla pełnych danych lub pozostaw tę metodę dla lekkich zapytań.
+     * @throws InvalidVocabularyIdException gdy lista ids jest null lub pusta
      */
-    @Deprecated(since = "2.0", forRemoval = false)
     public List<OnlyWordDto> getOnlyWordsByIds(List<String> ids) {
-        if (ids == null || ids.isEmpty())
-            throw new IllegalArgumentException("id must not be blank");
-        log.info("Pobieranie słów o id: {}", ids);
+        validateIds(ids);
+        log.info("Pobieranie {} minimalnych słów", ids.size());
         return vocabularyRepository.findAllById(ids).stream()
-                .map(v ->new OnlyWordDto(v.getId(), v.getWord())).toList();
+                .map(v -> new OnlyWordDto(v.getId(), v.getWord()))
+                .toList();
     }
 
     /**
      * Pobiera pełne dane słowa według ID.
      * 
-     * <p>Metoda zwraca kompletny obiekt {@link WordDto} zawierający:
-     * <ul>
-     *   <li>ID i słowo</li>
-     *   <li>Listę tłumaczeń</li>
-     *   <li>Pełne obiekty zdań przykładowych (nie tylko ID)</li>
-     *   <li>Pełne obiekty zdań wygenerowanych przez AI</li>
-     * </ul>
-     * 
      * @param id ID słowa do pobrania
      * @return Optional zawierający WordDto z pełnymi danymi słowa
-     * @throws VocabularyNotFoundException gdy ID jest null lub puste
+     * @throws InvalidVocabularyIdException gdy ID jest null lub puste
      * @see WordDto
      * @see SentenceDto
      */
     @Override
     public Optional<WordDto> getWordById(String id) {
-        if (id == null || id.isBlank())
-            throw new VocabularyNotFoundException(id);
-
+        validateId(id);
         log.info("Pobieranie pełnego słowa o id: {}", id);
-
-        return vocabularyRepository.findById(id).map(vocabulary -> {
-            // Pobieranie normalnych zdań - tylko jeśli lista nie jest null i nie jest pusta
-            List<SentenceDto> sentences = List.of();
-            if (vocabulary.getSentenceIds() != null && !vocabulary.getSentenceIds().isEmpty()) {
-                sentences = sentenceRepository.findAllById(vocabulary.getSentenceIds())
-                        .stream()
-                        .map(s -> new SentenceDto(s.getId(), s.getSentence(), s.getTranslation()))
-                        .toList();
-            }
-
-            // Pobieranie zdań AI - tylko jeśli lista nie jest null i nie jest pusta
-            List<SentenceDto> sentencesAI = List.of();
-            if (vocabulary.getSentenceAIds() != null && !vocabulary.getSentenceAIds().isEmpty()) {
-                sentencesAI = sentenceAIRepository.findAllById(vocabulary.getSentenceAIds())
-                        .stream()
-                        .map(s -> new SentenceDto(s.getId(), s.getSentenceAI(), s.getTranslationAI()))
-                        .toList();
-            }
-
-            return new WordDto(
-                    vocabulary.getId(),
-                    vocabulary.getWord(),
-                    vocabulary.getTranslations(),
-                    sentences,
-                    sentencesAI
-            );
-        });
+        return vocabularyRepository.findById(id).map(this::mapToWordDto);
     }
 
     /**
      * Pobiera pełne dane wielu słów według listy ID.
      * 
-     * <p>Metoda zwraca listę kompletnych obiektów {@link WordDto}, każdy zawierający:
-     * <ul>
-     *   <li>ID i słowo</li>
-     *   <li>Listę tłumaczeń</li>
-     *   <li>Pełne obiekty zdań przykładowych</li>
-     *   <li>Pełne obiekty zdań wygenerowanych przez AI</li>
-     * </ul>
-     * 
      * @param ids Lista ID słów do pobrania
      * @return Lista WordDto z pełnymi danymi słów
-     * @throws IllegalArgumentException gdy lista ids jest null lub pusta
+     * @throws InvalidVocabularyIdException gdy lista ids jest null lub pusta
      * @see WordDto
      * @see SentenceDto
      */
     @Override
     public List<WordDto> getWordsByIds(List<String> ids) {
-        if (ids == null || ids.isEmpty())
-            throw new IllegalArgumentException("ids must not be empty");
-
+        validateIds(ids);
         log.info("Pobieranie {} pełnych słów", ids.size());
-
         return vocabularyRepository.findAllById(ids).stream()
-                .map(vocabulary -> {
-                    List<SentenceDto> sentences = List.of();
-                    if (vocabulary.getSentenceIds() != null && !vocabulary.getSentenceIds().isEmpty()) {
-                        sentences = sentenceRepository.findAllById(vocabulary.getSentenceIds())
-                                .stream()
-                                .map(s -> new SentenceDto(s.getId(), s.getSentence(), s.getTranslation()))
-                                .toList();
-                    }
-                    List<SentenceDto> sentencesAI = List.of();
-                    if (vocabulary.getSentenceAIds() != null && !vocabulary.getSentenceAIds().isEmpty()) {
-                        sentencesAI = sentenceAIRepository.findAllById(vocabulary.getSentenceAIds())
-                                .stream()
-                                .map(s -> new SentenceDto(s.getId(), s.getSentenceAI(), s.getTranslationAI()))
-                                .toList();
-                    }
+                .map(this::mapToWordDto)
+                .toList();
+    }
 
-                    return new WordDto(
-                            vocabulary.getId(),
-                            vocabulary.getWord(),
-                            vocabulary.getTranslations(),
-                            sentences,
-                            sentencesAI
-                    );
-                })
+    /**
+     * Waliduje pojedyncze ID słownictwa.
+     */
+    private void validateId(String id) {
+        if (id == null || id.isBlank()) {
+            throw new InvalidVocabularyIdException();
+        }
+    }
+
+    /**
+     * Waliduje listę ID słownictwa.
+     */
+    private void validateIds(List<String> ids) {
+        if (ids == null || ids.isEmpty()) {
+            throw new InvalidVocabularyIdException("Lista ID słownictwa nie może być pusta");
+        }
+    }
+
+    /**
+     * Mapuje encję Vocabulary na DTO WordDto z pełnymi danymi.
+     */
+    private WordDto mapToWordDto(Vocabulary vocabulary) {
+        List<SentenceDto> sentences = fetchSentences(vocabulary.getSentenceIds());
+        List<SentenceDto> sentencesAI = fetchSentencesAI(vocabulary.getSentenceAIds());
+
+        return new WordDto(
+                vocabulary.getId(),
+                vocabulary.getWord(),
+                vocabulary.getTranslations(),
+                sentences,
+                sentencesAI
+        );
+    }
+
+    /**
+     * Pobiera zwykłe zdania przykładowe według listy ID.
+     */
+    private List<SentenceDto> fetchSentences(List<String> sentenceIds) {
+        if (sentenceIds == null || sentenceIds.isEmpty()) {
+            return List.of();
+        }
+        return sentenceRepository.findAllById(sentenceIds)
+                .stream()
+                .map(s -> new SentenceDto(s.getId(), s.getSentence(), s.getTranslation()))
+                .toList();
+    }
+
+    /**
+     * Pobiera zdania wygenerowane przez AI według listy ID.
+     */
+    private List<SentenceDto> fetchSentencesAI(List<String> sentenceAIds) {
+        if (sentenceAIds == null || sentenceAIds.isEmpty()) {
+            return List.of();
+        }
+        return sentenceAIRepository.findAllById(sentenceAIds)
+                .stream()
+                .map(s -> new SentenceDto(s.getId(), s.getSentenceAI(), s.getTranslationAI()))
                 .toList();
     }
 }

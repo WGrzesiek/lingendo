@@ -1,11 +1,12 @@
 package com.learnwords.vocabularyreadservice.service.grpc.impl;
 
-import com.learnwords.common.dto.ResponseVocabularyDto;
+import com.learnwords.common.dto.OnlyWordDto;
 import com.learnwords.common.dto.WordDto;
 import com.learnwords.sentence.v1.SentenceResponse;
 import com.learnwords.vocabulary.v1.*;
 import com.learnwords.vocabularyreadservice.service.VocabularyService;
 
+import com.learnwords.vocabularyreadservice.service.grpc.VocabularyServiceGrpc;
 import io.grpc.Status;
 import io.grpc.stub.StreamObserver;
 import lombok.extern.slf4j.Slf4j;
@@ -30,7 +31,7 @@ import java.util.Optional;
  */
 @Slf4j
 @GrpcService
-public class VocabularyServiceGrpcImpl extends VocabularyReadServiceGrpc.VocabularyReadServiceImplBase  {
+public class VocabularyServiceGrpcImpl extends VocabularyReadServiceGrpc.VocabularyReadServiceImplBase  implements VocabularyServiceGrpc {
 
 
     private final VocabularyService vocabularyService;
@@ -38,8 +39,6 @@ public class VocabularyServiceGrpcImpl extends VocabularyReadServiceGrpc.Vocabul
     public VocabularyServiceGrpcImpl(VocabularyService vocabularyService) {
         this.vocabularyService = vocabularyService;
     }
-
-    // ===== NOWE METODY (zwracają Word z pełnymi danymi) =====
 
     /**
      * Pobiera pełne dane pojedynczego słowa według ID.
@@ -112,6 +111,41 @@ public class VocabularyServiceGrpcImpl extends VocabularyReadServiceGrpc.Vocabul
     }
 
     /**
+     * Pobiera minimalne dane wielu słów według listy ID.
+     *
+     * @param request Request zawierający listę ID słów
+     * @param responseObserver Observer do wysłania odpowiedzi
+     */
+    @Override
+    public void batchGetOnlyWord(BatchGetVocabulariesRequest request, StreamObserver<BatchGetOnlyWordResponse> responseObserver) {
+        log.info("Pobieranie {} minimalnych słów", request.getIdsCount());
+
+        try {
+            List<OnlyWordDto> onlyWordsDto = vocabularyService.getOnlyWordsByIds(request.getIdsList());
+
+            BatchGetOnlyWordResponse.Builder builder = BatchGetOnlyWordResponse.newBuilder();
+            onlyWordsDto.forEach(dto ->
+                builder.addWord(
+                    OnlyWord.newBuilder()
+                        .setId(dto.id())
+                        .setWord(dto.word())
+                        .build()
+            ));
+
+            responseObserver.onNext(builder.build());
+            responseObserver.onCompleted();
+            log.info("Pomyślnie pobrano {} minimalnych słów", onlyWordsDto.size());
+        } catch (Exception e) {
+            log.error("Błąd podczas pobierania minimalnych słów", e);
+            responseObserver.onError(
+                Status.INTERNAL
+                    .withDescription("Internal error: " + e.getMessage())
+                    .asRuntimeException()
+            );
+        }
+    }
+
+    /**
      * Konwertuje {@link WordDto} na protobuf {@link Word}.
      * 
      * @param dto WordDto z serwisu
@@ -141,38 +175,6 @@ public class VocabularyServiceGrpcImpl extends VocabularyReadServiceGrpc.Vocabul
                     .toList()
                 : new ArrayList<>())
             .build();
-    }
-
-    // ===== STARE METODY (DEPRECATED) =====
-
-    /**
-     * Pobiera słowa według listy ID (stara wersja - tylko ID zdań).
-     * 
-     * @param request Request zawierający listę ID
-     * @param response Observer do wysłania odpowiedzi
-     * @deprecated Od wersji 2.0. Użyj {@link #batchGetWords(BatchGetWordsRequest, StreamObserver)} zamiast tego.
-     */
-    @Deprecated(since = "2.0", forRemoval = true)
-    @Override
-    public void batchGetVocabularies(BatchGetVocabulariesRequest request, StreamObserver<BatchGetVocabulariesResponse> response){
-        log.info("Pobieranie słów o id: {}", request.getIdsList());
-        List<ResponseVocabularyDto> vocabulariesDto = vocabularyService.getVocabulariesByIds(request.getIdsList());
-        BatchGetVocabulariesResponse.Builder builder = BatchGetVocabulariesResponse.newBuilder();
-        try {
-            vocabulariesDto.forEach(dto -> builder.addVocabularies(Vocabulary.newBuilder()
-                    .setId(dto.id())
-                    .setWord(dto.word())
-                    .addAllTranslations(dto.translation() != null ? dto.translation() : new ArrayList<>())
-                    .addAllSentenceIds(dto.sentenceIds() != null ? dto.sentenceIds() : new ArrayList<>())
-                    .build()));
-
-            response.onNext(builder.build());
-            response.onCompleted();
-        }
-        catch (Exception e){
-            log.error("Błąd podczas pobierania słów", e);
-            response.onError(e);
-        }
     }
 
 

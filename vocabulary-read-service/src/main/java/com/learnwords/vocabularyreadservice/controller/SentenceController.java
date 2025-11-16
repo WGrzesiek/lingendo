@@ -59,8 +59,8 @@ public class SentenceController {
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Zdanie znalezione",
                     content = @Content(schema = @Schema(implementation = ResponseSentenceDto.class))),
-        @ApiResponse(responseCode = "404", description = "Zdanie nie znalezione"),
-        @ApiResponse(responseCode = "401", description = "Brak autoryzacji")
+        @ApiResponse(responseCode = "400", description = "Nieprawidłowe ID"),
+        @ApiResponse(responseCode = "404", description = "Zdanie nie znalezione")
     })
     @GetMapping("/{id}")
     public ResponseEntity<ResponseSentenceDto> getSentenceById(
@@ -87,8 +87,7 @@ public class SentenceController {
                description = "Zwraca listę przykładowych zdań wraz z tłumaczeniami")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Lista zdań pobrana pomyślnie"),
-        @ApiResponse(responseCode = "400", description = "Nieprawidłowe parametry"),
-        @ApiResponse(responseCode = "401", description = "Brak autoryzacji")
+        @ApiResponse(responseCode = "400", description = "Nieprawidłowe parametry")
     })
     @GetMapping("/batch")
     public ResponseEntity<List<ResponseSentenceDto>> getSentencesByIds(
@@ -125,8 +124,7 @@ public class SentenceController {
                description = "Zwraca listę zdań według strategii pobierania (NORMAL, AI, RANDOM)")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Lista zdań pobrana pomyślnie"),
-        @ApiResponse(responseCode = "400", description = "Nieprawidłowe parametry"),
-        @ApiResponse(responseCode = "401", description = "Brak autoryzacji")
+        @ApiResponse(responseCode = "400", description = "Nieprawidłowe parametry")
     })
     @GetMapping
     public ResponseEntity<List<ResponseSentenceDto>> getSentences(
