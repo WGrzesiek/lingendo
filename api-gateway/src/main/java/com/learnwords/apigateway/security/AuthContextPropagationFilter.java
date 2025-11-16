@@ -12,7 +12,6 @@ import reactor.core.publisher.Mono;
 
 @Component
 public class AuthContextPropagationFilter implements GlobalFilter, Ordered {
-//NOTE zaraz nie bedzie potrzebne bo w redis siedzi info o userze
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
         // Po Spring Security Authentication jest już na exchange/principal
@@ -24,30 +23,18 @@ public class AuthContextPropagationFilter implements GlobalFilter, Ordered {
                         return chain.filter(exchange);
                     }
 
-                    // Wyciągnij co potrzebujesz z JWT
-                    String userId   = jwt.getSubject();                          // "sub"
-                    String clientId = jwt.getClaimAsString("user_id");         // albo inny claim
-//                    var roles       = jwt.getClaimAsStringList("roles");         // przykład listy
-
+                    String userId   = jwt.getSubject();
                     ServerHttpRequest mutatedReq = exchange.getRequest().mutate()
                             .headers(h -> {
                                 // Nie ufaj klientowi -> czyść potencjalne spoofowane nagłówki
                                 h.remove("X-User-Id");
-                                h.remove("X-Client-Id");
-//                                h.remove("X-Roles");
 
                                 if (userId != null)   h.add("X-User-Id", userId);
-                                if (clientId != null) h.add("X-Client-Id", clientId);
-//                                if (roles != null && !roles.isEmpty()) {
-//                                    h.add("X-Roles", String.join(",", roles));
-//                                }
-                                // opcjonalnie trace-id/log-correlation tutaj
                             })
                             .build();
 
                     return chain.filter(exchange.mutate().request(mutatedReq).build());
                 })
-                // brak principal? przepuść dalej bez modyfikacji
                 .switchIfEmpty(chain.filter(exchange));
     }
 
