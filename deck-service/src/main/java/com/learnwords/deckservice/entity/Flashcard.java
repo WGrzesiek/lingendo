@@ -6,6 +6,7 @@ import lombok.*;
 import org.hibernate.annotations.Type;
 
 import java.time.Instant;
+import java.util.List;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -22,6 +23,9 @@ public class Flashcard {
 
     @Column(name = "word_id", nullable = false, length = 36)
     private String wordId;
+
+    @OneToMany(mappedBy = "flashcard", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<SessionFlashcard> sessionFlashcards;
 
     @Column(name = "correct_answers")
     @Builder.Default
