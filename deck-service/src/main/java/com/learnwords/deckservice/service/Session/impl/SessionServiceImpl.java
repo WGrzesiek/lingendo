@@ -84,7 +84,7 @@ public class SessionServiceImpl implements SessionService {
                 deckId, userId, flashcardFetchStrategy.getClass().getSimpleName());
         
         Deck deck = getDeckIfUserHasPermissions(deckId, userId);
-        int flashcardsCount = sessionFlashcardService.getTotalFlashcardsInSession(deckId);
+        int flashcardsCount = sessionFlashcardService.getTotalFlashcardsInSession(deckId, userId);
         
         log.debug("Liczba fiszek w sesji - deckId: '{}', count: {}", deckId, flashcardsCount);
 
@@ -100,7 +100,7 @@ public class SessionServiceImpl implements SessionService {
         sessionRepository.save(session);
         log.debug("Zapisano sesję w bazie - sessionId: '{}'", session.getId());
 
-        sessionFlashcardService.addFlashcardsToSession(session, deck, flashcardFetchStrategy);
+        sessionFlashcardService.addFlashcardsToSession(session, deck, flashcardFetchStrategy, userId);
         log.info("Pomyślnie zainicjalizowano sesję - sessionId: '{}', totalFlashcards: {}", 
                 session.getId(), flashcardsCount);
 

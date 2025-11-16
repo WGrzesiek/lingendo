@@ -6,7 +6,10 @@ import com.learnwords.deckservice.entity.Deck;
 import com.learnwords.deckservice.entity.Flashcard;
 import com.learnwords.deckservice.entity.Session;
 import com.learnwords.deckservice.entity.SessionFlashcard;
+import com.learnwords.deckservice.exception.exceptions.InvalidSessionIdException;
 import com.learnwords.deckservice.exception.exceptions.NoFlashcardsAvailableException;
+import com.learnwords.deckservice.exception.exceptions.SessionNotFoundException;
+import com.learnwords.deckservice.exception.exceptions.UserPermissionsMissing;
 import com.learnwords.deckservice.repository.SessionFlashcardRepository;
 import com.learnwords.deckservice.repository.SessionRepository;
 import com.learnwords.deckservice.service.Algorithm.AbstractAlgorithm;
@@ -17,7 +20,6 @@ import com.learnwords.deckservice.service.Session.FlashcardFetchStrategy.impl.Fl
 import com.learnwords.deckservice.service.Session.SessionFlashcardService;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -84,57 +86,47 @@ public class SessionFlashcardServiceImpl implements SessionFlashcardService {
      */
     @Override
     @Transactional
-    public String addFlashcardsToSession(Session session, Deck deck, FlashcardFetchStrategy flashcardFetchStrategy) {
+    public void addFlashcardsToSession(Session session, Deck deck, FlashcardFetchStrategy flashcardFetchStrategy, String userId) {
         log.info("Dodawanie fiszek do sesji: {} z talii: {}", session.getId(), deck.getId());
-        
-        try {
-            AbstractAlgorithm algorithm = algorithmFactory.get(deck.getLearnAlgorithm());
-            
-            Set<Flashcard> filteredFlashcards = deck.getFlashcards().stream()
-                    .filter(flashcard -> !algorithm.deserialize(flashcard.getAlgorithmState()).getStep().isMaxLevel())
-                    .collect(Collectors.toSet());
-            
-            log.debug("Przefiltrowano {} fiszek (wyłączono max level)", filteredFlashcards.size());
-            
-            if (filteredFlashcards.isEmpty()) {
-                log.warn("Brak fiszek do dodania do sesji - wszystkie są na max level - deckId: '{}'", deck.getId());
-                throw new NoFlashcardsAvailableException(deck.getId(), "wszystkie fiszki są na maksymalnym poziomie nauki");
-            }
-            
-            List<Flashcard> filteredFlashcardsList = new ArrayList<>(filteredFlashcards);
+        getSessionIfUserHasPermissions(session.getId(), userId);
+        AbstractAlgorithm algorithm = algorithmFactory.get(deck.getLearnAlgorithm());
 
-            List<Flashcard> sortedFlashcards = flashcardFetchStrategyServiceImpl.sortFlashcardsByStrategy(
-                    flashcardFetchStrategy,
-                    deck.getHowManyFlashcardsForOneSession(),
-                    filteredFlashcardsList);
-            
-            log.debug("Po sortowaniu według strategii {}: {} fiszek", flashcardFetchStrategy, sortedFlashcards.size());
+        Set<Flashcard> filteredFlashcards = deck.getFlashcards().stream()
+                .filter(flashcard -> !algorithm.deserialize(flashcard.getAlgorithmState()).getStep().isMaxLevel())
+                .collect(Collectors.toSet());
 
-            if (sortedFlashcards == null || sortedFlashcards.isEmpty()) {
-                log.error("Brak fiszek po sortowaniu - sprawdź implementację sortFlashcardsByStrategy");
-                throw new RuntimeException("Nie udało się posortować fiszek");
-            }
+        log.debug("Przefiltrowano {} fiszek (wyłączono max level)", filteredFlashcards.size());
 
-            Set<SessionFlashcard> sessionFlashcards = sortedFlashcards.stream()
-                    .map(flashcard -> SessionFlashcard.builder()
-                            .id(UUID.randomUUID().toString())
-                            .session(session)
-                            .flashcard(flashcard)
-                            .build())
-                    .collect(Collectors.toSet());
-            
-            sessionFlashcardRepository.saveAll(sessionFlashcards);
-            
-            log.info("Pomyślnie dodano {} fiszek do sesji {}", sessionFlashcards.size(), session.getId());
-            return session.getId();
-            
-        } catch (DataAccessException e) {
-            log.error("Błąd dostępu do danych podczas dodawania fiszki do sesji: {}", e.getMessage(), e);
-            throw new RuntimeException("Błąd dostępu do danych: " + e.getMessage(), e);
-        } catch (Exception e) {
-            log.error("Błąd podczas dodawania fiszki do sesji: {}", e.getMessage(), e);
-            throw new RuntimeException("Nie udało się dodać fiszki do sesji: " + e.getMessage(), e);
+        if (filteredFlashcards.isEmpty()) {
+            log.warn("Brak fiszek do dodania do sesji - wszystkie są na max level - deckId: '{}'", deck.getId());
+            throw new NoFlashcardsAvailableException(deck.getId(), "wszystkie fiszki są na maksymalnym poziomie nauki");
         }
+
+        List<Flashcard> filteredFlashcardsList = new ArrayList<>(filteredFlashcards);
+
+        List<Flashcard> sortedFlashcards = flashcardFetchStrategyServiceImpl.sortFlashcardsByStrategy(
+                flashcardFetchStrategy,
+                deck.getHowManyFlashcardsForOneSession(),
+                filteredFlashcardsList);
+
+        log.debug("Po sortowaniu według strategii {}: {} fiszek", flashcardFetchStrategy, sortedFlashcards.size());
+
+        if (sortedFlashcards == null || sortedFlashcards.isEmpty()) {
+            log.error("Brak fiszek po sortowaniu - sprawdź implementację sortFlashcardsByStrategy");
+            throw new RuntimeException("Nie udało się posortować fiszek");
+        }
+
+        Set<SessionFlashcard> sessionFlashcards = sortedFlashcards.stream()
+                .map(flashcard -> SessionFlashcard.builder()
+                        .id(UUID.randomUUID().toString())
+                        .session(session)
+                        .flashcard(flashcard)
+                        .build())
+                .collect(Collectors.toSet());
+
+        sessionFlashcardRepository.saveAll(sessionFlashcards);
+
+        log.info("Pomyślnie dodano {} fiszek do sesji {}", sessionFlashcards.size(), session.getId());
     }
 
     /**
@@ -158,52 +150,40 @@ public class SessionFlashcardServiceImpl implements SessionFlashcardService {
      * @throws RuntimeException jeśli sesja nie istnieje, błąd gRPC lub błąd DB
      */
     @Override
-    public List<SessionFlashcardDto> getSessionFlashcards(String sessionId) {
+    public List<SessionFlashcardDto> getSessionFlashcards(String sessionId, String userId) {
         log.debug("Pobieranie fiszek dla sesji: {}", sessionId);
-        
-        try {
-            if (sessionId == null || sessionId.isBlank()) {
-                log.error("SessionId jest null lub pusty");
-                throw new IllegalArgumentException("SessionId nie może być pusty");
-            }
-            
-            List<SessionFlashcard> sessionFlashcards = sessionFlashcardRepository.findBySessionId(sessionId);
-            
-            if (sessionFlashcards.isEmpty()) {
-                log.debug("Sesja {} nie zawiera żadnych fiszek", sessionId);
-                return Collections.emptyList();
-            }
-            
-            log.debug("Znaleziono {} fiszek w sesji {}", sessionFlashcards.size(), sessionId);
-            
-            List<String> wordIds = sessionFlashcards.stream()
-                    .map(sf -> sf.getFlashcard().getWordId())
-                    .toList();
-            
-            log.debug("Pobieranie {} słówek przez gRPC", wordIds.size());
-            var wordsResponse = vocabularyGrpcClient.batchGetWordsByIds(wordIds);
-            log.debug("Otrzymano {} słówek z gRPC", wordsResponse.getWordsCount());
-            
-            return sessionFlashcards.stream()
-                    .map(sessionFlashcard -> {
-                        var wordProto = wordsResponse.getWordsList().stream()
-                                .filter(w -> w.getId().equals(sessionFlashcard.getFlashcard().getWordId()))
-                                .findFirst()
-                                .orElseThrow(() -> new RuntimeException(
-                                        "Nie znaleziono słówka: " + sessionFlashcard.getFlashcard().getWordId()));
-                        
-                        WordDto wordDto = mapProtoToWordDto(wordProto);
-                        return SessionFlashcardDto.from(sessionFlashcard, wordDto);
-                    })
-                    .toList();
-                    
-        } catch (DataAccessException e) {
-            log.error("Błąd dostępu do bazy danych: {}", e.getMessage(), e);
-            throw new RuntimeException("Błąd dostępu do bazy danych: " + e.getMessage(), e);
-        } catch (Exception e) {
-            log.error("Błąd podczas pobierania fiszek sesji: {}", e.getMessage(), e);
-            throw new RuntimeException("Błąd podczas pobierania fiszek sesji: " + e.getMessage(), e);
+
+        getSessionIfUserHasPermissions(sessionId, userId);
+
+        List<SessionFlashcard> sessionFlashcards = sessionFlashcardRepository.findBySessionId(sessionId);
+
+        if (sessionFlashcards.isEmpty()) {
+            log.debug("Sesja {} nie zawiera żadnych fiszek", sessionId);
+            return Collections.emptyList();
         }
+
+        log.debug("Znaleziono {} fiszek w sesji {}", sessionFlashcards.size(), sessionId);
+
+        List<String> wordIds = sessionFlashcards.stream()
+                .map(sf -> sf.getFlashcard().getWordId())
+                .toList();
+
+        log.debug("Pobieranie {} słówek przez gRPC", wordIds.size());
+        var wordsResponse = vocabularyGrpcClient.batchGetWordsByIds(wordIds);
+        log.debug("Otrzymano {} słówek z gRPC", wordsResponse.getWordsCount());
+
+        return sessionFlashcards.stream()
+                .map(sessionFlashcard -> {
+                    var wordProto = wordsResponse.getWordsList().stream()
+                            .filter(w -> w.getId().equals(sessionFlashcard.getFlashcard().getWordId()))
+                            .findFirst()
+                            .orElseThrow(() -> new RuntimeException(
+                                    "Nie znaleziono słówka: " + sessionFlashcard.getFlashcard().getWordId()));
+
+                    WordDto wordDto = mapProtoToWordDto(wordProto);
+                    return SessionFlashcardDto.from(sessionFlashcard, wordDto);
+                })
+                .toList();
     }
 
     /**
@@ -222,36 +202,24 @@ public class SessionFlashcardServiceImpl implements SessionFlashcardService {
      * @throws RuntimeException jeśli błąd gRPC lub błąd DB
      */
     @Override
-    public Optional<SessionFlashcardDto> getFlashcardProgress(String sessionId, String flashcardId) {
+    public Optional<SessionFlashcardDto> getFlashcardProgress(String sessionId, String flashcardId, String userId) {
         log.debug("Pobieranie postępu fiszki {} w sesji {}", flashcardId, sessionId);
-        
-        try {
-            if (sessionId == null || sessionId.isBlank() || flashcardId == null || flashcardId.isBlank()) {
-                log.error("SessionId lub flashcardId jest null/pusty");
-                throw new IllegalArgumentException("SessionId i flashcardId nie mogą być puste");
-            }
-            
-            Optional<SessionFlashcard> sessionFlashcard = sessionFlashcardRepository
-                    .findBySessionIdAndFlashcardId(sessionId, flashcardId);
-            
-            if (sessionFlashcard.isEmpty()) {
-                log.debug("Fiszka {} nie jest w sesji {}", flashcardId, sessionId);
-                return Optional.empty();
-            }
-            
-            var wordResponse = vocabularyGrpcClient.getWordById(sessionFlashcard.get().getFlashcard().getWordId());
-            WordDto wordDto = mapProtoToWordDto(wordResponse.getWord());
-            
-            return Optional.of(SessionFlashcardDto.from(sessionFlashcard.get(), wordDto));
-            
-        } catch (DataAccessException e) {
-            log.error("Błąd dostępu do bazy danych: {}", e.getMessage(), e);
-            throw new RuntimeException("Błąd dostępu do bazy danych: " + e.getMessage(), e);
-        } catch (Exception e) {
-            log.error("Błąd podczas pobierania postępu fiszki: {}", e.getMessage(), e);
-            throw new RuntimeException("Błąd podczas pobierania postępu fiszki: " + e.getMessage(), e);
+
+        getSessionIfUserHasPermissions(sessionId, userId);
+
+        Optional<SessionFlashcard> sessionFlashcard = sessionFlashcardRepository
+                .findBySessionIdAndFlashcardId(sessionId, flashcardId);
+
+        if (sessionFlashcard.isEmpty()) {
+            log.debug("Fiszka {} nie jest w sesji {}", flashcardId, sessionId);
+            return Optional.empty();
         }
-    }
+
+        var wordResponse = vocabularyGrpcClient.getWordById(sessionFlashcard.get().getFlashcard().getWordId());
+        WordDto wordDto = mapProtoToWordDto(wordResponse.getWord());
+
+        return Optional.of(SessionFlashcardDto.from(sessionFlashcard.get(), wordDto));
+}
 
     /**
      * Pomija fiszkę w sesji.
@@ -276,39 +244,28 @@ public class SessionFlashcardServiceImpl implements SessionFlashcardService {
      */
     @Override
     @Transactional
-    public void skipFlashcard(String sessionId, String flashcardId) {
+    public void skipFlashcard(String sessionId, String flashcardId, String userId) {
         log.debug("Pomijanie fiszki {} w sesji {}", flashcardId, sessionId);
-        
-        try {
-            if (sessionId == null || sessionId.isBlank() || flashcardId == null || flashcardId.isBlank()) {
-                log.error("SessionId lub flashcardId jest null/pusty");
-                throw new IllegalArgumentException("SessionId i flashcardId nie mogą być puste");
-            }
-            
-            SessionFlashcard sessionFlashcard = sessionFlashcardRepository
-                    .findBySessionIdAndFlashcardId(sessionId, flashcardId)
-                    .orElseThrow(() -> new RuntimeException(
-                            "Fiszka " + flashcardId + " nie jest w sesji " + sessionId));
-            
-            Session session = sessionRepository.findById(sessionId)
-                    .orElseThrow(() -> new RuntimeException("Nie znaleziono sesji: " + sessionId));
-            
-            session.setSkipped(session.getSkipped() + 1);
-            sessionRepository.save(session);
-            
-            Flashcard flashcard = sessionFlashcard.getFlashcard();
-            flashcard.setSkipped(true);
-            
-            log.info("Pominięto fiszkę {} w sesji {}. Łącznie pominiętych: {}", 
-                    flashcardId, sessionId, session.getSkipped());
-                    
-        } catch (DataAccessException e) {
-            log.error("Błąd dostępu do bazy danych: {}", e.getMessage(), e);
-            throw new RuntimeException("Błąd dostępu do bazy danych: " + e.getMessage(), e);
-        } catch (Exception e) {
-            log.error("Błąd podczas pomijania fiszki: {}", e.getMessage(), e);
-            throw new RuntimeException("Błąd podczas pomijania fiszki: " + e.getMessage(), e);
+        Session session = getSessionIfUserHasPermissions(sessionId, userId);
+
+        if (flashcardId == null || flashcardId.isBlank()) {
+            log.error("SessionId lub flashcardId jest null/pusty");
+            throw new IllegalArgumentException("SessionId i flashcardId nie mogą być puste");
         }
+
+        SessionFlashcard sessionFlashcard = sessionFlashcardRepository
+                .findBySessionIdAndFlashcardId(sessionId, flashcardId)
+                .orElseThrow(() -> new RuntimeException(
+                        "Fiszka " + flashcardId + " nie jest w sesji " + sessionId));
+
+        session.setSkipped(session.getSkipped() + 1);
+        sessionRepository.save(session);
+
+        Flashcard flashcard = sessionFlashcard.getFlashcard();
+        flashcard.setSkipped(true);
+
+        log.info("Pominięto fiszkę {} w sesji {}. Łącznie pominiętych: {}",
+                flashcardId, sessionId, session.getSkipped());
     }
 
     /**
@@ -323,26 +280,15 @@ public class SessionFlashcardServiceImpl implements SessionFlashcardService {
      * @throws RuntimeException jeśli błąd DB
      */
     @Override
-    public int getTotalFlashcardsInSession(String sessionId) {
+    public int getTotalFlashcardsInSession(String sessionId, String userId) {
         log.debug("Pobieranie liczby fiszek w sesji: {}", sessionId);
-        
-        try {
-            if (sessionId == null || sessionId.isBlank()) {
-                log.error("SessionId jest null lub pusty");
-                throw new IllegalArgumentException("SessionId nie może być pusty");
-            }
-            
-            int count = sessionFlashcardRepository.countBySessionId(sessionId);
-            log.debug("Sesja {} zawiera {} fiszek", sessionId, count);
-            return count;
-            
-        } catch (DataAccessException e) {
-            log.error("Błąd dostępu do bazy danych: {}", e.getMessage(), e);
-            throw new RuntimeException("Błąd dostępu do bazy danych: " + e.getMessage(), e);
-        } catch (Exception e) {
-            log.error("Błąd podczas zliczania fiszek w sesji: {}", e.getMessage(), e);
-            throw new RuntimeException("Błąd podczas zliczania fiszek w sesji: " + e.getMessage(), e);
-        }
+
+        getSessionIfUserHasPermissions(sessionId, userId);
+
+        int count = sessionFlashcardRepository.countBySessionId(sessionId);
+        log.debug("Sesja {} zawiera {} fiszek", sessionId, count);
+        return count;
+
     }
 
     /**
@@ -359,31 +305,51 @@ public class SessionFlashcardServiceImpl implements SessionFlashcardService {
      * @throws RuntimeException jeśli sesja nie istnieje lub błąd DB
      */
     @Override
-    public int getAnsweredFlashcardsCount(String sessionId) {
+    public int getAnsweredFlashcardsCount(String sessionId, String userId) {
         log.debug("Pobieranie liczby fiszek z odpowiedzią w sesji: {}", sessionId);
-        
-        try {
-            if (sessionId == null || sessionId.isBlank()) {
-                log.error("SessionId jest null lub pusty");
-                throw new IllegalArgumentException("SessionId nie może być pusty");
-            }
-            
-            Session session = sessionRepository.findById(sessionId)
-                    .orElseThrow(() -> new RuntimeException("Nie znaleziono sesji: " + sessionId));
-            
-            int answered = session.getCorrectAnswers() + session.getWrongAnswers();
-            log.debug("W sesji {} udzielono {} odpowiedzi (poprawne: {}, błędne: {})", 
-                    sessionId, answered, session.getCorrectAnswers(), session.getWrongAnswers());
-            return answered;
-            
-        } catch (DataAccessException e) {
-            log.error("Błąd dostępu do bazy danych: {}", e.getMessage(), e);
-            throw new RuntimeException("Błąd dostępu do bazy danych: " + e.getMessage(), e);
-        } catch (Exception e) {
-            log.error("Błąd podczas zliczania odpowiedzi w sesji: {}", e.getMessage(), e);
-            throw new RuntimeException("Błąd podczas zliczania odpowiedzi w sesji: " + e.getMessage(), e);
-        }
+
+        Session session = getSessionIfUserHasPermissions(sessionId, userId);
+
+        int answered = session.getCorrectAnswers() + session.getWrongAnswers();
+        log.debug("W sesji {} udzielono {} odpowiedzi (poprawne: {}, błędne: {})",
+                sessionId, answered, session.getCorrectAnswers(), session.getWrongAnswers());
+        return answered;
     }
+
+    /**
+     * Pobiera sesję jeśli użytkownik ma do niej uprawnienia.
+     *
+     * <p>Metoda pomocnicza weryfikująca czy użytkownik jest właścicielem sesji.
+     *
+     * @param sessionId ID sesji
+     * @param userId ID użytkownika
+     * @return sesja jeśli użytkownik ma uprawnienia
+     * @throws InvalidSessionIdException gdy sessionId jest null lub pusty
+     * @throws SessionNotFoundException gdy sesja o podanym ID nie istnieje
+     * @throws UserPermissionsMissing gdy użytkownik nie ma uprawnień do sesji
+     */
+    private Session getSessionIfUserHasPermissions(String sessionId, String userId) {
+        if (sessionId == null || sessionId.isBlank()) {
+            log.error("Próba dostępu do sesji z pustym sessionId - userId: '{}'", userId);
+            throw new InvalidSessionIdException();
+        }
+
+        Session session = sessionRepository.findById(sessionId)
+                .orElseThrow(() -> {
+                    log.error("Nie znaleziono sesji - sessionId: '{}', userId: '{}'", sessionId, userId);
+                    return new SessionNotFoundException(sessionId);
+                });
+
+        if (!session.getUserId().equals(userId)) {
+            log.warn("Brak uprawnień do sesji - userId: '{}', sessionId: '{}', sessionOwnerId: '{}'",
+                    userId, sessionId, session.getUserId());
+            throw new UserPermissionsMissing("Użytkownik nie ma uprawnień do tej sesji");
+        }
+
+        log.debug("Zweryfikowano uprawnienia do sesji - sessionId: '{}', userId: '{}'", sessionId, userId);
+        return session;
+    }
+
 
     /**
      * Mapuje Proto Word (z gRPC) na domenowy WordDto.

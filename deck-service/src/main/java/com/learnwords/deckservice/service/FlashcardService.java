@@ -53,5 +53,7 @@ public interface FlashcardService {
     public void updateFlashcard(String flashcardId, WordDto newWord, String userId);
     public void resetFlashcardProgress(String flashcardId, String userId);
     public void markAsLearned(String flashcardId, boolean learned, String userId);
-
+    public void markAsSkipped(String flashcardId, boolean skipped, String userId);
+    public void initializeDeckFlashcardsState(String deckId, String userId);
+    public void initializeSessionFlashcardsState(String deckId, List<String> flashcardIds, String userId);
 }

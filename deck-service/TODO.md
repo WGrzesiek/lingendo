@@ -251,3 +251,714 @@ https://macbook-air-grzegorz.ibis-tautara.ts.net/dashboard
 https://macbook-air-grzegorz.ibis-tautara.ts.net/dashboard-teacher
 https://macbook-air-grzegorz.ibis-tautara.ts.net/course/course-123
 https://macbook-air-grzegorz.ibis-tautara.ts.net/learn/session-1
+
+
+Deck-service
+package com.learnwords.deckservice.service.Session.FlashcardFetchStrategy;
+
+import com.learnwords.deckservice.entity.Flashcard;
+
+import java.util.List;
+
+/**
+* Serwis strategii pobierania i sortowania fiszek dla sesji nauki.
+*
+* <p>Odpowiada za implementację różnych strategii wyboru fiszek do sesji:
+* <ul>
+*   <li>ALPHABETICAL - sortowanie alfabetyczne po słowie</li>
+*   <li>RANDOM - losowa kolejność fiszek</li>
+*   <li>REVERSE_ALPHABETICAL - sortowanie odwrotnie alfabetyczne</li>
+*   <li>UNLEARNED_FIRST - nienauczone fiszki na początku, potem nauczone</li>
+* </ul>
+*
+* <p>Każda strategia może mieć limit liczby fiszek (flashcardsPerSession).
+* Jeśli limit jest null, zwracane są wszystkie fiszki.
+*
+* @author Grzegorz Wawrzeń
+* @version 1.0
+* @since 2025-11-12
+* @see FlashcardFetchStrategy
+  */
+  public interface FlashcardFetchStrategyService {
+
+  /**
+    * Sortuje fiszki według wybranej strategii i opcjonalnie limituje liczbę.
+    *
+    * <p>Implementacja powinna:
+    * <ol>
+    *   <li>Zastosować sortowanie według strategii</li>
+    *   <li>Jeśli limit jest ustawiony, zwrócić tylko pierwszych N fiszek</li>
+    *   <li>Jeśli limit jest null, zwrócić wszystkie posortowane fiszki</li>
+    * </ol>
+    *
+    * <p>Przykład użycia:
+    * <pre>
+    * List&lt;Flashcard&gt; flashcards = flashcardRepository.findByDeckId(deckId);
+    * List&lt;Flashcard&gt; sorted = strategyService.sortFlashcardsByStrategy(
+    *     FlashcardFetchStrategy.UNLEARNED_FIRST, 
+    *     20L, 
+    *     flashcards
+    * );
+    * // sorted zawiera max 20 fiszek, nienauczone najpierw
+    * </pre>
+    *
+    * @param strategy strategia sortowania (ALPHABETICAL, RANDOM, UNLEARNED_FIRST, REVERSE_ALPHABETICAL)
+    * @param limit maksymalna liczba fiszek do zwrócenia (null = bez limitu)
+    * @param flashcards lista fiszek do posortowania
+    * @return posortowana lista fiszek (z limitem jeśli ustawiony)
+    * @throws IllegalArgumentException jeśli strategy jest null lub flashcards jest null
+      */
+      List<Flashcard> sortFlashcardsByStrategy(FlashcardFetchStrategy strategy, Long limit, List<Flashcard> flashcards);
+
+  /**
+    * Pobiera listę wszystkich obsługiwanych strategii.
+    *
+    * @return tablica wszystkich dostępnych strategii
+      */
+      default FlashcardFetchStrategy[] getSupportedStrategies() {
+      return FlashcardFetchStrategy.values();
+      }
+
+  /**
+    * Pobiera domyślną strategię pobierania fiszek.
+    *
+    * <p>Używana gdy użytkownik nie wybierze strategii explicite.
+    *
+    * @return domyślna strategia (UNLEARNED_FIRST)
+      */
+      default FlashcardFetchStrategy getDefaultStrategy() {
+      return FlashcardFetchStrategy.UNLEARNED_FIRST;
+      }
+      }
+      package com.learnwords.deckservice.service.Session;
+
+public interface SessionStatisticsHelper {
+public void recordFlashcardAnswer(String sessionId, String flashcardId, boolean isCorrect);
+public void markFlashcardAsLearned(String flashcardId);
+public void completeSession(String sessionId);
+public void abandonSession(String sessionId);
+}
+package com.learnwords.deckservice.service.Session;
+
+import com.learnwords.deckservice.dto.SessionDto;
+import com.learnwords.deckservice.dto.SessionStatsDto;
+import com.learnwords.deckservice.entity.Session;
+import com.learnwords.deckservice.service.Session.FlashcardFetchStrategy.FlashcardFetchStrategy;
+
+import java.util.List;
+import java.util.Optional;
+
+/**
+* Serwis zarządzania sesjami nauki.
+*
+* <p>Odpowiada za pełny cykl życia sesji nauki:
+* <ul>
+*   <li>Inicjalizację nowej sesji z wybraną strategią pobierania fiszek</li>
+*   <li>Rejestrację odpowiedzi użytkownika i aktualizację statystyk</li>
+*   <li>Ukończenie lub porzucenie sesji</li>
+*   <li>Pobieranie historii sesji użytkownika lub talii</li>
+*   <li>Statystyki i postęp sesji</li>
+* </ul>
+*
+* <p>Sesja może mieć różne statusy:
+* <ul>
+*   <li>IN_PROGRESS - sesja w toku, użytkownik odpowiada na fiszki</li>
+*   <li>COMPLETED - sesja zakończona pomyślnie</li>
+*   <li>ABANDONED - sesja porzucona przed ukończeniem</li>
+* </ul>
+*
+* @author Grzegorz Wawrzeń
+* @version 1.0
+* @since 2025-11-12
+* @see Session
+* @see SessionDto
+* @see SessionStatsDto
+* @see FlashcardFetchStrategy
+  */
+  public interface SessionService {
+
+  /**
+    * Inicjalizuje nową sesję nauki dla wskazanej talii.
+    *
+    * <p>Tworzy sesję w statusie IN_PROGRESS i dodaje fiszki według wybranej strategii.
+    * Liczba fiszek zależy od ustawień talii (flashcardsPerSession).
+    *
+    * @param deckId ID talii do nauki
+    * @param flashcardFetchStrategy strategia wyboru fiszek (ALPHABETICAL, RANDOM, UNLEARNED_FIRST itp.)
+    * @return ID utworzonej sesji
+    * @throws RuntimeException jeśli talia nie istnieje lub jest pusta
+      */
+      String initializeSession(String deckId, FlashcardFetchStrategy flashcardFetchStrategy);
+
+  /**
+    * Ukończa sesję nauki.
+    *
+    * <p>Zmienia status sesji na COMPLETED, zapisuje czas ukończenia
+    * i oblicza łączny czas trwania sesji.
+    *
+    * @param sessionId ID sesji do ukończenia
+    * @throws RuntimeException jeśli sesja nie istnieje lub jest już ukończona
+      */
+      void completeSession(String sessionId);
+
+  /**
+    * Porzuca sesję nauki przed ukończeniem.
+    *
+    * <p>Zmienia status sesji na ABANDONED. Statystyki są zachowane,
+    * ale sesja nie jest liczona jako ukończona.
+    *
+    * @param sessionId ID sesji do porzucenia
+    * @throws RuntimeException jeśli sesja nie istnieje lub jest już ukończona/porzucona
+      */
+      void abandonSession(String sessionId);
+
+  /**
+    * Wstrzymuje aktywną sesję nauki.
+    *
+    * <p>Sesja może być później wznowiona metodą {@link #resumeSession(String)}.
+    * Czas wstrzymania nie jest liczony do czasu trwania sesji.
+    *
+    * @param sessionId ID sesji do wstrzymania
+    * @throws RuntimeException jeśli sesja nie istnieje lub nie jest IN_PROGRESS
+      */
+      void pauseSession(String sessionId);
+
+  /**
+    * Wznawia wstrzymaną sesję nauki.
+    *
+    * <p>Przywraca sesję do stanu IN_PROGRESS po wstrzymaniu.
+    *
+    * @param sessionId ID sesji do wznowienia
+    * @throws RuntimeException jeśli sesja nie istnieje lub nie jest wstrzymana
+      */
+      void resumeSession(String sessionId);
+
+  /**
+    * Pobiera encję sesji po ID.
+    *
+    * <p>Zwraca pełną encję z danymi z bazy. Używaj gdy potrzebujesz
+    * dostępu do relacji (deck, flashcards).
+    *
+    * @param sessionId ID sesji
+    * @return encja sesji
+    * @throws RuntimeException jeśli sesja nie istnieje
+      */
+      Session getSessionById(String sessionId);
+
+  /**
+    * Rejestruje odpowiedź użytkownika na fiszkę w sesji.
+    *
+    * <p>Aktualizuje statystyki sesji (correctAnswers/wrongAnswers)
+    * oraz statystyki samej fiszki (totalAttempts, correctAnswers).
+    *
+    * @param sessionId ID sesji
+    * @param flashcardId ID fiszki, na którą udzielono odpowiedzi
+    * @param isCorrect czy odpowiedź była poprawna
+    * @throws RuntimeException jeśli sesja/fiszka nie istnieje lub sesja nie jest aktywna
+      */
+      void recordAnswer(String sessionId, String flashcardId, boolean isCorrect);
+
+  /**
+    * Pobiera wszystkie sesje użytkownika.
+    *
+    * <p>Zwraca historię wszystkich sesji nauki użytkownika,
+    * niezależnie od talii. Posortowane od najnowszych.
+    *
+    * @param userId ID użytkownika
+    * @return lista sesji użytkownika (może być pusta)
+      */
+      List<SessionDto> getSessionsByUserId(String userId);
+
+  /**
+    * Pobiera wszystkie sesje dla wybranej talii.
+    *
+    * <p>Zwraca historię wszystkich sesji dla konkretnej talii,
+    * niezależnie od użytkownika. Przydatne do statystyk talii.
+    *
+    * @param deckId ID talii
+    * @return lista sesji talii (może być pusta)
+      */
+      List<SessionDto> getSessionsByDeckId(String deckId);
+
+  /**
+    * Pobiera aktywną (IN_PROGRESS) sesję użytkownika dla talii.
+    *
+    * <p>Sprawdza czy użytkownik ma już rozpoczętą sesję dla danej talii.
+    * Używaj przed rozpoczęciem nowej sesji, żeby uniknąć duplikatów.
+    *
+    * @param userId ID użytkownika
+    * @param deckId ID talii
+    * @return aktywna sesja jeśli istnieje, Optional.empty() w przeciwnym razie
+      */
+      Optional<SessionDto> getActiveSessionByUserAndDeck(String userId, String deckId);
+
+  /**
+    * Pobiera statystyki sesji nauki.
+    *
+    * <p>Zwraca przetworzone statystyki z procentami accuracy,
+    * postępu, średnim czasem itp. Użyj do wyświetlania podsumowania.
+    *
+    * @param sessionId ID sesji
+    * @return DTO ze statystykami sesji
+    * @throws RuntimeException jeśli sesja nie istnieje
+      */
+      SessionStatsDto getSessionStats(String sessionId);
+
+  /**
+    * Pobiera postęp sesji jako procent ukończenia.
+    *
+    * <p>Oblicza ile fiszek zostało już przerobione względem całkowitej liczby.
+    *
+    * @param sessionId ID sesji
+    * @return procent ukończenia (0.0 - 100.0)
+    * @throws RuntimeException jeśli sesja nie istnieje
+      */
+      double getSessionProgress(String sessionId);
+      }
+      package com.learnwords.deckservice.service.Session;
+
+import com.learnwords.deckservice.dto.SessionFlashcardDto;
+import com.learnwords.deckservice.entity.Deck;
+import com.learnwords.deckservice.entity.Flashcard;
+import com.learnwords.deckservice.entity.Session;
+import com.learnwords.deckservice.service.Session.FlashcardFetchStrategy.FlashcardFetchStrategy;
+
+import java.util.List;
+import java.util.Optional;
+
+/**
+* Serwis zarządzania fiszkami w kontekście sesji nauki.
+*
+* <p>Odpowiada za:
+* <ul>
+*   <li>Dodawanie fiszek do sesji według strategii (ALPHABETICAL, RANDOM itp.)</li>
+*   <li>Pobieranie fiszek przypisanych do sesji</li>
+*   <li>Śledzenie postępu fiszek w sesji (czy odpowiedziano, czy poprawnie)</li>
+*   <li>Zarządzanie pominiętymi fiszkami</li>
+* </ul>
+*
+* <p>Fiszki w sesji mają dodatkowy kontekst:
+* <ul>
+*   <li>Czy już odpowiedziano na fiszkę w tej sesji</li>
+*   <li>Czy odpowiedź była poprawna</li>
+*   <li>Kiedy fiszka została dodana do sesji</li>
+* </ul>
+*
+* @author Grzegorz Wawrzeń
+* @version 1.0
+* @since 2025-11-12
+* @see SessionFlashcardDto
+* @see FlashcardFetchStrategy
+  */
+  public interface SessionFlashcardService {
+
+  /**
+    * Dodaje fiszki do sesji według wybranej strategii.
+    *
+    * <p>Pobiera fiszki z talii, sortuje je według strategii (ALPHABETICAL, RANDOM, UNLEARNED_FIRST itp.)
+    * i dodaje do sesji. Liczba fiszek zależy od ustawienia flashcardsPerSession w talii.
+    *
+    * <p>Strategie sortowania:
+    * <ul>
+    *   <li>ALPHABETICAL - alfabetycznie po słowie</li>
+    *   <li>RANDOM - losowa kolejność</li>
+    *   <li>REVERSE_ALPHABETICAL - odwrotnie alfabetycznie</li>
+    *   <li>UNLEARNED_FIRST - nienauczone najpierw, potem reszta</li>
+    * </ul>
+    *
+    * @param session sesja, do której dodawane są fiszki
+    * @param deck talia, z której pobierane są fiszki
+    * @param flashcardFetchStrategy strategia wyboru i sortowania fiszek
+    * @return liczba dodanych fiszek do sesji
+    * @throws RuntimeException jeśli talia jest pusta lub wystąpi błąd DB
+      */
+      String addFlashcardsToSession(Session session, Deck deck, FlashcardFetchStrategy flashcardFetchStrategy);
+
+  /**
+    * Pobiera wszystkie fiszki przypisane do sesji z pełnymi danymi słówek.
+    *
+    * <p>Zwraca listę fiszek w sesji wraz z:
+    * <ul>
+    *   <li>Pełnymi danymi słówka (przez gRPC z Vocabulary Service)</li>
+    *   <li>Stanem fiszki (correctAnswers, totalAttempts, isLearned)</li>
+    *   <li>Kontekstem sesji (answeredInSession, wasCorrect)</li>
+    * </ul>
+    *
+    * @param sessionId ID sesji
+    * @return lista fiszek w sesji z pełnymi danymi
+    * @throws RuntimeException jeśli sesja nie istnieje
+      */
+      List<SessionFlashcardDto> getSessionFlashcards(String sessionId);
+
+  /**
+    * Pobiera postęp pojedynczej fiszki w sesji.
+    *
+    * <p>Zwraca informacje czy użytkownik już odpowiedział na tę fiszkę
+    * w bieżącej sesji i czy odpowiedź była poprawna.
+    *
+    * @param sessionId ID sesji
+    * @param flashcardId ID fiszki
+    * @return DTO z postępem fiszki w sesji
+    * @throws RuntimeException jeśli sesja/fiszka nie istnieje lub fiszka nie jest w sesji
+      */
+      Optional<SessionFlashcardDto> getFlashcardProgress(String sessionId, String flashcardId);
+
+  /**
+    * Pomija fiszkę w sesji.
+    *
+    * <p>Oznacza fiszkę jako pominiętą w bieżącej sesji.
+    * Inkrementuje licznik skipped w sesji.
+    *
+    * @param sessionId ID sesji
+    * @param flashcardId ID fiszki do pominięcia
+    * @throws RuntimeException jeśli sesja/fiszka nie istnieje lub sesja nie jest aktywna
+      */
+      void skipFlashcard(String sessionId, String flashcardId);
+
+  /**
+    * Pobiera łączną liczbę fiszek w sesji.
+    *
+    * @param sessionId ID sesji
+    * @return liczba fiszek w sesji
+    * @throws RuntimeException jeśli sesja nie istnieje
+      */
+      int getTotalFlashcardsInSession(String sessionId);
+
+  /**
+    * Pobiera liczbę fiszek na które już odpowiedziano w sesji.
+    *
+    * @param sessionId ID sesji
+    * @return liczba fiszek z odpowiedzią
+    * @throws RuntimeException jeśli sesja nie istnieje
+      */
+      int getAnsweredFlashcardsCount(String sessionId);
+      }
+      package com.learnwords.deckservice.service;
+
+import com.learnwords.deckservice.dto.*;
+import com.learnwords.deckservice.enums.DeckOwner;
+import com.learnwords.deckservice.enums.LearnAlgorithm;
+
+import java.util.List;
+
+public interface DeckService {
+public boolean createDeck(String userId, CreateDeckDto createDeckDto);
+public boolean deleteDeck(String deckId);
+public String renameDeck(String deckId, String newName);
+public boolean changeDeckVisibility(String deckId, boolean isPublic);
+public DeckOwner changeDeckOwner(String deckId, DeckOwner newOwner);
+public DeckDto getDeckById(String deckId);
+List<DeckDto> getDecksByFilter(String userId, Boolean isPublic, DeckOwner owner);
+default List<DeckDto> getDecksByFilter(String userId, DeckOwner owner) {
+return getDecksByFilter(userId, null,  owner);
+}
+default List<DeckDto> getDecksByFilter(String userId) {
+return getDecksByFilter(userId, null, null);
+}
+default List<DeckDto> getDecksByFilter(boolean isPublic) {
+return getDecksByFilter(null, isPublic, null);
+}
+public DeckDetailsDto getDeckDetailsById(String deckId);
+public DeckDetailsDto editDeckDetails(String deckId, DeckDetailsDto deckDetailsDto);
+public long getTotalFlashcardsCount(String deckId);
+public void updateLearnAlgorithm(String deckId, LearnAlgorithm algorithm);
+public void updateFlashcardsPerSession(String deckId, Long count);
+
+}
+package com.learnwords.deckservice.service;
+
+import com.learnwords.common.dto.WordDto;
+import com.learnwords.deckservice.dto.FlashcardDto;
+import com.learnwords.deckservice.dto.GetWordFromKafkaDto;
+import com.learnwords.deckservice.entity.Flashcard;
+
+import java.util.List;
+
+
+public interface FlashcardService {
+
+    public void processFlashcardCreateFromKafka(GetWordFromKafkaDto getWordFromKafkaDto);
+    public void setInitialFlashcardState(String deckId, Flashcard flashcard);
+    public List<FlashcardDto> getAllFlashcardsFromDeck(String deckId);
+    public List<FlashcardDto> getFlashcardsFromDeckByFilter(String deckId, boolean isLearned, boolean isSkipped);
+    public void updateFlashcard(String flashcardId, WordDto newWord);
+    public void resetFlashcardProgress(String flashcardId);
+    public void markAsLearned(String flashcardId, boolean learned);
+
+}
+package com.learnwords.deckservice.entity;
+
+import jakarta.persistence.*;
+import lombok.*;
+
+import java.time.Instant;
+
+@NoArgsConstructor
+@AllArgsConstructor
+@Setter
+@Getter
+@Builder
+@Entity
+@Table(name = "session_flashcard")
+public class SessionFlashcard {
+
+    @Id
+//    @GeneratedValue(strategy = GenerationType.UUID)
+private String id;
+
+    @ManyToOne
+    @JoinColumn(name = "learning_session_id", nullable = false)
+    private Session session;
+
+    @ManyToOne
+    @JoinColumn(name = "flashcard_id", nullable = false)
+    private Flashcard flashcard;
+
+    @Builder.Default
+    @Column(nullable = false, updatable = false)
+    private Instant createdAt = Instant.now();
+
+    @Column(nullable = false)
+    private Instant updatedAt;
+
+    @PrePersist
+    public void prePersist() {
+        updatedAt = createdAt;
+    }
+
+    @PreUpdate
+    public void preUpdate() {
+        updatedAt = Instant.now();
+    }
+}
+package com.learnwords.deckservice.entity;
+
+import com.learnwords.deckservice.enums.SessionStatus;
+import com.learnwords.deckservice.enums.SessionType;
+import jakarta.persistence.*;
+import lombok.*;
+
+import java.time.Instant;
+
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+@Entity
+@Setter
+@Getter
+@Table(name = "session")
+public class Session {
+@Id
+@Column(nullable = false, unique = true, length = 36)
+private String id;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "deck_id", nullable = false)
+    private Deck deck;
+
+    @Column(name = "user_id", nullable = false, length = 36)
+    private String userId;
+
+    @Column(name = "total_flashcards")
+    @Builder.Default
+    private int totalFlashcards = 0;
+
+    @Column(name = "correct_answers")
+    @Builder.Default
+    private int correctAnswers = 0;
+
+    @Column(name = "wrong_answers")
+    @Builder.Default
+    private int wrongAnswers = 0;
+
+    @Column(name = "skipped")
+    @Builder.Default
+    private int skipped = 0;
+
+    @Column(name = "duration_seconds")
+    private Long durationSeconds;
+
+    @Column(name = "completed_at")
+    private Instant completedAt;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status", nullable = false)
+    @Builder.Default
+    private SessionStatus status = SessionStatus.IN_PROGRESS;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "type", nullable = false)
+    private SessionType type;
+
+    @Builder.Default
+    @Column(nullable = false, updatable = false)
+    private Instant createdAt = Instant.now();
+
+    @Column(nullable = false)
+    private Instant updatedAt;
+
+    @PrePersist
+    public void prePersist() {
+        updatedAt = createdAt;
+    }
+
+    @PreUpdate
+    public void preUpdate() {
+        updatedAt = Instant.now();
+    }
+}
+package com.learnwords.deckservice.entity;
+
+import com.vladmihalcea.hibernate.type.json.JsonBinaryType;
+import jakarta.persistence.*;
+import lombok.*;
+import org.hibernate.annotations.Type;
+
+import java.time.Instant;
+
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+@Getter
+@Setter
+@Entity
+@Table(name = "flashcard")
+public class Flashcard {
+
+    @Id
+    @Column(name = "id", nullable = false, length = 36)
+    private String id;
+
+    @Column(name = "word_id", nullable = false, length = 36)
+    private String wordId;
+
+    @Column(name = "correct_answers")
+    @Builder.Default
+    private int correctAnswers = 0;
+
+    @Column(name = "total_attempts")
+    @Builder.Default
+    private int totalAttempts = 0;
+
+    @ManyToOne
+    @JoinColumn(name = "deck_id", nullable = false)
+    private Deck deck;
+
+    @Column(name = "is_learned", nullable = false)
+    @Builder.Default
+    private boolean isLearned = false;
+
+    @Column(name = "is_skipped", nullable = false)
+    @Builder.Default
+    private boolean isSkipped = false;
+
+    @Column(name = "algorithm_state", columnDefinition = "jsonb", nullable = false)
+    @Type(JsonBinaryType.class)
+    @Builder.Default
+    private String algorithmState = "{}";
+
+    @Builder.Default
+    @Column(nullable = false, updatable = false)
+    private Instant createdAt = Instant.now();
+
+    @Column(nullable = false)
+    private Instant updatedAt;
+
+    @PrePersist
+    public void prePersist() {
+        updatedAt = createdAt;
+    }
+
+    @PreUpdate
+    public void preUpdate() {
+        updatedAt = Instant.now();
+    }
+}
+package com.learnwords.deckservice.entity;
+
+
+import com.learnwords.deckservice.enums.DeckOwner;
+import com.learnwords.deckservice.enums.Language;
+import com.learnwords.deckservice.enums.LearnAlgorithm;
+import jakarta.persistence.*;
+import lombok.*;
+
+import java.time.Instant;
+import java.util.HashSet;
+import java.util.Set;
+
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+@Getter
+@Setter
+@Entity
+@Table(name = "deck")
+public class Deck {
+@Id
+@Column(nullable = false, unique = true, length = 36)
+private String id;
+
+    @Column(nullable = false, length = 100)
+    private String name;
+
+    @Column(nullable = true, length = 255)
+    private String description;
+
+    @Column(name = "user_id", nullable = false, length = 36)
+    private String userId;
+
+    @OneToMany(mappedBy = "deck",
+            fetch = FetchType.LAZY,
+            cascade = CascadeType.ALL,
+            orphanRemoval = true  )
+    private Set<Flashcard> flashcards = new HashSet<>();
+
+    @OneToMany(mappedBy = "deck", fetch = FetchType.LAZY)
+    private Set<Session> sessions = new HashSet<>();
+
+    @Column(name = "how_many_flashcards_for_one_session")
+    @Builder.Default
+    private Long howManyFlashcardsForOneSession = 20L;
+
+    @Builder.Default
+    @Column(name = "is_public", nullable = false)
+    private boolean isPublic = false;
+
+    @Column(name = "word_count", nullable = false)
+    @Builder.Default
+    private int wordCount = 0;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "learn_algorithm", nullable = false)
+    private LearnAlgorithm learnAlgorithm;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "language_from", nullable = false)
+    private Language languageFrom;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "language_to", nullable = false)
+    private Language languageTo;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "owner", nullable = false)
+    private DeckOwner owner;
+
+    @Builder.Default
+    @Column(nullable = false, updatable = false)
+    private Instant createdAt = Instant.now();
+
+    @Column(nullable = false)
+    private Instant updatedAt;
+
+    @PrePersist
+    public void prePersist() {
+        updatedAt = createdAt;
+    }
+
+    @PreUpdate
+    public void preUpdate() {
+        updatedAt = Instant.now();
+    }
+}

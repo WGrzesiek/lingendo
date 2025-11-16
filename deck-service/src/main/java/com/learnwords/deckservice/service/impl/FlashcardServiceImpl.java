@@ -169,6 +169,73 @@ public class FlashcardServiceImpl implements FlashcardService {
                 flashcard.getId(), algorithm);
     }
 
+    /**
+     * Inicjalizuje stan algorytmu nauki dla wszystkich fiszek w talii.
+     *
+     * <p>Używane gdy użytkownik zmienia algorytm nauki talii lub
+     * gdy talia jest tworzona z istniejącymi fiszkami.
+     *
+     * <p>Proces:
+     * <ol>
+     *   <li>Sprawdza czy talia istnieje i czy użytkownik ma uprawnienia</li>
+     *   <li>Pobiera wszystkie fiszki z talii</li>
+     *   <li>Dla każdej fiszki wywołuje {@link #setInitialFlashcardState}</li>
+     * </ol>
+     *
+     * @param deckId ID talii
+     * @param userId ID użytkownika wykonującego operację
+     * @throws DeckNotFoundException jeśli talia o podanym ID nie istnieje
+     * @throws UserPermissionsMissing jeśli użytkownik nie ma uprawnień do talii
+     */
+    @Override
+    public void initializeDeckFlashcardsState(String deckId, String userId){
+        log.debug("Inicjalizacja stanu fiszek w talii - deckId: '{}', userId: '{}'", deckId, userId);
+
+        checkDeckIsExistsAndUserHasPermissions(deckId, userId);
+        List<Flashcard> flashcards = flashcardRepository.findByDeckId(deckId);
+
+        for (Flashcard flashcard : flashcards) {
+            setInitialFlashcardState(deckId, flashcard, userId);
+        }
+
+        log.info("Zainicjalizowano stan algorytmu nauki dla fiszek w talii - deckId: '{}', flashcardCount: {}",
+                deckId, flashcards.size());
+    }
+
+    /**
+     * Inicjalizuje stan algorytmu nauki dla wybranych fiszek w sesji.
+     *
+     * <p>Używane gdy użytkownik rozpoczyna sesję nauki z wybranymi fiszkami.
+     *
+     * <p>Proces:
+     * <ol>
+     *   <li>Sprawdza czy talia istnieje i czy użytkownik ma uprawnienia</li>
+     *   <li>Pobiera fiszki według podanych ID i talii</li>
+     *   <li>Dla każdej fiszki wywołuje {@link #setInitialFlashcardState}</li>
+     * </ol>
+     *
+     * @param deckId ID talii
+     * @param flashcardIds lista ID fiszek do inicjalizacji
+     * @param userId ID użytkownika wykonującego operację
+     * @throws DeckNotFoundException jeśli talia o podanym ID nie istnieje
+     * @throws UserPermissionsMissing jeśli użytkownik nie ma uprawnień do talii
+     */
+    @Override
+    public void initializeSessionFlashcardsState(String deckId, List<String> flashcardIds, String userId){
+        log.debug("Inicjalizacja stanu fiszek w sesji - deckId: '{}', userId: '{}', flashcardCount: {}",
+                deckId, userId, flashcardIds.size());
+
+        checkDeckIsExistsAndUserHasPermissions(deckId, userId);
+        List<Flashcard> flashcards = flashcardRepository.findByIdsAndDeckId(flashcardIds, deckId);
+
+        for (Flashcard flashcard : flashcards) {
+            setInitialFlashcardState(deckId, flashcard, userId);
+        }
+
+        log.info("Zainicjalizowano stan algorytmu nauki dla fiszek w sesji - deckId: '{}', flashcardCount: {}",
+                deckId, flashcards.size());
+    }
+
 
     /**
      * Pobiera wszystkie fiszki z talii wraz z pełnymi danymi słówek.
@@ -330,6 +397,29 @@ public class FlashcardServiceImpl implements FlashcardService {
         flashcard.setLearned(learned);
         flashcardRepository.save(flashcard);
         log.info("Zaktualizowano status nauki fiszki - flashcardId: '{}', learned: {}", flashcardId, learned);
+    }
+
+    /**
+     * Oznacza fiszkę jako pominiętą lub niepominiętą.
+     *
+     * <p>Zmienia flagę 'skipped' fiszki. Używane gdy użytkownik
+     * chce pominąć fiszkę podczas nauki lub przywrócić ją do nauki.
+     *
+     * @param flashcardId ID fiszki
+     * @param skipped nowy status pominięcia (true = pominięta, false = do nauki)
+     * @param userId ID użytkownika wykonującego operację
+     * @throws FlashcardNotFoundException jeśli fiszka o podanym ID nie istnieje
+     * @throws UserPermissionsMissing jeśli użytkownik nie ma uprawnień do fiszki
+     */
+    @Override
+    @Transactional
+    public void markAsSkipped(String flashcardId, boolean skipped, String userId){
+        log.debug("Oznaczanie fiszki jako pominięta - flashcardId: '{}', userId: '{}', skipped: {}",
+                flashcardId, userId, skipped);
+        Flashcard flashcard = getFlashcardIfUserHasPermissions(flashcardId, userId);
+        flashcard.setSkipped(skipped);
+        flashcardRepository.save(flashcard);
+        log.info("Zaktualizowano status pominięcia fiszki - flashcardId: '{}', skipped: {}", flashcardId, skipped);
     }
 
     /**

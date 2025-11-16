@@ -21,5 +21,8 @@ public interface FlashcardRepository extends JpaRepository<Flashcard, String> {
             @Param("isLearned") Boolean isLearned,
             @Param("isSkipped") Boolean isSkipped);
 
+    @Query("SELECT f FROM Flashcard f WHERE f.id IN :ids AND f.deck.id = :deckId")
+    List<Flashcard> findByIdsAndDeckId(List<String> ids, String deckId);
+
 
 }

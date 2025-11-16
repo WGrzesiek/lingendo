@@ -17,6 +17,6 @@ ALTER TABLE session
     ADD COLUMN completed_at timestamp(6) with time zone,
     ADD COLUMN status varchar(255) NOT NULL DEFAULT 'IN_PROGRESS',
     ADD COLUMN type varchar(255) NOT NULL DEFAULT 'STANDARD';
-ALTER TABLE session ADD CONSTRAINT session_status_check CHECK (status IN ('IN_PROGRESS', 'COMPLETED','PAUSED' , 'ABANDONED'));
+ALTER TABLE session ADD CONSTRAINT session_status_check CHECK (status IN ('IN_PROGRESS', 'COMPLETED','PAUSED', 'ABANDONED'));
 ALTER TABLE session ADD CONSTRAINT session_type_check CHECK (type IN ('LEARNING', 'REVIEW'));
 

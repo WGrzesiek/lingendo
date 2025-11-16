@@ -35,10 +35,10 @@ import java.util.Optional;
 public interface SessionFlashcardService {
     
 
-    String addFlashcardsToSession(Session session, Deck deck, FlashcardFetchStrategy flashcardFetchStrategy);
-    List<SessionFlashcardDto> getSessionFlashcards(String sessionId);
-    Optional<SessionFlashcardDto> getFlashcardProgress(String sessionId, String flashcardId);
-    void skipFlashcard(String sessionId, String flashcardId);
-    int getTotalFlashcardsInSession(String sessionId);
-    int getAnsweredFlashcardsCount(String sessionId);
+    void addFlashcardsToSession(Session session, Deck deck, FlashcardFetchStrategy flashcardFetchStrategy, String userId);
+    List<SessionFlashcardDto> getSessionFlashcards(String sessionId, String userId);
+    Optional<SessionFlashcardDto> getFlashcardProgress(String sessionId, String flashcardId, String userId);
+    void skipFlashcard(String sessionId, String flashcardId, String userId);
+    int getTotalFlashcardsInSession(String sessionId, String userId);
+    int getAnsweredFlashcardsCount(String sessionId, String userId);
 }
