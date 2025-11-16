@@ -11,6 +11,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -76,9 +77,10 @@ import java.util.List;
  * @see CreateWordDto
  * @see SendWordFromKafkaDto
  */
+@Slf4j
 @RestController
 @RequestMapping("/api/v1/vocabulary")
-@Tag(name = "Vocabulary Command", description = "Operacje tworzenia słownictwa (CQRS Write Side)")
+@Tag(name = "Vocabulary Management", description = "API do zarządzania słownictwem")
 public class VocabularyController {
     private final VocabularyService vocabularyService;
 
@@ -107,13 +109,11 @@ public class VocabularyController {
     })
     @PostMapping("/create")
     public ResponseEntity<SendWordFromKafkaDto> createVocabulary(
-            @io.swagger.v3.oas.annotations.parameters.RequestBody(
-                description = "Dane nowego słówka",
-                required = true,
-                content = @Content(schema = @Schema(implementation = CreateWordDto.class))
-            )
+            @Parameter(description = "Dane nowego słówka", required = true)
             @Valid @RequestBody CreateWordDto createWordDto) {
+        log.debug("Tworzenie słówka - słowo: '{}'", createWordDto.getWord());
         SendWordFromKafkaDto saveVocabulary = vocabularyService.createVocabulary(createWordDto);
+        log.info("Słówko utworzone - wordId: '{}', słowo: '{}'", saveVocabulary.id(), saveVocabulary.word());
         return ResponseEntity.status(HttpStatus.CREATED).body(saveVocabulary);
     }
 
@@ -142,13 +142,11 @@ public class VocabularyController {
     public ResponseEntity<SendWordFromKafkaDto> createVocabularyForDeck(
             @Parameter(description = "ID decka", required = true, example = "deck-123")
             @PathVariable String deckId,
-            @io.swagger.v3.oas.annotations.parameters.RequestBody(
-                description = "Dane nowego słówka",
-                required = true,
-                content = @Content(schema = @Schema(implementation = CreateWordDto.class))
-            )
+            @Parameter(description = "Dane nowego słówka", required = true)
             @Valid @RequestBody CreateWordDto createWordDto) {
+        log.debug("Tworzenie słówka dla decka - deckId: '{}', słowo: '{}'", deckId, createWordDto.getWord());
         SendWordFromKafkaDto saveVocabulary = vocabularyService.createVocabularyForDeck(createWordDto, deckId);
+        log.info("Słówko utworzone dla decka - wordId: '{}', deckId: '{}'", saveVocabulary.id(), deckId);
         return ResponseEntity.status(HttpStatus.CREATED).body(saveVocabulary);
     }
 
@@ -173,12 +171,11 @@ public class VocabularyController {
     })
     @PostMapping("/create-batch")
     public ResponseEntity<List<SendWordFromKafkaDto>> createVocabularies(
-            @io.swagger.v3.oas.annotations.parameters.RequestBody(
-                description = "Lista danych nowych słówek",
-                required = true
-            )
+            @Parameter(description = "Lista danych nowych słówek", required = true)
             @Valid @RequestBody List<CreateWordDto> createWordDtos) {
+        log.debug("Tworzenie słówek batch - liczba: {}", createWordDtos.size());
         List<SendWordFromKafkaDto> saveVocabularies = vocabularyService.createVocabularies(createWordDtos);
+        log.info("Słówka batch utworzone - liczba: {}", saveVocabularies.size());
         return ResponseEntity.status(HttpStatus.CREATED).body(saveVocabularies);
     }
 
@@ -207,12 +204,11 @@ public class VocabularyController {
     public ResponseEntity<List<SendWordFromKafkaDto>> createVocabulariesForDeck(
             @Parameter(description = "ID decka", required = true, example = "deck-123")
             @PathVariable String deckId,
-            @io.swagger.v3.oas.annotations.parameters.RequestBody(
-                description = "Lista danych nowych słówek",
-                required = true
-            )
+            @Parameter(description = "Lista danych nowych słówek", required = true)
             @Valid @RequestBody List<CreateWordDto> createWordDtos) {
+        log.debug("Tworzenie słówek batch dla decka - deckId: '{}', liczba: {}", deckId, createWordDtos.size());
         List<SendWordFromKafkaDto> saveVocabularies = vocabularyService.createVocabulariesForDeck(createWordDtos, deckId);
+        log.info("Słówka batch utworzone dla decka - liczba: {}, deckId: '{}'", saveVocabularies.size(), deckId);
         return ResponseEntity.status(HttpStatus.CREATED).body(saveVocabularies);
     }
 }

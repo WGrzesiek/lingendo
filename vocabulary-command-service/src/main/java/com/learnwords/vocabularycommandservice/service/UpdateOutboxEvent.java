@@ -27,24 +27,5 @@ import com.learnwords.common.dto.UpdateOutboxEventDto;
  * @see UpdateOutboxEventDto
  */
 public interface UpdateOutboxEvent {
-    
-    /**
-     * Aktualizuje status zdarzenia w tabeli Outbox.
-     * 
-     * <p>Metoda używana przez scheduler/publisher do aktualizacji statusu
-     * zdarzenia po próbie publikacji do Kafki. Oznacza zdarzenie jako
-     * pomyślnie wysłane (SENT) lub błędne (ERROR).
-     * 
-     * <p>Implementacja powinna:
-     * <ul>
-     *   <li>Znaleźć zdarzenie po ID z DTO</li>
-     *   <li>Zaktualizować status (SENT/ERROR)</li>
-     *   <li>Zaktualizować timestampy (publishedAt, lastAttemptAt)</li>
-     *   <li>Zwiększyć licznik prób w przypadku błędu</li>
-     * </ul>
-     * 
-     * @param updateOutboxEventDto DTO zawierające ID zdarzenia i nowy status
-     * @throws IllegalArgumentException jeśli zdarzenie o podanym ID nie istnieje
-     */
-    void updateOutboxEvent(UpdateOutboxEventDto updateOutboxEventDto);
+     void updateOutboxEvent(UpdateOutboxEventDto updateOutboxEventDto);
 }

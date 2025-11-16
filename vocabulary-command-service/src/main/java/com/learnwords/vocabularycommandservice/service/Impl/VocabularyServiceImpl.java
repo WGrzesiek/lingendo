@@ -2,10 +2,10 @@ package com.learnwords.vocabularycommandservice.service.Impl;
 
 import com.learnwords.common.AggregateType;
 import com.learnwords.common.EventType;
+import com.learnwords.common.dto.SendSentenceFromKafkaDto;
 import com.learnwords.common.dto.SendWordFromKafkaDto;
 import com.learnwords.vocabularycommandservice.dto.CreateSentenceDto;
 import com.learnwords.vocabularycommandservice.dto.CreateWordDto;
-import com.learnwords.vocabularycommandservice.dto.SendSentenceDto;
 import com.learnwords.vocabularycommandservice.entity.Outbox;
 import com.learnwords.vocabularycommandservice.mapper.EntityToOutboxEntityMapper;
 import com.learnwords.vocabularycommandservice.repository.OutboxRepository;
@@ -173,7 +173,6 @@ public class VocabularyServiceImpl implements VocabularyService {
     private SendWordFromKafkaDto createVocabularyInternal(CreateWordDto createWordDto, String deckId) {
         String aggregateId = UUID.randomUUID().toString();
         List<String> sentenceIds = new ArrayList<>();
-        try {
             if (createWordDto.getWord() == null || createWordDto.getTranslations() == null) {
                 log.error("Tworzenie słówka - brak wymaganych pól");
                 throw new IllegalArgumentException("Word and translations must not be null");
@@ -181,7 +180,7 @@ public class VocabularyServiceImpl implements VocabularyService {
             
             if (createWordDto.getSentences() != null && !createWordDto.getSentences().isEmpty()) {
                 for (CreateSentenceDto createSentenceDto : createWordDto.getSentences()){
-                    SendSentenceDto sentenceDto = sentenceService.createSentence(createSentenceDto, deckId);
+                    SendSentenceFromKafkaDto sentenceDto = sentenceService.createSentence(createSentenceDto, deckId);
                     sentenceIds.add(sentenceDto.id());
                     log.debug("Utworzono zdanie - sentenceId: '{}', słowo: '{}'", sentenceDto.id(), createWordDto.getWord());
                 }
@@ -211,13 +210,6 @@ public class VocabularyServiceImpl implements VocabularyService {
             log.info("Słówko '{}' zostało utworzone - wordId: '{}'", eventPayload.word(), eventPayload.id());
             return eventPayload;
 
-        } catch(DataAccessException e){
-            log.error("Błąd zapisu słówka - słowo: '{}', błąd: {}", createWordDto.getWord(), e.getMessage());
-            throw e;
-        } catch(Exception e){
-            log.error("Nieoczekiwany błąd podczas tworzenia słówka - słowo: '{}', błąd: {}", createWordDto.getWord(), e.getMessage());
-            throw new RuntimeException("Nie udało się zapisać słówka", e);
-        }
     }
 
     /**
@@ -244,7 +236,7 @@ public class VocabularyServiceImpl implements VocabularyService {
     private List<SendWordFromKafkaDto> createVocabulariesInternal(List<CreateWordDto> createWordDtos, String deckId) {
         if (createWordDtos == null || createWordDtos.isEmpty()) {
             log.error("Tworzenie słówek batch - pusta lista");
-            throw new IllegalArgumentException("CreateWordDtos list must not be null or empty");
+            throw new IllegalArgumentException("Lista CreateWordDtos nie może być null lub pusta");
         }
 
         List<SendWordFromKafkaDto> createdVocabularies = new ArrayList<>();
