@@ -1,3 +1,3 @@
-export const DecksPage = () => {
-  return <div>Decks</div>;
-};
+export default function DecksPage() {
+  return <div>Decks List Page</div>;
+}
