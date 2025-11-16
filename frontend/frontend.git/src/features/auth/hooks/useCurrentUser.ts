@@ -69,8 +69,19 @@ export const CURRENT_USER_KEY = ["current-user"] as const;
 export function useCurrentUser() {
   return useQuery<User | null>({
     queryKey: CURRENT_USER_KEY,
-    queryFn: getCurrentUser,
+    queryFn: async () => {
+      try {
+        return await getCurrentUser();
+      } catch (error: any) {
+        // Jeśli 401 (unauthorized) - zwróć null zamiast error
+        if (error.response?.status === 401) {
+          return null;
+        }
+        throw error;
+      }
+    },
     staleTime: 1000 * 60 * 5,
+    retry: false, // Nie retry jeśli user nie jest zalogowany
     refetchOnMount: false,
     refetchOnWindowFocus: false,
     refetchOnReconnect: true,
