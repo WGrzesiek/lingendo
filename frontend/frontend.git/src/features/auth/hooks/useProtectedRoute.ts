@@ -33,7 +33,7 @@ export const useProtectedRoute = (options: ProtectionOptions = {}) => {
   } = options;
 
   const router = useRouter();
-  const { user, isLoading, error } = useCurrentUser();
+  const { data: user, isLoading, error } = useCurrentUser();
 
   useEffect(() => {
     if (isLoading) return;

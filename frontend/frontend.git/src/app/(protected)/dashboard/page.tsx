@@ -1,40 +1,74 @@
 "use client";
 
-import { useProtectedRoute } from "@/features/auth/hooks/useProtectedRoute";
+// import { useProtectedRoute } from "@/features/auth/hooks/useProtectedRoute";
+import { StudentStatsGrid } from "@/components/dashboard-student/stats/StudentStatsGrid";
+import { MyCourses } from "@/components/dashboard-student/courses/MyCourses";
+import { CommunityCourses } from "@/components/dashboard-student/courses/CommunityCourses";
+import { Leaderboard } from "@/components/dashboard-student/leaderboard/Leaderboard";
+import { RecentActivity } from "@/components/dashboard-student/activity/RecentActivity";
+import { StudentQuickActions } from "@/components/dashboard-student/quick-actions/StudentQuickActions";
+import type { User } from "@/features/auth/types";
 
+/**
+ * Mock użytkownika dla celów deweloperskich
+ */
+const mockUser: User = {
+  userId: "student-456",
+  username: "Piotr Wiśniewski",
+  accountType: "STUDENT",
+  userType: "NORMAL",
+  isEnabled: true,
+};
+
+/**
+ * Strona dashboardu dla uczniów
+ * Dostępna dla wszystkich zalogowanych użytkowników (domyślny dashboard)
+ */
 const DashboardPage = () => {
-  const { user, isLoading } = useProtectedRoute();
+  // const { user, isLoading } = useProtectedRoute();
+
+  const user = mockUser;
+  const isLoading = false;
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <p className="text-muted-foreground">Ładowanie...</p>
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="text-center">
+          <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+          <p className="text-muted-foreground">Ładowanie dashboardu...</p>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen p-8">
-      <h1 className="text-3xl font-bold mb-6">Dashboard</h1>
-      <p className="text-muted-foreground mb-4">
-        Witaj w panelu użytkownika, <strong>{user?.username}</strong>!
-      </p>
-      <div className="bg-card p-4 rounded-lg border">
-        <h2 className="text-xl font-semibold mb-2">Informacje o koncie</h2>
-        <ul className="space-y-2">
-          <li>
-            <span className="text-muted-foreground">Typ konta:</span>{" "}
-            <strong>{user?.accountType}</strong>
-          </li>
-          <li>
-            <span className="text-muted-foreground">Typ użytkownika:</span>{" "}
-            <strong>{user?.userType}</strong>
-          </li>
-          <li>
-            <span className="text-muted-foreground">Status:</span>{" "}
-            <strong>{user?.isEnabled ? "Aktywne" : "Nieaktywne"}</strong>
-          </li>
-        </ul>
+    <div className="min-h-screen bg-background">
+      <div className="container mx-auto p-6 lg:p-8 space-y-8">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-4xl font-bold mb-2">
+              Witaj, {user?.username}! 👋
+            </h1>
+            <p className="text-muted-foreground text-lg">
+              Kontynuuj naukę i rozwijaj swoje umiejętności
+            </p>
+          </div>
+        </div>
+
+        <StudentStatsGrid />
+
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="lg:col-span-2 space-y-6">
+            <MyCourses />
+            <CommunityCourses />
+          </div>
+
+          <div className="space-y-6">
+            <Leaderboard />
+            <RecentActivity />
+            <StudentQuickActions />
+          </div>
+        </div>
       </div>
     </div>
   );

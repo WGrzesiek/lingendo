@@ -1,36 +1,78 @@
+// "use client";
+
+// import { useState, useEffect } from "react";
+// import { getCurrentUser } from "../services/auth";
+// import type { User } from "../types";
+
+// /**
+//  * Hook do pobierania danych aktualnie zalogowanego użytkownika z /me
+//  * Automatycznie pobiera dane przy montowaniu komponentu
+//  */
+// export const useCurrentUser = () => {
+//   const [user, setUser] = useState<User | null>(null);
+//   const [isLoading, setIsLoading] = useState(true);
+//   const [error, setError] = useState<string | null>(null);
+
+//   useEffect(() => {
+//     const fetchUser = async () => {
+//       try {
+//         setIsLoading(true);
+//         const userData = await getCurrentUser();
+//         setUser(userData);
+//         setError(null);
+//       } catch (err) {
+//         console.error("Failed to fetch current user:", err);
+//         setError("Failed to load user data");
+//         setUser(null);
+//       } finally {
+//         setIsLoading(false);
+//       }
+//     };
+
+//     fetchUser();
+//   }, []);
+
+//   return { user, isLoading, error };
+// };
 "use client";
 
-import { useState, useEffect } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { getCurrentUser } from "../services/auth";
 import type { User } from "../types";
 
 /**
- * Hook do pobierania danych aktualnie zalogowanego użytkownika z /me
- * Automatycznie pobiera dane przy montowaniu komponentu
+ * Klucz cache dla React Query identyfikujący zapytanie o aktualnego użytkownika
+ * Używany do invalidacji cache po login/logout
  */
-export const useCurrentUser = () => {
-  const [user, setUser] = useState<User | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+export const CURRENT_USER_KEY = ["current-user"] as const;
 
-  useEffect(() => {
-    const fetchUser = async () => {
-      try {
-        setIsLoading(true);
-        const userData = await getCurrentUser();
-        setUser(userData);
-        setError(null);
-      } catch (err) {
-        console.error("Failed to fetch current user:", err);
-        setError("Failed to load user data");
-        setUser(null);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchUser();
-  }, []);
-
-  return { user, isLoading, error };
-};
+/**
+ * Hook do pobierania danych aktualnie zalogowanego użytkownika z endpointu /me
+ * Wykorzystuje React Query do cache'owania - wielokrotne wywołania w różnych komponentach
+ * wykonują tylko JEDEN request HTTP, pozostałe pobierają dane z cache
+ *
+ * @returns Obiekt z React Query zawierający:
+ *   - data: User | null - dane użytkownika lub null gdy niezalogowany
+ *   - isLoading: boolean - czy trwa pobieranie danych
+ *   - error: Error | null - błąd jeśli wystąpił
+ *   - refetch: () => Promise - funkcja do ręcznego odświeżenia danych
+ *
+ * @example
+ * ```tsx
+ * const { data: user, isLoading } = useCurrentUser();
+ *
+ * if (isLoading) return <Spinner />;
+ * if (!user) return <LoginPrompt />;
+ * return <div>Witaj {user.username}</div>;
+ * ```
+ */
+export function useCurrentUser() {
+  return useQuery<User | null>({
+    queryKey: CURRENT_USER_KEY,
+    queryFn: getCurrentUser,
+    staleTime: 1000 * 60 * 5,
+    refetchOnMount: false,
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: true,
+  });
+}

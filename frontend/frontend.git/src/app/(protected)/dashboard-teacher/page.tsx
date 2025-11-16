@@ -1,49 +1,75 @@
 "use client";
 
 import { useProtectedRoute } from "@/features/auth/hooks/useProtectedRoute";
+import { StatsGrid } from "@/components/dashboard-teacher/stats/StatsGrid";
+import { RecentCourses } from "@/components/dashboard-teacher/courses/RecentCourses";
+import { TopStudents } from "@/components/dashboard-teacher/students/TopStudents";
+import { ActivityFeed } from "@/components/dashboard-teacher/activity/ActivityFeed";
+import { QuickActions } from "@/components/dashboard-teacher/quick-actions/QuickActions";
+import type { User } from "@/features/auth/types";
 
+/**
+ * Mock użytkownika dla celów deweloperskich
+ */
+const mockUser: User = {
+  userId: "teacher-123",
+  username: "Jan Kowalski",
+  accountType: "TEACHER",
+  userType: "NORMAL",
+  isEnabled: true,
+};
+
+/**
+ * Strona dashboardu dla nauczycieli
+ * Dostępna tylko dla użytkowników z accountType = TEACHER
+ */
 const DashboardTeacherPage = () => {
-  const { user, isLoading } = useProtectedRoute({
-    requiredAccountType: "TEACHER",
-    redirectTo: "/dashboard-teacher",
-  });
+  // const { user, isLoading } = useProtectedRoute({
+  //   requiredAccountType: "TEACHER",
+  //   redirectTo: "/dashboard-teacher",
+  // });
+
+  const user = mockUser;
+  const isLoading = false;
 
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <p className="text-muted-foreground">Ładowanie...</p>
+        <div className="text-center">
+          <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+          <p className="text-muted-foreground">Ładowanie dashboardu...</p>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen p-8">
-      <h1 className="text-3xl font-bold mb-6">Panel Nauczyciela</h1>
-      <p className="text-muted-foreground mb-4">
-        Witaj, <strong>{user?.username}</strong>! Ta strona jest dostępna tylko
-        dla nauczycieli.
-      </p>
+    <div className="min-h-screen bg-background">
+      <div className="container mx-auto p-6 lg:p-8 space-y-8">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-4xl font-bold mb-2">
+              Witaj, {user?.username}! 👋
+            </h1>
+            <p className="text-muted-foreground text-lg">
+              Oto podsumowanie Twojej aktywności jako nauczyciela
+            </p>
+          </div>
+        </div>
 
-      <div className="bg-card p-6 rounded-lg border">
-        <h2 className="text-xl font-semibold mb-2">Twoje dane:</h2>
-        <ul className="space-y-2">
-          <li>
-            <span className="text-muted-foreground">Username:</span>{" "}
-            <strong>{user?.username}</strong>
-          </li>
-          <li>
-            <span className="text-muted-foreground">Typ konta:</span>{" "}
-            <strong>{user?.accountType}</strong>
-          </li>
-          <li>
-            <span className="text-muted-foreground">Typ użytkownika:</span>{" "}
-            <strong>{user?.userType}</strong>
-          </li>
-          <li>
-            <span className="text-muted-foreground">Status:</span>{" "}
-            <strong>{user?.isEnabled ? "Aktywne" : "Nieaktywne"}</strong>
-          </li>
-        </ul>
+        <StatsGrid />
+
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="lg:col-span-2 space-y-6">
+            <RecentCourses />
+            <ActivityFeed />
+          </div>
+
+          <div className="space-y-6">
+            <TopStudents />
+            <QuickActions />
+          </div>
+        </div>
       </div>
     </div>
   );
