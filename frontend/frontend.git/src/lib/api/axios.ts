@@ -88,7 +88,7 @@ apiClient.interceptors.response.use(
       } else {
         console.log("[Axios] Refresh nieudany, przekierowanie na /login");
         if (typeof window !== "undefined") {
-          window.location.href = "/api/v1/gateway/login";
+          window.location.href = "/login";
         }
       }
     }
