@@ -72,10 +72,13 @@ export function useCurrentUser() {
     queryFn: async () => {
       try {
         return await getCurrentUser();
-      } catch (error: any) {
+      } catch (error: unknown) {
         // Jeśli 401 (unauthorized) - zwróć null zamiast error
-        if (error.response?.status === 401) {
-          return null;
+        if (error && typeof error === "object" && "response" in error) {
+          const axiosError = error as { response?: { status?: number } };
+          if (axiosError.response?.status === 401) {
+            return null;
+          }
         }
         throw error;
       }
