@@ -19,7 +19,7 @@ import type {
 } from "../types";
 import type { DeckOwnerType } from "@/types/common";
 
-const BASE_URL = "api/v1/decks";
+const BASE_URL = "/v1/decks";
 
 /**
  * Pobiera listę talii z opcjonalnymi filtrami (isPublic, owner)

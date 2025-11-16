@@ -1,7 +1,7 @@
 import apiClient from "@/lib/api/axios";
 import type { LoginRequest, SignupRequest, User } from "../types";
 
-const BASE_URL = "api/v1/gateway";
+const BASE_URL = "/v1/gateway";
 /**
  * Logowanie użytkownika
  * Backend ustawia access token w httpOnly cookie
