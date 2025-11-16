@@ -73,8 +73,19 @@ export const CreateDeckForm = () => {
         router.push("/dashboard");
       },
       onError: (error) => {
+        if (
+          error?.status === 409 &&
+          typeof error?.message === "string" &&
+          error.message.includes("już istnieje dla tego użytkownika")
+        ) {
+          setErrors((prev) => ({
+            ...prev,
+            deckName: error.message,
+          }));
+          return;
+        }
+
         console.error("Błąd tworzenia talii:", error);
-        alert("Nie udało się utworzyć talii. Spróbuj ponownie.");
       },
     });
   };
