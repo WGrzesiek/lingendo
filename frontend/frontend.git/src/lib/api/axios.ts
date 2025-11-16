@@ -46,7 +46,7 @@ async function refreshAccess(): Promise<boolean> {
   if (!refreshing) {
     refreshing = (async () => {
       try {
-        await axios.post("/refresh", {}, { withCredentials: true });
+        await axios.post("/api/v1/gateway/refresh", {}, { withCredentials: true });
         console.log("[Axios] Token odświeżony pomyślnie");
       } catch (error) {
         console.error("[Axios] Nie udało się odświeżyć tokenu");
@@ -88,7 +88,7 @@ apiClient.interceptors.response.use(
       } else {
         console.log("[Axios] Refresh nieudany, przekierowanie na /login");
         if (typeof window !== "undefined") {
-          window.location.href = "/login";
+          window.location.href = "/api/v1/gateway/login";
         }
       }
     }
