@@ -1,6 +1,7 @@
 package com.learnwords.deckservice.entity;
 
 
+import com.learnwords.deckservice.enums.DeckOwner;
 import com.learnwords.deckservice.enums.Language;
 import com.learnwords.deckservice.enums.LearnAlgorithm;
 import jakarta.persistence.*;
@@ -31,7 +32,10 @@ public class Deck {
     @Column(name = "user_id", nullable = false, length = 36)
     private String userId;
 
-    @OneToMany(mappedBy = "deck", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "deck",
+            fetch = FetchType.LAZY,
+            cascade = CascadeType.ALL,
+            orphanRemoval = true  )
     private Set<Flashcard> flashcards = new HashSet<>();
 
     @OneToMany(mappedBy = "deck", fetch = FetchType.LAZY)
@@ -60,6 +64,10 @@ public class Deck {
     @Enumerated(EnumType.STRING)
     @Column(name = "language_to", nullable = false)
     private Language languageTo;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "owner", nullable = false)
+    private DeckOwner owner;
 
     @Builder.Default
     @Column(nullable = false, updatable = false)
