@@ -38,12 +38,7 @@ public class SecurityConfig {
 
 
         return http
-                //NOTE potrzebne tylko do deva
-                .csrf(ServerHttpSecurity.CsrfSpec::disable)
-                .securityContextRepository(NoOpServerSecurityContextRepository.getInstance())
                 .authorizeExchange(ex -> ex
-                        .pathMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                        //NOTE
                         .pathMatchers(
                                 "/openapi/**", "/docs", "/swagger-ui/**", "/v3/api-docs/**",
                                 "/.well-known/**"
