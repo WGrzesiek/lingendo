@@ -1,9 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { StepRenderer } from "@/components/learning/steps/StepRenderer";
-import { SessionProgress } from "@/components/learning/progress/SessionProgress";
-import { SessionSummary } from "@/components/learning/summary/SessionSummary";
+import { StepRenderer } from "@/features/learning/components/steps/StepRenderer";
+import { SessionProgress } from "@/features/learning/components/progress/SessionProgress";
+import { SessionSummary } from "@/features/learning/components/summary/SessionSummary";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ArrowLeft } from "lucide-react";

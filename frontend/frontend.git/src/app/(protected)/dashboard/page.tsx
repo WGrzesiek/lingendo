@@ -1,12 +1,12 @@
 "use client";
 
 // import { useProtectedRoute } from "@/features/auth/hooks/useProtectedRoute";
-import { StudentStatsGrid } from "@/components/dashboard-student/stats/StudentStatsGrid";
-import { MyCourses } from "@/components/dashboard-student/courses/MyCourses";
-import { CommunityCourses } from "@/components/dashboard-student/courses/CommunityCourses";
-import { Leaderboard } from "@/components/dashboard-student/leaderboard/Leaderboard";
-import { RecentActivity } from "@/components/dashboard-student/activity/RecentActivity";
-import { StudentQuickActions } from "@/components/dashboard-student/quick-actions/StudentQuickActions";
+import { StudentStatsGrid } from "@/features/dashboard-student/components/StudentStatsGrid";
+import { MyCourses } from "@/features/dashboard-student/components/MyCourses";
+import { CommunityCourses } from "@/features/dashboard-student/components/CommunityCourses";
+import { Leaderboard } from "@/features/dashboard-student/components/Leaderboard";
+import { RecentActivity } from "@/features/dashboard-student/components/RecentActivity";
+import { StudentQuickActions } from "@/features/dashboard-student/components/StudentQuickActions";
 import type { User } from "@/features/auth/types";
 
 /**

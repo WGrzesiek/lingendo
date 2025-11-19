@@ -18,6 +18,8 @@ import {
 import { useCreateDeck } from "../../hooks/mutation/useCreateDeck";
 import type { CreateDeckDto } from "../../types";
 import type { DeckOwnerType, Language, LearnAlgorithm } from "@/types/common";
+import type { AxiosError } from "axios";
+import { ApiErrorResponse } from "@/types/common";
 
 /**
  * Formularz do tworzenia nowej talii fiszek
@@ -67,35 +69,34 @@ export const CreateDeckForm = () => {
 
     if (!validate()) return;
 
-    createDeck(formData, {
-      onSuccess: (data) => {
-        console.log("Talia utworzona:", data);
-        router.push("/dashboard");
-      },
-      onError: (error) => {
-        if (
-          error?.status === 409 &&
-          typeof error?.message === "string" &&
-          error.message.includes("już istnieje dla tego użytkownika")
-        ) {
-          setErrors((prev) => ({
-            ...prev,
-            deckName: error.message,
-          }));
-          return;
-        }
+createDeck(formData, {
+  onSuccess: () => router.push("/dashboard"),
 
-        console.error("Błąd tworzenia talii:", error);
-      },
-    });
-  };
+  onError: (error) => {
+    const status = error.response?.status;
+    const apiMessage = error.response?.data?.message;
+
+    if (
+      status === 409 &&
+      typeof apiMessage === "string" &&
+      apiMessage.includes("już istnieje dla tego użytkownika")
+    ) {
+      setErrors((prev) => ({
+        ...prev,
+        deckName: apiMessage,
+      }));
+      return;
+    }
+
+    console.error("Błąd tworzenia talii:", error);
+  },
+});
 
   const handleChange = <K extends keyof CreateDeckDto>(
     field: K,
     value: CreateDeckDto[K]
   ) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
-    // Usuń błąd dla tego pola po zmianie
     if (errors[field]) {
       setErrors((prev) => ({ ...prev, [field]: undefined }));
     }
