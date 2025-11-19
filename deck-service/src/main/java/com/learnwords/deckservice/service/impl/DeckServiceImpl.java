@@ -399,9 +399,7 @@ public class DeckServiceImpl implements DeckService {
      */
     private void assertDeckNameIsFree(String userId, String deckName) {
         if (isDeckNameTaken(userId, deckName)) {
-            throw new DeckWithThisNameForThisUserAlreadyExistsException(
-                    deckName
-            );
+            throw new DeckWithThisNameForThisUserAlreadyExistsException(deckName);
         }
     }
 
