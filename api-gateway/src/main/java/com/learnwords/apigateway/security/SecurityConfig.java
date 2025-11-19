@@ -39,7 +39,6 @@ public class SecurityConfig {
 
         return http
                 //NOTE potrzebne tylko do deva
-                .cors(Customizer.withDefaults())   // ✅ nowa zalecana forma
                 .csrf(ServerHttpSecurity.CsrfSpec::disable)
                 .securityContextRepository(NoOpServerSecurityContextRepository.getInstance())
                 .authorizeExchange(ex -> ex
