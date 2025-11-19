@@ -75,6 +75,8 @@ spring:
                             - "http://localhost:8811"
                             - "http://localhost:3000"
                             - "http://127.0.0.1:8811"
+                            - "http://100.74.36.70:3000"
+                            - "http://macbook-air-grzegorz.ibis-tautara.ts.net:3000"
                           allowedMethods:
                             - GET
                             - POST
