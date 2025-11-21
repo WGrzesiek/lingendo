@@ -1,8 +1,10 @@
 package com.learnwords.deckservice.service;
 
 import com.learnwords.deckservice.dto.*;
+import com.learnwords.deckservice.dto.dashboard.StudentMyCourseListItemDto;
 import com.learnwords.deckservice.enums.DeckOwner;
 import com.learnwords.deckservice.enums.LearnAlgorithm;
+import org.springframework.data.domain.Page;
 
 import java.util.List;
 
@@ -69,4 +71,8 @@ public interface DeckService {
     UserDeckCountDto getUserDeckCount(String userId);
     DeckStatisticsDto getDeckStatistics(String deckId, String userId);
     boolean isDeckNameTaken(String userId, String deckName);
+
+    //======================
+    // pod widoki
+    Page<StudentMyCourseListItemDto> getStudentMyCourseDecks(String userId, int page, int size);
 }

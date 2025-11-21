@@ -25,14 +25,12 @@ import java.time.Instant;
 @AllArgsConstructor
 public class DeckDetailsDto {
 
-    // === Pola tylko do odczytu (nie edytowalne) ===
     private String id;
     private String userId;
     private int wordCount;
     private Instant createdAt;
     private Instant updatedAt;
 
-    // === Pola edytowalne ===
     @NotBlank(message = "Nazwa talii nie może być pusta")
     private String name;
     private String description;

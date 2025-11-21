@@ -1,6 +1,7 @@
 package com.learnwords.deckservice.service.impl;
 
 import com.learnwords.deckservice.dto.*;
+import com.learnwords.deckservice.dto.dashboard.StudentMyCourseListItemDto;
 import com.learnwords.deckservice.entity.Deck;
 import com.learnwords.deckservice.enums.DeckOwner;
 import com.learnwords.deckservice.enums.LearnAlgorithm;
@@ -14,6 +15,10 @@ import com.learnwords.deckservice.repository.SessionRepository;
 import com.learnwords.deckservice.service.DeckService;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -215,17 +220,6 @@ public class DeckServiceImpl implements DeckService {
                 .toList();
     }
 
-    private DeckDto mapToDeckDto(Deck deck) {
-        return new DeckDto(
-                deck.getId(),
-                deck.getName(),
-                deck.isPublic(),
-                deck.getUserId(),
-                deck.getOwner().name(),
-                deck.getWordCount()
-        );
-    }
-
     /**
      * Pobiera szczegółowe informacje o talii
      * @param deckId ID talii
@@ -364,6 +358,50 @@ public class DeckServiceImpl implements DeckService {
         return stats;
 
     }
+    /**
+     * Pobiera talię dla widoku "Moje kursy" studenta z paginacją
+     *
+     * @param userId ID użytkownika
+     * @param page Numer strony (0-indexed)
+     * @param size Rozmiar strony
+     * @return Strona z listą talii w formacie StudentMyCourseListItemDto
+     */
+    @Override
+    public Page<StudentMyCourseListItemDto> getStudentMyCourseDecks(String userId, int page, int size) {
+        if (userId == null || userId.isBlank()) {
+            log.error("UserId jest pusty");
+            throw new IllegalArgumentException("UserId nie może być pusty");
+        }
+        log.debug("Pobieranie talii dla użytkownika: {}", userId);
+        Pageable pageable = PageRequest.of(
+                page,
+                size,
+                Sort.by(
+                        Sort.Order.asc("completionPercent"),
+                        Sort.Order.desc("lastAccessed")
+                )
+        );
+        return deckRepository.findByUserId(userId, pageable)
+                .map(this::toDto);
+    }
+
+    private StudentMyCourseListItemDto toDto(Deck deck) {
+        Long totalSession = deck.getTotalSessions();
+        Long sessionCompleted = deck.getSessionCompleted();
+        double progress = (totalSession != null && totalSession > 0)
+                ? Math.round((sessionCompleted * 100.0 / totalSession) * 100.0) / 100.0
+                : 0.0;
+        return new StudentMyCourseListItemDto(
+                deck.getId(),
+                deck.getName(),
+                deck.getDescription(),
+                totalSession,
+                sessionCompleted,
+                progress,
+                deck.getLastAccessed(),
+                deck.getDifficulty()
+        );
+    }
 
     /**
      * Sprawdza czy nazwa talii jest już zajęta dla danego użytkownika
@@ -429,6 +467,17 @@ public class DeckServiceImpl implements DeckService {
             throw new UserPermissionsMissing("Użytkownik nie ma uprawnień do tej talii");
         }
         return deck;
+    }
+
+    private DeckDto mapToDeckDto(Deck deck) {
+        return new DeckDto(
+                deck.getId(),
+                deck.getName(),
+                deck.isPublic(),
+                deck.getUserId(),
+                deck.getOwner().name(),
+                deck.getWordCount()
+        );
     }
 }
 

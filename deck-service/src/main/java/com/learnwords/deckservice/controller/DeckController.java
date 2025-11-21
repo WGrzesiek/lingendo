@@ -1,6 +1,7 @@
 package com.learnwords.deckservice.controller;
 
 import com.learnwords.deckservice.dto.*;
+import com.learnwords.deckservice.dto.dashboard.StudentMyCourseListItemDto;
 import com.learnwords.deckservice.enums.DeckOwner;
 import com.learnwords.deckservice.exception.exceptions.DeckNotFoundException;
 import com.learnwords.deckservice.exception.exceptions.DeckWithThisNameForThisUserAlreadyExistsException;
@@ -15,6 +16,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -141,6 +143,47 @@ public class DeckController {
 
     public DeckController(DeckService deckService) {
         this.deckService = deckService;
+    }
+
+    /**
+     * Pobiera paginowaną listę talii kursów studenta.
+     *
+     * <p>Endpoint zwraca talie przypisane do użytkownika z nagłówka x-client-id.
+     * Wyniki są paginowane według podanych parametrów page i size.
+     *
+     * @param userId ID użytkownika z nagłówka x-client-id
+     * @param page numer strony (domyślnie 0)
+     * @param size rozmiar strony (domyślnie 4)
+     * @return strona talii kursów studenta
+     */
+    @Operation(
+        summary = "Pobierz talie kursów studenta",
+        description = "Pobiera paginowaną listę talii kursów przypisanych do użytkownika."
+    )
+    @ApiResponses(value = {
+        @ApiResponse(
+            responseCode = "200",
+            description = "Lista talii kursów pobrana pomyślnie",
+            content = @Content(schema = @Schema(implementation = StudentMyCourseListItemDto.class))
+        ),
+        @ApiResponse(
+            responseCode = "400",
+            description = "Błędne parametry zapytania",
+            content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))
+        )
+    })
+    @GetMapping("/student-my-decks")
+    public ResponseEntity<Page<StudentMyCourseListItemDto>> getStudentMyCourseListItemDto(
+            @Parameter(description = "ID użytkownika z nagłówka", required = true, example = "user-123") @RequestHeader(USER_ID_HEADER) String userId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "4") int size
+    ) {
+
+        log.debug("Pobieranie talii kursów studenta - userId: {}, page: {}, size: {}", userId, page, size);
+        Page<StudentMyCourseListItemDto> decks = deckService.getStudentMyCourseDecks(userId, page, size);
+        log.info("Znaleziono {} talii kursów dla użytkownika {}", decks.getTotalElements(), userId);
+        return ResponseEntity.ok(decks);
+
     }
 
     /**
