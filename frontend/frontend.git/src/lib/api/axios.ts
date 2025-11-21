@@ -46,11 +46,7 @@ async function refreshAccess(): Promise<boolean> {
   if (!refreshing) {
     refreshing = (async () => {
       try {
-        await axios.post(
-          "/api/v1/gateway/refresh",
-          {},
-          { withCredentials: true }
-        );
+        await apiClient.post("/v1/gateway/refresh", {});
         console.log("[Axios] Token odświeżony pomyślnie");
       } catch (error) {
         console.error("[Axios] Nie udało się odświeżyć tokenu");
