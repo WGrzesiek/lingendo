@@ -134,3 +134,28 @@ export interface UserDeckCountDto {
   publicDecks: number;
   privateDecks: number;
 }
+
+export interface StudentMyCourseListItem {
+  deckId: string;
+  deckName: string;
+  deckDescription: string;
+  totalSession: number;
+  learnedSession: number;
+  progressPercentage: number | null;
+  lastAccessed: string | null;
+  deckDifficulty: DeckDifficulty;
+}
+
+export type DeckDifficulty = "EASY" | "MEDIUM" | "HARD";
+
+// Do wyniesienia kiedys do glownych typow
+export interface PageResponse<T> {
+  content: T[];
+  totalElements: number;
+  totalPages: number;
+  number: number;
+  size: number;
+  first: boolean;
+  last: boolean;
+  empty: boolean;
+}

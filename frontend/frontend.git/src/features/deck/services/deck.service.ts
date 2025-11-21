@@ -16,10 +16,29 @@ import type {
   UpdateFlashcardsPerSessionRequest,
   DeckStatisticsDto,
   UserDeckCountDto,
+  StudentMyCourseListItem,
+  PageResponse,
 } from "../types";
 import type { DeckOwnerType } from "@/types/common";
 
 const BASE_URL = "/v1/decks";
+
+export const getIDecks = async (params?: {
+  page?: number;
+  size?: number;
+}): Promise<PageResponse<StudentMyCourseListItem>> => {
+  const response = await apiClient.get<PageResponse<StudentMyCourseListItem>>(
+    `${BASE_URL}/student-my-decks`,
+    { params }
+  );
+
+  console.log(
+    "[Deck Service] Pobrano talie kursów studenta:",
+    response.data.content.length
+  );
+
+  return response.data;
+};
 
 /**
  * Pobiera listę talii z opcjonalnymi filtrami (isPublic, owner)
