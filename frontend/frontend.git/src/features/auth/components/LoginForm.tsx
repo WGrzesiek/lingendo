@@ -5,13 +5,13 @@ import { useState } from "react";
 import { useAuth } from "../hooks/useAuth";
 
 export const LoginForm = () => {
-  const { login, isLoading, error } = useAuth();
+  const { loginAsync, isLoading, loginError } = useAuth();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    await login({ username, password });
+    await loginAsync({ username, password });
   };
 
   return (
@@ -46,9 +46,10 @@ export const LoginForm = () => {
         />
       </div>
 
-      {error && (
+      {loginError && (
         <div className="text-destructive text-sm bg-destructive/10 p-3 rounded border border-destructive/20">
-          {error}
+          {loginError.response?.data.message ||
+            "Wystąpił błąd podczas logowania."}
         </div>
       )}
 

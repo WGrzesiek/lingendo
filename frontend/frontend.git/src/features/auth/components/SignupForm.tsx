@@ -4,14 +4,14 @@ import { useState } from "react";
 import { useAuth } from "../hooks/useAuth";
 
 export const SignupForm = () => {
-  const { signup, isLoading, error } = useAuth();
+  const { signupAsync, isLoading, signupError } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    await signup({ email, password, name });
+    await signupAsync({ email, password, name });
   };
 
   return (
@@ -61,9 +61,10 @@ export const SignupForm = () => {
         />
       </div>
 
-      {error && (
+      {signupError && (
         <div className="text-destructive text-sm bg-destructive/10 p-3 rounded border border-destructive/20">
-          {error}
+          {signupError.response?.data.message ||
+            "Wystąpił błąd podczas rejestracji."}
         </div>
       )}
 
