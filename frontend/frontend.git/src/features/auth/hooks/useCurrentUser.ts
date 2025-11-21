@@ -41,6 +41,12 @@ import { getCurrentUser } from "../services/auth";
 import type { User } from "../types";
 
 /**
+ * Klucz cache dla React Query identyfikujący zapytanie o aktualnego użytkownika
+ * Używany do invalidacji cache po login/logout
+ */
+export const CURRENT_USER_KEY = ["current-user"] as const;
+
+/**
  * Hook do pobierania danych aktualnie zalogowanego użytkownika z endpointu /me
  * Wykorzystuje React Query do cache'owania - wielokrotne wywołania w różnych komponentach
  * wykonują tylko JEDEN request HTTP, pozostałe pobierają dane z cache
@@ -50,10 +56,11 @@ import type { User } from "../types";
  *   - isLoading: boolean - czy trwa pobieranie danych
  *   - error: Error | null - błąd jeśli wystąpił
  *   - refetch: () => Promise - funkcja do ręcznego odświeżenia danych
+ *
  */
 export function useCurrentUser() {
   return useQuery<User | null>({
-    queryKey: ["current-user"],
+    queryKey: CURRENT_USER_KEY,
     queryFn: async () => {
       try {
         return await getCurrentUser();
