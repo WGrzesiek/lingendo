@@ -4,6 +4,7 @@ package com.learnwords.deckservice.entity;
 import com.learnwords.deckservice.enums.*;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.Formula;
 
 import java.time.Instant;
 import java.util.HashSet;
@@ -83,6 +84,9 @@ public class Deck {
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
     private DeckStatus status;
+
+    @Formula("(100 * session_completed) / NULLIF(total_session, 0)")
+    private Integer completionPercent;
 
     @Builder.Default
     @Column(nullable = false, updatable = false)

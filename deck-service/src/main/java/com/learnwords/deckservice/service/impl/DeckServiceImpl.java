@@ -15,6 +15,7 @@ import com.learnwords.deckservice.repository.SessionRepository;
 import com.learnwords.deckservice.service.DeckService;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
+import org.hibernate.annotations.Formula;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -373,6 +374,7 @@ public class DeckServiceImpl implements DeckService {
             throw new IllegalArgumentException("UserId nie może być pusty");
         }
         log.debug("Pobieranie talii dla użytkownika: {}", userId);
+
         Pageable pageable = PageRequest.of(
                 page,
                 size,
@@ -386,18 +388,14 @@ public class DeckServiceImpl implements DeckService {
     }
 
     private StudentMyCourseListItemDto toDto(Deck deck) {
-        Long totalSession = deck.getTotalSessions();
-        Long sessionCompleted = deck.getSessionCompleted();
-        double progress = (totalSession != null && totalSession > 0)
-                ? Math.round((sessionCompleted * 100.0 / totalSession) * 100.0) / 100.0
-                : 0.0;
+
         return new StudentMyCourseListItemDto(
                 deck.getId(),
                 deck.getName(),
                 deck.getDescription(),
-                totalSession,
-                sessionCompleted,
-                progress,
+                deck.getTotalSessions(),
+                deck.getSessionCompleted(),
+                deck.getCompletionPercent(),
                 deck.getLastAccessed(),
                 deck.getDifficulty()
         );

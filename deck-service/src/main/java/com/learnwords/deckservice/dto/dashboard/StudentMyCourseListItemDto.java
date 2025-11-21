@@ -9,7 +9,7 @@ public record StudentMyCourseListItemDto(String deckId,
                                          String deckDescription,
                                          Long totalSession,
                                          Long learnedSession,
-                                         double progressPercentage,
+                                         Integer progressPercentage,
                                          Instant lastAccessed,
                                          DeckDifficulty deckDifficulty
                                          ) {
