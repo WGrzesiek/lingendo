@@ -5,7 +5,7 @@ import { BookOpen, Clock, PlayCircle } from "lucide-react";
 import { DeckDto } from "@/features/deck/types";
 import { useUserDecks } from "@/features/deck/hooks/useUserDecks";
 import { UseQueryResult } from "@tanstack/react-query";
-import { DeckForDashboard } from "@/features/deck/components/deck/DeckForDashboard";
+import { DecksForDashboard } from "@/features/deck/components/deck/DeckForDashboard";
 
 interface MyCourse {
   id: string;
@@ -70,11 +70,6 @@ export const MyCourses = () => {
   //     isOwn: true,
   //   },
   // ];
-  const {
-    data: decks,
-    isLoading: decksLoading,
-    error: decksError,
-  }: UseQueryResult<DeckDto[]> = useUserDecks();
 
   // const getDifficultyBadge = (difficulty: MyCourse["difficulty"]) => {
   //   const variants = {
@@ -89,12 +84,6 @@ export const MyCourses = () => {
   //   const { label, variant } = variants[difficulty];
   //   return <Badge variant={variant}>{label}</Badge>;
   // };
-  if (decksLoading) {
-    return <div>Ładowanie kursów...</div>;
-  }
-  if (decksError) {
-    return <div>Błąd podczas ładowania kursów.</div>;
-  }
   return (
     <Card className="p-6">
       <div className="sm:flex items-center justify-between mb-6">
@@ -106,9 +95,7 @@ export const MyCourses = () => {
       </div>
 
       <div className="space-y-4">
-        {decks?.map((deck) => (
-          <DeckForDashboard key={deck.id} deckId={deck.id} />
-        ))}
+        <DecksForDashboard />
       </div>
     </Card>
   );
