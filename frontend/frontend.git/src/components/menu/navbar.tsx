@@ -32,16 +32,6 @@ export function Navbar() {
   const { data: user, isLoading } = useCurrentUser();
   const { logout } = useAuth();
 
-  // Mock zalogowanego użytkownika - odkomentuj useCurrentUser powyżej gdy backend będzie gotowy
-  // const user = {
-  //   userId: "student-456",
-  //   username: "Piotr Wiśniewski",
-  //   accountType: "BASIC" as "BASIC" | "PREMIUM" | "STUDENT" | "TEACHER",
-  //   userType: "NORMAL" as const,
-  //   isEnabled: true,
-  // };
-  // const isLoading = false;
-
   const publicMenuItems = [
     { label: "Funkcje", href: "#features" },
     { label: "Jak to działa", href: "#how" },

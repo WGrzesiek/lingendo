@@ -74,8 +74,20 @@ apiClient.interceptors.response.use(
   (response) => response,
   async (error) => {
     const originalRequest = error.config;
+    const status = error.response?.status;
+    const url = originalRequest?.url ?? "";
 
-    if (error.response?.status === 401 && !originalRequest._retry) {
+    // Jezeli blad z /me to nie odswiezamy
+    if (status === 401 && url.includes("/me")) {
+      return Promise.reject(error);
+    }
+
+    if (
+      status === 401 &&
+      !originalRequest._retry &&
+      !url.includes("/login") &&
+      !url.includes("/refresh")
+    ) {
       originalRequest._retry = true;
 
       console.log("[Axios] Otrzymano 401, próba odświeżenia tokenu...");
