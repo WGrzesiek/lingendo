@@ -93,6 +93,8 @@ public class DeckServiceImpl implements DeckService {
                 .status(DeckStatus.NOT_STARTED)
                 .difficulty(createDeckDto.getDifficulty())
                 .category(createDeckDto.getCategory())
+                .sessionCompleted(0L)
+                .totalSessions(0L)
                 .build();
 
         deckRepository.save(deck);
