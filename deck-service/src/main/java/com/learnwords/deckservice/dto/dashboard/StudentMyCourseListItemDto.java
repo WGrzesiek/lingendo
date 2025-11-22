@@ -1,6 +1,7 @@
 package com.learnwords.deckservice.dto.dashboard;
 
 import com.learnwords.deckservice.enums.DeckDifficulty;
+import com.learnwords.deckservice.enums.DeckOwner;
 
 import java.time.Instant;
 
@@ -11,6 +12,7 @@ public record StudentMyCourseListItemDto(String deckId,
                                          Long learnedSession,
                                          Integer progressPercentage,
                                          Instant lastAccessed,
-                                         DeckDifficulty deckDifficulty
+                                         DeckDifficulty deckDifficulty,
+                                         DeckOwner deckOwner
                                          ) {
 }

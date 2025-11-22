@@ -397,7 +397,8 @@ public class DeckServiceImpl implements DeckService {
                 deck.getSessionCompleted(),
                 deck.getCompletionPercent(),
                 deck.getLastAccessed(),
-                deck.getDifficulty()
+                deck.getDifficulty(),
+                deck.getOwner()
         );
     }
 
