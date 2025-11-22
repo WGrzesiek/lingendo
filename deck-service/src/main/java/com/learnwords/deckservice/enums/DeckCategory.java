@@ -24,6 +24,7 @@ public enum DeckCategory {
     HOBBY,
     NATURE,
     MARKETING,
-    GAMING
+    GAMING,
+    GENERAL
 }
 
