@@ -117,8 +117,7 @@ public class AuthController {
                 .httpOnly(true)
 //                .secure(true)
                 .path("/")
-                //NOTE do develop lokalnie
-                .sameSite("None")
+                .sameSite("Lax")
                 .maxAge(ttl)
                 .build();
         rsp.addCookie(cookie);
@@ -129,7 +128,7 @@ public class AuthController {
                 .httpOnly(true)
 //                .secure(true)
                 .path("/")
-                .sameSite("None")
+                .sameSite("Lax")
                 .maxAge(Duration.ZERO)
                 .build();
         rsp.addCookie(cookie);
