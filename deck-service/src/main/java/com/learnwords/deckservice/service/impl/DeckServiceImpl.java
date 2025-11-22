@@ -4,6 +4,7 @@ import com.learnwords.deckservice.dto.*;
 import com.learnwords.deckservice.dto.dashboard.StudentMyCourseListItemDto;
 import com.learnwords.deckservice.entity.Deck;
 import com.learnwords.deckservice.enums.DeckOwner;
+import com.learnwords.deckservice.enums.DeckStatus;
 import com.learnwords.deckservice.enums.LearnAlgorithm;
 import com.learnwords.deckservice.enums.SessionStatus;
 import com.learnwords.deckservice.exception.exceptions.DeckNotFoundException;
@@ -15,7 +16,6 @@ import com.learnwords.deckservice.repository.SessionRepository;
 import com.learnwords.deckservice.service.DeckService;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
-import org.hibernate.annotations.Formula;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -90,6 +90,9 @@ public class DeckServiceImpl implements DeckService {
                 .languageFrom(createDeckDto.getLanguageFrom())
                 .languageTo(createDeckDto.getLanguageTo())
                 .owner(createDeckDto.getOwner())
+                .status(DeckStatus.NOT_STARTED)
+                .difficulty(createDeckDto.getDifficulty())
+                .category(createDeckDto.getCategory())
                 .build();
 
         deckRepository.save(deck);
