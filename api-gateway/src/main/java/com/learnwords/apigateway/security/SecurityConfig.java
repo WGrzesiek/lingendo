@@ -103,8 +103,8 @@ public class SecurityConfig {
                 "http://100.74.36.70:3000"
         ));
         corsConfig.setMaxAge(8000L);
-        corsConfig.addAllowedMethod("PUT");
-        corsConfig.addAllowedHeader("Baeldung-Allowed");
+        corsConfig.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        corsConfig.setAllowedHeaders(List.of("*"));
 
         UrlBasedCorsConfigurationSource source =
                 new UrlBasedCorsConfigurationSource();
