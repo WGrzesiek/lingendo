@@ -11,6 +11,7 @@ import org.springframework.security.web.server.context.NoOpServerSecurityContext
 import org.springframework.util.StringUtils;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.reactive.CorsConfigurationSource;
+import org.springframework.web.cors.reactive.CorsWebFilter;
 import org.springframework.web.cors.reactive.UrlBasedCorsConfigurationSource;
 import reactor.core.publisher.Mono;
 
@@ -18,6 +19,7 @@ import org.springframework.security.web.server.authentication.ServerAuthenticati
 import org.springframework.security.oauth2.server.resource.authentication.BearerTokenAuthenticationToken;
 import org.springframework.security.oauth2.server.resource.web.server.authentication.ServerBearerTokenAuthenticationConverter;
 
+import java.util.Arrays;
 import java.util.List;
 
 @Configuration
@@ -75,20 +77,39 @@ public class SecurityConfig {
     }
 
     //NOTE do dewelopu lokalnie
+//    @Bean
+//    public CorsConfigurationSource corsConfigurationSource() {
+//        CorsConfiguration config = new CorsConfiguration();
+//        config.setAllowedOrigins(List.of(
+//                "http://localhost:3000",
+//                "http://macbook-air-grzegorz.ibis-tautara.ts.net:3000"
+//        ));
+//        config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+//        config.setAllowedHeaders(List.of("*"));
+//        config.setAllowCredentials(true);
+//
+//        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+//        source.registerCorsConfiguration("/**", config);
+//
+//        return source;
+//    }
+
     @Bean
-    public CorsConfigurationSource corsConfigurationSource() {
-        CorsConfiguration config = new CorsConfiguration();
-        config.setAllowedOrigins(List.of(
+    CorsWebFilter corsWebFilter() {
+        CorsConfiguration corsConfig = new CorsConfiguration();
+        corsConfig.setAllowedOrigins(List.of(
                 "http://localhost:3000",
-                "http://macbook-air-grzegorz.ibis-tautara.ts.net:3000"
+                "http://macbook-air-grzegorz.ibis-tautara.ts.net:3000",
+                "http://100.74.36.70:3000"
         ));
-        config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-        config.setAllowedHeaders(List.of("*"));
-        config.setAllowCredentials(true);
+        corsConfig.setMaxAge(8000L);
+        corsConfig.addAllowedMethod("PUT");
+        corsConfig.addAllowedHeader("Baeldung-Allowed");
 
-        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", config);
+        UrlBasedCorsConfigurationSource source =
+                new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", corsConfig);
 
-        return source;
+        return new CorsWebFilter(source);
     }
 }
