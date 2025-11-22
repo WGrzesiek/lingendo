@@ -88,6 +88,10 @@ public class Deck {
     @Formula("(100 * session_completed) / NULLIF(total_session, 0)")
     private Integer completionPercent;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "category", length = 100)
+    private DeckCategory category;
+
     @Builder.Default
     @Column(nullable = false, updatable = false)
     private Instant createdAt = Instant.now();
