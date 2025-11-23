@@ -1,8 +1,6 @@
 package com.learnwords.deckservice.dto;
 
-import com.learnwords.deckservice.enums.DeckOwner;
-import com.learnwords.deckservice.enums.Language;
-import com.learnwords.deckservice.enums.LearnAlgorithm;
+import com.learnwords.deckservice.enums.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
@@ -38,6 +36,12 @@ public class CreateDeckDto {
 
     @NotNull(message = "Należy określić właściciela talii")
     private DeckOwner owner;
+
+    @NotNull(message = "Należy określić kategorię talii")
+    private DeckCategory category;
+
+    @NotNull(message = "Należy określić poziom trudności talii")
+    private DeckDifficulty difficulty;
 
     @Builder.Default
     @NotNull(message = "Określ, czy talia ma być publiczna czy prywatna")

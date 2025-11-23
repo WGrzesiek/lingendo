@@ -1,11 +1,10 @@
 package com.learnwords.deckservice.entity;
 
 
-import com.learnwords.deckservice.enums.DeckOwner;
-import com.learnwords.deckservice.enums.Language;
-import com.learnwords.deckservice.enums.LearnAlgorithm;
+import com.learnwords.deckservice.enums.*;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.Formula;
 
 import java.time.Instant;
 import java.util.HashSet;
@@ -68,6 +67,30 @@ public class Deck {
     @Enumerated(EnumType.STRING)
     @Column(name = "owner", nullable = false)
     private DeckOwner owner;
+
+    @Column(name = "last_accessed")
+    private Instant lastAccessed;
+
+    @Column(name = "total_session")
+    private Long totalSessions;
+
+    @Column(name = "session_completed")
+    private Long sessionCompleted;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "difficulty")
+    private DeckDifficulty difficulty;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status", nullable = false)
+    private DeckStatus status;
+
+    @Formula("(100 * session_completed) / NULLIF(total_session, 0)")
+    private Integer completionPercent;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "category", length = 100)
+    private DeckCategory category;
 
     @Builder.Default
     @Column(nullable = false, updatable = false)

@@ -1,8 +1,10 @@
 package com.learnwords.deckservice.service.impl;
 
 import com.learnwords.deckservice.dto.*;
+import com.learnwords.deckservice.dto.dashboard.StudentMyCourseListItemDto;
 import com.learnwords.deckservice.entity.Deck;
 import com.learnwords.deckservice.enums.DeckOwner;
+import com.learnwords.deckservice.enums.DeckStatus;
 import com.learnwords.deckservice.enums.LearnAlgorithm;
 import com.learnwords.deckservice.enums.SessionStatus;
 import com.learnwords.deckservice.exception.exceptions.DeckNotFoundException;
@@ -14,6 +16,10 @@ import com.learnwords.deckservice.repository.SessionRepository;
 import com.learnwords.deckservice.service.DeckService;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -84,6 +90,11 @@ public class DeckServiceImpl implements DeckService {
                 .languageFrom(createDeckDto.getLanguageFrom())
                 .languageTo(createDeckDto.getLanguageTo())
                 .owner(createDeckDto.getOwner())
+                .status(DeckStatus.NOT_STARTED)
+                .difficulty(createDeckDto.getDifficulty())
+                .category(createDeckDto.getCategory())
+                .sessionCompleted(0L)
+                .totalSessions(0L)
                 .build();
 
         deckRepository.save(deck);
@@ -213,17 +224,6 @@ public class DeckServiceImpl implements DeckService {
         return decks.stream()
                 .map(this::mapToDeckDto)
                 .toList();
-    }
-
-    private DeckDto mapToDeckDto(Deck deck) {
-        return new DeckDto(
-                deck.getId(),
-                deck.getName(),
-                deck.isPublic(),
-                deck.getUserId(),
-                deck.getOwner().name(),
-                deck.getWordCount()
-        );
     }
 
     /**
@@ -364,6 +364,49 @@ public class DeckServiceImpl implements DeckService {
         return stats;
 
     }
+    /**
+     * Pobiera talię dla widoku "Moje kursy" studenta z paginacją
+     *
+     * @param userId ID użytkownika
+     * @param page Numer strony (0-indexed)
+     * @param size Rozmiar strony
+     * @return Strona z listą talii w formacie StudentMyCourseListItemDto
+     */
+    @Override
+    public Page<StudentMyCourseListItemDto> getStudentMyCourseDecks(String userId, int page, int size) {
+        if (userId == null || userId.isBlank()) {
+            log.error("UserId jest pusty");
+            throw new IllegalArgumentException("UserId nie może być pusty");
+        }
+        log.debug("Pobieranie talii dla użytkownika: {}", userId);
+
+        Pageable pageable = PageRequest.of(
+                page,
+                size,
+                Sort.by(
+                        Sort.Order.asc("completionPercent"),
+                        Sort.Order.desc("lastAccessed")
+                )
+        );
+        return deckRepository.findByUserId(userId, pageable)
+                .map(this::toDto);
+    }
+
+    private StudentMyCourseListItemDto toDto(Deck deck) {
+
+        return new StudentMyCourseListItemDto(
+                deck.getId(),
+                deck.getName(),
+                deck.getDescription(),
+                deck.getTotalSessions(),
+                deck.getSessionCompleted(),
+                deck.getCompletionPercent(),
+                deck.getLastAccessed(),
+                deck.getDifficulty(),
+                deck.getOwner(),
+                deck.getCategory()
+        );
+    }
 
     /**
      * Sprawdza czy nazwa talii jest już zajęta dla danego użytkownika
@@ -399,9 +442,7 @@ public class DeckServiceImpl implements DeckService {
      */
     private void assertDeckNameIsFree(String userId, String deckName) {
         if (isDeckNameTaken(userId, deckName)) {
-            throw new DeckWithThisNameForThisUserAlreadyExistsException(
-                    "Talia o tej nazwie już istnieje dla tego użytkownika"
-            );
+            throw new DeckWithThisNameForThisUserAlreadyExistsException(deckName);
         }
     }
 
@@ -431,6 +472,17 @@ public class DeckServiceImpl implements DeckService {
             throw new UserPermissionsMissing("Użytkownik nie ma uprawnień do tej talii");
         }
         return deck;
+    }
+
+    private DeckDto mapToDeckDto(Deck deck) {
+        return new DeckDto(
+                deck.getId(),
+                deck.getName(),
+                deck.isPublic(),
+                deck.getUserId(),
+                deck.getOwner().name(),
+                deck.getWordCount()
+        );
     }
 }
 
