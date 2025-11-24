@@ -1,11 +1,8 @@
 package com.learnwords.deckservice.entity;
 
-
-import com.learnwords.deckservice.enums.*;
+import com.learnwords.deckservice.enums.DeckVisibility;
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.Formula;
-
 import java.time.Instant;
 import java.util.HashSet;
 import java.util.Set;
@@ -31,66 +28,20 @@ public class Deck {
     @Column(name = "user_id", nullable = false, length = 36)
     private String userId;
 
-    @OneToMany(mappedBy = "deck",
-            fetch = FetchType.LAZY,
-            cascade = CascadeType.ALL,
-            orphanRemoval = true  )
-    private Set<Flashcard> flashcards = new HashSet<>();
-
-    @OneToMany(mappedBy = "deck", fetch = FetchType.LAZY)
-    private Set<Session> sessions = new HashSet<>();
-
-    @Column(name = "how_many_flashcards_for_one_session")
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 20)
     @Builder.Default
-    private Long howManyFlashcardsForOneSession = 20L;
-
-    @Builder.Default
-    @Column(name = "is_public", nullable = false)
-    private boolean isPublic = false;
+    private DeckVisibility visibility = DeckVisibility.PRIVATE;
 
     @Column(name = "word_count", nullable = false)
     @Builder.Default
     private int wordCount = 0;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "learn_algorithm", nullable = false)
-    private LearnAlgorithm learnAlgorithm;
-
-    @Enumerated(EnumType.STRING)
-    @Column(name = "language_from", nullable = false)
-    private Language languageFrom;
-
-    @Enumerated(EnumType.STRING)
-    @Column(name = "language_to", nullable = false)
-    private Language languageTo;
-
-    @Enumerated(EnumType.STRING)
-    @Column(name = "owner", nullable = false)
-    private DeckOwner owner;
-
-    @Column(name = "last_accessed")
-    private Instant lastAccessed;
-
-    @Column(name = "total_session")
-    private Long totalSessions;
-
-    @Column(name = "session_completed")
-    private Long sessionCompleted;
-
-    @Enumerated(EnumType.STRING)
-    @Column(name = "difficulty")
-    private DeckDifficulty difficulty;
-
-    @Enumerated(EnumType.STRING)
-    @Column(name = "status", nullable = false)
-    private DeckStatus status;
-
-    @Formula("(100 * session_completed) / NULLIF(total_session, 0)")
-    private Integer completionPercent;
-
-    @Enumerated(EnumType.STRING)
-    @Column(name = "category", length = 100)
-    private DeckCategory category;
+    @OneToMany(mappedBy = "deck",
+            fetch = FetchType.LAZY,
+            cascade = CascadeType.ALL,
+            orphanRemoval = true  )
+    private Set<Flashcard> flashcards = new HashSet<>();
 
     @Builder.Default
     @Column(nullable = false, updatable = false)

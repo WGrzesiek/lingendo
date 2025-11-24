@@ -18,13 +18,25 @@ public class SessionFlashcard {
 //    @GeneratedValue(strategy = GenerationType.UUID)
     private String id;
 
-    @ManyToOne
-    @JoinColumn(name = "learning_session_id", nullable = false)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "session_id", nullable = false)
     private Session session;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "flashcard_id", nullable = false)
     private Flashcard flashcard;
+
+    @Column(name = "user_answer")
+    private String userAnswer;
+
+    @Column(name = "is_correct")
+    private boolean isCorrect;
+
+    @Column(name = "quality_rating")
+    private int qualityRating;
+
+    @Column(name = "response_time_ms")
+    private long responseTimeMs;
 
     @Builder.Default
     @Column(nullable = false, updatable = false)

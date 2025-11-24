@@ -21,36 +21,11 @@ public class Session {
     private String id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "deck_id", nullable = false)
-    private Deck deck;
+    @JoinColumn(name = "enrollment_id", nullable = false)
+    private DeckEnrollment enrollment;
 
     @OneToMany(mappedBy = "session", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<SessionFlashcard> sessionFlashcards;
-
-    @Column(name = "user_id", nullable = false, length = 36)
-    private String userId;
-
-    @Column(name = "total_flashcards")
-    @Builder.Default
-    private int totalFlashcards = 0;
-
-    @Column(name = "correct_answers")
-    @Builder.Default
-    private int correctAnswers = 0;
-
-    @Column(name = "wrong_answers")
-    @Builder.Default
-    private int wrongAnswers = 0;
-
-    @Column(name = "skipped")
-    @Builder.Default
-    private int skipped = 0;
-
-    @Column(name = "duration_seconds")
-    private Long durationSeconds;
-
-    @Column(name = "completed_at")
-    private Instant completedAt;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
@@ -60,6 +35,12 @@ public class Session {
     @Enumerated(EnumType.STRING)
     @Column(name = "type", nullable = false)
     private SessionType type;
+
+    @Column(name = "started_at")
+    private Instant startedAt;
+
+    @Column(name = "completed_at")
+    private Instant completedAt;
 
     @Builder.Default
     @Column(nullable = false, updatable = false)
@@ -77,4 +58,5 @@ public class Session {
     public void preUpdate() {
         updatedAt = Instant.now();
     }
+
 }
