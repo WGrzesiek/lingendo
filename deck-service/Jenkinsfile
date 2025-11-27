@@ -58,6 +58,23 @@ stage('Build & Install deck-service') {
         }
     }
 }
+stage('Test Coverage') {
+    when { expression { return !params.SKIP_TESTS } }
+    steps {
+        dir('deck-service') {
+            junit '**/target/surefire-reports/*.xml'
+
+            recordCoverage(
+                tools: [[
+                    parser: 'JACOCO',
+                    pattern: 'target/site/jacoco/jacoco.xml'
+                ]],
+                id: 'jacoco',
+                name: 'JaCoCo Coverage'
+            )
+        }
+    }
+}
 
     stage('Build Docker image') {
 			steps {
