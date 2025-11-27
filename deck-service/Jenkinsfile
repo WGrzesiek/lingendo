@@ -21,7 +21,7 @@ pipeline {
   environment {
 	CREDS_ID   = 'bitbucket'
     PARENT_REPO= 'git@bitbucket.org:grzegorz5/learnwords-parent.git'
-    MVN_FLAGS = "${params.SKIP_TESTS ? '-DskipTests' : ''}"
+    MVN_FLAGS  = ''
   }
 
   stages {
@@ -52,7 +52,10 @@ pipeline {
     stage('Build & Install deck-service') {
 			steps {
 				dir('deck-service') {
-					sh "mvn -U -B clean install ${env.MVN_FLAGS}"
+					script {
+                        env.MVN_FLAGS = params.SKIP_TESTS ? "-DskipTests" : ""
+                        sh "mvn -U -B clean install ${env.MVN_FLAGS}"
+                    }
         }
       }
     }
