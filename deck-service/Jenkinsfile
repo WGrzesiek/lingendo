@@ -49,13 +49,17 @@ pipeline {
             }
         }
 
-        stage('Build & Install deck-service') {
-            steps {
-                dir('deck-service') {
-                    sh "mvn -U -B clean install ${env.MVN_FLAGS}"
-                }
+stage('Build & Install deck-service') {
+    steps {
+        dir('deck-service') {
+            script {
+                def mvnFlags = params.SKIP_TESTS ? "-DskipTests" : ""
+                sh "mvn -U -B clean install ${mvnFlags}"
             }
         }
+    }
+}
+
 
         stage('Test Coverage') {
             when { expression { return !params.SKIP_TESTS } }
