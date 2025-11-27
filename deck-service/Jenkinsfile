@@ -80,6 +80,18 @@ stage('Test & Coverage') {
         )
     }
 }
+stage('Allure report') {
+    when { expression { !params.SKIP_TESTS } }
+    steps {
+        dir('deck-service') {
+            allure([
+                includeProperties: false,
+                jdk: '',
+                results: [[path: 'target/allure-results']]
+            ])
+        }
+    }
+}
 
 
 
