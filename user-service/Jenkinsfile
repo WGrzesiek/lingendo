@@ -24,6 +24,16 @@ pipeline {
   }
 
   stages {
+      stage('Coverage') {
+          steps {
+              jacoco(
+                  execPattern: 'target/jacoco.exec',
+                  classPattern: 'target/classes',
+                  sourcePattern: 'src/main/java'
+              )
+          }
+      }
+
 		stage('Checkout parent') {
 			steps {
 				dir('parent') {
