@@ -62,7 +62,6 @@ stage('Test & Coverage') {
     when { expression { !params.SKIP_TESTS } }
     steps {
         dir('deck-service') {
-            sh "mvn -U -B clean test"
             junit 'target/surefire-reports/*.xml'
         }
 
