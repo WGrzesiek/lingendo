@@ -427,14 +427,12 @@
                     <artifactId>jacoco-maven-plugin</artifactId>
                     <version>0.8.14</version>
                     <executions>
-                        <!-- Podpinamy agenta przed testami -->
                         <execution>
                             <goals>
                                 <goal>prepare-agent</goal>
                             </goals>
                         </execution>
 
-                        <!-- Generujemy raport po testach -->
                         <execution>
                             <id>report</id>
                             <phase>test</phase>
@@ -464,5 +462,11 @@
                 </plugin>
             </plugins>
         </pluginManagement>
+        <plugins>
+            <plugin>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+            </plugin>
+        </plugins>
     </build>
 </project>
