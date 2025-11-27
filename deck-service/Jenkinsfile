@@ -58,23 +58,30 @@ stage('Build & Install deck-service') {
         }
     }
 }
-stage('Test Coverage') {
+stage('Test & Coverage') {
     when { expression { !params.SKIP_TESTS } }
     steps {
         dir('deck-service') {
+            sh "mvn -U -B clean test"
             junit 'target/surefire-reports/*.xml'
-
-            recordCoverage(
-                tools: [[
-                    parser: 'JACOCO',
-                    pattern: 'target/site/jacoco/jacoco.xml'
-                ]],
-                sourceCodeRetention: 'EVERY_BUILD',
-                calculateDiffForChangeRequests: true
-            )
         }
+
+        discoverReferenceBuild()
+
+        recordCoverage(
+            tools: [[parser: 'JACOCO']],
+            id: 'jacoco',
+            name: 'JaCoCo Coverage',
+            sourceCodeRetention: 'EVERY_BUILD',
+            sourceDirectories: [[path: 'deck-service/src/main/java']],
+            qualityGates: [
+                [threshold: 60.0, metric: 'LINE',   baseline: 'PROJECT', unstable: true],
+                [threshold: 60.0, metric: 'BRANCH', baseline: 'PROJECT', unstable: true]
+            ]
+        )
     }
 }
+
 
 
     stage('Build Docker image') {
