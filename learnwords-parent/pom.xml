@@ -56,6 +56,10 @@
         <micrometer-registry-prometheus-version>1.15.5</micrometer-registry-prometheus-version>
         <clickhouse-jdbc-version>0.9.4</clickhouse-jdbc-version>
         <flyway-database-clickhouse-version>10.24.0</flyway-database-clickhouse-version>
+        <testcontainers-postgresql-version>1.21.3</testcontainers-postgresql-version>
+        <testcontainers-junit-jupiter-version>1.21.3</testcontainers-junit-jupiter-version>
+        <testcontainers-version>2.0.1</testcontainers-version>
+        <jacoco-maven-plugin-version>0.8.14</jacoco-maven-plugin-version>
 
         <!--        Koniec Grcp-->
     </properties>
@@ -317,6 +321,12 @@
                 <version>${flyway-database-clickhouse-version}</version>
                 <scope>runtime</scope>
             </dependency>
+            <!-- https://mvnrepository.com/artifact/org.jacoco/jacoco-maven-plugin -->
+            <dependency>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+                <version>${jacoco-maven-plugin-version}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -367,6 +377,32 @@
             <groupId>io.micrometer</groupId>
             <artifactId>micrometer-tracing-bridge-brave</artifactId>
         </dependency>
+        <!-- https://mvnrepository.com/artifact/org.testcontainers/testcontainers -->
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>testcontainers</artifactId>
+            <version>${testcontainers-version}</version>
+            <scope>test</scope>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/org.testcontainers/junit-jupiter -->
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <version>${testcontainers-junit-jupiter-version}</version>
+            <scope>test</scope>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/org.testcontainers/postgresql -->
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>postgresql</artifactId>
+            <version>${testcontainers-postgresql-version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.jacoco</groupId>
+            <artifactId>jacoco-maven-plugin</artifactId>
+            <version>${jacoco-maven-plugin-version}</version>
+        </dependency>
     </dependencies>
 
     <modules>
@@ -385,6 +421,27 @@
                     <groupId>org.springframework.boot</groupId>
                     <artifactId>spring-boot-maven-plugin</artifactId>
                     <version>${spring-boot-version}</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.jacoco</groupId>
+                    <artifactId>jacoco-maven-plugin</artifactId>
+                    <version>0.8.12</version>
+
+                    <executions>
+                        <execution>
+                            <goals>
+                                <goal>prepare-agent</goal>
+                            </goals>
+                        </execution>
+
+                        <execution>
+                            <id>report</id>
+                            <phase>test</phase>
+                            <goals>
+                                <goal>report</goal>
+                            </goals>
+                        </execution>
+                    </executions>
                 </plugin>
                 <!-- wspólny kompilator -->
                 <plugin>
