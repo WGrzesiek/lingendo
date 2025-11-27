@@ -60,6 +60,8 @@
         <testcontainers-junit-jupiter-version>1.21.3</testcontainers-junit-jupiter-version>
         <testcontainers-version>2.0.1</testcontainers-version>
         <jacoco-maven-plugin-version>0.8.14</jacoco-maven-plugin-version>
+        <allure-version>2.31.0</allure-version>
+
 
         <!--        Koniec Grcp-->
     </properties>
@@ -327,6 +329,13 @@
                 <artifactId>jacoco-maven-plugin</artifactId>
                 <version>${jacoco-maven-plugin-version}</version>
             </dependency>
+            <dependency>
+                <groupId>io.qameta.allure</groupId>
+                <artifactId>allure-junit5</artifactId>
+                <version>${allure-version}</version>
+                <scope>test</scope>
+            </dependency>
+
         </dependencies>
     </dependencyManagement>
 
@@ -402,6 +411,11 @@
             <groupId>org.jacoco</groupId>
             <artifactId>jacoco-maven-plugin</artifactId>
             <version>${jacoco-maven-plugin-version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.qameta.allure</groupId>
+            <artifactId>allure-junit5</artifactId>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 
