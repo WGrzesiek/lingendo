@@ -2,10 +2,11 @@ package com.learnwords.deckservice.service;
 
 import com.learnwords.common.dto.SendWordFromKafkaDto;
 import com.learnwords.common.dto.WordDto;
-import com.learnwords.deckservice.dto.FlashcardDto;
+import com.learnwords.deckservice.dto.flashcard.FlashcardDto;
 import com.learnwords.deckservice.entity.Flashcard;
 
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Serwis zarządzania fiszkami.
@@ -38,24 +39,26 @@ import java.util.List;
  * </ul>
  * 
  * @author Grzegorz Wawrzeń
- * @version 1.0
- * @since 2025-11-15
+ * @version 2.0
+ * @since 2025-11-24
  * @see Flashcard
  * @see FlashcardDto
  * @see com.learnwords.deckservice.service.impl.FlashcardServiceImpl
  */
 public interface FlashcardService {
 
-    public void addFlashcardToDeck(String deckId, String wordId, String userId);
-    public void removeFlashcardFromDeck(String deckId, String flashcardId, String userId);
-    public void processFlashcardCreateFromKafka(SendWordFromKafkaDto sendWordFromKafkaDto);
-    public void setInitialFlashcardState(String deckId, Flashcard flashcard, String userId);
-    public List<FlashcardDto> getAllFlashcardsFromDeck(String deckId, String userId);
-    public List<FlashcardDto> getFlashcardsFromDeckByFilter(String deckId, boolean isLearned, boolean isSkipped, String userId);
-    public void updateFlashcard(String flashcardId, WordDto newWord, String userId);
-    public void resetFlashcardProgress(String flashcardId, String userId);
-    public void markAsLearned(String flashcardId, boolean learned, String userId);
-    public void markAsSkipped(String flashcardId, boolean skipped, String userId);
-    public void initializeDeckFlashcardsState(String deckId, String userId);
-    public void initializeSessionFlashcardsState(String deckId, List<String> flashcardIds, String userId);
+    void addFlashcardToDeck(String deckId, String wordId, String userId);
+    void removeFlashcardFromDeck(String deckId, String flashcardId, String userId);
+    void processFlashcardCreateFromKafka(SendWordFromKafkaDto sendWordFromKafkaDto);
+    void updateFlashcardContent(String flashcardId, WordDto newWord, String userId);
+    FlashcardDto getFlashcardById(String flashcardId, String userId);
+    List<FlashcardDto> getAllFlashcardsFromDeck(String deckId, String userId);
 }
+
+//    public void addFlashcardToDeck(String deckId, String wordId, String userId);
+//    public void removeFlashcardFromDeck(String deckId, String flashcardId, String userId);
+//    public void processFlashcardCreateFromKafka(SendWordFromKafkaDto sendWordFromKafkaDto);
+//    public List<FlashcardDto> getAllFlashcardsFromDeck(String deckId, String userId);
+//    public List<FlashcardDto> getFlashcardsFromDeckByFilter(String deckId, boolean isLearned, boolean isSkipped, String userId);
+
+

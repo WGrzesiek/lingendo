@@ -43,6 +43,18 @@ public class DeckEnrollment {
     @Column(name = "joined_at", nullable = false)
     private Instant joinedAt;
 
+    @Column(name = "completed_sessions_count")
+    @Builder.Default
+    private int completedSessionsCount = 0;
+
+    @Column(name = "total_learning_time_seconds")
+    @Builder.Default
+    private long totalLearningTimeSeconds = 0;
+
+    @Column(name = "learned_flashcards_count")
+    @Builder.Default
+    private int learnedFlashcardsCount = 0;
+
     @Column(name = "last_accessed_at")
     private Instant lastAccessedAt;
 
@@ -63,5 +75,11 @@ public class DeckEnrollment {
     @PreUpdate
     public void preUpdate() {
         updatedAt = Instant.now();
+    }
+
+    public void incrementCompletedSessions(long durationSeconds) {
+        this.completedSessionsCount++;
+        this.totalLearningTimeSeconds += durationSeconds;
+        this.lastAccessedAt = Instant.now();
     }
 }

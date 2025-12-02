@@ -1,17 +1,7 @@
 package com.learnwords.deckservice.exception;
 
 import com.learnwords.deckservice.dto.ApiErrorResponse;
-import com.learnwords.deckservice.exception.exceptions.DeckNotFoundException;
-import com.learnwords.deckservice.exception.exceptions.DeckWithThisNameForThisUserAlreadyExistsException;
-import com.learnwords.deckservice.exception.exceptions.FlashcardNotFoundException;
-import com.learnwords.deckservice.exception.exceptions.InvalidFlashcardIdException;
-import com.learnwords.deckservice.exception.exceptions.InvalidSessionIdException;
-import com.learnwords.deckservice.exception.exceptions.InvalidWordDataException;
-import com.learnwords.deckservice.exception.exceptions.NoFlashcardsAvailableException;
-import com.learnwords.deckservice.exception.exceptions.SessionNotActiveException;
-import com.learnwords.deckservice.exception.exceptions.SessionNotFoundException;
-import com.learnwords.deckservice.exception.exceptions.StepWithThisNameNoExist;
-import com.learnwords.deckservice.exception.exceptions.UserPermissionsMissing;
+import com.learnwords.deckservice.exception.exceptions.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -144,6 +134,13 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(InvalidSessionIdException.class)
     public ResponseEntity<ApiErrorResponse> handleInvalidSessionIdException(InvalidSessionIdException ex) {
         log.error("Invalid session ID: {}", ex.getMessage());
+        ApiErrorResponse errorResponse = new ApiErrorResponse(HttpStatus.BAD_REQUEST.value(), ex.getMessage());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+    }
+
+    @ExceptionHandler(SessionFinishedException.class)
+    public ResponseEntity<ApiErrorResponse> handleSessionFinishedException(SessionFinishedException ex) {
+        log.error("Session finished: {}", ex.getMessage());
         ApiErrorResponse errorResponse = new ApiErrorResponse(HttpStatus.BAD_REQUEST.value(), ex.getMessage());
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
     }

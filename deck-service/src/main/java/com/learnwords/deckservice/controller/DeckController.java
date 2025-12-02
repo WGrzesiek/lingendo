@@ -1,8 +1,11 @@
 package com.learnwords.deckservice.controller;
 
 import com.learnwords.deckservice.dto.*;
-import com.learnwords.deckservice.dto.dashboard.StudentMyCourseListItemDto;
+import com.learnwords.deckservice.dto.deck.CreateDeckDto;
+import com.learnwords.deckservice.dto.deck.DeckDetailsDto;
+import com.learnwords.deckservice.dto.deck.DeckDto;
 import com.learnwords.deckservice.enums.DeckOwner;
+import com.learnwords.deckservice.enums.DeckVisibility;
 import com.learnwords.deckservice.exception.exceptions.DeckNotFoundException;
 import com.learnwords.deckservice.exception.exceptions.DeckWithThisNameForThisUserAlreadyExistsException;
 import com.learnwords.deckservice.exception.exceptions.UserPermissionsMissing;
@@ -16,7 +19,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -145,46 +147,46 @@ public class DeckController {
         this.deckService = deckService;
     }
 
-    /**
-     * Pobiera paginowaną listę talii kursów studenta.
-     *
-     * <p>Endpoint zwraca talie przypisane do użytkownika z nagłówka x-client-id.
-     * Wyniki są paginowane według podanych parametrów page i size.
-     *
-     * @param userId ID użytkownika z nagłówka x-client-id
-     * @param page numer strony (domyślnie 0)
-     * @param size rozmiar strony (domyślnie 4)
-     * @return strona talii kursów studenta
-     */
-    @Operation(
-        summary = "Pobierz talie kursów studenta",
-        description = "Pobiera paginowaną listę talii kursów przypisanych do użytkownika."
-    )
-    @ApiResponses(value = {
-        @ApiResponse(
-            responseCode = "200",
-            description = "Lista talii kursów pobrana pomyślnie",
-            content = @Content(schema = @Schema(implementation = StudentMyCourseListItemDto.class))
-        ),
-        @ApiResponse(
-            responseCode = "400",
-            description = "Błędne parametry zapytania",
-            content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))
-        )
-    })
-    @GetMapping("/student-my-decks")
-    public ResponseEntity<Page<StudentMyCourseListItemDto>> getStudentMyCourseListItemDto(
-            @Parameter(description = "ID użytkownika z nagłówka", required = true, example = "user-123") @RequestHeader(USER_ID_HEADER) String userId,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "4") int size
-    ) {
-
-        log.debug("Pobieranie talii kursów studenta - userId: {}, page: {}, size: {}", userId, page, size);
-        Page<StudentMyCourseListItemDto> decks = deckService.getStudentMyCourseDecks(userId, page, size);
-        log.info("Znaleziono {} talii kursów dla użytkownika {}", decks.getTotalElements(), userId);
-        return ResponseEntity.ok(decks);
-
-    }
+//    /**
+//     * Pobiera paginowaną listę talii kursów studenta.
+//     *
+//     * <p>Endpoint zwraca talie przypisane do użytkownika z nagłówka x-client-id.
+//     * Wyniki są paginowane według podanych parametrów page i size.
+//     *
+//     * @param userId ID użytkownika z nagłówka x-client-id
+//     * @param page numer strony (domyślnie 0)
+//     * @param size rozmiar strony (domyślnie 4)
+//     * @return strona talii kursów studenta
+//     */
+//    @Operation(
+//        summary = "Pobierz talie kursów studenta",
+//        description = "Pobiera paginowaną listę talii kursów przypisanych do użytkownika."
+//    )
+//    @ApiResponses(value = {
+//        @ApiResponse(
+//            responseCode = "200",
+//            description = "Lista talii kursów pobrana pomyślnie",
+//            content = @Content(schema = @Schema(implementation = StudentMyCourseListItemDto.class))
+//        ),
+//        @ApiResponse(
+//            responseCode = "400",
+//            description = "Błędne parametry zapytania",
+//            content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))
+//        )
+//    })
+//    @GetMapping("/student-my-decks")
+//    public ResponseEntity<Page<StudentMyCourseListItemDto>> getStudentMyCourseListItemDto(
+//            @Parameter(description = "ID użytkownika z nagłówka", required = true, example = "user-123") @RequestHeader(USER_ID_HEADER) String userId,
+//            @RequestParam(defaultValue = "0") int page,
+//            @RequestParam(defaultValue = "4") int size
+//    ) {
+//
+//        log.debug("Pobieranie talii kursów studenta - userId: {}, page: {}, size: {}", userId, page, size);
+//        Page<StudentMyCourseListItemDto> decks = deckService.getStudentMyCourseDecks(userId, page, size);
+//        log.info("Znaleziono {} talii kursów dla użytkownika {}", decks.getTotalElements(), userId);
+//        return ResponseEntity.ok(decks);
+//
+//    }
 
     /**
      * Pobiera listę talii z opcjonalnymi filtrami.
@@ -199,7 +201,7 @@ public class DeckController {
      * <p>Jeśli nie podano żadnego filtru, zwracane są wszystkie talie.
      * 
      * @param userId ID użytkownika
-     * @param isPublic czy talia jest publiczna (opcjonalny)
+     * @param deckVisibility czy talia jest publiczna (opcjonalny)
      * @param owner typ właściciela talii (opcjonalny)
      * @return lista talii spełniających kryteria filtrowania
      */
@@ -222,10 +224,10 @@ public class DeckController {
     @GetMapping()
     public ResponseEntity<List<DeckDto>> getDecksByFilter(
             @Parameter(description = "ID użytkownika z nagłówka", required = true, example = "user-123") @RequestHeader(USER_ID_HEADER) String userId,
-            @Parameter(description = "Czy talia jest publiczna", example = "true") @RequestParam(required = false) Boolean isPublic,
+            @Parameter(description = "Czy talia jest publiczna", example = "true") @RequestParam(required = false) DeckVisibility deckVisibility,
             @Parameter(description = "Typ właściciela talii", schema = @Schema(implementation = DeckOwner.class)) @RequestParam(required = false) DeckOwner owner) {
-        log.debug("Pobieranie talii z filtrami - userId: {}, isPublic: {}, owner: {}", userId, isPublic, owner);
-        List<DeckDto> decks = deckService.getDecksByFilter(userId, isPublic, owner);
+        log.debug("Pobieranie talii z filtrami - userId: {}, isPublic: {}, owner: {}", userId, deckVisibility, owner);
+        List<DeckDto> decks = deckService.getDecksByFilter(userId, deckVisibility, owner);
         log.info("Znaleziono {} talii spełniających kryteria", decks.size());
         return ResponseEntity.ok(decks);
     }
@@ -472,7 +474,7 @@ public class DeckController {
      * Bez filtrów zwraca wszystkie talie użytkownika.
      * 
      * @param userId ID użytkownika z nagłówka x-client-id
-     * @param isPublic czy talia jest publiczna (opcjonalny)
+     * @param deckVisibility czy talia jest publiczna (opcjonalny)
      * @param owner typ właściciela talii (opcjonalny)
      * @return lista talii użytkownika spełniających kryteria
      * @throws IllegalArgumentException jeśli brak nagłówka x-client-id
@@ -496,85 +498,84 @@ public class DeckController {
     @GetMapping("/user/filter")
     public ResponseEntity<List<DeckDto>> filterUserDecks(
             @Parameter(description = "ID użytkownika z nagłówka", required = true, example = "user-123") @RequestHeader(USER_ID_HEADER) String userId,
-            @Parameter(description = "Czy talia jest publiczna", example = "true") @RequestParam(required = false) Boolean isPublic,
+            @Parameter(description = "Czy talia jest publiczna", example = "true") @RequestParam(required = false) DeckVisibility deckVisibility,
             @Parameter(description = "Typ właściciela talii", schema = @Schema(implementation = DeckOwner.class)) @RequestParam(required = false) DeckOwner owner) {
-        log.debug("Filtrowanie talii użytkownika {} - isPublic: {}, owner: {}", userId, isPublic, owner);
-        List<DeckDto> decks = deckService.getDecksByFilter(userId, isPublic, owner);
+        log.debug("Filtrowanie talii użytkownika {} - isPublic: {}, owner: {}", userId, deckVisibility, owner);
+        List<DeckDto> decks = deckService.getDecksByFilter(userId, deckVisibility, owner);
         log.info("Znaleziono {} talii użytkownika {} spełniających kryteria", decks.size(), userId);
         return ResponseEntity.ok(decks);
     }
 
-    /**
-     * Pobiera wszystkie talie użytkownika.
-     * 
-     * <p>Zwraca kompletną listę wszystkich talii należących do użytkownika,
-     * bez żadnych filtrów. Obejmuje zarówno talie publiczne jak i prywatne.
-     * 
-     * <p>ID użytkownika jest automatycznie pobierane z nagłówka x-client-id,
-     * co zapewnia, że użytkownik może zobaczyć tylko własne talie.
-     * 
-     * @param userId ID użytkownika z nagłówka x-client-id
-     * @return lista wszystkich talii użytkownika
-     * @throws IllegalArgumentException jeśli brak nagłówka x-client-id
-     */
-    @Operation(
-        summary = "Pobierz wszystkie talie użytkownika",
-        description = "Pobiera kompletną listę wszystkich talii użytkownika (publicznych i prywatnych) bez filtrowania."
-    )
-    @ApiResponses(value = {
-        @ApiResponse(
-            responseCode = "200",
-            description = "Lista wszystkich talii użytkownika",
-            content = @Content(schema = @Schema(implementation = DeckDto.class))
-        ),
-        @ApiResponse(
-            responseCode = "400",
-            description = "Brak wymaganego nagłówka x-client-id",
-            content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))
-        )
-    })
-    @GetMapping("/user")
-    public ResponseEntity<List<DeckDto>> getUserDecks(
-            @Parameter(description = "ID użytkownika z nagłówka", required = true, example = "user-123") @RequestHeader(USER_ID_HEADER) String userId) {
-        log.debug("Pobieranie wszystkich talii użytkownika {}", userId);
-        List<DeckDto> decks = deckService.getDecksByFilter(userId);
-        log.info("Znaleziono {} talii użytkownika {}", decks.size(), userId);
-        return ResponseEntity.ok(decks);
-    }
-
-    /**
-     * Pobiera wszystkie talie publiczne.
-     * 
-     * <p>Zwraca listę wszystkich talii oznaczonych jako publiczne.
-     * Endpoint nie wymaga autoryzacji - każdy może przeglądać publiczne talie.
-     * 
-     * <p>Publiczne talie mogą być:
-     * <ul>
-     *   <li>Utworzone przez użytkowników i udostępnione publicznie</li>
-     *   <li>Talie systemowe dostępne dla wszystkich</li>
-     *   <li>Talie administracyjne jako materiały edukacyjne</li>
-     * </ul>
-     * 
-     * @return lista wszystkich publicznych talii
-     */
-    @Operation(
-        summary = "Pobierz wszystkie talie publiczne",
-        description = "Pobiera listę wszystkich talii oznaczonych jako publiczne. Nie wymaga autoryzacji."
-    )
-    @ApiResponses(value = {
-        @ApiResponse(
-            responseCode = "200",
-            description = "Lista publicznych talii",
-            content = @Content(schema = @Schema(implementation = DeckDto.class))
-        )
-    })
-    @GetMapping("/public")
-    public ResponseEntity<List<DeckDto>> getPublicDecks() {
-        log.debug("Pobieranie wszystkich talii publicznych");
-        List<DeckDto> decks = deckService.getPublicDecks();
-        log.info("Znaleziono {} talii publicznych", decks.size());
-        return ResponseEntity.ok(decks);
-    }
+//    /**
+//     * Pobiera wszystkie talie użytkownika.
+//     *
+//     * <p>Zwraca kompletną listę wszystkich talii należących do użytkownika,
+//     * bez żadnych filtrów. Obejmuje zarówno talie publiczne jak i prywatne.
+//     *
+//     * <p>ID użytkownika jest automatycznie pobierane z nagłówka x-client-id,
+//     * co zapewnia, że użytkownik może zobaczyć tylko własne talie.
+//     *
+//     * @param userId ID użytkownika z nagłówka x-client-id
+//     * @return lista wszystkich talii użytkownika
+//     * @throws IllegalArgumentException jeśli brak nagłówka x-client-id
+//     */
+//    @Operation(
+//        summary = "Pobierz wszystkie talie użytkownika",
+//        description = "Pobiera kompletną listę wszystkich talii użytkownika (publicznych i prywatnych) bez filtrowania."
+//    )
+//    @ApiResponses(value = {
+//        @ApiResponse(
+//            responseCode = "200",
+//            description = "Lista wszystkich talii użytkownika",
+//            content = @Content(schema = @Schema(implementation = DeckDto.class))
+//        ),
+//        @ApiResponse(
+//            responseCode = "400",
+//            description = "Brak wymaganego nagłówka x-client-id",
+//            content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))
+//        )
+//    })
+//    @GetMapping("/user")
+//    public ResponseEntity<List<DeckDto>> getUserDecks(
+//            @Parameter(description = "ID użytkownika z nagłówka", required = true, example = "user-123") @RequestHeader(USER_ID_HEADER) String userId) {
+//        log.debug("Pobieranie wszystkich talii użytkownika {}", userId);
+//        List<DeckDto> decks = deckService.getDecksByFilter(userId);
+//        log.info("Znaleziono {} talii użytkownika {}", decks.size(), userId);
+//        return ResponseEntity.ok(decks);
+//    }
+//    /**
+//     * Pobiera wszystkie talie publiczne.
+//     *
+//     * <p>Zwraca listę wszystkich talii oznaczonych jako publiczne.
+//     * Endpoint nie wymaga autoryzacji - każdy może przeglądać publiczne talie.
+//     *
+//     * <p>Publiczne talie mogą być:
+//     * <ul>
+//     *   <li>Utworzone przez użytkowników i udostępnione publicznie</li>
+//     *   <li>Talie systemowe dostępne dla wszystkich</li>
+//     *   <li>Talie administracyjne jako materiały edukacyjne</li>
+//     * </ul>
+//     *
+//     * @return lista wszystkich publicznych talii
+//     */
+//    @Operation(
+//        summary = "Pobierz wszystkie talie publiczne",
+//        description = "Pobiera listę wszystkich talii oznaczonych jako publiczne. Nie wymaga autoryzacji."
+//    )
+//    @ApiResponses(value = {
+//        @ApiResponse(
+//            responseCode = "200",
+//            description = "Lista publicznych talii",
+//            content = @Content(schema = @Schema(implementation = DeckDto.class))
+//        )
+//    })
+//    @GetMapping("/public")
+//    public ResponseEntity<List<DeckDto>> getPublicDecks() {
+//        log.debug("Pobieranie wszystkich talii publicznych");
+//        List<DeckDto> decks = deckService.getPublicDecks();
+//        log.info("Znaleziono {} talii publicznych", decks.size());
+//        return ResponseEntity.ok(decks);
+//    }
 
     /**
      * Zmienia nazwę talii.
@@ -691,9 +692,9 @@ public class DeckController {
             @Parameter(description = "ID talii", required = true, example = "deck-123") @PathVariable String deckId,
             @Parameter(description = "Nowa widoczność talii", required = true) @Valid @RequestBody UpdateDeckVisibilityRequest request,
             @Parameter(description = "ID użytkownika z nagłówka", required = true, example = "user-123") @RequestHeader(USER_ID_HEADER) String userId) {
-        log.debug("Aktualizacja widoczności talii o ID: {} dla użytkownika: {} na '{}'", deckId, userId, request.isPublic());
-        boolean result = deckService.changeDeckVisibility(deckId, userId, request.isPublic());
-        log.info("Widzoczność talii {} zaktualizowana pomyślnie dla użytkownika {} na '{}'", deckId, userId, result);
+        log.debug("Aktualizacja widoczności talii o ID: {} dla użytkownika: {} na '{}'", deckId, userId, request.deckVisibility());
+        deckService.changeDeckVisibility(deckId, userId, request.deckVisibility());
+        log.info("Widzoczność talii {} zaktualizowana pomyślnie dla użytkownika {} na '{}'", deckId, userId, request.deckVisibility());
         return ResponseEntity.ok(request);
     }
 
@@ -755,130 +756,130 @@ public class DeckController {
         return ResponseEntity.ok(request);
     }
 
-    /**
-     * Zmienia liczbę fiszek na sesję nauki.
-     * 
-     * <p>Określa ile fiszek zostanie wybranych do jednej sesji nauki.
-     * Wartość musi być w zakresie od 1 do 100.
-     * 
-     * <p>Mniejsza liczba:
-     * <ul>
-     *   <li>Krótsza sesja nauki (lepsze dla początkujących)</li>
-     *   <li>Szybsze postępy widoczne w statystykach</li>
-     *   <li>Mniejsze zmęczenie kognitywne</li>
-     * </ul>
-     * 
-     * <p>Większa liczba:
-     * <ul>
-     *   <li>Intensywniejsza sesja (dla zaawansowanych)</li>
-     *   <li>Więcej materiału w jednym podejściu</li>
-     *   <li>Szybsze przejście przez całą talię</li>
-     * </ul>
-     * 
-     * @param deckId ID talii do zaktualizowania
-     * @param request obiekt zawierający nową liczbę fiszek (1-100)
-     * @param userId ID użytkownika z nagłówka x-client-id
-     * @return zaktualizowana liczba fiszek na sesję
-     * @throws IllegalArgumentException jeśli deckId jest pusty lub liczba poza zakresem
-     * @throws DeckNotFoundException jeśli talia o podanym ID nie istnieje
-     * @throws UserPermissionsMissing jeśli użytkownik nie ma dostępu do talii
-     */
-    @Operation(
-        summary = "Zmień liczbę fiszek na sesję",
-        description = "Ustawia ile fiszek będzie wyświetlanych w jednej sesji nauki (zakres: 1-100)."
-    )
-    @ApiResponses(value = {
-        @ApiResponse(
-            responseCode = "200",
-            description = "Liczba fiszek na sesję zmieniona pomyślnie",
-            content = @Content(schema = @Schema(implementation = UpdateFlashcardsPerSessionRequest.class))
-        ),
-        @ApiResponse(
-            responseCode = "400",
-            description = "Nieprawidłowa liczba fiszek lub ID talii",
-            content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))
-        ),
-        @ApiResponse(
-            responseCode = "404",
-            description = "Talia nie znaleziona",
-            content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))
-        ),
-        @ApiResponse(
-            responseCode = "403",
-            description = "Brak dostępu do talii",
-            content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))
-        )
-    })
-    @PutMapping("/{deckId}/flashcardsPerSession")
-    public ResponseEntity<UpdateFlashcardsPerSessionRequest> updateFlashcardsPerSession(
-            @Parameter(description = "ID talii", required = true, example = "deck-123") @PathVariable String deckId,
-            @Parameter(description = "Liczba fiszek na sesję (1-100)", required = true) @Valid @RequestBody UpdateFlashcardsPerSessionRequest request,
-            @Parameter(description = "ID użytkownika z nagłówka", required = true, example = "user-123") @RequestHeader(USER_ID_HEADER) String userId) {
-        log.debug("Aktualizacja liczby fiszek na sesję dla talii o ID: {} dla użytkownika: {} na '{}'", deckId, userId, request.flashcardsPerSession());
-        deckService.updateFlashcardsPerSession(deckId, request.flashcardsPerSession(), userId);
-        log.info("Liczba fiszek na sesję dla talii {} zaktualizowana pomyślnie dla użytkownika {} na '{}'", deckId, userId, request.flashcardsPerSession());
-        return ResponseEntity.ok(request);
-    }
+//    /**
+//     * Zmienia liczbę fiszek na sesję nauki.
+//     *
+//     * <p>Określa ile fiszek zostanie wybranych do jednej sesji nauki.
+//     * Wartość musi być w zakresie od 1 do 100.
+//     *
+//     * <p>Mniejsza liczba:
+//     * <ul>
+//     *   <li>Krótsza sesja nauki (lepsze dla początkujących)</li>
+//     *   <li>Szybsze postępy widoczne w statystykach</li>
+//     *   <li>Mniejsze zmęczenie kognitywne</li>
+//     * </ul>
+//     *
+//     * <p>Większa liczba:
+//     * <ul>
+//     *   <li>Intensywniejsza sesja (dla zaawansowanych)</li>
+//     *   <li>Więcej materiału w jednym podejściu</li>
+//     *   <li>Szybsze przejście przez całą talię</li>
+//     * </ul>
+//     *
+//     * @param deckId ID talii do zaktualizowania
+//     * @param request obiekt zawierający nową liczbę fiszek (1-100)
+//     * @param userId ID użytkownika z nagłówka x-client-id
+//     * @return zaktualizowana liczba fiszek na sesję
+//     * @throws IllegalArgumentException jeśli deckId jest pusty lub liczba poza zakresem
+//     * @throws DeckNotFoundException jeśli talia o podanym ID nie istnieje
+//     * @throws UserPermissionsMissing jeśli użytkownik nie ma dostępu do talii
+//     */
+//    @Operation(
+//        summary = "Zmień liczbę fiszek na sesję",
+//        description = "Ustawia ile fiszek będzie wyświetlanych w jednej sesji nauki (zakres: 1-100)."
+//    )
+//    @ApiResponses(value = {
+//        @ApiResponse(
+//            responseCode = "200",
+//            description = "Liczba fiszek na sesję zmieniona pomyślnie",
+//            content = @Content(schema = @Schema(implementation = UpdateFlashcardsPerSessionRequest.class))
+//        ),
+//        @ApiResponse(
+//            responseCode = "400",
+//            description = "Nieprawidłowa liczba fiszek lub ID talii",
+//            content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))
+//        ),
+//        @ApiResponse(
+//            responseCode = "404",
+//            description = "Talia nie znaleziona",
+//            content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))
+//        ),
+//        @ApiResponse(
+//            responseCode = "403",
+//            description = "Brak dostępu do talii",
+//            content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))
+//        )
+//    })
+//    @PutMapping("/{deckId}/flashcardsPerSession")
+//    public ResponseEntity<UpdateFlashcardsPerSessionRequest> updateFlashcardsPerSession(
+//            @Parameter(description = "ID talii", required = true, example = "deck-123") @PathVariable String deckId,
+//            @Parameter(description = "Liczba fiszek na sesję (1-100)", required = true) @Valid @RequestBody UpdateFlashcardsPerSessionRequest request,
+//            @Parameter(description = "ID użytkownika z nagłówka", required = true, example = "user-123") @RequestHeader(USER_ID_HEADER) String userId) {
+//        log.debug("Aktualizacja liczby fiszek na sesję dla talii o ID: {} dla użytkownika: {} na '{}'", deckId, userId, request.flashcardsPerSession());
+//        deckService.updateFlashcardsPerSession(deckId, request.flashcardsPerSession(), userId);
+//        log.info("Liczba fiszek na sesję dla talii {} zaktualizowana pomyślnie dla użytkownika {} na '{}'", deckId, userId, request.flashcardsPerSession());
+//        return ResponseEntity.ok(request);
+//    }
 
-    /**
-     * Zmienia algorytm nauki dla talii.
-     * 
-     * <p>Określa sposób wybierania i kolejności prezentacji fiszek podczas sesji nauki.
-     * Dostępne algorytmy mają różne strategie i są dostosowane do różnych stylów uczenia.
-     * 
-     * <p>Zmiana algorytmu wpływa na:
-     * <ul>
-     *   <li>Kolejność prezentacji fiszek w nowych sesjach</li>
-     *   <li>Sposób zarządzania powtórkami</li>
-     *   <li>Interwały między powtórzeniami</li>
-     *   <li>Adaptację do postępów użytkownika</li>
-     * </ul>
-     * 
-     * <p>Zmiana nie wpływa na już rozpoczęte sesje ani historię nauki.
-     * 
-     * @param deckId ID talii do zaktualizowania
-     * @param request obiekt zawierający nowy algorytm nauki
-     * @param userId ID użytkownika z nagłówka x-client-id
-     * @return zaktualizowany algorytm nauki
-     * @throws IllegalArgumentException jeśli deckId jest pusty lub algorytm nieprawidłowy
-     * @throws DeckNotFoundException jeśli talia o podanym ID nie istnieje
-     */
-    @Operation(
-        summary = "Zmień algorytm nauki",
-        description = "Ustawia algorytm określający sposób wyboru i kolejności fiszek podczas nauki."
-    )
-    @ApiResponses(value = {
-        @ApiResponse(
-            responseCode = "200",
-            description = "Algorytm nauki zmieniony pomyślnie",
-            content = @Content(schema = @Schema(implementation = UpdateLearnAlgorithmRequest.class))
-        ),
-        @ApiResponse(
-            responseCode = "400",
-            description = "Nieprawidłowy algorytm lub ID talii",
-            content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))
-        ),
-        @ApiResponse(
-            responseCode = "404",
-            description = "Talia nie znaleziona",
-            content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))
-        ),
-        @ApiResponse(
-            responseCode = "403",
-            description = "Brak dostępu do talii",
-            content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))
-        )
-    })
-    @PutMapping("/{deckId}/learnAlgorithm")
-    public ResponseEntity<UpdateLearnAlgorithmRequest> updateLearnAlgorithm(
-            @Parameter(description = "ID talii", required = true, example = "deck-123") @PathVariable String deckId,
-            @Parameter(description = "Nowy algorytm nauki", required = true) @Valid @RequestBody UpdateLearnAlgorithmRequest request,
-            @Parameter(description = "ID użytkownika z nagłówka", required = true, example = "user-123") @RequestHeader(USER_ID_HEADER) String userId) {
-        log.debug("Aktualizacja algorytmu nauki dla talii o ID: {} dla użytkownika: {} na '{}'", deckId, userId, request.learnAlgorithm());
-        deckService.updateLearnAlgorithm(deckId, request.learnAlgorithm(), userId);
-        log.info("Algorytm nauki dla talii {} zaktualizowany pomyślnie dla użytkownika {} na '{}'", deckId, userId, request.learnAlgorithm());
-        return ResponseEntity.ok(request);
-    }
+//    /**
+//     * Zmienia algorytm nauki dla talii.
+//     *
+//     * <p>Określa sposób wybierania i kolejności prezentacji fiszek podczas sesji nauki.
+//     * Dostępne algorytmy mają różne strategie i są dostosowane do różnych stylów uczenia.
+//     *
+//     * <p>Zmiana algorytmu wpływa na:
+//     * <ul>
+//     *   <li>Kolejność prezentacji fiszek w nowych sesjach</li>
+//     *   <li>Sposób zarządzania powtórkami</li>
+//     *   <li>Interwały między powtórzeniami</li>
+//     *   <li>Adaptację do postępów użytkownika</li>
+//     * </ul>
+//     *
+//     * <p>Zmiana nie wpływa na już rozpoczęte sesje ani historię nauki.
+//     *
+//     * @param deckId ID talii do zaktualizowania
+//     * @param request obiekt zawierający nowy algorytm nauki
+//     * @param userId ID użytkownika z nagłówka x-client-id
+//     * @return zaktualizowany algorytm nauki
+//     * @throws IllegalArgumentException jeśli deckId jest pusty lub algorytm nieprawidłowy
+//     * @throws DeckNotFoundException jeśli talia o podanym ID nie istnieje
+//     */
+//    @Operation(
+//        summary = "Zmień algorytm nauki",
+//        description = "Ustawia algorytm określający sposób wyboru i kolejności fiszek podczas nauki."
+//    )
+//    @ApiResponses(value = {
+//        @ApiResponse(
+//            responseCode = "200",
+//            description = "Algorytm nauki zmieniony pomyślnie",
+//            content = @Content(schema = @Schema(implementation = UpdateLearnAlgorithmRequest.class))
+//        ),
+//        @ApiResponse(
+//            responseCode = "400",
+//            description = "Nieprawidłowy algorytm lub ID talii",
+//            content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))
+//        ),
+//        @ApiResponse(
+//            responseCode = "404",
+//            description = "Talia nie znaleziona",
+//            content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))
+//        ),
+//        @ApiResponse(
+//            responseCode = "403",
+//            description = "Brak dostępu do talii",
+//            content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))
+//        )
+//    })
+//    @PutMapping("/{deckId}/learnAlgorithm")
+//    public ResponseEntity<UpdateLearnAlgorithmRequest> updateLearnAlgorithm(
+//            @Parameter(description = "ID talii", required = true, example = "deck-123") @PathVariable String deckId,
+//            @Parameter(description = "Nowy algorytm nauki", required = true) @Valid @RequestBody UpdateLearnAlgorithmRequest request,
+//            @Parameter(description = "ID użytkownika z nagłówka", required = true, example = "user-123") @RequestHeader(USER_ID_HEADER) String userId) {
+//        log.debug("Aktualizacja algorytmu nauki dla talii o ID: {} dla użytkownika: {} na '{}'", deckId, userId, request.learnAlgorithm());
+//        deckService.updateLearnAlgorithm(deckId, request.learnAlgorithm(), userId);
+//        log.info("Algorytm nauki dla talii {} zaktualizowany pomyślnie dla użytkownika {} na '{}'", deckId, userId, request.learnAlgorithm());
+//        return ResponseEntity.ok(request);
+//    }
 
     /**
      * Usuwa talię.
@@ -944,124 +945,123 @@ public class DeckController {
         return ResponseEntity.ok(response);
     }
 
-    /**
-     * Pobiera liczbę talii użytkownika.
-     * 
-     * <p>Zwraca statystyki dotyczące liczby talii użytkownika z podziałem na:
-     * <ul>
-     *   <li><b>totalDecks:</b> Całkowita liczba wszystkich talii użytkownika</li>
-     *   <li><b>publicDecks:</b> Liczba talii publicznych (widocznych dla innych)</li>
-     *   <li><b>privateDecks:</b> Liczba talii prywatnych (tylko dla właściciela)</li>
-     * </ul>
-     * 
-     * <p>Przydatne do:
-     * <ul>
-     *   <li>Wyświetlania podsumowania na dashboardzie</li>
-     *   <li>Walidacji limitów (np. max liczba talii)</li>
-     *   <li>Statystyk użytkowania</li>
-     * </ul>
-     * 
-     * @param userId ID użytkownika z nagłówka x-client-id
-     * @return liczby talii z podziałem na typy
-     * @throws IllegalArgumentException jeśli brak nagłówka x-client-id
-     */
-    @Operation(
-        summary = "Pobierz liczbę talii użytkownika",
-        description = "Zwraca statystyki liczby talii użytkownika: całkowita, publiczne, prywatne."
-    )
-    @ApiResponses(value = {
-        @ApiResponse(
-            responseCode = "200",
-            description = "Liczba talii pobrana pomyślnie",
-            content = @Content(schema = @Schema(implementation = UserDeckCountDto.class))
-        ),
-        @ApiResponse(
-            responseCode = "400",
-            description = "Brak wymaganego nagłówka x-client-id",
-            content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))
-        )
-    })
-    @GetMapping("/user/count")
-    public ResponseEntity<UserDeckCountDto> getUserDeckCount(
-            @Parameter(description = "ID użytkownika z nagłówka", required = true, example = "user-123") @RequestHeader(USER_ID_HEADER) String userId) {
-        log.debug("Pobieranie liczby talii użytkownika {}", userId);
-        UserDeckCountDto count = deckService.getUserDeckCount(userId);
-        log.info("Liczba talii użytkownika {}: total={}, public={}, private={}",
-            userId, count.totalDecks(), count.publicDecks(), count.privateDecks());
-        return ResponseEntity.ok(count);
-    }
-
-    /**
-     * Pobiera statystyki talii.
-     * 
-     * <p>Zwraca szczegółowe statystyki dotyczące postępów w nauce dla konkretnej talii:
-     * <ul>
-     *   <li><b>Fiszki:</b>
-     *     <ul>
-     *       <li>totalFlashcards - całkowita liczba fiszek w talii</li>
-     *       <li>learnedFlashcards - liczba opanowanych fiszek</li>
-     *       <li>unlearnedFlashcards - liczba fiszek do nauczenia</li>
-     *       <li>progressPercentage - procent postępu (learned/total * 100)</li>
-     *     </ul>
-     *   </li>
-     *   <li><b>Sesje:</b>
-     *     <ul>
-     *       <li>totalSessions - całkowita liczba wszystkich sesji</li>
-     *       <li>completedSessions - liczba ukończonych sesji</li>
-     *     </ul>
-     *   </li>
-     * </ul>
-     * 
-     * <p>Przydatne do:
-     * <ul>
-     *   <li>Wyświetlania postępów użytkownika</li>
-     *   <li>Tworzenia wykresów i dashboardów</li>
-     *   <li>Motywowania do kontynuowania nauki</li>
-     *   <li>Analizy efektywności nauki</li>
-     * </ul>
-     * 
-     * @param deckId ID talii
-     * @param userId ID użytkownika z nagłówka x-client-id
-     * @return szczegółowe statystyki talii
-     * @throws IllegalArgumentException jeśli deckId jest pusty
-     * @throws DeckNotFoundException jeśli talia o podanym ID nie istnieje
-     * @throws UserPermissionsMissing jeśli użytkownik nie ma dostępu do talii
-     */
-    @Operation(
-        summary = "Pobierz statystyki talii",
-        description = "Zwraca szczegółowe statystyki postępów: liczby fiszek (learned/unlearned), procent postępu, liczby sesji."
-    )
-    @ApiResponses(value = {
-        @ApiResponse(
-            responseCode = "200",
-            description = "Statystyki talii pobrane pomyślnie",
-            content = @Content(schema = @Schema(implementation = DeckStatisticsDto.class))
-        ),
-        @ApiResponse(
-            responseCode = "400",
-            description = "Nieprawidłowe ID talii",
-            content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))
-        ),
-        @ApiResponse(
-            responseCode = "404",
-            description = "Talia nie znaleziona",
-            content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))
-        ),
-        @ApiResponse(
-            responseCode = "403",
-            description = "Brak dostępu do talii",
-            content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))
-        )
-    })
-    @GetMapping("/{deckId}/statistics")
-    public ResponseEntity<DeckStatisticsDto> getDeckStatistics(
-            @Parameter(description = "ID talii", required = true, example = "deck-123") @PathVariable String deckId,
-            @Parameter(description = "ID użytkownika z nagłówka", required = true, example = "user-123") @RequestHeader(USER_ID_HEADER) String userId) {
-        log.debug("Pobieranie statystyk talii o ID: {} dla użytkownika: {}", deckId, userId);
-        DeckStatisticsDto statistics = deckService.getDeckStatistics(deckId, userId);
-        log.info("Statystyki talii {} dla użytkownika {} pobrane pomyślnie", deckId, userId);
-        return ResponseEntity.ok(statistics);
-    }
+//    /**
+//     * Pobiera liczbę talii użytkownika.
+//     *
+//     * <p>Zwraca statystyki dotyczące liczby talii użytkownika z podziałem na:
+//     * <ul>
+//     *   <li><b>totalDecks:</b> Całkowita liczba wszystkich talii użytkownika</li>
+//     *   <li><b>publicDecks:</b> Liczba talii publicznych (widocznych dla innych)</li>
+//     *   <li><b>privateDecks:</b> Liczba talii prywatnych (tylko dla właściciela)</li>
+//     * </ul>
+//     *
+//     * <p>Przydatne do:
+//     * <ul>
+//     *   <li>Wyświetlania podsumowania na dashboardzie</li>
+//     *   <li>Walidacji limitów (np. max liczba talii)</li>
+//     *   <li>Statystyk użytkowania</li>
+//     * </ul>
+//     *
+//     * @param userId ID użytkownika z nagłówka x-client-id
+//     * @return liczby talii z podziałem na typy
+//     * @throws IllegalArgumentException jeśli brak nagłówka x-client-id
+//     */
+//    @Operation(
+//        summary = "Pobierz liczbę talii użytkownika",
+//        description = "Zwraca statystyki liczby talii użytkownika: całkowita, publiczne, prywatne."
+//    )
+//    @ApiResponses(value = {
+//        @ApiResponse(
+//            responseCode = "200",
+//            description = "Liczba talii pobrana pomyślnie",
+//            content = @Content(schema = @Schema(implementation = UserDeckCountDto.class))
+//        ),
+//        @ApiResponse(
+//            responseCode = "400",
+//            description = "Brak wymaganego nagłówka x-client-id",
+//            content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))
+//        )
+//    })
+//    @GetMapping("/user/count")
+//    public ResponseEntity<UserDeckCountDto> getUserDeckCount(
+//            @Parameter(description = "ID użytkownika z nagłówka", required = true, example = "user-123") @RequestHeader(USER_ID_HEADER) String userId) {
+//        log.debug("Pobieranie liczby talii użytkownika {}", userId);
+//        UserDeckCountDto count = deckService.getUserDeckCount(userId);
+//        log.info("Liczba talii użytkownika {}: total={}, public={}, private={}",
+//            userId, count.totalDecks(), count.publicDecks(), count.privateDecks());
+//        return ResponseEntity.ok(count);
+//    }
+//    /**
+//     * Pobiera statystyki talii.
+//     *
+//     * <p>Zwraca szczegółowe statystyki dotyczące postępów w nauce dla konkretnej talii:
+//     * <ul>
+//     *   <li><b>Fiszki:</b>
+//     *     <ul>
+//     *       <li>totalFlashcards - całkowita liczba fiszek w talii</li>
+//     *       <li>learnedFlashcards - liczba opanowanych fiszek</li>
+//     *       <li>unlearnedFlashcards - liczba fiszek do nauczenia</li>
+//     *       <li>progressPercentage - procent postępu (learned/total * 100)</li>
+//     *     </ul>
+//     *   </li>
+//     *   <li><b>Sesje:</b>
+//     *     <ul>
+//     *       <li>totalSessions - całkowita liczba wszystkich sesji</li>
+//     *       <li>completedSessions - liczba ukończonych sesji</li>
+//     *     </ul>
+//     *   </li>
+//     * </ul>
+//     *
+//     * <p>Przydatne do:
+//     * <ul>
+//     *   <li>Wyświetlania postępów użytkownika</li>
+//     *   <li>Tworzenia wykresów i dashboardów</li>
+//     *   <li>Motywowania do kontynuowania nauki</li>
+//     *   <li>Analizy efektywności nauki</li>
+//     * </ul>
+//     *
+//     * @param deckId ID talii
+//     * @param userId ID użytkownika z nagłówka x-client-id
+//     * @return szczegółowe statystyki talii
+//     * @throws IllegalArgumentException jeśli deckId jest pusty
+//     * @throws DeckNotFoundException jeśli talia o podanym ID nie istnieje
+//     * @throws UserPermissionsMissing jeśli użytkownik nie ma dostępu do talii
+//     */
+//    @Operation(
+//        summary = "Pobierz statystyki talii",
+//        description = "Zwraca szczegółowe statystyki postępów: liczby fiszek (learned/unlearned), procent postępu, liczby sesji."
+//    )
+//    @ApiResponses(value = {
+//        @ApiResponse(
+//            responseCode = "200",
+//            description = "Statystyki talii pobrane pomyślnie",
+//            content = @Content(schema = @Schema(implementation = DeckStatisticsDto.class))
+//        ),
+//        @ApiResponse(
+//            responseCode = "400",
+//            description = "Nieprawidłowe ID talii",
+//            content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))
+//        ),
+//        @ApiResponse(
+//            responseCode = "404",
+//            description = "Talia nie znaleziona",
+//            content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))
+//        ),
+//        @ApiResponse(
+//            responseCode = "403",
+//            description = "Brak dostępu do talii",
+//            content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))
+//        )
+//    })
+//    @GetMapping("/{deckId}/statistics")
+//    public ResponseEntity<DeckStatisticsDto> getDeckStatistics(
+//            @Parameter(description = "ID talii", required = true, example = "deck-123") @PathVariable String deckId,
+//            @Parameter(description = "ID użytkownika z nagłówka", required = true, example = "user-123") @RequestHeader(USER_ID_HEADER) String userId) {
+//        log.debug("Pobieranie statystyk talii o ID: {} dla użytkownika: {}", deckId, userId);
+//        DeckStatisticsDto statistics = deckService.getDeckStatistics(deckId, userId);
+//        log.info("Statystyki talii {} dla użytkownika {} pobrane pomyślnie", deckId, userId);
+//        return ResponseEntity.ok(statistics);
+//    }
 
     /**
      * Waliduje dostępność nazwy talii dla użytkownika.
