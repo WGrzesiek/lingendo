@@ -4,9 +4,13 @@ import com.learnwords.deckservice.dto.flashcard.FlashcardDto;
 import com.learnwords.deckservice.service.algorithm.step.GrzesiekStep;
 import com.learnwords.deckservice.service.algorithm.step.Step;
 import com.learnwords.deckservice.service.evaluationService.*;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+@Service
+@Slf4j
 public class AnswerValidatorImpl implements AnswerValidator {
 
     public boolean validate(FlashcardDto flashcard, UserAnswer userAnswer, Step step) {

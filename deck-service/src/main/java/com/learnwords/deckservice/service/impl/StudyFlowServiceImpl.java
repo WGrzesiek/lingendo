@@ -37,7 +37,7 @@ public class StudyFlowServiceImpl implements StudyFlowService {
     private final UserProgressService userProgressService;
     private final AlgorithmFactory algorithmFactory;
     private final AnswerValidator answerValidator;
-    private final SessionStatisticsHelper statsHelper;
+
     private final FlashcardService flashcardService;
 
     public StudyFlowServiceImpl(List<LearningStrategy> strategies,
@@ -46,7 +46,7 @@ public class StudyFlowServiceImpl implements StudyFlowService {
                                 UserProgressService userProgressService,
                                 AlgorithmFactory algorithmFactory,
                                 AnswerValidator answerValidator,
-                                SessionStatisticsHelper statsHelper,
+
                                 FlashcardService flashcardService) {
         this.strategies = strategies;
         this.sessionService = sessionService;
@@ -54,7 +54,7 @@ public class StudyFlowServiceImpl implements StudyFlowService {
         this.userProgressService = userProgressService;
         this.algorithmFactory = algorithmFactory;
         this.answerValidator = answerValidator;
-        this.statsHelper = statsHelper;
+
         this.flashcardService = flashcardService;
     }
 
