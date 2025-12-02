@@ -1,10 +1,13 @@
 package com.learnwords.common.dto;
 
+import lombok.Builder;
+
 import java.util.List;
 /**
  * Pełna reprezentacja słowa ze wszystkimi szczegółami.
  * Używana przez deck-service do wyświetlania fiszek w sesji nauki.
  */
+@Builder
 public record WordDto(
         String id,
         String word,
