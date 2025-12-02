@@ -253,7 +253,7 @@ public class DeckServiceImpl implements DeckService {
             throw new IllegalArgumentException("userId lub deckName nie może być pusty");
         }
 
-        boolean isTaken = deckRepository.existsByNameAndUserId(deckName, userId);
+        boolean isTaken = deckRepository.existsByNameAndOwnerId(deckName, userId);
 
         if (isTaken) {
             log.info("Nazwa talii '{}' dla użytkownika '{}' jest ZAJĘTA", deckName, userId);
