@@ -58,23 +58,42 @@ stage('Build & Install deck-service') {
         }
     }
 }
-stage('Test Coverage') {
-    when { expression { return !params.SKIP_TESTS } }
+stage('Test & Coverage') {
+    when { expression { !params.SKIP_TESTS } }
     steps {
         dir('deck-service') {
-            junit '**/target/surefire-reports/*.xml'
+            junit 'target/surefire-reports/*.xml'
+        }
 
-            recordCoverage(
-                tools: [[
-                    parser: 'JACOCO',
-                    pattern: 'target/site/jacoco/jacoco.xml'
-                ]],
-                id: 'jacoco',
-                name: 'JaCoCo Coverage'
-            )
+        discoverReferenceBuild()
+
+        recordCoverage(
+            tools: [[parser: 'JACOCO']],
+            id: 'jacoco',
+            name: 'JaCoCo Coverage',
+            sourceCodeRetention: 'EVERY_BUILD',
+            sourceDirectories: [[path: 'deck-service/src/main/java']],
+            qualityGates: [
+                [threshold: 60.0, metric: 'LINE',   baseline: 'PROJECT', unstable: true],
+                [threshold: 60.0, metric: 'BRANCH', baseline: 'PROJECT', unstable: true]
+            ]
+        )
+    }
+}
+stage('Allure report') {
+    when { expression { !params.SKIP_TESTS } }
+    steps {
+        dir('deck-service') {
+            allure([
+                includeProperties: false,
+                jdk: '',
+                results: [[path: 'target/allure-results']]
+            ])
         }
     }
 }
+
+
 
     stage('Build Docker image') {
 			steps {
@@ -92,4 +111,3 @@ stage('Test Coverage') {
 	}
   }
 }
-
