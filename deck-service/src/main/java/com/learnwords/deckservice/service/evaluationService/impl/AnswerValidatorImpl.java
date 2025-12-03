@@ -15,23 +15,41 @@ public class AnswerValidatorImpl implements AnswerValidator {
 
     public boolean validate(FlashcardDto flashcard, UserAnswer userAnswer, Step step) {
         return switch (userAnswer) {
-            case RememberedAnswer remember -> validateRemembered(flashcard, remember);
+            case RememberedAnswer remember -> validateRemembered(remember, step);
             case TextAnswer text -> validateText(flashcard, text, step);
-            case ChoiceAnswer choice -> validateChoice(flashcard, choice);
+            case ChoiceAnswer choice -> validateChoice(flashcard, choice ,step);
         };
     }
 
-    private boolean validateRemembered(FlashcardDto flashcard, RememberedAnswer answer) {
-        return answer.remembered();
+    private boolean validateRemembered(RememberedAnswer answer, Step step) {
+        if( step == GrzesiekStep.SHOW_BOTH || step == GrzesiekStep.SHOW_LANGUAGE_FROM|| step == GrzesiekStep.SHOW_LANGUAGE_TO){
+            return answer.remembered();
+        }
+        return false;
+    }
+
+    private boolean validateChoice(FlashcardDto flashcard, ChoiceAnswer answer, Step step) {
+        String given = normalize(answer.selectedOption());
+        List<String> expectedTranslations = flashcard.wordDto().translations().stream()
+                .map(this::normalize)
+                .toList();
+        if (step == GrzesiekStep.QUIZ){
+            return matchesAny(expectedTranslations, given);
+        }
+        return false;
     }
 
     private boolean validateText(FlashcardDto flashcard, TextAnswer answer, Step step) {
         String given = normalize(answer.text());
+        String word = normalize(flashcard.wordDto().word());
+        List<String> expectedTranslations = flashcard.wordDto().translations().stream()
+                .map(this::normalize)
+                .toList();
 
         if (step == GrzesiekStep.WRITE_LANGUAGE_FROM) {
-            return matchesAny(flashcard.wordDto().translations(), given);
+            return matchesAny(expectedTranslations, given);
         } else if (step == GrzesiekStep.WRITE_LANGUAGE_TO) {
-            return equalsNormalized(flashcard.wordDto().word(), given);
+            return equalsNormalized(word, given);
         }
         return false;
     }
@@ -48,9 +66,4 @@ public class AnswerValidatorImpl implements AnswerValidator {
         return normalize(expected).equals(given);
     }
 
-
-    private boolean validateChoice(FlashcardDto flashcard, ChoiceAnswer answer) {
-
-        return true;
-    }
 }
