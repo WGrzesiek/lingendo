@@ -1,5 +1,8 @@
 package com.learnwords.deckservice.service.impl;
 
+import com.learnwords.common.dto.SentenceDto;
+import com.learnwords.common.dto.WordDto;
+import com.learnwords.deckservice.dto.sessionFlashcard.SessionFlashcardDto;
 import com.learnwords.deckservice.entity.*;
 import com.learnwords.deckservice.exception.exceptions.InvalidSessionIdException;
 import com.learnwords.deckservice.exception.exceptions.SessionNotFoundException;
@@ -17,6 +20,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
@@ -44,6 +48,7 @@ public class SessionFlashcardServiceImpl implements SessionFlashcardService {
     private final DeckEnrollmentRepository deckEnrollmentRepository;
     private final UserFlashcardProgressRepository userFlashcardProgressRepository;
     private final UserProgressService userProgressService;
+    private final VocabularyGrpcClient vocabularyGrpcClient;
 
 
     public SessionFlashcardServiceImpl(
@@ -53,7 +58,8 @@ public class SessionFlashcardServiceImpl implements SessionFlashcardService {
             FlashcardFetchStrategyServiceImpl flashcardFetchStrategyServiceImpl,
             DeckEnrollmentRepository deckEnrollmentRepository,
             UserFlashcardProgressRepository userFlashcardProgressRepository,
-            UserProgressService userProgressService
+            UserProgressService userProgressService,
+            VocabularyGrpcClient vocabularyGrpcClient
 
             ) {
         this.sessionFlashcardRepository = sessionFlashcardRepository;
@@ -63,6 +69,8 @@ public class SessionFlashcardServiceImpl implements SessionFlashcardService {
         this.deckEnrollmentRepository = deckEnrollmentRepository;
         this.userFlashcardProgressRepository = userFlashcardProgressRepository;
         this.userProgressService = userProgressService;
+        this.vocabularyGrpcClient = vocabularyGrpcClient;
+
     }
 
     @Override
@@ -151,6 +159,69 @@ public class SessionFlashcardServiceImpl implements SessionFlashcardService {
         List<SessionFlashcard> cards = sessionFlashcardRepository.findBySession_Id(sessionId);
         log.info("Pobrano {} fiszek dla sesji {}", cards.size(), sessionId);
         return cards;
+    }
+
+    @Override
+    public SessionFlashcardDto getSessionFlashcardsWithWords(String sessionId) {
+        List<SessionFlashcard> cards = sessionFlashcardRepository.findBySession_Id(sessionId);
+        log.info("Pobrano {} fiszek dla sesji {}", cards.size(), sessionId);
+        var words = vocabularyGrpcClient.batchGetWordsByIds(
+                cards.stream()
+                        .map(card -> card.getFlashcard().getWordId())
+                        .toList()
+        );
+
+        List<WordDto> wordDtos = words.getWordsList().stream()
+                .map(w -> WordDto.builder()
+                        .id(w.getId())
+                        .word(w.getWord())
+                        .translations(w.getTranslationsList())
+                        .sentences(w.getSentencesList().stream()
+                                .map(s -> SentenceDto.builder()
+                                        .id(s.getId())
+                                        .sentence(s.getSentence())
+                                        .translation(s.getTranslation())
+                                        .build())
+                                .toList())
+                        .sentencesAI(w.getSentencesAiList().stream()
+                                .map(s -> SentenceDto.builder()
+                                        .id(s.getId())
+                                        .sentence(s.getSentence())
+                                        .translation(s.getTranslation())
+                                        .build())
+                                .toList())
+                        .build()
+                )
+                .toList();
+        Map<String, WordDto> wordById = wordDtos.stream()
+                .collect(Collectors.toMap(WordDto::id, Function.identity()));
+
+
+        Map<List<String>, List<WordDto>> flashcardWithWords = cards.stream()
+                .map(card -> {
+                    String flashcardId = card.getFlashcard().getId();
+                    String wordId = card.getFlashcard().getWordId();
+
+                    WordDto wordDto = Optional.ofNullable(wordById.get(wordId))
+                            .orElseThrow(() -> new IllegalStateException(
+                                    "Brak WordDto dla wordId: " + wordId
+                            ));
+
+                    return Map.entry(
+                            List.of(flashcardId, wordId),
+                            List.of(wordDto) // <- typ: List<WordDto>
+                    );
+                })
+                .collect(Collectors.toMap(
+                        Map.Entry::getKey,
+                        Map.Entry::getValue
+                ));
+
+        return SessionFlashcardDto.builder()
+                .sessionId(sessionId)
+                .flashcardWithWords(flashcardWithWords)
+                .build();
+
     }
 
 }

@@ -5,6 +5,6 @@ import com.learnwords.deckservice.dto.learningStrategy.NextFlashcardRecommendati
 import com.learnwords.deckservice.service.evaluationService.UserAnswer;
 
 public interface StudyFlowService {
-    NextFlashcardRecommendation getNextFlashcard(String sessionId,String deckId, String userId);
+    NextFlashcardRecommendation getNextFlashcard(String sessionId, String userId);
     AnswerResultDto submitAnswer(String sessionId, String flashcardId, UserAnswer userAnswer, String userId);
 }

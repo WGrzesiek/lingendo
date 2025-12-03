@@ -31,11 +31,11 @@ import com.learnwords.deckservice.enums.SessionType;
  */
 public interface SessionService {
     String initializeSession(String deckId, FlashcardFetchStrategy flashcardFetchStrategy, SessionType type, String userId);
-    void completeSession(String sessionId, String userId, String deckId);
-    void abandonSession(String sessionId, String userId, String deckId);
-    void pauseSession(String sessionId, String userId, String deckId);
-    void resumeSession(String sessionId, String userId, String deckId);
-    SessionDto getSessionById(String sessionId, String userId, String deckId);
+    void completeSession(String sessionId, String userId);
+    void abandonSession(String sessionId, String userId);
+    void pauseSession(String sessionId, String userId);
+    void resumeSession(String sessionId, String userId);
+    SessionDto getSessionById(String sessionId, String userId);
 }
 
 

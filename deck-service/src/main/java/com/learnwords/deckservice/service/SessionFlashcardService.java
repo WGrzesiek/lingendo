@@ -33,5 +33,6 @@ public interface SessionFlashcardService {
 
     void populateSessionWithFlashcards(String sessionId, String enrollmentId, FlashcardFetchStrategy flashcardFetchStrategy, String userId);
     List<SessionFlashcard> getSessionFlashcards(String sessionId);
+    SessionFlashcardDto getSessionFlashcardsWithWords(String sessionId);
     //TODO wypelnienie wszystkich sesji fiszkai z danego decka
 }

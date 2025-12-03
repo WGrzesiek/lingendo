@@ -15,10 +15,14 @@ public class AnswerValidatorImpl implements AnswerValidator {
 
     public boolean validate(FlashcardDto flashcard, UserAnswer userAnswer, Step step) {
         return switch (userAnswer) {
-            case RememberedAnswer remember -> remember.remembered();
+            case RememberedAnswer remember -> validateRemembered(flashcard, remember);
             case TextAnswer text -> validateText(flashcard, text, step);
             case ChoiceAnswer choice -> validateChoice(flashcard, choice);
         };
+    }
+
+    private boolean validateRemembered(FlashcardDto flashcard, RememberedAnswer answer) {
+        return answer.remembered();
     }
 
     private boolean validateText(FlashcardDto flashcard, TextAnswer answer, Step step) {

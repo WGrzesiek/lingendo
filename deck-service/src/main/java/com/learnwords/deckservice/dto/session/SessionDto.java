@@ -11,6 +11,7 @@ import java.util.List;
 
 @Builder
 public record SessionDto(
+        //NOTE poprawic bo zwraca za duzo danych, w zasadzie wszytsko co wie sesja
         String id,
         DeckEnrollment enrollment,
         SessionStatus status,

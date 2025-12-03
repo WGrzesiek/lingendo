@@ -110,7 +110,25 @@ public class UserProgressServiceImpl implements UserProgressService {
      */
     @Override
     public List<UserFlashcardProgressDto> getProgressForDeck(String deckId, String userId) {
-        return List.of();
+        log.debug("Pobieranie progresu fiszek dla talii - deckId: '{}', userId: '{}'", deckId, userId);
+        DeckEnrollment enrollment = DeckUtils.getDeckEnrollmentIfUserHasPermissions(
+                deckEnrollmentRepository, deckId, userId);
+        List<UserFlashcardProgress> progresses =
+                userFlashcardProgressRepository.findByEnrollment_Id(enrollment.getId());
+        return progresses.stream()
+                .map(progress -> UserFlashcardProgressDto.builder()
+                        .id(progress.getId())
+                        .flashcardId(progress.getFlashcard().getId())
+                        .enrollmentId(progress.getEnrollment().getId())
+                        .userId(progress.getUserId())
+                        .phase(progress.getPhase())
+                        .isLearned(progress.isLearned())
+                        .isSkipped(progress.isSkipped())
+                        .repetitionCount(progress.getRepetitionCount())
+                        .nextReviewAt(progress.getNextReviewAt())
+                        .algorithmState(progress.getAlgorithmState())
+                        .build())
+                .toList();
     }
 
     /**

@@ -30,20 +30,18 @@ public class StudyFlowController {
     /**
      * Pobiera kolejną rekomendowaną fiszkę do nauki w ramach sesji.
      */
-    @GetMapping("/{deckId}/sessions/{sessionId}/next")
+    @GetMapping("/sessions/{sessionId}/next")
     public ResponseEntity<NextFlashcardRecommendation> getNextFlashcard(
-            @Parameter(description = "ID talii (kursu)", required = true, example = "deck-123")
-            @PathVariable String deckId,
             @Parameter(description = "ID sesji", required = true, example = "session-123")
             @PathVariable String sessionId,
             @Parameter(description = "ID użytkownika z nagłówka", required = true, example = "user-123")
             @RequestHeader(USER_ID_HEADER) String userId
     ) {
-        log.debug("Pobieranie następnej fiszki: sessionId={}, deckId={}, userId={}",
-                sessionId, deckId, userId);
+        log.debug("Pobieranie następnej fiszki: sessionId={}, userId={}",
+                sessionId, userId);
 
         NextFlashcardRecommendation recommendation =
-                studyFlowService.getNextFlashcard(sessionId, deckId, userId);
+                studyFlowService.getNextFlashcard(sessionId, userId);
 
         log.info("Zwrócono rekomendację następnej fiszki dla sessionId={} (userId={})",
                 sessionId, userId);
@@ -54,10 +52,8 @@ public class StudyFlowController {
     /**
      * Wysłanie odpowiedzi użytkownika dla aktualnej fiszki w sesji.
      */
-    @PostMapping("/{deckId}/sessions/{sessionId}/flashcards/{flashcardId}/answer")
+    @PostMapping("/sessions/{sessionId}/flashcards/{flashcardId}/answer")
     public ResponseEntity<AnswerResultDto> submitAnswer(
-            @Parameter(description = "ID talii (kursu)", required = true, example = "deck-123")
-            @PathVariable String deckId,
             @Parameter(description = "ID sesji", required = true, example = "session-123")
             @PathVariable String sessionId,
             @Parameter(description = "ID fiszki", required = true, example = "flashcard-789")
@@ -67,8 +63,8 @@ public class StudyFlowController {
             @Parameter(description = "ID użytkownika z nagłówka", required = true, example = "user-123")
             @RequestHeader(USER_ID_HEADER) String userId
     ) {
-        log.debug("Odebrano odpowiedź użytkownika: sessionId={}, deckId={}, flashcardId={}, userId={}, answer={}",
-                sessionId, deckId, flashcardId, userId, userAnswer);
+        log.debug("Odebrano odpowiedź użytkownika: sessionId={}, flashcardId={}, userId={}, answer={}",
+                sessionId, flashcardId, userId, userAnswer);
 
         AnswerResultDto result =
                 studyFlowService.submitAnswer(sessionId, flashcardId, userAnswer, userId);

@@ -137,7 +137,7 @@ public class SessionFlashcardController {
     }
 
     @GetMapping("/{sessionId}/flashcards")
-    public ResponseEntity<List<SessionFlashcardDto>> getSessionFlashcards(
+    public ResponseEntity<SessionFlashcardDto> getSessionFlashcards(
             @Parameter(description = "ID sesji", required = true, example = "session-123")
             @PathVariable String sessionId,
             @Parameter(description = "ID użytkownika z nagłówka", required = true, example = "user-123")
@@ -145,20 +145,12 @@ public class SessionFlashcardController {
     ) {
         log.debug("Pobieranie fiszek dla sesji {} (userId: {})", sessionId, userId);
 
-        List<SessionFlashcard> flashcards = sessionFlashcardService.getSessionFlashcards(sessionId);
+        SessionFlashcardDto flashcards = sessionFlashcardService.getSessionFlashcardsWithWords(sessionId);
 
-        List<SessionFlashcardDto> result = flashcards.stream()
-                        .map(sessionFlashcard ->
-                                SessionFlashcardDto.builder()
-                                        .flashcard(sessionFlashcard.getFlashcard())
-                                        .session(sessionFlashcard.getSession())
-                                        .build())
-                        .toList();
 
-        log.info("Pobrano {} fiszek dla sesji {} (userId: {})",
-                result.size(), sessionId, userId);
+        log.info("Pobrano fiszki dla sesji {} (userId: {})", sessionId, userId);
 
-        return ResponseEntity.ok(result);
+        return ResponseEntity.ok(flashcards);
     }
 }
 

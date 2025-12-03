@@ -54,110 +54,101 @@ public class SessionController {
     /**
      * Oznaczenie sesji jako ukończonej.
      */
-    @PutMapping("/{deckId}/sessions/{sessionId}/complete")
+    @PutMapping("/sessions/{sessionId}/complete")
     public ResponseEntity<Void> completeSession(
-            @Parameter(description = "ID talii (kursu)", required = true, example = "deck-123")
-            @PathVariable String deckId,
             @Parameter(description = "ID sesji", required = true, example = "session-123")
             @PathVariable String sessionId,
             @Parameter(description = "ID użytkownika z nagłówka", required = true, example = "user-123")
             @RequestHeader(USER_ID_HEADER) String userId
     ) {
-        log.debug("Zamykanie (complete) sesji {} dla talii {} (userId: {})",
-                sessionId, deckId, userId);
+        log.debug("Zamykanie (complete) sesji {} userId: {}",
+                sessionId, userId);
 
-        sessionService.completeSession(sessionId, userId, deckId);
+        sessionService.completeSession(sessionId, userId);
 
-        log.info("Sesja {} dla talii {} została oznaczona jako ukończona (userId: {})",
-                sessionId, deckId, userId);
+        log.info("Sesja {} została oznaczona jako ukończona (userId: {})",
+                sessionId, userId);
         return ResponseEntity.ok().build();
     }
 
     /**
      * Przerwanie (porzucenie) sesji.
      */
-    @PutMapping("/{deckId}/sessions/{sessionId}/abandon")
+    @PutMapping("/sessions/{sessionId}/abandon")
     public ResponseEntity<Void> abandonSession(
-            @Parameter(description = "ID talii (kursu)", required = true, example = "deck-123")
-            @PathVariable String deckId,
             @Parameter(description = "ID sesji", required = true, example = "session-123")
             @PathVariable String sessionId,
             @Parameter(description = "ID użytkownika z nagłówka", required = true, example = "user-123")
             @RequestHeader(USER_ID_HEADER) String userId
     ) {
-        log.debug("Porzucanie (abandon) sesji {} dla talii {} (userId: {})",
-                sessionId, deckId, userId);
+        log.debug("Porzucanie (abandon) sesji {} userId: {}",
+                sessionId, userId);
 
-        sessionService.abandonSession(sessionId, userId, deckId);
+        sessionService.abandonSession(sessionId, userId);
 
-        log.info("Sesja {} dla talii {} została porzucona (userId: {})",
-                sessionId, deckId, userId);
+        log.info("Sesja {} została porzucona (userId: {})",
+                sessionId,  userId);
         return ResponseEntity.ok().build();
     }
 
     /**
      * Wstrzymanie sesji.
      */
-    @PutMapping("/{deckId}/sessions/{sessionId}/pause")
+    @PutMapping("/sessions/{sessionId}/pause")
     public ResponseEntity<Void> pauseSession(
-            @Parameter(description = "ID talii (kursu)", required = true, example = "deck-123")
-            @PathVariable String deckId,
+
             @Parameter(description = "ID sesji", required = true, example = "session-123")
             @PathVariable String sessionId,
             @Parameter(description = "ID użytkownika z nagłówka", required = true, example = "user-123")
             @RequestHeader(USER_ID_HEADER) String userId
     ) {
-        log.debug("Pauzowanie sesji {} dla talii {} (userId: {})",
-                sessionId, deckId, userId);
+        log.debug("Pauzowanie sesji {} userId: {}",
+                sessionId, userId);
 
-        sessionService.pauseSession(sessionId, userId, deckId);
+        sessionService.pauseSession(sessionId, userId);
 
-        log.info("Sesja {} dla talii {} została wstrzymana (userId: {})",
-                sessionId, deckId, userId);
+        log.info("Sesja {} dla userId: {}",
+                sessionId, userId);
         return ResponseEntity.ok().build();
     }
 
     /**
      * Wznowienie sesji.
      */
-    @PutMapping("/{deckId}/sessions/{sessionId}/resume")
+    @PutMapping("/sessions/{sessionId}/resume")
     public ResponseEntity<Void> resumeSession(
-            @Parameter(description = "ID talii (kursu)", required = true, example = "deck-123")
-            @PathVariable String deckId,
             @Parameter(description = "ID sesji", required = true, example = "session-123")
             @PathVariable String sessionId,
             @Parameter(description = "ID użytkownika z nagłówka", required = true, example = "user-123")
             @RequestHeader(USER_ID_HEADER) String userId
     ) {
-        log.debug("Wznawianie sesji {} dla talii {} (userId: {})",
-                sessionId, deckId, userId);
+        log.debug("Wznawianie sesji {} userId: {}",
+                sessionId, userId);
 
-        sessionService.resumeSession(sessionId, userId, deckId);
+        sessionService.resumeSession(sessionId, userId);
 
-        log.info("Sesja {} dla talii {} została wznowiona (userId: {})",
-                sessionId, deckId, userId);
+        log.info("Sesja {} została wznowiona (userId: {})",
+                sessionId, userId);
         return ResponseEntity.ok().build();
     }
 
     /**
      * Pobranie szczegółów sesji.
      */
-    @GetMapping("/{deckId}/sessions/{sessionId}")
+    @GetMapping("/sessions/{sessionId}")
     public ResponseEntity<SessionDto> getSessionById(
-            @Parameter(description = "ID talii (kursu)", required = true, example = "deck-123")
-            @PathVariable String deckId,
             @Parameter(description = "ID sesji", required = true, example = "session-123")
             @PathVariable String sessionId,
             @Parameter(description = "ID użytkownika z nagłówka", required = true, example = "user-123")
             @RequestHeader(USER_ID_HEADER) String userId
     ) {
-        log.debug("Pobieranie sesji {} dla talii {} (userId: {})",
-                sessionId, deckId, userId);
+        log.debug("Pobieranie sesji {} userId: {}",
+                sessionId, userId);
 
-        SessionDto sessionDto = sessionService.getSessionById(sessionId, userId, deckId);
+        SessionDto sessionDto = sessionService.getSessionById(sessionId, userId);
 
-        log.info("Pobrano sesję {} dla talii {} (userId: {})",
-                sessionId, deckId, userId);
+        log.info("Pobrano sesję {} userId: {}",
+                sessionId, userId);
         return ResponseEntity.ok(sessionDto);
     }
 }
