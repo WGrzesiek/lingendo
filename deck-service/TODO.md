@@ -254,7 +254,7 @@ https://macbook-air-grzegorz.ibis-tautara.ts.net/learn/session-1
 
 
 Deck-service
-package com.learnwords.deckservice.service.Session.FlashcardFetchStrategy;
+package com.learnwords.deckservice.service.session.flashcardFetchStrategy;
 
 import com.learnwords.deckservice.entity.Flashcard;
 
@@ -330,7 +330,7 @@ import java.util.List;
       return FlashcardFetchStrategy.UNLEARNED_FIRST;
       }
       }
-      package com.learnwords.deckservice.service.Session;
+      package com.learnwords.deckservice.service.session;
 
 public interface SessionStatisticsHelper {
 public void recordFlashcardAnswer(String sessionId, String flashcardId, boolean isCorrect);
@@ -338,12 +338,12 @@ public void markFlashcardAsLearned(String flashcardId);
 public void completeSession(String sessionId);
 public void abandonSession(String sessionId);
 }
-package com.learnwords.deckservice.service.Session;
+package com.learnwords.deckservice.service.session;
 
 import com.learnwords.deckservice.dto.SessionDto;
 import com.learnwords.deckservice.dto.SessionStatsDto;
 import com.learnwords.deckservice.entity.Session;
-import com.learnwords.deckservice.service.Session.FlashcardFetchStrategy.FlashcardFetchStrategy;
+import com.learnwords.deckservice.service.FlashcardFetchStrategy;
 
 import java.util.List;
 import java.util.Optional;
@@ -515,13 +515,13 @@ import java.util.Optional;
       */
       double getSessionProgress(String sessionId);
       }
-      package com.learnwords.deckservice.service.Session;
+      package com.learnwords.deckservice.service.session;
 
-import com.learnwords.deckservice.dto.SessionFlashcardDto;
+import com.learnwords.deckservice.dto.sessionFlashcard.SessionFlashcardDto;
 import com.learnwords.deckservice.entity.Deck;
 import com.learnwords.deckservice.entity.Flashcard;
 import com.learnwords.deckservice.entity.Session;
-import com.learnwords.deckservice.service.Session.FlashcardFetchStrategy.FlashcardFetchStrategy;
+import com.learnwords.deckservice.service.FlashcardFetchStrategy;
 
 import java.util.List;
 import java.util.Optional;

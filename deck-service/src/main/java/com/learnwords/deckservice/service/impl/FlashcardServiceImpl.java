@@ -5,7 +5,7 @@ import com.learnwords.common.KafkaTopic;
 import com.learnwords.common.dto.SendWordFromKafkaDto;
 import com.learnwords.common.dto.SentenceDto;
 import com.learnwords.common.dto.WordDto;
-import com.learnwords.deckservice.dto.FlashcardDto;
+import com.learnwords.deckservice.dto.flashcard.FlashcardDto;
 import com.learnwords.deckservice.entity.Deck;
 import com.learnwords.deckservice.entity.Flashcard;
 import com.learnwords.deckservice.enums.LearnAlgorithm;
@@ -16,9 +16,9 @@ import com.learnwords.deckservice.exception.exceptions.InvalidWordDataException;
 import com.learnwords.deckservice.exception.exceptions.UserPermissionsMissing;
 import com.learnwords.deckservice.repository.DeckRepository;
 import com.learnwords.deckservice.repository.FlashcardRepository;
-import com.learnwords.deckservice.service.Algorithm.GrzesiekAlgorithm;
+import com.learnwords.deckservice.service.algorithm.GrzesiekAlgorithm;
 import com.learnwords.deckservice.service.FlashcardService;
-import com.learnwords.deckservice.service.GrpcClient.VocabularyGrpcClient;
+import com.learnwords.deckservice.service.grpcClient.VocabularyGrpcClient;
 import com.learnwords.vocabulary.v1.Word;
 
 import jakarta.transaction.Transactional;
@@ -28,6 +28,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 /**
@@ -50,8 +51,8 @@ import java.util.UUID;
  * </ul>
  * 
  * @author Grzegorz Wawrzeń
- * @version 1.0
- * @since 2025-11-12
+ * @version 2.0
+ * @since 2025-11-25
  * @see FlashcardService
  * @see VocabularyGrpcClient
  */
@@ -79,6 +80,37 @@ public class FlashcardServiceImpl implements FlashcardService {
         this.vocabularyGrpcClient = vocabularyGrpcClient;
     }
 
+    @Override
+    public FlashcardDto getFlashcardById(String flashcardId, String userId){
+        log.debug("Pobieranie fiszki po ID - flashcardId: '{}', userId: '{}'", flashcardId, userId);
+
+        Flashcard flashcard = getFlashcardIfUserHasPermissions(flashcardId, userId);
+        var word = vocabularyGrpcClient.getWordById(flashcard.getWordId());
+
+        List<SentenceDto> sentences = word.getWord().getSentencesList().stream()
+                .map(s -> new SentenceDto(s.getId(), s.getSentence(), s.getTranslation()))
+                .toList();
+
+        List<SentenceDto> sentenceAi = word.getWord().getSentencesAiList().stream()
+                .map(s -> new SentenceDto(s.getId(), s.getSentence(), s.getTranslation()))
+                .toList();
+
+        FlashcardDto flashcardDto = new FlashcardDto(
+                flashcard.getId(),
+                new WordDto(
+                        word.getWord().getId(),
+                        word.getWord().getWord(),
+                        word.getWord().getTranslationsList(),
+                        sentences,
+                        sentenceAi
+                )
+
+        );
+
+        log.debug("Zwrócono fiszkę - flashcardId: '{}', wordId: '{}'", flashcardId, flashcard.getWordId());
+        return flashcardDto;
+    }
+
     /**
      * Przetwarza zdarzenie utworzenia słówka z Kafki i tworzy fiszkę.
      * 
@@ -100,7 +132,7 @@ public class FlashcardServiceImpl implements FlashcardService {
      * albo rollback w przypadku błędu.
      * 
      * @param getWordFromKafkaDto DTO ze zdarzenia Kafka zawierające ID słówka i talii
-     * @param userId ID użytkownika, który utworzył słówko
+//     * @param ownerId ID użytkownika, który utworzył słówko
      * @throws DeckNotFoundException jeśli talia o podanym ID nie istnieje
      * @throws UserPermissionsMissing jeśli użytkownik nie ma uprawnień do talii
      */
@@ -125,7 +157,6 @@ public class FlashcardServiceImpl implements FlashcardService {
                 .wordId(getWordFromKafkaDto.id())
                 .deck(deck)
                 .build();
-        setInitialFlashcardState(getWordFromKafkaDto.deckId(), flashcard, deck.getUserId());
         flashcardRepository.save(flashcard);
         log.info("Utworzono fiszkę - flashcardId: '{}', wordId: '{}', deckId: '{}'", 
                 flashcardId, getWordFromKafkaDto.id(), getWordFromKafkaDto.deckId());
@@ -134,106 +165,6 @@ public class FlashcardServiceImpl implements FlashcardService {
         deckRepository.save(deck);
         log.info("Zaktualizowano licznik słówek w talii - deckId: '{}', wordCount: {}", 
                 getWordFromKafkaDto.deckId(), deck.getWordCount());
-    }
-
-    /**
-     * Inicjalizuje początkowy stan algorytmu nauki dla nowej fiszki.
-     * 
-     * <p>Pobiera algorytm nauki przypisany do talii i wywołuje jego metodę
-     * inicjalizującą. Zserializowany stan jest zapisywany w fiszce.
-     * 
-     * <p>Obecnie obsługiwane algorytmy:
-     * <ul>
-     *   <li>GRZESIEK_ALGORITHM - autorski algorytm interwałowego powtarzania</li>
-     * </ul>
-     * 
-     * @param deckId ID talii, z której pobierany jest algorytm
-     * @param flashcard fiszka do inicjalizacji (stan zostanie ustawiony)
-     * @param userId ID użytkownika wykonującego operację
-     * @throws DeckNotFoundException jeśli talia o podanym ID nie istnieje
-     * @throws UserPermissionsMissing jeśli użytkownik nie ma uprawnień do talii
-     */
-    @Override
-    public void setInitialFlashcardState(String deckId, Flashcard flashcard, String userId) {
-        log.debug("Inicjalizacja stanu fiszki - flashcardId: '{}', deckId: '{}', userId: '{}'", 
-                flashcard.getId(), deckId, userId);
-        
-        checkDeckIsExistsAndUserHasPermissions(deckId, userId);
-        LearnAlgorithm algorithm = getDeckAlgorithm(deckId);
-
-        switch (algorithm) {
-            case GRZESIEK_ALGORITHM -> flashcard.setAlgorithmState(grzesiekAlgorithm.initialize().serialize());
-        }
-        flashcardRepository.save(flashcard);
-        log.debug("Ustawiono początkowy stan algorytmu nauki - flashcardId: '{}', algorithm: '{}'", 
-                flashcard.getId(), algorithm);
-    }
-
-    /**
-     * Inicjalizuje stan algorytmu nauki dla wszystkich fiszek w talii.
-     *
-     * <p>Używane gdy użytkownik zmienia algorytm nauki talii lub
-     * gdy talia jest tworzona z istniejącymi fiszkami.
-     *
-     * <p>Proces:
-     * <ol>
-     *   <li>Sprawdza czy talia istnieje i czy użytkownik ma uprawnienia</li>
-     *   <li>Pobiera wszystkie fiszki z talii</li>
-     *   <li>Dla każdej fiszki wywołuje {@link #setInitialFlashcardState}</li>
-     * </ol>
-     *
-     * @param deckId ID talii
-     * @param userId ID użytkownika wykonującego operację
-     * @throws DeckNotFoundException jeśli talia o podanym ID nie istnieje
-     * @throws UserPermissionsMissing jeśli użytkownik nie ma uprawnień do talii
-     */
-    @Override
-    public void initializeDeckFlashcardsState(String deckId, String userId){
-        log.debug("Inicjalizacja stanu fiszek w talii - deckId: '{}', userId: '{}'", deckId, userId);
-
-        checkDeckIsExistsAndUserHasPermissions(deckId, userId);
-        List<Flashcard> flashcards = flashcardRepository.findByDeckId(deckId);
-
-        for (Flashcard flashcard : flashcards) {
-            setInitialFlashcardState(deckId, flashcard, userId);
-        }
-
-        log.info("Zainicjalizowano stan algorytmu nauki dla fiszek w talii - deckId: '{}', flashcardCount: {}",
-                deckId, flashcards.size());
-    }
-
-    /**
-     * Inicjalizuje stan algorytmu nauki dla wybranych fiszek w sesji.
-     *
-     * <p>Używane gdy użytkownik rozpoczyna sesję nauki z wybranymi fiszkami.
-     *
-     * <p>Proces:
-     * <ol>
-     *   <li>Sprawdza czy talia istnieje i czy użytkownik ma uprawnienia</li>
-     *   <li>Pobiera fiszki według podanych ID i talii</li>
-     *   <li>Dla każdej fiszki wywołuje {@link #setInitialFlashcardState}</li>
-     * </ol>
-     *
-     * @param deckId ID talii
-     * @param flashcardIds lista ID fiszek do inicjalizacji
-     * @param userId ID użytkownika wykonującego operację
-     * @throws DeckNotFoundException jeśli talia o podanym ID nie istnieje
-     * @throws UserPermissionsMissing jeśli użytkownik nie ma uprawnień do talii
-     */
-    @Override
-    public void initializeSessionFlashcardsState(String deckId, List<String> flashcardIds, String userId){
-        log.debug("Inicjalizacja stanu fiszek w sesji - deckId: '{}', userId: '{}', flashcardCount: {}",
-                deckId, userId, flashcardIds.size());
-
-        checkDeckIsExistsAndUserHasPermissions(deckId, userId);
-        List<Flashcard> flashcards = flashcardRepository.findByIdsAndDeckId(flashcardIds, deckId);
-
-        for (Flashcard flashcard : flashcards) {
-            setInitialFlashcardState(deckId, flashcard, userId);
-        }
-
-        log.info("Zainicjalizowano stan algorytmu nauki dla fiszek w sesji - deckId: '{}', flashcardCount: {}",
-                deckId, flashcards.size());
     }
 
 
@@ -273,43 +204,6 @@ public class FlashcardServiceImpl implements FlashcardService {
             return mapFlashcardsToDto(flashcards);
     }
 
-    /**
-     * Pobiera fiszki z talii według filtrów (learned, skipped).
-     * 
-     * <p>Umożliwia filtrowanie fiszek według statusu nauki:
-     * <ul>
-     *   <li>isLearned = true - tylko nauczone fiszki</li>
-     *   <li>isSkipped = true - tylko pominięte fiszki</li>
-     *   <li>Kombinacje obu flag</li>
-     * </ul>
-     * 
-     * <p>Podobnie jak {@link #getAllFlashcardsFromDeck}, pobiera pełne dane słówek przez gRPC.
-     * 
-     * @param deckId ID talii
-     * @param isLearned flaga filtrująca nauczone fiszki
-     * @param isSkipped flaga filtrująca pominięte fiszki
-     * @param userId ID użytkownika wykonującego operację
-     * @return lista fiszek spełniających kryteria wraz z pełnymi danymi słówek
-     * @throws DeckNotFoundException jeśli talia o podanym ID nie istnieje
-     * @throws UserPermissionsMissing jeśli użytkownik nie ma uprawnień do talii
-     */
-    @Override
-    public List<FlashcardDto> getFlashcardsFromDeckByFilter(String deckId, boolean isLearned, boolean isSkipped, String userId) {
-        log.debug("Pobieranie fiszek z filtrami - deckId: '{}', userId: '{}', learned: {}, skipped: {}", 
-                deckId, userId, isLearned, isSkipped);
-
-            checkDeckIsExistsAndUserHasPermissions(deckId, userId);
-            List<Flashcard> flashcards = flashcardRepository.findByFilters(deckId, isLearned, isSkipped);
-
-            if (flashcards.isEmpty()) {
-                log.debug("Brak fiszek spełniających kryteria - deckId: '{}', learned: {}, skipped: {}", 
-                        deckId, isLearned, isSkipped);
-                return Collections.emptyList();
-            }
-
-            log.debug("Znaleziono fiszki spełniające kryteria - deckId: '{}', count: {}", deckId, flashcards.size());
-            return mapFlashcardsToDto(flashcards);
-    }
 
     /**
      * Aktualizuje słówko przypisane do fiszki.
@@ -327,7 +221,7 @@ public class FlashcardServiceImpl implements FlashcardService {
      */
     @Override
     @Transactional
-    public void updateFlashcard(String flashcardId, WordDto newWord, String userId) {
+    public void updateFlashcardContent(String flashcardId, WordDto newWord, String userId) {
         log.debug("Aktualizacja słówka w fiszce - flashcardId: '{}', userId: '{}'", flashcardId, userId);
         
         if (newWord == null || newWord.id() == null) {
@@ -343,118 +237,6 @@ public class FlashcardServiceImpl implements FlashcardService {
                 flashcardId, oldWordId, newWord.id());
     }
 
-    /**
-     * Resetuje postęp nauki fiszki do stanu początkowego.
-     * 
-     * <p>Ustawia:
-     * <ul>
-     *   <li>correctAnswers = 0</li>
-     *   <li>totalAttempts = 0</li>
-     *   <li>learned = false</li>
-     *   <li>skipped = false</li>
-     * </ul>
-     * 
-     * <p>Używane gdy użytkownik chce zacząć naukę fiszki od nowa.
-     * 
-     * @param flashcardId ID fiszki do zresetowania
-     * @param userId ID użytkownika wykonującego operację
-     * @throws FlashcardNotFoundException jeśli fiszka o podanym ID nie istnieje
-     * @throws UserPermissionsMissing jeśli użytkownik nie ma uprawnień do fiszki
-     */
-    @Override
-    @Transactional
-    public void resetFlashcardProgress(String flashcardId, String userId) {
-        log.debug("Resetowanie postępu fiszki - flashcardId: '{}', userId: '{}'", flashcardId, userId);
-
-        Flashcard flashcard = getFlashcardIfUserHasPermissions(flashcardId, userId);
-        flashcard.setCorrectAnswers(0);
-        flashcard.setTotalAttempts(0);
-        flashcard.setLearned(false);
-        flashcard.setSkipped(false);
-        flashcardRepository.save(flashcard);
-        log.info("Zresetowano postęp fiszki - flashcardId: '{}'", flashcardId);
-    }
-
-    /**
-     * Oznacza fiszkę jako nauczoną lub nienauczoną.
-     * 
-     * <p>Zmienia flagę 'learned' fiszki. Używane gdy użytkownik
-     * ręcznie oznaczy fiszkę jako opanowaną lub chce ją cofnąć do nauki.
-     * 
-     * @param flashcardId ID fiszki
-     * @param learned nowy status nauki (true = nauczona, false = do nauki)
-     * @param userId ID użytkownika wykonującego operację
-     * @throws FlashcardNotFoundException jeśli fiszka o podanym ID nie istnieje
-     * @throws UserPermissionsMissing jeśli użytkownik nie ma uprawnień do fiszki
-     */
-    @Override
-    @Transactional
-    public void markAsLearned(String flashcardId, boolean learned, String userId) {
-        log.debug("Oznaczanie fiszki jako nauczona - flashcardId: '{}', userId: '{}', learned: {}", 
-                flashcardId, userId, learned);
-        
-        Flashcard flashcard = getFlashcardIfUserHasPermissions(flashcardId, userId);
-        flashcard.setLearned(learned);
-        flashcardRepository.save(flashcard);
-        log.info("Zaktualizowano status nauki fiszki - flashcardId: '{}', learned: {}", flashcardId, learned);
-    }
-
-    /**
-     * Oznacza fiszkę jako pominiętą lub niepominiętą.
-     *
-     * <p>Zmienia flagę 'skipped' fiszki. Używane gdy użytkownik
-     * chce pominąć fiszkę podczas nauki lub przywrócić ją do nauki.
-     *
-     * @param flashcardId ID fiszki
-     * @param skipped nowy status pominięcia (true = pominięta, false = do nauki)
-     * @param userId ID użytkownika wykonującego operację
-     * @throws FlashcardNotFoundException jeśli fiszka o podanym ID nie istnieje
-     * @throws UserPermissionsMissing jeśli użytkownik nie ma uprawnień do fiszki
-     */
-    @Override
-    @Transactional
-    public void markAsSkipped(String flashcardId, boolean skipped, String userId){
-        log.debug("Oznaczanie fiszki jako pominięta - flashcardId: '{}', userId: '{}', skipped: {}",
-                flashcardId, userId, skipped);
-        Flashcard flashcard = getFlashcardIfUserHasPermissions(flashcardId, userId);
-        flashcard.setSkipped(skipped);
-        flashcardRepository.save(flashcard);
-        log.info("Zaktualizowano status pominięcia fiszki - flashcardId: '{}', skipped: {}", flashcardId, skipped);
-    }
-
-    /**
-     * Dodaje nową fiszkę do talii.
-     * 
-     * <p>Tworzy nową fiszkę łączącą talię ze słówkiem z Vocabulary Service.
-     * Proces tworzenia fiszki:
-     * <ol>
-     *   <li>Waliduje uprawnienia użytkownika do talii</li>
-     *   <li>Generuje UUID dla nowej fiszki</li>
-     *   <li>Tworzy encję Flashcard z wordId</li>
-     *   <li>Inicjalizuje stan algorytmu nauki (zależny od algorytmu talii)</li>
-     *   <li>Zapisuje fiszkę do bazy</li>
-     *   <li>Inkrementuje licznik słówek w talii (wordCount)</li>
-     * </ol>
-     * 
-     * <p>Nowa fiszka jest inicjalizowana z:
-     * <ul>
-     *   <li>correctAnswers = 0</li>
-     *   <li>totalAttempts = 0</li>
-     *   <li>learned = false</li>
-     *   <li>skipped = false</li>
-     *   <li>Stan algorytmu = początkowy (serializowany JSON)</li>
-     * </ul>
-     * 
-     * <p>Transakcja zapewnia atomowość - albo fiszka zostanie utworzona
-     * i licznik zaktualizowany, albo rollback w przypadku błędu.
-     * 
-     * @param deckId ID talii, do której dodawana jest fiszka
-     * @param wordId ID słówka z Vocabulary Service
-     * @param userId ID użytkownika wykonującego operację
-     * @throws IllegalArgumentException jeśli deckId, wordId lub userId jest null lub pusty
-     * @throws DeckNotFoundException jeśli talia o podanym ID nie istnieje
-     * @throws UserPermissionsMissing jeśli użytkownik nie ma uprawnień do talii
-     */
     @Override
     @Transactional
     public void addFlashcardToDeck(String deckId, String wordId, String userId) {
@@ -468,7 +250,6 @@ public class FlashcardServiceImpl implements FlashcardService {
                 .wordId(wordId)
                 .deck(deck)
                 .build();
-        setInitialFlashcardState(wordId, flashcard, deck.getUserId());
         flashcardRepository.save(flashcard);
         log.info("Utworzono fiszkę - flashcardId: '{}', wordId: '{}', deckId: '{}'",
                 flashcardId, wordId, deckId);
@@ -533,8 +314,7 @@ public class FlashcardServiceImpl implements FlashcardService {
      * Mapuje listę fiszek wraz z danymi słówek na FlashcardDto.
      * 
      * <p>Wspólna metoda pomocnicza używana przez {@link #getAllFlashcardsFromDeck}
-     * i {@link #getFlashcardsFromDeckByFilter} aby uniknąć duplikacji kodu.
-     * 
+     *
      * <p>Proces:
      * <ol>
      *   <li>Wyciąga wordIds z fiszek</li>
@@ -571,13 +351,7 @@ public class FlashcardServiceImpl implements FlashcardService {
                     
                     return new FlashcardDto(
                             flashcard.getId(),
-                            wordDto,
-                            flashcard.getCorrectAnswers(),
-                            flashcard.getTotalAttempts(),
-                            flashcard.isLearned(),
-                            flashcard.isSkipped(),
-                            flashcard.getCreatedAt(),
-                            flashcard.getUpdatedAt()
+                            wordDto
                     );
                 })
                 .toList();
@@ -634,9 +408,9 @@ public class FlashcardServiceImpl implements FlashcardService {
                     return new DeckNotFoundException(deckId);
                 });
 
-        if (!deck.getUserId().equals(userId)) {
+        if (!deck.getOwnerId().equals(userId)) {
             log.warn("Brak uprawnień do talii - userId: '{}', deckId: '{}', deckOwnerId: '{}'", 
-                    userId, deckId, deck.getUserId());
+                    userId, deckId, deck.getOwnerId());
             throw new UserPermissionsMissing("Użytkownik nie ma uprawnień do tej talii");
         }
         return deck;
@@ -662,9 +436,9 @@ public class FlashcardServiceImpl implements FlashcardService {
                     return new DeckNotFoundException(deckId);
                 });
 
-        if (!deck.getUserId().equals(userId)) {
+        if (!deck.getOwnerId().equals(userId)) {
             log.warn("Brak uprawnień do talii - userId: '{}', deckId: '{}', deckOwnerId: '{}'", 
-                    userId, deckId, deck.getUserId());
+                    userId, deckId, deck.getOwnerId());
             throw new UserPermissionsMissing("Użytkownik nie ma uprawnień do tej talii");
         }
     }
@@ -710,9 +484,9 @@ public class FlashcardServiceImpl implements FlashcardService {
                     log.error("Nie znaleziono fiszki - flashcardId: '{}'", flashcardId);
                     return new FlashcardNotFoundException(flashcardId);
                 });
-        if (!flashcard.getDeck().getUserId().equals(userId)) {
+        if (!flashcard.getDeck().getOwnerId().equals(userId)) {
             log.warn("Brak uprawnień do fiszki - userId: '{}', flashcardId: '{}', deckOwnerId: '{}'", 
-                    userId, flashcardId, flashcard.getDeck().getUserId());
+                    userId, flashcardId, flashcard.getDeck().getOwnerId());
             throw new UserPermissionsMissing("Użytkownik nie ma uprawnień do tej fiszki");
         }
         return flashcard;

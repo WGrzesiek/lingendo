@@ -1,9 +1,9 @@
 package com.learnwords.deckservice;
 
 import com.learnwords.deckservice.enums.LearnAlgorithm;
-import com.learnwords.deckservice.service.Algorithm.AbstractAlgorithm;
-import com.learnwords.deckservice.service.Algorithm.AlgorithmFactory;
-import com.learnwords.deckservice.service.Algorithm.GrzesiekAlgorithm;
+import com.learnwords.deckservice.service.algorithm.AbstractAlgorithm;
+import com.learnwords.deckservice.service.algorithm.AlgorithmFactory;
+import com.learnwords.deckservice.service.algorithm.GrzesiekAlgorithm;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

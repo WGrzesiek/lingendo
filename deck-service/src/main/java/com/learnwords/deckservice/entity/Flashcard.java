@@ -1,12 +1,8 @@
 package com.learnwords.deckservice.entity;
 
-import com.vladmihalcea.hibernate.type.json.JsonBinaryType;
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.Type;
-
 import java.time.Instant;
-import java.util.List;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -24,33 +20,9 @@ public class Flashcard {
     @Column(name = "word_id", nullable = false, length = 36)
     private String wordId;
 
-    @OneToMany(mappedBy = "flashcard", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<SessionFlashcard> sessionFlashcards;
-
-    @Column(name = "correct_answers")
-    @Builder.Default
-    private int correctAnswers = 0;
-
-    @Column(name = "total_attempts")
-    @Builder.Default
-    private int totalAttempts = 0;
-
     @ManyToOne
     @JoinColumn(name = "deck_id", nullable = false)
     private Deck deck;
-
-    @Column(name = "is_learned", nullable = false)
-    @Builder.Default
-    private boolean isLearned = false;
-
-    @Column(name = "is_skipped", nullable = false)
-    @Builder.Default
-    private boolean isSkipped = false;
-
-    @Column(name = "algorithm_state", columnDefinition = "jsonb", nullable = false)
-    @Type(JsonBinaryType.class)
-    @Builder.Default
-    private String algorithmState = "{}";
 
     @Builder.Default
     @Column(nullable = false, updatable = false)

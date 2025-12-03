@@ -1,10 +1,11 @@
 package com.learnwords.deckservice.service;
 
 import com.learnwords.deckservice.dto.*;
-import com.learnwords.deckservice.dto.dashboard.StudentMyCourseListItemDto;
+import com.learnwords.deckservice.dto.deck.CreateDeckDto;
+import com.learnwords.deckservice.dto.deck.DeckDetailsDto;
+import com.learnwords.deckservice.dto.deck.DeckDto;
 import com.learnwords.deckservice.enums.DeckOwner;
-import com.learnwords.deckservice.enums.LearnAlgorithm;
-import org.springframework.data.domain.Page;
+import com.learnwords.deckservice.enums.DeckVisibility;
 
 import java.util.List;
 
@@ -40,8 +41,8 @@ import java.util.List;
  * </ul>
  * 
  * @author Grzegorz Wawrzeń
- * @version 1.0
- * @since 2025-11-15
+ * @version 2.0
+ * @since 2025-11-24
  * @see com.learnwords.deckservice.entity.Deck
  * @see DeckDto
  * @see DeckDetailsDto
@@ -49,30 +50,17 @@ import java.util.List;
  * @see com.learnwords.deckservice.service.impl.DeckServiceImpl
  */
 public interface DeckService {
-    void createDeck(String userId, CreateDeckDto createDeckDto);
+    void createDeck(String ownerId, CreateDeckDto createDeckDto);
     void deleteDeck(String deckId, String userId);
     String renameDeck(String deckId, String newName, String userId);
-    boolean changeDeckVisibility(String deckId, String userId, boolean isPublic);
+    void changeDeckVisibility(String deckId, String userId, DeckVisibility visibility);
     DeckOwner changeDeckOwner(String deckId, String userId, DeckOwner newOwner);
+
     DeckDto getDeckById(String deckId, String userId);
-    List<DeckDto> getDecksByFilter(String userId, Boolean isPublic, DeckOwner owner);
-    default List<DeckDto> getDecksByFilter(String userId, DeckOwner owner) {
-        return getDecksByFilter(userId, null, owner);
-    }
-    default List<DeckDto> getDecksByFilter(String userId) {
-        return getDecksByFilter(userId, null, null);
-    }
-    List<DeckDto> getPublicDecks();
-    DeckDetailsDto getDeckDetailsById(String deckId, String userId);
+    List<DeckDto> getDecksByFilter(String userId, DeckVisibility visibility, DeckOwner owner);
+    DeckDetailsDto getDeckDetailsById(String deckId, String userId); // Szczegóły statyczne (opis, ilość słów)
     DeckDetailsDto editDeckDetails(String deckId, DeckDetailsDto deckDetailsDto, String userId);
     long getTotalFlashcardsCount(String deckId, String userId);
-    String updateLearnAlgorithm(String deckId, LearnAlgorithm algorithm, String userId);
-    Long updateFlashcardsPerSession(String deckId, Long count, String userId);
-    UserDeckCountDto getUserDeckCount(String userId);
-    DeckStatisticsDto getDeckStatistics(String deckId, String userId);
     boolean isDeckNameTaken(String userId, String deckName);
 
-    //======================
-    // pod widoki
-    Page<StudentMyCourseListItemDto> getStudentMyCourseDecks(String userId, int page, int size);
 }
