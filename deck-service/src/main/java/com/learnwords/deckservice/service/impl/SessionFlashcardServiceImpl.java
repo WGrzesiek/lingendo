@@ -106,7 +106,7 @@ public class SessionFlashcardServiceImpl implements SessionFlashcardService {
             log.info("Znaleziono {} fiszek bez progresu w talii {}. Inicjalizuję...",
                     flashcardIdsWithoutProgress.size(), enrollment.getDeck().getId());
 
-            userProgressService.initializeSessionFlashcardsState(enrollment.getDeck().getId(), flashcardIdsWithoutProgress, userId);
+            userProgressService.initializeSessionFlashcardsState(enrollment.getId(), flashcardIdsWithoutProgress, userId);
 
             progresses = userFlashcardProgressRepository.findByEnrollment_Id(enrollmentId);
         } else {
