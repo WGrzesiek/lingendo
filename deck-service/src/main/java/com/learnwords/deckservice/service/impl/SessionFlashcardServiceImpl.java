@@ -4,6 +4,7 @@ import com.learnwords.deckservice.entity.*;
 import com.learnwords.deckservice.exception.exceptions.InvalidSessionIdException;
 import com.learnwords.deckservice.exception.exceptions.SessionNotFoundException;
 import com.learnwords.deckservice.repository.*;
+import com.learnwords.deckservice.service.UserProgressService;
 import com.learnwords.deckservice.service.algorithm.AbstractAlgorithm;
 import com.learnwords.deckservice.service.algorithm.Algorithm;
 import com.learnwords.deckservice.service.algorithm.AlgorithmFactory;
@@ -16,6 +17,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Implementacja serwisu zarządzania fiszkami w sesjach nauki.
@@ -39,97 +41,29 @@ public class SessionFlashcardServiceImpl implements SessionFlashcardService {
     private final SessionRepository sessionRepository;
     private final AlgorithmFactory algorithmFactory;
     private final FlashcardFetchStrategyServiceImpl flashcardFetchStrategyServiceImpl;
-    private final VocabularyGrpcClient vocabularyGrpcClient;
     private final DeckEnrollmentRepository deckEnrollmentRepository;
     private final UserFlashcardProgressRepository userFlashcardProgressRepository;
-    private final Algorithm algorithm;
-    private final FlashcardRepository flashcardRepository;
+    private final UserProgressService userProgressService;
+
 
     public SessionFlashcardServiceImpl(
             SessionFlashcardRepository sessionFlashcardRepository,
             SessionRepository sessionRepository,
             AlgorithmFactory algorithmFactory,
             FlashcardFetchStrategyServiceImpl flashcardFetchStrategyServiceImpl,
-            VocabularyGrpcClient vocabularyGrpcClient,
             DeckEnrollmentRepository deckEnrollmentRepository,
             UserFlashcardProgressRepository userFlashcardProgressRepository,
-            Algorithm algorithm, FlashcardRepository flashcardRepository) {
+            UserProgressService userProgressService
+
+            ) {
         this.sessionFlashcardRepository = sessionFlashcardRepository;
         this.sessionRepository = sessionRepository;
         this.algorithmFactory = algorithmFactory;
         this.flashcardFetchStrategyServiceImpl = flashcardFetchStrategyServiceImpl;
-        this.vocabularyGrpcClient = vocabularyGrpcClient;
         this.deckEnrollmentRepository = deckEnrollmentRepository;
         this.userFlashcardProgressRepository = userFlashcardProgressRepository;
-        this.algorithm = algorithm;
-        this.flashcardRepository = flashcardRepository;
+        this.userProgressService = userProgressService;
     }
-
-//    /**
-//     * Dodaje fiszki do sesji według wybranej strategii.
-//     *
-//     * <p>Proces dodawania fiszek:
-//     * <ol>
-//     *   <li>Pobiera algorytm nauki przypisany do talii</li>
-//     *   <li>Filtruje fiszki - wyłącza te na maksymalnym poziomie nauki</li>
-//     *   <li>Sortuje fiszki według strategii (ALPHABETICAL, RANDOM, UNLEARNED_FIRST itp.)</li>
-//     *   <li>Ogranicza liczbę fiszek do limitu z ustawień talii (flashcardsPerSession)</li>
-//     *   <li>Tworzy relacje SessionFlashcard i zapisuje w bazie</li>
-//     * </ol>
-//     *
-//     * <p>Transakcja zapewnia atomowość - albo wszystkie fiszki zostaną dodane,
-//     * albo żadna w przypadku błędu.
-//     *
-//     * @param session sesja, do której dodawane są fiszki
-//     * @param deck talia, z której pobierane są fiszki
-//     * @param flashcardFetchStrategy strategia wyboru i sortowania fiszek
-//     * @return ID sesji
-//     * @throws RuntimeException jeśli brak dostępnych fiszek, błąd sortowania lub błąd DB
-//     */
-//    @Override
-//    @Transactional
-//    public void addFlashcardsToSession(Session session, Deck deck, FlashcardFetchStrategy flashcardFetchStrategy, String userId) {
-//        log.info("Dodawanie fiszek do sesji: {} z talii: {}", session.getId(), deck.getId());
-//        Session session1 = SessionUtils.getSessionIfUserHasPermissions(deckEnrollmentRepository, sessionRepository, deck.getId(), userId, session.getId());
-//        AbstractAlgorithm algorithm = algorithmFactory.get(deck.getLearnAlgorithm());
-//
-//        Set<Flashcard> filteredFlashcards = deck.getFlashcards().stream()
-//                .filter(flashcard -> !algorithm.deserialize(flashcard.getAlgorithmState()).getStep().isMaxLevel())
-//                .collect(Collectors.toSet());
-//
-//        log.debug("Przefiltrowano {} fiszek (wyłączono max level)", filteredFlashcards.size());
-//
-//        if (filteredFlashcards.isEmpty()) {
-//            log.warn("Brak fiszek do dodania do sesji - wszystkie są na max level - deckId: '{}'", deck.getId());
-//            throw new NoFlashcardsAvailableException(deck.getId(), "wszystkie fiszki są na maksymalnym poziomie nauki");
-//        }
-//
-//        List<Flashcard> filteredFlashcardsList = new ArrayList<>(filteredFlashcards);
-//
-//        List<Flashcard> sortedFlashcards = flashcardFetchStrategyServiceImpl.sortFlashcardsByStrategy(
-//                flashcardFetchStrategy,
-//                deck.getHowManyFlashcardsForOneSession(),
-//                filteredFlashcardsList);
-//
-//        log.debug("Po sortowaniu według strategii {}: {} fiszek", flashcardFetchStrategy, sortedFlashcards.size());
-//
-//        if (sortedFlashcards == null || sortedFlashcards.isEmpty()) {
-//            log.error("Brak fiszek po sortowaniu - sprawdź implementację sortFlashcardsByStrategy");
-//            throw new RuntimeException("Nie udało się posortować fiszek");
-//        }
-//
-//        Set<SessionFlashcard> sessionFlashcards = sortedFlashcards.stream()
-//                .map(flashcard -> SessionFlashcard.builder()
-//                        .id(UUID.randomUUID().toString())
-//                        .session(session)
-//                        .flashcard(flashcard)
-//                        .build())
-//                .collect(Collectors.toSet());
-//
-//        sessionFlashcardRepository.saveAll(sessionFlashcards);
-//
-//        log.info("Pomyślnie dodano {} fiszek do sesji {}", sessionFlashcards.size(), session.getId());
-//    }
 
     @Override
     @Transactional
@@ -145,7 +79,7 @@ public class SessionFlashcardServiceImpl implements SessionFlashcardService {
         DeckEnrollment enrollment = deckEnrollmentRepository.findById(enrollmentId).orElseThrow(
                 () -> {
                     log.error("Nie znaleziono zapisu do talii o ID: {}", enrollmentId);
-                    throw new InvalidSessionIdException("Nieprawidłowy identyfikator zapisu do talii: " + enrollmentId);
+                    return new InvalidSessionIdException("Nieprawidłowy identyfikator zapisu do talii: " + enrollmentId);
                 }
         );
         if (!enrollment.getDeck().equals(session.getEnrollment().getDeck())) {
@@ -154,7 +88,30 @@ public class SessionFlashcardServiceImpl implements SessionFlashcardService {
         AbstractAlgorithm algorithm = algorithmFactory.get(enrollment.getPreferredAlgorithm());
 
         List<UserFlashcardProgress> progresses = userFlashcardProgressRepository.findByEnrollment_Id(enrollmentId);
+        Set<String> flashcardIdsWithProgress = progresses.stream()
+                .map(p -> p.getFlashcard().getId())
+                .collect(Collectors.toSet());
 
+        List<Flashcard> allDeckFlashcards = new ArrayList<>(enrollment.getDeck().getFlashcards());
+
+
+        List<String> flashcardIdsWithoutProgress = allDeckFlashcards.stream()
+                .map(Flashcard::getId)
+                .filter(id -> !flashcardIdsWithProgress.contains(id))
+                .toList();
+
+
+
+        if (!flashcardIdsWithoutProgress.isEmpty()) {
+            log.info("Znaleziono {} fiszek bez progresu w talii {}. Inicjalizuję...",
+                    flashcardIdsWithoutProgress.size(), enrollment.getDeck().getId());
+
+            userProgressService.initializeSessionFlashcardsState(enrollment.getDeck().getId(), flashcardIdsWithoutProgress, userId);
+
+            progresses = userFlashcardProgressRepository.findByEnrollment_Id(enrollmentId);
+        } else {
+            log.info("Wszystkie fiszki w talii {} mają już progres. Nic nie inicjalizuję.", enrollment.getDeck().getId());
+        }
 
         List<Flashcard> candidateFlashcards = progresses.stream()
                 .filter(p -> !p.isSkipped())

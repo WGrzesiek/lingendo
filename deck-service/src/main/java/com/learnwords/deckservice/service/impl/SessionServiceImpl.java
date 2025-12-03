@@ -13,6 +13,8 @@ import com.learnwords.deckservice.repository.SessionRepository;
 import com.learnwords.deckservice.service.FlashcardFetchStrategy;
 import com.learnwords.deckservice.service.SessionFlashcardService;
 import com.learnwords.deckservice.service.SessionService;
+import com.learnwords.deckservice.service.algorithm.AbstractAlgorithm;
+import com.learnwords.deckservice.service.algorithm.AlgorithmFactory;
 import com.learnwords.deckservice.service.utils.DeckUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -41,18 +43,18 @@ public class SessionServiceImpl implements SessionService {
     private final DeckEnrollmentRepository deckEnrollmentRepository;
     private final SessionRepository sessionRepository;
     private final SessionFlashcardService sessionFlashcardService;
-    private final FlashcardRepository flashcardRepository;
+    private final AlgorithmFactory algorithmFactory;
 
 
     public SessionServiceImpl(
             DeckEnrollmentRepository deckEnrollmentRepository,
-            SessionRepository sessionRepository, 
+            SessionRepository sessionRepository,
             SessionFlashcardService sessionFlashcardService,
-            FlashcardRepository flashcardRepository) {
+            AlgorithmFactory algorithmFactory) {
         this.deckEnrollmentRepository = deckEnrollmentRepository;
         this.sessionRepository = sessionRepository;
         this.sessionFlashcardService = sessionFlashcardService;
-        this.flashcardRepository = flashcardRepository;
+        this.algorithmFactory = algorithmFactory;
     }
 
     /**
@@ -79,10 +81,11 @@ public class SessionServiceImpl implements SessionService {
     @Override
     @Transactional
     public String initializeSession(String deckId, FlashcardFetchStrategy flashcardFetchStrategy ,SessionType type, String userId) {
-        log.info("Inicjalizacja sesji - deckId: '{}', userId: '{}', strategy: '{}'", 
+        log.info("Inicjalizacja sesji - deckId: '{}', userId: '{}', strategy: '{}'",
                 deckId, userId, flashcardFetchStrategy.getClass().getSimpleName());
-        
+
         DeckEnrollment deckEnrollment = DeckUtils.getDeckEnrollmentIfUserHasPermissions(deckEnrollmentRepository, deckId, userId);
+        AbstractAlgorithm algorithm = algorithmFactory.get(deckEnrollment.getPreferredAlgorithm());
 
         log.debug("Liczba fiszek w sesji - deckId: '{}'", deckId);
 

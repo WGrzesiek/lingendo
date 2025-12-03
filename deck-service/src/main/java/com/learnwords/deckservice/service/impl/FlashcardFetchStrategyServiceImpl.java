@@ -6,6 +6,7 @@ import com.learnwords.deckservice.service.FlashcardFetchStrategy;
 import com.learnwords.deckservice.service.FlashcardFetchStrategyService;
 import com.learnwords.common.dto.OnlyWordDto;
 import io.grpc.StatusRuntimeException;
+import org.apache.kafka.common.protocol.types.Field;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -24,7 +25,7 @@ public class FlashcardFetchStrategyServiceImpl implements FlashcardFetchStrategy
 
 
     public List<Flashcard> sortFlashcardsByStrategy(FlashcardFetchStrategy strategy, Long limit, List<Flashcard> flashcards){
-        var ids = flashcards.stream().map(Flashcard::getWordId).toList();
+        List<String> ids = flashcards.stream().map(Flashcard::getWordId).toList();
         return switch (strategy) {
             case ALPHABETICAL -> {
                 List<Flashcard> result = new ArrayList<>();

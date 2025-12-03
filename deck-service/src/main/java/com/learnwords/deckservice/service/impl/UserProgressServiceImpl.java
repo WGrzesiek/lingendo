@@ -18,6 +18,7 @@ import com.learnwords.deckservice.service.algorithm.state.AlgorithmState;
 import com.learnwords.deckservice.service.evaluationService.responseResult.AlgorithmResult;
 import com.learnwords.deckservice.service.evaluationService.responseResult.MaxLevel;
 import com.learnwords.deckservice.service.evaluationService.responseResult.Success;
+import com.learnwords.deckservice.service.utils.DeckUtils;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -25,6 +26,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import static com.learnwords.deckservice.enums.LearnAlgorithm.GRZESIEK_ALGORITHM;
 import static com.learnwords.deckservice.service.utils.DeckUtils.checkDeckEnrollmentIsExistsAndUserHasPermissions;
@@ -126,8 +129,65 @@ public class UserProgressServiceImpl implements UserProgressService {
      * @param userId
      */
     @Override
+    @Transactional
     public void initializeSessionFlashcardsState(String deckId, List<String> flashcardIds, String userId) {
+        log.info("Inicjalizacja stanu fiszek dla sesji - deckId: {}, userId: {}, liczba fiszek: {}",
+                deckId, userId, flashcardIds != null ? flashcardIds.size() : 0);
 
+        if (flashcardIds == null || flashcardIds.isEmpty()) {
+            log.warn("initializeSessionFlashcardsState wywołane z pustą listą flashcardIds (deckId: {}, userId: {})",
+                    deckId, userId);
+            return;
+        }
+
+        DeckEnrollment enrollment = DeckUtils.getDeckEnrollmentIfUserHasPermissions(
+                deckEnrollmentRepository, deckId, userId);
+
+        AbstractAlgorithm algorithm = algorithmFactory.get(enrollment.getPreferredAlgorithm());
+
+        List<UserFlashcardProgress> existingProgresses =
+                userFlashcardProgressRepository.findByEnrollment_Id(enrollment.getId());
+
+        Set<String> flashcardIdsWithProgress = existingProgresses.stream()
+                .map(p -> p.getFlashcard().getId())
+                .collect(Collectors.toSet());
+
+
+        List<String> idsToInitialize = flashcardIds.stream()
+                .filter(id -> !flashcardIdsWithProgress.contains(id))
+                .toList();
+
+        if (idsToInitialize.isEmpty()) {
+            log.info("Wszystkie {} fiszek w talii {} mają już stan progresu. Nic nie inicjalizuję.",
+                    flashcardIds.size(), deckId);
+            return;
+        }
+
+        List<Flashcard> flashcardsToInitialize = flashcardRepository.findAllById(idsToInitialize);
+
+        if (flashcardsToInitialize.isEmpty()) {
+            log.warn("Żadna z fiszek {} nie została znaleziona w bazie (deckId: {})", idsToInitialize, deckId);
+            return;
+        }
+
+        List<UserFlashcardProgress> newProgresses = flashcardsToInitialize.stream()
+                .map(flashcard -> UserFlashcardProgress.builder()
+                        .flashcard(flashcard)
+                        .enrollment(enrollment)
+                        .algorithmState(algorithm.initialize().serialize())
+                        .isLearned(false)
+                        .isSkipped(false)
+                        .phase(LearningPhase.NEW)
+                        .repetitionCount(0)
+                        .userId(enrollment.getUserId())
+                        .build()
+                )
+                .toList();
+
+        userFlashcardProgressRepository.saveAll(newProgresses);
+
+        log.info("Zainicjalizowano progres dla {} nowych fiszek w talii {} (userId: {})",
+                newProgresses.size(), deckId, userId);
     }
 
     @Override
