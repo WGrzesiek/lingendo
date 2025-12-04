@@ -20,7 +20,7 @@ public class UserLoginStatsRepository {
 
     private static final String INSERT_SQL = """
         INSERT INTO analytics.user_logins
-            (event_time, user_id, username, email,received_at)
+            (event_time, user_id, username, email, received_at)
         VALUES (?, ?, ?, ?, ?)
         """;
 
@@ -30,7 +30,6 @@ public class UserLoginStatsRepository {
         jdbcTemplate.update(
                 INSERT_SQL,
                 Timestamp.from(event.occurredAt()),
-                event.eventId(),
                 event.userId(),
                 event.username(),
                 event.email(),
