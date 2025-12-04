@@ -19,7 +19,7 @@ spring:
   datasource:
     url: jdbc:clickhouse://clickhouse:8123//analytics
     username: wawrzen
-    password: ubuntu98
+    password: Ubuntu98
     driver-class-name: com.clickhouse.jdbc.ClickHouseDriver
   jpa:
     hibernate:
