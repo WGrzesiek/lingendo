@@ -6,7 +6,7 @@ spring:
     name: ${SPRING_APPLICATION_NAME:user-service}
 
   datasource:
-    url: jdbc:postgresql://${DB_POSTGRESQL_HOST:localhost}:${DB_POSTGRESQL_PORT:5432}/${DB_POSTGRESQL_NAME:user_management}
+    url: jdbc:postgresql://${DB_POSTGRESQL_HOST:192.168.23.9}:${DB_POSTGRESQL_PORT:5432}/${DB_POSTGRESQL_NAME:user_management}
     username: ${DATASOURCE_USERNAME:admin}
     password: ${DATASOURCE_PASSWORD:adminpassword}
   flyway:
@@ -17,7 +17,21 @@ spring:
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
+  kafka:
+    producer:
+      bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:127.0.0.1:9092}
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      retries: 3 # 3 razy proba wyslania zeby nie zabrazo sie zapentlac
 
+    consumer:
+      bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:127.0.0.1:9092}
+      auto-offset-reset: ${KAFKA_AUTO_OFFSET_RESET:earliest}
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.ErrorHandlingDeserializer
+      properties:
+        spring.deserializer.value.delegate.class: org.springframework.kafka.support.serializer.JsonDeserializer
+        spring.json.trusted.packages: "*"
 springdoc:
   api-docs:
     path: /api-docs
