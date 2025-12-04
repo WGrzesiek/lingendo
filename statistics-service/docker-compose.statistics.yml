@@ -30,7 +30,7 @@ services:
 #      LOGSTASH_HOST: ${LOGSTASH_HOST:-logstash}
 
     ports:
-      - "${PORT:-8814}:${PORT:-8814}"
+      - "${PORT:-8799}:${PORT:-8799}"
 
     # Jeśli potrzebujesz zależności na tej samej sieci
     networks: [learnwords-net]
