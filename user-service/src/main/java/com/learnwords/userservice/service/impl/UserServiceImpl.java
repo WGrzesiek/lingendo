@@ -1,7 +1,9 @@
 package com.learnwords.userservice.service.impl;
 
+import com.learnwords.common.events.UserLoginEvent;
 import com.learnwords.userservice.dtos.RegisterRequest;
 import com.learnwords.userservice.entity.User;
+import com.learnwords.userservice.events.UserLoginEventProducer;
 import com.learnwords.userservice.exception.exceptions.EmailAlreadyExistsException;
 import com.learnwords.userservice.exception.exceptions.UsernameAlreadyExistsException;
 import com.learnwords.userservice.exception.exceptions.WrongPasswordException;
@@ -15,9 +17,6 @@ import com.learnwords.userservice.service.UserService;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.stereotype.Service;
-
 import java.util.UUID;
 
 
@@ -27,11 +26,13 @@ public class UserServiceImpl implements UserService {
 
     private final PasswordService passwordService;
     private final UserRepository userRepository;
+    private final UserLoginEventProducer userLoginEventProducer;
 
 
-    public UserServiceImpl(PasswordService passwordService, UserRepository userRepository) {
+    public UserServiceImpl(PasswordService passwordService, UserRepository userRepository, UserLoginEventProducer userLoginEventProducer) {
         this.passwordService = passwordService;
         this.userRepository = userRepository;
+        this.userLoginEventProducer = userLoginEventProducer;
 
     }
 
@@ -71,6 +72,13 @@ public class UserServiceImpl implements UserService {
         if (!isAuth)
             throw new WrongPasswordException();
         log.info("User {} authenticated successfully", username);
+        userLoginEventProducer.send(UserLoginEvent.builder()
+                        .eventId(UUID.randomUUID().toString())
+                        .userId(userDetails.getId())
+                        .username(userDetails.getUsername())
+                        .email(userDetails.getEmail())
+                        .occurredAt(java.time.Instant.now())
+                        .build());
         return userDetails;
     }
 
