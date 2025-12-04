@@ -9,4 +9,5 @@ public class KafkaTopic {
     public static final String FLASHCARD_ANSWERED_TOPIC = "deck.flashcard.answered";
     public static final String SESSION_COMPLETED_TOPIC = "deck.session.completed";
     public static final String FLASHCARD_PROGRESS_TOPIC = "deck.flashcard.progress";
+    public static final String USER_LOGINS_TOPIC = "user-logins";
 }
