@@ -17,7 +17,7 @@ spring:
         spring.deserializer.value.delegate.class: org.springframework.kafka.support.serializer.JsonDeserializer
         spring.json.trusted.packages: "*"
   datasource:
-    url: jdbc:clickhouse://clickhouse:9001/learnwords
+    url: jdbc:clickhouse://clickhouse:8123//analytics
     username: wawrzen
     password: ubuntu98
     driver-class-name: com.clickhouse.jdbc.ClickHouseDriver
