@@ -1,0 +1,40 @@
+name: learnwords
+
+services:
+  statistics-service:
+    image: ${IMAGE_NAME:-statistics-service}:${IMAGE_TAG:-dev}
+    container_name: statistics-service
+    environment:
+      # Spring profile
+      SPRING_PROFILES_ACTIVE: ${PROFILE:-dev}
+
+      # HTTP
+      SERVER_PORT: ${PORT:-8799}
+
+#      # DB
+#      DB_POSTGRESQL_HOST: ${DB_POSTGRESQL_HOST:-postgres}
+#      DB_POSTGRESQL_PORT: ${DB_POSTGRESQL_PORT:-5432}
+#      DB_POSTGRESQL_NAME: ${DB_POSTGRESQL_NAME:-deck}
+#      DB_POSTGRESQL_USER: ${DB_POSTGRESQL_USER:-admin}
+#      DB_POSTGRESQL_PASSWORD: ${DB_POSTGRESQL_PASSWORD:-adminpassword}
+#
+#      # Kafka
+#      KAFKA_BOOTSTRAP: ${KAFKA_BOOTSTRAP:-kafka:9092}
+#      KAFKA_GROUP: ${KAFKA_GROUP:-deck-service-group}
+#
+#      # Log levels / JVM (opcjonalnie)
+#      LOG_LEVEL_KAFKA: ${LOG_LEVEL_KAFKA:-INFO}
+#      LOG_LEVEL_HIBERNATE: ${LOG_LEVEL_HIBERNATE:-INFO}
+#      LOG_LEVEL_POSTGRESQL: ${LOG_LEVEL_POSTGRESQL:-INFO}
+#      JAVA_OPTS: ${JAVA_OPTS:-}
+#      LOGSTASH_HOST: ${LOGSTASH_HOST:-logstash}
+
+    ports:
+      - "${PORT:-8814}:${PORT:-8814}"
+
+    # Jeśli potrzebujesz zależności na tej samej sieci
+    networks: [learnwords-net]
+
+networks:
+  learnwords-net:
+    external: true
