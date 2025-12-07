@@ -14,7 +14,6 @@ import reactor.core.publisher.Mono;
 public class AuthContextPropagationFilter implements GlobalFilter, Ordered {
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
-        // Po Spring Security Authentication jest już na exchange/principal
         return exchange.getPrincipal()
                 .cast(Authentication.class)
                 .flatMap(auth -> {
@@ -26,7 +25,6 @@ public class AuthContextPropagationFilter implements GlobalFilter, Ordered {
                     String userId   = jwt.getSubject();
                     ServerHttpRequest mutatedReq = exchange.getRequest().mutate()
                             .headers(h -> {
-                                // Nie ufaj klientowi -> czyść potencjalne spoofowane nagłówki
                                 h.remove("X-User-Id");
 
                                 if (userId != null)   h.add("X-User-Id", userId);
@@ -40,7 +38,6 @@ public class AuthContextPropagationFilter implements GlobalFilter, Ordered {
 
     @Override
     public int getOrder() {
-        // Uruchom po Spring Security, ale jeszcze przed właściwymi route filters
         return Ordered.LOWEST_PRECEDENCE - 10;
     }
 }

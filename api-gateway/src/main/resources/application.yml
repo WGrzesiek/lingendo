@@ -68,6 +68,14 @@ spring:
               uri: http://vocabulary-read-service:8813
               predicates:
                 - Path=/api/v1/read/vocabulary/**,/api/v1/read/sentences/**
+            - id: statistics-service
+              uri: http://statistics-service:8799
+              predicates:
+                - Path=/api/v1/dashboard/**
+              filters:
+                - RemoveRequestHeader=X-User-Id
+                - RemoveRequestHeader=X-Client-Id
+                - RemoveRequestHeader=X-Roles
           globalcors:
             cors-configurations:
               '[/**]':
