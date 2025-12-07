@@ -6,9 +6,8 @@ import java.time.Instant;
 
 @Builder
 public record UserLoginEvent(
-        String eventId,
+        Instant eventTime,
         String userId,
         String username,
-        String email,
-        Instant occurredAt
-) {}
+        Instant received_at
+) implements DomainEvent {}
