@@ -35,8 +35,8 @@ public class DeckEnrollmentRepository {
 
     private static final String INSERT_DECK_ENROLLMENT_FINISHED_SQL = """
         INSERT INTO analytics.deck_enrollments_finished
-            (event_time, deck_enrollment_id, deck_id, user_id, correct_answers, incorrect_answers, received_at)
-        VALUES (?, ?, ?, ?, ?, ?, ?)
+            (event_time, deck_enrollment_id, deck_id, user_id, received_at)
+        VALUES (?, ?, ?, ?, ?)
         """;
 
     public void saveDeckEnrollmentFinished(DeckEnrollmentsFinished event) {
@@ -46,8 +46,6 @@ public class DeckEnrollmentRepository {
                 event.deckEnrollmentId(),
                 event.deckId(),
                 event.userId(),
-                event.correctAnswers(),
-                event.incorrectAnswers(),
                 Instant.now()
         );
     }
