@@ -16,7 +16,7 @@ public class FlashcardRepository {
     }
 
     private static final String INSERT_FLASHCARD_CREATED_SQL = """
-        INSERT INTO analytics.flashcards_created
+        INSERT INTO analytics.flashcard_answers
             (event_time, flashcard_id, deck_id, user_id, received_at)
         VALUES (?, ?, ?, ?, ?)
         """;
@@ -32,8 +32,9 @@ public class FlashcardRepository {
     }
 
     private static final String INSERT_FLASHCARD_ANSWERED_SQL = """
-        INSERT INTO analytics.flashcards_answered
-            (event_time, user_id, deck_enrollment_id, session_id, flashcard_id, correct, received_at)
+
+            INSERT INTO analytics.flashcard_answers
+                              (event_time, user_id, deck_enrollment_id, session_id, flashcard_id, correct, received_at)
         VALUES (?, ?, ?, ?, ?, ?, ?)
         """;
 
