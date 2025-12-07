@@ -82,4 +82,9 @@ public class DeckEnrollment {
         this.totalLearningTimeSeconds += durationSeconds;
         this.lastAccessedAt = Instant.now();
     }
+
+    public void markCompleted(){
+        this.status = DeckStatus.COMPLETED;
+        this.lastAccessedAt = Instant.now();
+    }
 }

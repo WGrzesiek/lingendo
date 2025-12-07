@@ -5,4 +5,5 @@ public enum DeckVisibility {
     PUBLIC,
     FRIENDS_ONLY,
     STUDENTS_ONLY
+
 }
