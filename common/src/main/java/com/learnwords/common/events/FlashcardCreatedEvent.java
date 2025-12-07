@@ -1,9 +1,12 @@
 package com.learnwords.common.events;
 
+import lombok.Builder;
+
 import java.time.Instant;
 
+@Builder
 public record FlashcardCreatedEvent(
-        String eventTime,
+        Instant eventTime,
         String flashcardId,
         String deckId,
         String userId,
