@@ -9,7 +9,6 @@ public class KafkaTopic {
 
 
     public static final String USER_LOGINS_TOPIC = "user-logins";
-    public static final String USER_LOGINS = "user-logins";
     public static final String DECK_CREATED = "deck.created";
     public static final String FLASHCARD_CREATED = "deck.flashcard.created";
     public static final String SESSION_STARTED = "deck.session.started";

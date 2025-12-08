@@ -9,5 +9,6 @@ public record UserLoginEvent(
         Instant eventTime,
         String userId,
         String username,
+        Integer streak,
         Instant received_at
 ) implements DomainEvent {}
