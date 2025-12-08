@@ -1,0 +1,10 @@
+package com.learnwords.statisticsservice.dto;
+
+import java.time.Instant;
+
+public record StudentActivityItemDto(
+        String type,
+        String title,
+        int points,
+        Instant eventTime
+) {}

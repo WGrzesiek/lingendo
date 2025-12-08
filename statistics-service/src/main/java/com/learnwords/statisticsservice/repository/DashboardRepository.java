@@ -1,8 +1,12 @@
 package com.learnwords.statisticsservice.repository;
 
+import com.learnwords.statisticsservice.dto.StudentActivityItemDto;
 import com.learnwords.statisticsservice.dto.UserPointsDto;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
+
+import java.sql.Timestamp;
+import java.util.List;
 
 @Repository
 public class DashboardRepository {
@@ -88,6 +92,32 @@ public class DashboardRepository {
                         rs.getLong("points_this_week")
                 ),
                 userId
+        );
+    }
+
+    private static final String GET_RECENT_ACTIVITY_SQL = """
+        SELECT
+            event_time,
+            type,
+            title,
+            points
+        FROM analytics.user_activity
+        WHERE user_id = ?
+        ORDER BY event_time DESC
+        LIMIT ?
+        """;
+
+    public List<StudentActivityItemDto> getRecentActivity(String userId, int limit) {
+        return jdbcTemplate.query(
+                GET_RECENT_ACTIVITY_SQL,
+                (rs, rowNum) -> new StudentActivityItemDto(
+                        rs.getString("type"),
+                        rs.getString("title"),
+                        rs.getInt("points"),
+                        rs.getObject("event_time", Timestamp.class).toInstant()
+                ),
+                userId,
+                limit
         );
     }
 }

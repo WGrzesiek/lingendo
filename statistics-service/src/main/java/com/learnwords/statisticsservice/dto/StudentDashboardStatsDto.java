@@ -1,6 +1,6 @@
 package com.learnwords.statisticsservice.dto;
 
-public record StudentDashboardDto(
+public record StudentDashboardStatsDto(
         int activeDecks,
         int completedLessonsThisMonth,
         int streakDays,

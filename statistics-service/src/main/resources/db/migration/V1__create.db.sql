@@ -5,6 +5,7 @@ CREATE TABLE analytics.user_logins
     event_time   DateTime64(3, 'UTC'),
     user_id      String,
     username     String,
+    streak       UInt32,
     received_at  DateTime64(3, 'UTC')
 )
     ENGINE = MergeTree
@@ -128,3 +129,17 @@ SELECT
     sum(correct) * 5 AS points
 FROM analytics.flashcard_answers
 GROUP BY day, user_id;
+
+CREATE TABLE analytics.user_activity
+(
+    event_time  DateTime64(3, 'UTC'),
+    user_id     String,
+    type        LowCardinality(String),
+    title       String,
+    points      Int32,
+    received_at  DateTime64(3, 'UTC')
+)
+    ENGINE = MergeTree
+        PARTITION BY toYYYYMM(event_time)
+        ORDER BY (user_id, event_time);
+

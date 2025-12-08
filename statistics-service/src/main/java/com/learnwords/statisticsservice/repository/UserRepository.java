@@ -16,8 +16,8 @@ public class UserRepository {
 
     private static final String INSERT_SQL = """
         INSERT INTO analytics.user_logins
-            (event_time, user_id, username, received_at)
-        VALUES (?, ?, ?, ?)
+            (event_time, user_id, username, streak, received_at)
+        VALUES (?, ?, ?, ?, ?)
         """;
 
     public void save(UserLoginEvent event) {
@@ -26,6 +26,7 @@ public class UserRepository {
                 event.eventTime(),
                 event.userId(),
                 event.username(),
+                event.streak(),
                 event.received_at()
         );
     }

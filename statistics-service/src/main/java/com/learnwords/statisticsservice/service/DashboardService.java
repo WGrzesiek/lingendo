@@ -1,12 +1,16 @@
 package com.learnwords.statisticsservice.service;
 
-import com.learnwords.statisticsservice.dto.StudentDashboardDto;
+import com.learnwords.statisticsservice.dto.StudentActivityItemDto;
+import com.learnwords.statisticsservice.dto.StudentDashboardStatsDto;
 import com.learnwords.statisticsservice.dto.UserPointsDto;
 import com.learnwords.statisticsservice.repository.DashboardRepository;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 public class DashboardService {
+    private static final int LAST_ACTIVITY_LIMIT = 5;
 
     private final DashboardRepository dashboardRepository;
 
@@ -14,18 +18,22 @@ public class DashboardService {
         this.dashboardRepository = dashboardRepository;
     }
 
-    public StudentDashboardDto getStudentDashboard(String userId) {
+    public StudentDashboardStatsDto getStudentDashboard(String userId) {
         int activeDecks = dashboardRepository.getActiveDecks(userId);
         int completedLessons = dashboardRepository.getCompletedLessonsThisMonth(userId);
         int streakDays = dashboardRepository.getStreakDays(userId);
         UserPointsDto points = dashboardRepository.getUserPoints(userId);
 
-        return new StudentDashboardDto(
+        return new StudentDashboardStatsDto(
                 activeDecks,
                 completedLessons,
                 streakDays,
                 points.totalPoints(),
                 points.pointsThisWeek()
         );
+    }
+
+    public List<StudentActivityItemDto> getRecentActivity(String userId) {
+        return dashboardRepository.getRecentActivity(userId, LAST_ACTIVITY_LIMIT);
     }
 }
