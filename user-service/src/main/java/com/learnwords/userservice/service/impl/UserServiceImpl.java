@@ -17,6 +17,9 @@ import com.learnwords.userservice.service.UserService;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.UUID;
 
 
@@ -66,18 +69,24 @@ public class UserServiceImpl implements UserService {
     @Override
     public AppUserDetails authenticate(String username, String password) throws WrongPasswordException, UsernameNotFoundException {
         log.info("Authenticating user with username: {}", username);
-        AppUserDetails userDetails = loadUserByUsername(username);
+        User user = loadUserByUsername(username);
+        AppUserDetails userDetails = new AppUserDetails(user);
         log.info("User found, checking password for user: {}", username);
         boolean isAuth = passwordService.matchPassword(password, userDetails.getPassword());
         if (!isAuth)
             throw new WrongPasswordException();
         log.info("User {} authenticated successfully", username);
+        Instant now = Instant.now();
+
+        user.registerLogin(now);
+        userRepository.save(user);
+
         userLoginEventProducer.send(UserLoginEvent.builder()
-                        .eventId(UUID.randomUUID().toString())
+                        .eventTime(Instant.now())
                         .userId(userDetails.getId())
                         .username(userDetails.getUsername())
-                        .email(userDetails.getEmail())
-                        .occurredAt(java.time.Instant.now())
+                        .streak(user.getSteak())
+                        .received_at(Instant.now())
                         .build());
         return userDetails;
     }
@@ -91,21 +100,13 @@ public class UserServiceImpl implements UserService {
         return new AppUserDetails(user);
     }
 
-    private AppUserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+    private User loadUserByUsername(String username) throws UsernameNotFoundException {
         log.info("Loading user by username: {}", username);
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found: " + username));
         log.info("User found with username: {}", username);
-        return new AppUserDetails(user);
+        return user;
     }
-
-//    private AppUserDetails loadUserByEmail(String email) throws UsernameNotFoundException {
-//        log.info("Loading user by email: {}", email);
-//        User user = userRepository.findByEmail(email)
-//                .orElseThrow(() -> new UsernameNotFoundException("User not found: " + email));
-//        log.info("User found with email: {}", email);
-//        return new AppUserDetails(user);
-//    }
 
 }
 

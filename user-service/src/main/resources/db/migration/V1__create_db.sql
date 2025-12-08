@@ -14,6 +14,7 @@ create table user_management
     last_name varchar(255),
     last_password_change timestamp(6) with time zone,
     login_count integer not null,
+    steak integer not null,
     password varchar(255) not null,
     updated_at timestamp(6) with time zone not null,
     user_type varchar(20) not null
