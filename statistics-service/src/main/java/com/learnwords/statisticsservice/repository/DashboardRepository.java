@@ -4,6 +4,7 @@ import com.learnwords.statisticsservice.dto.leaderboard.LeaderboardEntryDto;
 import com.learnwords.statisticsservice.dto.StudentActivityItemDto;
 import com.learnwords.statisticsservice.dto.UserPointsDto;
 import com.learnwords.statisticsservice.dto.leaderboard.LeaderboardOverviewDto;
+import org.apache.kafka.common.protocol.types.Field;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
@@ -35,21 +36,12 @@ public class DashboardRepository {
 
     // streak: ile kolejnych dni od dzisiaj w dół user miał aktywność
     private static final String GET_STREAK_SQL = """
-        SELECT count() AS streak_days
-        FROM (
-            SELECT
-                day,
-                row_number() OVER (ORDER BY day DESC) AS rn
-            FROM (
-                SELECT DISTINCT toDate(event_time) AS day
-                FROM analytics.sessions_started
-                WHERE user_id = ?
-                  AND event_time <= now()
-                  AND event_time >= today() - INTERVAL 90 DAY
-            )
-        )
-        WHERE day = today() - (rn - 1)
-        """;
+        SELECT analytics.user_activity.subtitle
+        FROM analytics.user_activity
+        WHERE analytics.user_activity.type = 'LOGIN' and analytics.user_activity.user_id = ?
+        ORDER BY analytics.user_activity.event_time DESC
+        LIMIT 1;
+    """;
 
     private static final String GET_USER_POINTS_SQL = """
         SELECT
@@ -78,12 +70,12 @@ public class DashboardRepository {
     }
 
     public int getStreakDays(String userId) {
-        Integer result = jdbcTemplate.queryForObject(
+        String result =  jdbcTemplate.queryForObject(
                 GET_STREAK_SQL,
-                Integer.class,
+                String.class,
                 userId
         );
-        return result != null ? result : 0;
+        return Integer.parseInt(result.replaceAll("\\D+", ""));
     }
 
     public UserPointsDto getUserPoints(String userId) {
