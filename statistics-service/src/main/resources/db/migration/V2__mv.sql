@@ -37,7 +37,8 @@ SELECT
     event_time,
     user_id,
     'LOGIN' AS type,
-    concat(toString(streak), ' dni nauki z rzędu – nowy rekord!') AS title,
+    'Seria dni nauki!'                                            AS title,
+    concat(toString(streak), ' dni nauki z rzędu – nowy rekord!') AS subtitle,
     10 AS points
 FROM analytics.user_logins;
 

@@ -101,6 +101,7 @@ public class DashboardRepository {
             event_time,
             type,
             title,
+            subtitle,
             points
         FROM analytics.user_activity
         WHERE user_id = ?
@@ -114,6 +115,7 @@ public class DashboardRepository {
                 (rs, rowNum) -> new StudentActivityItemDto(
                         rs.getString("type"),
                         rs.getString("title"),
+                        rs.getString("subtitle"),
                         rs.getInt("points"),
                         rs.getObject("event_time", Timestamp.class).toInstant()
                 ),
