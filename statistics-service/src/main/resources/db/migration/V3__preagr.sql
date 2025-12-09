@@ -2,7 +2,6 @@ CREATE TABLE analytics.user_points_monthly
 (
     month   Date,
     user_id String,
-    username String,
     points  Int64
 )
 ENGINE = SummingMergeTree
@@ -13,7 +12,6 @@ ORDER BY (month, user_id);
 CREATE TABLE analytics.user_points_total
 (
     user_id String,
-    username String,
     points  Int64
 )
 ENGINE = SummingMergeTree

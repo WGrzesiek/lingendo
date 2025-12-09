@@ -1,9 +1,10 @@
 package com.learnwords.statisticsservice.service;
 
-import com.learnwords.statisticsservice.dto.LeaderboardEntryDto;
+import com.learnwords.statisticsservice.dto.leaderboard.LeaderboardEntryDto;
 import com.learnwords.statisticsservice.dto.StudentActivityItemDto;
 import com.learnwords.statisticsservice.dto.StudentDashboardStatsDto;
 import com.learnwords.statisticsservice.dto.UserPointsDto;
+import com.learnwords.statisticsservice.dto.leaderboard.LeaderboardOverviewDto;
 import com.learnwords.statisticsservice.repository.DashboardRepository;
 import org.springframework.stereotype.Service;
 
@@ -38,8 +39,9 @@ public class DashboardService {
         return dashboardRepository.getRecentActivity(userId, LAST_ACTIVITY_LIMIT);
     }
 
-    public List<LeaderboardEntryDto> getMonthlyLeaderboardWithChanges(){
-        return dashboardRepository.getMonthlyLeaderboardWithChanges();
+    public LeaderboardOverviewDto getLeaderboardOverview(String userId) {
+        return dashboardRepository.getLeaderboardWithMyPosition(userId);
     }
+
 
 }

@@ -1,8 +1,9 @@
 package com.learnwords.statisticsservice.controller;
 
-import com.learnwords.statisticsservice.dto.LeaderboardEntryDto;
+import com.learnwords.statisticsservice.dto.leaderboard.LeaderboardEntryDto;
 import com.learnwords.statisticsservice.dto.StudentActivityItemDto;
 import com.learnwords.statisticsservice.dto.StudentDashboardStatsDto;
+import com.learnwords.statisticsservice.dto.leaderboard.LeaderboardOverviewDto;
 import com.learnwords.statisticsservice.service.DashboardService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -87,9 +88,10 @@ public class DashboardController {
 
     @GetMapping("/leaderboard")
     @Operation(summary = "Pobierz aktualna topke")
-    public ResponseEntity<List<LeaderboardEntryDto>> getMonthlyLeaderboardWithChanges(
+    public ResponseEntity<LeaderboardOverviewDto> getLeaderboardOverview(
+            @RequestHeader(USER_ID_HEADER) String userId
     ) {
-        List<LeaderboardEntryDto> activity = dashboardService.getMonthlyLeaderboardWithChanges();
+        LeaderboardOverviewDto activity = dashboardService.getLeaderboardOverview(userId);
         return ResponseEntity.ok(activity);
     }
 

@@ -114,7 +114,6 @@ CREATE TABLE analytics.user_points_daily
 (
     day       Date,
     user_id   String,
-    username  String,
     points    Int32
 )
     ENGINE = SummingMergeTree
