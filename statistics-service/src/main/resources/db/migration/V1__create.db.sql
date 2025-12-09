@@ -32,6 +32,7 @@ CREATE TABLE analytics.deck_enrollments_created
     event_time  DateTime64(3, 'UTC'),
     deck_enrollment_id  String,
     deck_id     String,
+    deck_name   String,
     user_id     String,
     received_at  DateTime64(3, 'UTC')
 )
@@ -44,6 +45,7 @@ CREATE TABLE analytics.deck_enrollments_finished
     event_time          DateTime64(3, 'UTC'),
     deck_enrollment_id  String,
     deck_id             String,
+    deck_name   String,
     user_id             String,
     correct_answers     UInt32,
     incorrect_answers   UInt32,
@@ -70,7 +72,8 @@ CREATE TABLE analytics.sessions_started
     event_time  DateTime64(3, 'UTC'),
     session_id String,
     user_id    String,
-    deck_id             String,
+    deck_id    String,
+    deck_name   String,
     deck_enrollment_id    String,
     received_at  DateTime64(3, 'UTC')
 )
@@ -85,6 +88,7 @@ CREATE TABLE analytics.sessions_finished
     session_id          String,
     user_id             String,
     deck_id             String,
+    deck_name   String,
     deck_enrollment_id  String,
     correct_answers     UInt16,
     incorrect_answers   UInt16,
@@ -114,6 +118,7 @@ CREATE TABLE analytics.user_points_daily
 (
     day       Date,
     user_id   String,
+    username  String,
     points    Int32
 )
     ENGINE = SummingMergeTree
@@ -126,6 +131,7 @@ AS
 SELECT
     toDate(event_time) AS day,
     user_id,
+    username,
     sum(correct) * 5 AS points
 FROM analytics.flashcard_answers
 GROUP BY day, user_id;
@@ -136,6 +142,7 @@ CREATE TABLE analytics.user_activity
     user_id     String,
     type        LowCardinality(String),
     title       String,
+    subtitle    String,
     points      Int32,
     received_at  DateTime64(3, 'UTC')
 )

@@ -1,5 +1,6 @@
 package com.learnwords.statisticsservice.repository;
 
+import com.learnwords.statisticsservice.dto.LeaderboardEntryDto;
 import com.learnwords.statisticsservice.dto.StudentActivityItemDto;
 import com.learnwords.statisticsservice.dto.UserPointsDto;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -120,4 +121,57 @@ public class DashboardRepository {
                 limit
         );
     }
+
+    private static final String GET_MONTHLY_LEADERBOARD_WITH_CHANGES_SQL = """
+                WITH
+                    toStartOfMonth(today())      AS cur_month,
+                    addMonths(cur_month, -1)     AS prev_month
+                SELECT
+                    cur.user_id,
+                    cur.username,
+                    cur.points                   AS points_current,
+                    cur.rank                     AS rank_current,
+                
+                    prev.points                  AS points_previous,
+                    prev.rank                    AS rank_previous,
+                
+                    (cur.points - coalesce(prev.points, 0))        AS points_diff,
+                    (coalesce(prev.rank, 100000) - cur.rank)       AS rank_change
+                FROM
+                (
+                    SELECT
+                        user_id,
+                        points,
+                        dense_rank() OVER (ORDER BY points DESC) AS rank
+                    FROM analytics.user_points_monthly
+                    WHERE month = cur_month
+                ) cur
+                LEFT JOIN
+                (
+                    SELECT
+                        user_id,
+                        points,
+                        dense_rank() OVER (ORDER BY points DESC) AS rank
+                    FROM analytics.user_points_monthly
+                    WHERE month = prev_month
+                ) prev USING (user_id)
+                ORDER BY rank_current
+                LIMIT 6;
+            """;
+
+    public List<LeaderboardEntryDto> getMonthlyLeaderboardWithChanges() {
+        return jdbcTemplate.query(
+                GET_MONTHLY_LEADERBOARD_WITH_CHANGES_SQL,
+                (rs, rowNum) -> new LeaderboardEntryDto(
+                        rs.getString("user_id"),
+                        rs.getString("username"),
+                        rs.getLong("points_current"),
+                        rs.getLong("points_diff"),     // FIXED
+                        rs.getInt("rank_current"),
+                        rs.getInt("rank_previous")     // FIXED
+                )
+        );
+    }
+
+
 }

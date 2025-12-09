@@ -15,8 +15,8 @@ public class SessionRepository {
 
     private static final String INSERT_SESSION_STARTED_SQL = """
         INSERT INTO analytics.sessions_started
-            (event_time, session_id, user_id, deck_id, deck_enrollment_id, received_at)
-        VALUES (?, ?, ?, ?, ?, ?)
+            (event_time, session_id, user_id, deck_id, deck_name, deck_enrollment_id, received_at)
+        VALUES (?, ?, ?, ?, ?, ?,?)
         """;
 
     public void saveSessionStarted(SessionStartedEvent event) {
@@ -26,6 +26,7 @@ public class SessionRepository {
                 event.sessionId(),
                 event.userId(),
                 event.deckId(),
+                event.deckName(),
                 event.deckEnrollmentId(),
                 event.receivedAt()
         );
@@ -33,8 +34,8 @@ public class SessionRepository {
 
     private static final String INSERT_SESSION_FINISHED_SQL = """
         INSERT INTO analytics.sessions_finished
-            (event_time, started_at, session_id, user_id, deck_id, deck_enrollment_id,correct_answers,incorrect_answers,received_at)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+            (event_time, started_at, session_id, user_id, deck_id, deck_name, deck_enrollment_id,correct_answers,incorrect_answers,received_at)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """;
 
     public void saveSessionFinished(SessionFinishedEvent event) {
@@ -45,6 +46,7 @@ public class SessionRepository {
                 event.sessionId(),
                 event.userId(),
                 event.deckId(),
+                event.deckName(),
                 event.deckEnrollmentId(),
                 event.correctAnswers(),
                 event.incorrectAnswers(),

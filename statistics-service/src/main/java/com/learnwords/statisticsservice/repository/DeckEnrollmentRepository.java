@@ -18,8 +18,8 @@ public class DeckEnrollmentRepository {
 
     private static final String INSERT_DECK_ENROLLMENT_CREATED_SQL = """
         INSERT INTO analytics.deck_enrollments_created
-            (event_time, deck_enrollment_id, deck_id, user_id, received_at)
-        VALUES (?, ?, ?, ?, ?)
+            (event_time, deck_enrollment_id, deck_id, deck_name, user_id, received_at)
+        VALUES (?, ?, ?, ?, ?,?)
         """;
 
     public void saveDeckEnrollmentCreate(DeckEnrollmentsCreated event) {
@@ -28,6 +28,7 @@ public class DeckEnrollmentRepository {
                 event.eventTime(),
                 event.deckEnrollmentId(),
                 event.deckId(),
+                event.deckName(),
                 event.userId(),
                 Instant.now()
         );
@@ -35,8 +36,8 @@ public class DeckEnrollmentRepository {
 
     private static final String INSERT_DECK_ENROLLMENT_FINISHED_SQL = """
         INSERT INTO analytics.deck_enrollments_finished
-            (event_time, deck_enrollment_id, deck_id, user_id, received_at)
-        VALUES (?, ?, ?, ?, ?)
+            (event_time, deck_enrollment_id, deck_id, deck_name, user_id, received_at)
+        VALUES (?, ?, ?, ?, ?, ?)
         """;
 
     public void saveDeckEnrollmentFinished(DeckEnrollmentsFinished event) {
@@ -45,6 +46,7 @@ public class DeckEnrollmentRepository {
                 event.eventTime(),
                 event.deckEnrollmentId(),
                 event.deckId(),
+                event.deckName(),
                 event.userId(),
                 Instant.now()
         );

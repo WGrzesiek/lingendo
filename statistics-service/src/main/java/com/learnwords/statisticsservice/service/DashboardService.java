@@ -1,5 +1,6 @@
 package com.learnwords.statisticsservice.service;
 
+import com.learnwords.statisticsservice.dto.LeaderboardEntryDto;
 import com.learnwords.statisticsservice.dto.StudentActivityItemDto;
 import com.learnwords.statisticsservice.dto.StudentDashboardStatsDto;
 import com.learnwords.statisticsservice.dto.UserPointsDto;
@@ -36,4 +37,9 @@ public class DashboardService {
     public List<StudentActivityItemDto> getRecentActivity(String userId) {
         return dashboardRepository.getRecentActivity(userId, LAST_ACTIVITY_LIMIT);
     }
+
+    public List<LeaderboardEntryDto> getMonthlyLeaderboardWithChanges(){
+        return dashboardRepository.getMonthlyLeaderboardWithChanges();
+    }
+
 }

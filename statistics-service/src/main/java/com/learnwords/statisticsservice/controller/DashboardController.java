@@ -1,5 +1,6 @@
 package com.learnwords.statisticsservice.controller;
 
+import com.learnwords.statisticsservice.dto.LeaderboardEntryDto;
 import com.learnwords.statisticsservice.dto.StudentActivityItemDto;
 import com.learnwords.statisticsservice.dto.StudentDashboardStatsDto;
 import com.learnwords.statisticsservice.service.DashboardService;
@@ -23,7 +24,7 @@ import java.util.List;
  *
  * @author Grzegorz Wawrzeń
  * @version 1.0
- * @since 2025-11-12
+ * @since 2025-12-09
  * @see DashboardService
  * @see StudentDashboardStatsDto
  */
@@ -83,4 +84,14 @@ public class DashboardController {
         List<StudentActivityItemDto> activity = dashboardService.getRecentActivity(userId);
         return ResponseEntity.ok(activity);
     }
+
+    @GetMapping("/leaderboard")
+    @Operation(summary = "Pobierz aktualna topke")
+    public ResponseEntity<List<LeaderboardEntryDto>> getMonthlyLeaderboardWithChanges(
+    ) {
+        List<LeaderboardEntryDto> activity = dashboardService.getMonthlyLeaderboardWithChanges();
+        return ResponseEntity.ok(activity);
+    }
+
+
 }

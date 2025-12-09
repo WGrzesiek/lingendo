@@ -1,10 +1,11 @@
-CREATE MATERIALIZED VIEW analytics.mv_lesson_completed_feed TO analytics.user_activity
+CREATE MATERIALIZED VIEW analytics.mv_session_completed_feed TO analytics.user_activity
 AS
 SELECT
     event_time,
     user_id,
     'LESSON_COMPLETED'                   AS type,
     'Ukończono lekcję'                   AS title,
+    deck_name                            AS subtitle,
     50                                   AS points
 FROM analytics.sessions_finished;
 
@@ -15,6 +16,7 @@ SELECT
     user_id,
     'SESSION_STARTED' AS type,
     'Rozpoczęto nowy kurs' AS title,
+    deck_name                            AS subtitle,
     0 AS points
 FROM analytics.deck_enrollments_created;
 
@@ -25,6 +27,7 @@ SELECT
     user_id,
     'SESSION_COMPLETED' AS type,
     'Ukończono kurs' AS title,
+    deck_name                            AS subtitle,
     100 AS points
 FROM analytics.deck_enrollments_finished;
 
