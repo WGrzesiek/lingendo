@@ -1,5 +1,3 @@
-CREATE DATABASE IF NOT EXISTS analytics;
-
 CREATE TABLE analytics.user_logins
 (
     event_time   DateTime64(3, 'UTC'),
@@ -47,8 +45,6 @@ CREATE TABLE analytics.deck_enrollments_finished
     deck_id             String,
     deck_name   String,
     user_id             String,
-    correct_answers     UInt32,
-    incorrect_answers   UInt32,
     received_at  DateTime64(3, 'UTC')
 )
     ENGINE = MergeTree
@@ -131,7 +127,6 @@ AS
 SELECT
     toDate(event_time) AS day,
     user_id,
-    username,
     sum(correct) * 5 AS points
 FROM analytics.flashcard_answers
 GROUP BY day, user_id;

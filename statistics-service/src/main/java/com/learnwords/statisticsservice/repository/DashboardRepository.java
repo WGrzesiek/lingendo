@@ -123,18 +123,16 @@ public class DashboardRepository {
     }
 
     private static final String GET_MONTHLY_LEADERBOARD_WITH_CHANGES_SQL = """
-                WITH
+    WITH
                     toStartOfMonth(today())      AS cur_month,
                     addMonths(cur_month, -1)     AS prev_month
                 SELECT
-                    cur.user_id,
-                    cur.username,
+                    cur.user_id                  AS user_id,
+                    cur.username                 AS username,
                     cur.points                   AS points_current,
                     cur.rank                     AS rank_current,
-                
                     prev.points                  AS points_previous,
                     prev.rank                    AS rank_previous,
-                
                     (cur.points - coalesce(prev.points, 0))        AS points_diff,
                     (coalesce(prev.rank, 100000) - cur.rank)       AS rank_change
                 FROM
@@ -142,6 +140,7 @@ public class DashboardRepository {
                     SELECT
                         user_id,
                         points,
+                        username,
                         dense_rank() OVER (ORDER BY points DESC) AS rank
                     FROM analytics.user_points_monthly
                     WHERE month = cur_month
@@ -166,9 +165,9 @@ public class DashboardRepository {
                         rs.getString("user_id"),
                         rs.getString("username"),
                         rs.getLong("points_current"),
-                        rs.getLong("points_diff"),     // FIXED
+                        rs.getLong("points_diff"),
                         rs.getInt("rank_current"),
-                        rs.getInt("rank_previous")     // FIXED
+                        rs.getInt("rank_previous")
                 )
         );
     }
