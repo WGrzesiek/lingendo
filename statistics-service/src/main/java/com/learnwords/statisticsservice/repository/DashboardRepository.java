@@ -163,6 +163,8 @@ public class DashboardRepository {
                         rs.getLong("total_points"),
                         rs.getInt("finished_decks_count")
                 ),
+                userId,
+                userId,
                 userId
         );
 
