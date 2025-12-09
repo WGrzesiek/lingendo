@@ -60,6 +60,7 @@ public class DeckEnrollmentServiceImpl implements DeckEnrollmentService {
                 .eventTime(deckEnrollment.getJoinedAt())
                 .deckEnrollmentId(deckEnrollment.getId())
                 .deckId(deckId)
+                .deckName(deckEnrollment.getDeck().getName())
                 .userId(userId)
                 .receivedAt(Instant.now())
                 .build();

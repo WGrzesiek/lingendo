@@ -118,6 +118,7 @@ public class SessionServiceImpl implements SessionService {
                 .sessionId(sessionId)
                 .userId(userId)
                 .deckId(deckEnrollment.getDeck().getId())
+                .deckName(deckEnrollment.getDeck().getName())
                 .deckEnrollmentId(deckEnrollment.getId())
                 .receivedAt(Instant.now())
                 .build();
@@ -173,6 +174,7 @@ public class SessionServiceImpl implements SessionService {
                 .sessionId(sessionId)
                 .userId(userId)
                 .deckId(enrollment.getDeck().getId())
+                .deckName(enrollment.getDeck().getName())
                 .deckEnrollmentId(enrollment.getId())
                 .receivedAt(Instant.now())
                 .build();
@@ -190,6 +192,7 @@ public class SessionServiceImpl implements SessionService {
                     .eventTime(session.getCompletedAt())
                     .deckEnrollmentId(enrollment.getId())
                     .deckId(enrollment.getDeck().getId())
+                    .deckName(enrollment.getDeck().getName())
                     .userId(userId)
                     .receivedAt(Instant.now())
                     .build();
