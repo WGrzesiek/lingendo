@@ -76,18 +76,19 @@ public class UserServiceImpl implements UserService {
         if (!isAuth)
             throw new WrongPasswordException();
         log.info("User {} authenticated successfully", username);
+        int currentStreak = user.getSteak();
         Instant now = Instant.now();
-
         user.registerLogin(now);
         userRepository.save(user);
-
-        userLoginEventProducer.send(UserLoginEvent.builder()
-                        .eventTime(Instant.now())
-                        .userId(userDetails.getId())
-                        .username(userDetails.getUsername())
-                        .streak(user.getSteak())
-                        .received_at(Instant.now())
-                        .build());
+        if(user.getSteak() != currentStreak){
+            userLoginEventProducer.send(UserLoginEvent.builder()
+                            .eventTime(Instant.now())
+                            .userId(userDetails.getId())
+                            .username(userDetails.getUsername())
+                            .streak(user.getSteak())
+                            .received_at(Instant.now())
+                            .build());
+        }
         return userDetails;
     }
 
