@@ -16,6 +16,8 @@ spring:
   kafka:
     consumer:
       bootstrap-servers: ${KAFKA_BOOTSTRAP:kafka:9092}
+    producer:
+      bootstrap-servers: ${KAFKA_BOOTSTRAP:kafka:9092}
 
 server:
   port: ${SERVER_PORT:8814}

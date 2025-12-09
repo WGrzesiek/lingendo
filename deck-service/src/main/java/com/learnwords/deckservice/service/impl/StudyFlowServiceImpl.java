@@ -1,5 +1,7 @@
 package com.learnwords.deckservice.service.impl;
 
+import com.learnwords.common.KafkaTopic;
+import com.learnwords.common.events.FlashcardAnsweredEvent;
 import com.learnwords.deckservice.dto.evaluationService.AnswerResultDto;
 import com.learnwords.deckservice.dto.flashcard.FlashcardDto;
 import com.learnwords.deckservice.dto.session.SessionDto;
@@ -14,10 +16,12 @@ import com.learnwords.deckservice.service.algorithm.state.AlgorithmState;
 import com.learnwords.deckservice.service.evaluationService.AnswerValidator;
 import com.learnwords.deckservice.service.evaluationService.UserAnswer;
 import com.learnwords.deckservice.service.evaluationService.responseResult.AlgorithmResult;
+import com.learnwords.deckservice.service.event.GenericEventProducer;
 import com.learnwords.deckservice.service.learningStrategy.LearningStrategy;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.time.Instant;
 import java.util.List;
 @Slf4j
 @Service
@@ -28,7 +32,7 @@ public class StudyFlowServiceImpl implements StudyFlowService {
     private final UserProgressService userProgressService;
     private final AlgorithmFactory algorithmFactory;
     private final AnswerValidator answerValidator;
-
+    private final GenericEventProducer eventProducer;
     private final FlashcardService flashcardService;
 
     public StudyFlowServiceImpl(List<LearningStrategy> strategies,
@@ -37,7 +41,7 @@ public class StudyFlowServiceImpl implements StudyFlowService {
                                 UserProgressService userProgressService,
                                 AlgorithmFactory algorithmFactory,
                                 AnswerValidator answerValidator,
-
+                                GenericEventProducer eventProducer,
                                 FlashcardService flashcardService) {
         this.strategies = strategies;
         this.sessionService = sessionService;
@@ -45,7 +49,7 @@ public class StudyFlowServiceImpl implements StudyFlowService {
         this.userProgressService = userProgressService;
         this.algorithmFactory = algorithmFactory;
         this.answerValidator = answerValidator;
-
+        this.eventProducer = eventProducer;
         this.flashcardService = flashcardService;
     }
 
@@ -79,8 +83,18 @@ public class StudyFlowServiceImpl implements StudyFlowService {
         AlgorithmResult<AlgorithmState> result = algorithm.processAnswer(currentState, isCorrect);
         userProgressService.updateProgress(progress, result, isCorrect);
 
-//NOTE jeszcze nie ma
-//        statsHelper.recordFlashcardAnswer(sessionId, flashcardId, isCorrect);
+
+
+        FlashcardAnsweredEvent event = FlashcardAnsweredEvent.builder()
+                .eventTime(Instant.now())
+                .userId(userId)
+                .deckEnrollmentId(session.enrollment().getId())
+                .sessionId(sessionId)
+                .flashcardId(flashcardId)
+                .correct(isCorrect)
+                .receivedAt(Instant.now())
+                .build();
+        eventProducer.send(KafkaTopic.FLASHCARD_ANSWERED, event);
 
         return new AnswerResultDto(
                 isCorrect,

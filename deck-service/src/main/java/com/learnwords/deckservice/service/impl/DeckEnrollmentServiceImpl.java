@@ -1,5 +1,7 @@
 package com.learnwords.deckservice.service.impl;
 
+import com.learnwords.common.KafkaTopic;
+import com.learnwords.common.events.DeckEnrollmentsCreated;
 import com.learnwords.deckservice.dto.deckEnrollment.CreateDeckEnrollmentDto;
 import com.learnwords.deckservice.dto.deckEnrollment.DeckEnrollmentDto;
 import com.learnwords.deckservice.dto.dashboard.StudentMyCourseListItemDto;
@@ -12,6 +14,7 @@ import com.learnwords.deckservice.enums.LearnAlgorithm;
 import com.learnwords.deckservice.repository.DeckEnrollmentRepository;
 import com.learnwords.deckservice.repository.DeckRepository;
 import com.learnwords.deckservice.service.DeckEnrollmentService;
+import com.learnwords.deckservice.service.event.GenericEventProducer;
 import com.learnwords.deckservice.service.utils.DeckUtils;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
@@ -19,6 +22,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
@@ -28,8 +32,10 @@ import java.time.Instant;
 public class DeckEnrollmentServiceImpl implements DeckEnrollmentService {
     private final DeckRepository deckRepository;
     private final DeckEnrollmentRepository deckEnrollmentRepository;
+    private final GenericEventProducer eventProducer;
 
-    public DeckEnrollmentServiceImpl(DeckRepository deckRepository, DeckEnrollmentRepository deckEnrollmentRepository) {
+    public DeckEnrollmentServiceImpl(DeckRepository deckRepository, DeckEnrollmentRepository deckEnrollmentRepository, GenericEventProducer eventProducer) {
+        this.eventProducer = eventProducer;
         this.deckRepository = deckRepository;
         this.deckEnrollmentRepository = deckEnrollmentRepository;
     }
@@ -50,6 +56,15 @@ public class DeckEnrollmentServiceImpl implements DeckEnrollmentService {
                 .build();
         deckEnrollmentRepository.save(deckEnrollment);
         log.info("Uzytkownik {} zostal przypisany do talii {}", userId, deckId);
+        DeckEnrollmentsCreated event = DeckEnrollmentsCreated.builder()
+                .eventTime(deckEnrollment.getJoinedAt())
+                .deckEnrollmentId(deckEnrollment.getId())
+                .deckId(deckId)
+                .deckName(deckEnrollment.getDeck().getName())
+                .userId(userId)
+                .receivedAt(Instant.now())
+                .build();
+        eventProducer.send(KafkaTopic.DECK_ENROLLMENT_CREATED, event);
     }
 
     @Override

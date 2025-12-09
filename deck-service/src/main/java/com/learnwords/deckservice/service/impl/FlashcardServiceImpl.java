@@ -5,6 +5,7 @@ import com.learnwords.common.KafkaTopic;
 import com.learnwords.common.dto.SendWordFromKafkaDto;
 import com.learnwords.common.dto.SentenceDto;
 import com.learnwords.common.dto.WordDto;
+import com.learnwords.common.events.FlashcardCreatedEvent;
 import com.learnwords.deckservice.dto.flashcard.FlashcardDto;
 import com.learnwords.deckservice.entity.Deck;
 import com.learnwords.deckservice.entity.Flashcard;
@@ -18,6 +19,7 @@ import com.learnwords.deckservice.repository.DeckRepository;
 import com.learnwords.deckservice.repository.FlashcardRepository;
 import com.learnwords.deckservice.service.algorithm.GrzesiekAlgorithm;
 import com.learnwords.deckservice.service.FlashcardService;
+import com.learnwords.deckservice.service.event.GenericEventProducer;
 import com.learnwords.deckservice.service.grpcClient.VocabularyGrpcClient;
 import com.learnwords.vocabulary.v1.Word;
 
@@ -26,6 +28,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Service;
 
+import java.time.Instant;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -62,22 +65,21 @@ public class FlashcardServiceImpl implements FlashcardService {
 
     private final FlashcardRepository flashcardRepository;
     private final DeckRepository deckRepository;
-    private final GrzesiekAlgorithm grzesiekAlgorithm;
     private final VocabularyGrpcClient vocabularyGrpcClient;
+    private final GenericEventProducer eventProducer;
 
     /**
      * Konstruktor z dependency injection.
      * 
      * @param flashcardRepository repozytorium fiszek
      * @param deckRepository repozytorium talii
-     * @param grzesiekAlgorithm algorytm nauki Grzegorza
      * @param vocabularyGrpcClient klient gRPC do komunikacji z Vocabulary Service
      */
-    public FlashcardServiceImpl(FlashcardRepository flashcardRepository, DeckRepository deckRepository, GrzesiekAlgorithm grzesiekAlgorithm, VocabularyGrpcClient vocabularyGrpcClient) {
+    public FlashcardServiceImpl(FlashcardRepository flashcardRepository, DeckRepository deckRepository, VocabularyGrpcClient vocabularyGrpcClient, GenericEventProducer eventProducer) {
         this.flashcardRepository = flashcardRepository;
         this.deckRepository = deckRepository;
-        this.grzesiekAlgorithm = grzesiekAlgorithm;
         this.vocabularyGrpcClient = vocabularyGrpcClient;
+        this.eventProducer = eventProducer;
     }
 
     @Override
@@ -165,6 +167,16 @@ public class FlashcardServiceImpl implements FlashcardService {
         deckRepository.save(deck);
         log.info("Zaktualizowano licznik słówek w talii - deckId: '{}', wordCount: {}", 
                 getWordFromKafkaDto.deckId(), deck.getWordCount());
+        FlashcardCreatedEvent event = FlashcardCreatedEvent.builder()
+                .eventTime(flashcard.getCreatedAt())
+                .flashcardId(flashcardId)
+                .deckId(deck.getId())
+                .userId(deck.getOwnerId())
+                .receivedAt(Instant.now())
+                .build();
+        eventProducer.send(KafkaTopic.FLASHCARD_CREATED, event);
+        log.info("Wysłano zdarzenie utworzenia fiszki do Kafki - flashcardId: '{}', deckId: '{}'",
+                flashcardId, deck.getId());
     }
 
 
@@ -258,7 +270,16 @@ public class FlashcardServiceImpl implements FlashcardService {
         deckRepository.save(deck);
         log.info("Zaktualizowano licznik słówek w talii - deckId: '{}', wordCount: {}",
                 deckId, deck.getWordCount());
-
+        FlashcardCreatedEvent event = FlashcardCreatedEvent.builder()
+                .eventTime(flashcard.getCreatedAt())
+                .flashcardId(flashcardId)
+                .deckId(deck.getId())
+                .userId(deck.getOwnerId())
+                .receivedAt(Instant.now())
+                .build();
+        eventProducer.send(KafkaTopic.FLASHCARD_CREATED, event);
+        log.info("Wysłano zdarzenie utworzenia fiszki do Kafki - flashcardId: '{}', deckId: '{}'",
+                flashcardId, deck.getId());
     }
 
     /**

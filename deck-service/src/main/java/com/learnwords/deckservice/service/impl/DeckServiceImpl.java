@@ -1,5 +1,7 @@
 package com.learnwords.deckservice.service.impl;
 
+import com.learnwords.common.KafkaTopic;
+import com.learnwords.common.events.DeckCreatedEvent;
 import com.learnwords.deckservice.dto.deck.CreateDeckDto;
 import com.learnwords.deckservice.dto.deck.DeckDetailsDto;
 import com.learnwords.deckservice.dto.deck.DeckDto;
@@ -9,10 +11,13 @@ import com.learnwords.deckservice.exception.exceptions.DeckWithThisNameForThisUs
 import com.learnwords.deckservice.repository.DeckRepository;
 import com.learnwords.deckservice.service.DeckEnrollmentService;
 import com.learnwords.deckservice.service.DeckService;
+import com.learnwords.deckservice.service.event.GenericEventProducer;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
@@ -46,12 +51,15 @@ import static com.learnwords.deckservice.service.utils.DeckUtils.getDeckIfUserHa
 public class DeckServiceImpl implements DeckService {
     private final DeckRepository deckRepository;
     private final DeckEnrollmentService deckEnrollmentService;
+    private final GenericEventProducer eventProducer;
 
     public DeckServiceImpl(
             DeckRepository deckRepository,
-            DeckEnrollmentService deckEnrollmentService) {
+            DeckEnrollmentService deckEnrollmentService,
+            GenericEventProducer eventProducer) {
         this.deckRepository = deckRepository;
         this.deckEnrollmentService = deckEnrollmentService;
+        this.eventProducer = eventProducer;
     }
 
     /**
@@ -83,6 +91,17 @@ public class DeckServiceImpl implements DeckService {
                 .difficulty(createDeckDto.getDifficulty())
                 .build();
         deckRepository.save(deck);
+        DeckCreatedEvent deckCreatedEvent = DeckCreatedEvent.builder()
+                .eventTime(deck.getCreatedAt())
+                .deckId(deck.getId())
+                .userId(userId)
+                .deckName(deck.getName())
+                .deckCategory(deck.getCategory().name())
+                .languageFrom(deck.getLanguageFrom().name())
+                .languageTo(deck.getLanguageTo().name())
+                .receivedAt(Instant.now())
+                .build();
+        eventProducer.send(KafkaTopic.DECK_CREATED, deckCreatedEvent);
         log.info("Talia '{}' została utworzona przez użytkownika {}", createDeckDto.getDeckName(), userId);
     }
 

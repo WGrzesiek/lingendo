@@ -1,5 +1,9 @@
 package com.learnwords.deckservice.service.impl;
 
+import com.learnwords.common.KafkaTopic;
+import com.learnwords.common.events.DeckEnrollmentsFinished;
+import com.learnwords.common.events.SessionFinishedEvent;
+import com.learnwords.common.events.SessionStartedEvent;
 import com.learnwords.deckservice.dto.session.SessionDto;
 import com.learnwords.deckservice.entity.DeckEnrollment;
 import com.learnwords.deckservice.entity.Flashcard;
@@ -15,6 +19,7 @@ import com.learnwords.deckservice.service.SessionFlashcardService;
 import com.learnwords.deckservice.service.SessionService;
 import com.learnwords.deckservice.service.algorithm.AbstractAlgorithm;
 import com.learnwords.deckservice.service.algorithm.AlgorithmFactory;
+import com.learnwords.deckservice.service.event.GenericEventProducer;
 import com.learnwords.deckservice.service.utils.DeckUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -22,6 +27,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Duration;
 import java.time.Instant;
+import java.util.List;
 import java.util.UUID;
 
 import static com.learnwords.deckservice.service.utils.SessionUtils.getSessionIfUserHasPermissions;
@@ -44,17 +50,20 @@ public class SessionServiceImpl implements SessionService {
     private final SessionRepository sessionRepository;
     private final SessionFlashcardService sessionFlashcardService;
     private final AlgorithmFactory algorithmFactory;
+    private final GenericEventProducer eventProducer;
 
 
     public SessionServiceImpl(
             DeckEnrollmentRepository deckEnrollmentRepository,
             SessionRepository sessionRepository,
             SessionFlashcardService sessionFlashcardService,
-            AlgorithmFactory algorithmFactory) {
+            AlgorithmFactory algorithmFactory,
+            GenericEventProducer eventProducer) {
         this.deckEnrollmentRepository = deckEnrollmentRepository;
         this.sessionRepository = sessionRepository;
         this.sessionFlashcardService = sessionFlashcardService;
         this.algorithmFactory = algorithmFactory;
+        this.eventProducer = eventProducer;
     }
 
     /**
@@ -104,7 +113,16 @@ public class SessionServiceImpl implements SessionService {
         sessionFlashcardService.populateSessionWithFlashcards(sessionId, deckId, flashcardFetchStrategy, userId);
         log.info("Pomyślnie zainicjalizowano sesję - sessionId: '{}'",
                 session.getId());
-
+        SessionStartedEvent event = SessionStartedEvent.builder()
+                .eventTime(session.getCreatedAt())
+                .sessionId(sessionId)
+                .userId(userId)
+                .deckId(deckEnrollment.getDeck().getId())
+                .deckName(deckEnrollment.getDeck().getName())
+                .deckEnrollmentId(deckEnrollment.getId())
+                .receivedAt(Instant.now())
+                .build();
+        eventProducer.send(KafkaTopic.SESSION_STARTED, event);
         return session.getId();
     }
 
@@ -141,7 +159,6 @@ public class SessionServiceImpl implements SessionService {
                     sessionId, session.getStatus(), userId);
             throw new SessionNotActiveException(sessionId, session.getStatus().toString());
         }
-        
         Instant now = Instant.now();
         session.setCompletedAt(now);
         session.setStatus(SessionStatus.COMPLETED);
@@ -151,6 +168,38 @@ public class SessionServiceImpl implements SessionService {
         DeckEnrollment enrollment = session.getEnrollment();
         long duration = Duration.between(session.getStartedAt(), now).getSeconds();
         enrollment.incrementCompletedSessions(duration);
+
+        SessionFinishedEvent eventS = SessionFinishedEvent.builder()
+                .eventTime(session.getCompletedAt())
+                .sessionId(sessionId)
+                .userId(userId)
+                .deckId(enrollment.getDeck().getId())
+                .deckName(enrollment.getDeck().getName())
+                .deckEnrollmentId(enrollment.getId())
+                .receivedAt(Instant.now())
+                .build();
+        eventProducer.send(KafkaTopic.SESSION_FINISHED, eventS);
+        boolean hasActiveSessions = sessionRepository.existsByEnrollment_IdAndStatusIn(
+                enrollment.getId(),
+                List.of(SessionStatus.IN_PROGRESS, SessionStatus.PAUSED)
+        );
+
+        if (!hasActiveSessions) {
+            enrollment.markCompleted();
+            log.info("Ukończono naukę talii - deckEnrollmentId: '{}'", enrollment.getId());
+
+            DeckEnrollmentsFinished enrollmentFinishedEvent = DeckEnrollmentsFinished.builder()
+                    .eventTime(session.getCompletedAt())
+                    .deckEnrollmentId(enrollment.getId())
+                    .deckId(enrollment.getDeck().getId())
+                    .deckName(enrollment.getDeck().getName())
+                    .userId(userId)
+                    .receivedAt(Instant.now())
+                    .build();
+
+            eventProducer.send(KafkaTopic.DECK_ENROLLMENT_FINISHED, enrollmentFinishedEvent);
+        }
+
         deckEnrollmentRepository.save(enrollment);
     }
 
