@@ -11,6 +11,7 @@ public record SessionFinishedEvent(
         String sessionId,
         String userId,
         String deckId,
+        String deckName,
         String deckEnrollmentId,
         int correctAnswers,
         int incorrectAnswers,

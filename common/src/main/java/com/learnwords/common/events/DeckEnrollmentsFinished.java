@@ -9,6 +9,7 @@ public record DeckEnrollmentsFinished(
         Instant eventTime,
         String deckEnrollmentId,
         String deckId,
+        String deckName,
         String userId,
         Instant receivedAt
 

@@ -10,6 +10,7 @@ public record SessionStartedEvent (
     String sessionId,
     String userId,
     String deckId,
+    String deckName,
     String deckEnrollmentId,
     Instant receivedAt
 ) implements DomainEvent {}
