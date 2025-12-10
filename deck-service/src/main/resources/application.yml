@@ -4,12 +4,12 @@ spring:
 
   jpa:
     hibernate:
-      ddl-auto: none
+      ddl-auto: update
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
   datasource:
-    url: jdbc:postgresql://${DB_POSTGRESQL_HOST:localhost}:${DB_POSTGRESQL_PORT:5432}/${DB_POSTGRESQL_NAME:deck}
+    url: jdbc:postgresql://${DB_POSTGRESQL_HOST:192.168.23.9}:${DB_POSTGRESQL_PORT:5432}/${DB_POSTGRESQL_NAME:deck}
     username: ${DB_POSTGRESQL_USER:admin}
     password: ${DB_POSTGRESQL_PASSWORD:adminpassword}
   flyway:
@@ -33,11 +33,6 @@ spring:
       properties:
         spring.deserializer.value.delegate.class: org.springframework.kafka.support.serializer.JsonDeserializer
         spring.json.trusted.packages: "*"
-  security:
-    oauth2:
-      resourceserver:
-        jwt:
-          jwk-set-uri: ${JWK_SET_URI:http://localhost:8810/.well-known/jwks.json}
 server:
   port: ${SERVER_PORT:8814}
 logging:
@@ -53,9 +48,11 @@ logging:
 grpc:
   client:
     vocabulary-read:
-      address: ${GRPC_VOCAB_READ_ADDRESS:static://vocabulary-read-service:9099}           # np. static://vocabulary-read-service:0002
+      address: ${GRPC_VOCAB_READ_ADDRESS:static://192.168.23.9:9099}           # np. static://vocabulary-read-service:0002
       negotiationType: ${GRPC_VOCAB_READ_NEGOTIATION:PLAINTEXT}
-
+    auth:
+      address: ${GRPC_CLIENT_AUTH_ADDRESS:static://192.168.23.9:9098}
+      negotiationType: ${GRPC_CLIENT_AUTH_NEGOTIATIONTYPE:PLAINTEXT}
 
 springdoc:
   api-docs:
