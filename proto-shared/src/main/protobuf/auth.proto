@@ -30,7 +30,12 @@ message GetUserByIdResponse{
   map<string, string> claims = 5;
 }
 
+message GetUserNameByIdResponse{
+  string username = 1;
+}
+
 service AuthService{
   rpc Authenticate(AuthenticateRequest) returns (AuthenticateResponse);
   rpc GetUserById(GetUserByIdRequest) returns (GetUserByIdResponse);
+  rpc GetUserNameById(GetUserByIdRequest) returns (GetUserNameByIdResponse);
 }
