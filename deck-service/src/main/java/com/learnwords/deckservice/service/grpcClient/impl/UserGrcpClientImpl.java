@@ -12,7 +12,7 @@ import java.util.concurrent.TimeUnit;
 public class UserGrcpClientImpl implements UserGrcpClient {
     private static final long GRPC_DEADLINE_MS = 800;
 
-    @GrpcClient("user-service")
+    @GrpcClient("auth")
     private AuthServiceGrpc.AuthServiceBlockingStub blockingStub;
     @Override
     public GetUserNameByIdResponse getUserNameById(String userId) {
