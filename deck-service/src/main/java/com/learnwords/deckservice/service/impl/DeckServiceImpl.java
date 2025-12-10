@@ -188,6 +188,18 @@ public class DeckServiceImpl implements DeckService {
         return mapToDeckDto(deck);
     }
 
+    @Override
+    public Deck getDeckById(String deckId) {
+        Deck deck = deckRepository.findById(deckId).orElseThrow(
+                () -> {
+                    log.error("Talia o ID '{}' nie istnieje", deckId);
+                    return new IllegalArgumentException("Talia o podanym ID nie istnieje");
+                }
+        );
+        log.info("Pomyślnie pobrano talię o ID '{}'", deckId);
+        return deck;
+    }
+
 
     /**
      * Filtruje talie na podstawie podanych parametrów.

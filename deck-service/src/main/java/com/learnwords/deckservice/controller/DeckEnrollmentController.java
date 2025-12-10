@@ -1,5 +1,6 @@
 package com.learnwords.deckservice.controller;
 
+import com.learnwords.deckservice.dto.course.CourseHeaderInfo;
 import com.learnwords.deckservice.dto.course.FlashcardsWithStatus;
 import com.learnwords.deckservice.dto.deckEnrollment.DeckEnrollmentDto;
 import com.learnwords.deckservice.dto.dashboard.StudentMyCourseListItemDto;
@@ -129,13 +130,10 @@ public class DeckEnrollmentController {
             @RequestParam(defaultValue = "10") int size
     ) {
         log.debug("Pobieranie zapisów (kursów) użytkownika {} - page: {}, size: {}", userId, page, size);
-
         Page<StudentMyCourseListItemDto> enrollments =
                 deckEnrollmentService.getStudentEnrollments(userId, page, size);
-
         log.info("Pobrano {} zapisów dla użytkownika {} (page: {}, size: {})",
                 enrollments.getNumberOfElements(), userId, page, size);
-
         return ResponseEntity.ok(enrollments);
     }
 
@@ -150,9 +148,7 @@ public class DeckEnrollmentController {
             @RequestHeader(USER_ID_HEADER) String userId
     ) {
         log.debug("Pobieranie zapisu użytkownika {} na talię {}", userId, deckId);
-
         DeckEnrollmentDto enrollment = deckEnrollmentService.getEnrollment(userId, deckId);
-
         log.info("Pobrano zapis użytkownika {} na talię {}", userId, deckId);
         return ResponseEntity.ok(enrollment);
     }
@@ -164,26 +160,30 @@ public class DeckEnrollmentController {
     public ResponseEntity<Page<FlashcardsWithStatus>> getCourseView(
             @Parameter(description = "ID zapisu na talię (enrollment)", required = true, example = "enr-123")
             @PathVariable String enrollmentId,
-
             @Parameter(description = "ID użytkownika z nagłówka", required = true, example = "user-123")
             @RequestHeader(USER_ID_HEADER) String userId,
-
             @Parameter(description = "Numer strony (0-based)", example = "0")
             @RequestParam(defaultValue = "0") int page,
-
             @Parameter(description = "Rozmiar strony", example = "20")
             @RequestParam(defaultValue = "20") int size
     ) {
         log.debug("Pobieranie course-view dla enrollment {} (userId: {}, page: {}, size: {})",
                 enrollmentId, userId, page, size);
-
         Page<FlashcardsWithStatus> result =
                 courseViewFacade.getFlashcardsForCourseView(userId, enrollmentId, page, size);
-
         log.info("Pobrano {} fiszek dla enrollment {} (userId: {})",
                 result.getContent().size(), enrollmentId, userId);
-
         return ResponseEntity.ok(result);
+    }
+
+    @GetMapping("/{enrollmentId}/course-header")
+    public CourseHeaderInfo getCourseHeader(
+            @Parameter(description = "ID zapisu na talię (enrollment)", required = true, example = "enr-123")
+            @PathVariable String enrollmentId,
+            @Parameter(description = "ID użytkownika z nagłówka", required = true, example = "user-123")
+            @RequestHeader(USER_ID_HEADER) String userId
+    ) {
+        return courseViewFacade.getCourseHeaderInfo(enrollmentId, userId);
     }
 
 }

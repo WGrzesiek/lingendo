@@ -4,6 +4,7 @@ import com.learnwords.deckservice.dto.*;
 import com.learnwords.deckservice.dto.deck.CreateDeckDto;
 import com.learnwords.deckservice.dto.deck.DeckDetailsDto;
 import com.learnwords.deckservice.dto.deck.DeckDto;
+import com.learnwords.deckservice.entity.Deck;
 import com.learnwords.deckservice.enums.DeckOwner;
 import com.learnwords.deckservice.enums.DeckVisibility;
 
@@ -56,6 +57,8 @@ public interface DeckService {
     DeckOwner changeDeckOwner(String deckId, String userId, DeckOwner newOwner);
 
     DeckDto getDeckById(String deckId, String userId);
+    Deck getDeckById(String deckId);
+
     List<DeckDto> getDecksByFilter(String userId, DeckVisibility visibility, DeckOwner owner);
     DeckDetailsDto getDeckDetailsById(String deckId, String userId); // Szczegóły statyczne (opis, ilość słów)
     DeckDetailsDto editDeckDetails(String deckId, DeckDetailsDto deckDetailsDto, String userId);
