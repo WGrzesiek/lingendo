@@ -30,11 +30,10 @@ public class CourseViewFacade {
     public FlashcardsWithStatus getFlashcardsForCourseView(String userId, String enrollmentId, int page, int size){
         Pageable pageable = PageRequest.of(page, size, Sort.by("isLearned").ascending());
 
-        Page<List<UserFlashcardProgressDto>> progressPage =
+        Page<UserFlashcardProgressDto> progressPage =
                 userProgressService.getProgressForEnrollment(enrollmentId, userId, pageable);
 
         List<UserFlashcardProgressDto> progresses = progressPage.getContent().stream()
-                .flatMap(List::stream)
                 .toList();
 
         List<String> flashcardIds = progresses.stream()

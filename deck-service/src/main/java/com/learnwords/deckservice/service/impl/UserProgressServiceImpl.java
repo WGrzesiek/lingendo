@@ -274,25 +274,32 @@ public class UserProgressServiceImpl implements UserProgressService {
     }
 
     @Override
-    public Page<List<UserFlashcardProgressDto>> getProgressForEnrollment(String enrollmentId, String userId, Pageable pageable) {
+    public Page<UserFlashcardProgressDto> getProgressForEnrollment(
+            String enrollmentId,
+            String userId,
+            Pageable pageable
+    ) {
         if (userId == null || userId.isBlank()) {
             log.error("UserId jest pusty");
             throw new IllegalArgumentException("UserId nie może być pusty");
         }
-        Page<List<UserFlashcardProgress>> progresses = userFlashcardProgressRepository.findByEnrollment_Id(enrollmentId, pageable);
-        return progresses.map(progressList -> progressList.stream()
-                .map(progress -> UserFlashcardProgressDto.builder()
-                        .id(progress.getId())
-                        .flashcardId(progress.getFlashcard().getId())
-                        .enrollmentId(progress.getEnrollment().getId())
-                        .userId(progress.getUserId())
-                        .phase(progress.getPhase())
-                        .isLearned(progress.isLearned())
-                        .isSkipped(progress.isSkipped())
-                        .repetitionCount(progress.getRepetitionCount())
-                        .nextReviewAt(progress.getNextReviewAt())
-                        .algorithmState(progress.getAlgorithmState())
-                        .build())
-                .toList());
+
+        Page<UserFlashcardProgress> progresses =
+                userFlashcardProgressRepository.findByEnrollment_Id(enrollmentId, pageable);
+
+        return progresses.map(progress -> UserFlashcardProgressDto.builder()
+                .id(progress.getId())
+                .flashcardId(progress.getFlashcard().getId())
+                .enrollmentId(progress.getEnrollment().getId())
+                .userId(progress.getUserId())
+                .phase(progress.getPhase())
+                .isLearned(progress.isLearned())
+                .isSkipped(progress.isSkipped())
+                .repetitionCount(progress.getRepetitionCount())
+                .nextReviewAt(progress.getNextReviewAt())
+                .algorithmState(progress.getAlgorithmState())
+                .build()
+        );
     }
+
 }

@@ -20,5 +20,5 @@ public interface UserProgressService {
     void initializeDeckFlashcardsState(String deckId, String userId);
     UserFlashcardProgressDto getFlashcardProgress(String flashcardId, String userId);
     void updateProgress(UserFlashcardProgressDto progressDto, AlgorithmResult result, boolean isCorrect);
-    Page<List<UserFlashcardProgressDto>> getProgressForEnrollment(String enrollmentId, String userId, Pageable pageable);
+    Page<UserFlashcardProgressDto> getProgressForEnrollment(String enrollmentId, String userId, Pageable pageable);
 }

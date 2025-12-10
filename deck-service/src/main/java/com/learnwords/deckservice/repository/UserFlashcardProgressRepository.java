@@ -12,5 +12,6 @@ public interface UserFlashcardProgressRepository extends JpaRepository<com.learn
     List<UserFlashcardProgress> findByEnrollment_Id(String enrollmentId);
     Optional<UserFlashcardProgress> findByFlashcard_IdAndEnrollment_Id(String flashcardId, String enrollmentId);
     Optional<UserFlashcardProgress> findByFlashcard_IdAndUserId(String flashcardId, String userId);
-    Page<List<UserFlashcardProgress>> findByEnrollment_Id(String enrollmentId, Pageable pageable);
+    Page<UserFlashcardProgress> findByEnrollment_Id(String enrollmentId, Pageable pageable);
+
 }
