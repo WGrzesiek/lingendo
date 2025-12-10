@@ -93,7 +93,7 @@ public class CourseViewFacade {
     }
 
     public CourseHeaderInfo getCourseHeaderInfo(String enrollmentId, String userId) {
-        DeckEnrollmentDto enrollment = deckEnrollmentService.getEnrollment(enrollmentId, userId);
+        DeckEnrollmentDto enrollment = deckEnrollmentService.getEnrollment(userId,enrollmentId);
         String deckId = enrollment.getDeckId();
         Deck deck = deckService.getDeckById(deckId);
         GetUserNameByIdResponse userResponse = userGrcpClient.getUserNameById(deck.getOwnerId());
