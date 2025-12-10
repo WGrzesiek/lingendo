@@ -21,6 +21,8 @@ import com.learnwords.deckservice.service.evaluationService.responseResult.Succe
 import com.learnwords.deckservice.service.utils.DeckUtils;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -269,5 +271,28 @@ public class UserProgressServiceImpl implements UserProgressService {
         }
 
         userFlashcardProgressRepository.save(entity);
+    }
+
+    @Override
+    public Page<List<UserFlashcardProgressDto>> getProgressForEnrollment(String enrollmentId, String userId, Pageable pageable) {
+        if (userId == null || userId.isBlank()) {
+            log.error("UserId jest pusty");
+            throw new IllegalArgumentException("UserId nie może być pusty");
+        }
+        Page<List<UserFlashcardProgress>> progresses = userFlashcardProgressRepository.findByEnrollment_Id(enrollmentId, pageable);
+        return progresses.map(progressList -> progressList.stream()
+                .map(progress -> UserFlashcardProgressDto.builder()
+                        .id(progress.getId())
+                        .flashcardId(progress.getFlashcard().getId())
+                        .enrollmentId(progress.getEnrollment().getId())
+                        .userId(progress.getUserId())
+                        .phase(progress.getPhase())
+                        .isLearned(progress.isLearned())
+                        .isSkipped(progress.isSkipped())
+                        .repetitionCount(progress.getRepetitionCount())
+                        .nextReviewAt(progress.getNextReviewAt())
+                        .algorithmState(progress.getAlgorithmState())
+                        .build())
+                .toList());
     }
 }

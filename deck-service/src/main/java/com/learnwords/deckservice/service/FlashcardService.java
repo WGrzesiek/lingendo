@@ -4,6 +4,8 @@ import com.learnwords.common.dto.SendWordFromKafkaDto;
 import com.learnwords.common.dto.WordDto;
 import com.learnwords.deckservice.dto.flashcard.FlashcardDto;
 import com.learnwords.deckservice.entity.Flashcard;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 import java.util.Optional;
@@ -52,6 +54,7 @@ public interface FlashcardService {
     void processFlashcardCreateFromKafka(SendWordFromKafkaDto sendWordFromKafkaDto);
     void updateFlashcardContent(String flashcardId, WordDto newWord, String userId);
     FlashcardDto getFlashcardById(String flashcardId, String userId);
+    Page<List<FlashcardDto>> getFlashcardsFromDeckPaged(String deckId, String userId, Pageable pageable);
     List<FlashcardDto> getAllFlashcardsFromDeck(String deckId, String userId);
 }
 

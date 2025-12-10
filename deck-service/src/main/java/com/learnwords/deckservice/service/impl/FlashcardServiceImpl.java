@@ -25,6 +25,10 @@ import com.learnwords.vocabulary.v1.Word;
 
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Service;
 
@@ -111,6 +115,17 @@ public class FlashcardServiceImpl implements FlashcardService {
 
         log.debug("Zwrócono fiszkę - flashcardId: '{}', wordId: '{}'", flashcardId, flashcard.getWordId());
         return flashcardDto;
+    }
+
+    @Override
+    public Page<List<FlashcardDto>> getFlashcardsFromDeckPaged(String deckId, String userId, Pageable pageable) {
+        if (userId == null || userId.isBlank()) {
+            log.error("UserId jest pusty");
+            throw new IllegalArgumentException("UserId nie może być pusty");
+        }
+        Page<List<Flashcard>> flashcardsPage = flashcardRepository.findByDeckId(deckId, pageable);
+        log.debug("Pobieranie fiszek z talii - deckId: '{}' userId: '{}'", deckId, userId);
+        return flashcardsPage.map(this::mapFlashcardsToDto);
     }
 
     /**

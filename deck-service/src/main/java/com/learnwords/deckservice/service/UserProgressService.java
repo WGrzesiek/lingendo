@@ -4,6 +4,8 @@ import com.learnwords.deckservice.dto.userFlashcardProgress.UserFlashcardProgres
 import com.learnwords.deckservice.entity.Flashcard;
 import com.learnwords.deckservice.service.algorithm.state.AlgorithmState;
 import com.learnwords.deckservice.service.evaluationService.responseResult.AlgorithmResult;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 
@@ -18,4 +20,5 @@ public interface UserProgressService {
     void initializeDeckFlashcardsState(String deckId, String userId);
     UserFlashcardProgressDto getFlashcardProgress(String flashcardId, String userId);
     void updateProgress(UserFlashcardProgressDto progressDto, AlgorithmResult result, boolean isCorrect);
+    Page<List<UserFlashcardProgressDto>> getProgressForEnrollment(String enrollmentId, String userId, Pageable pageable);
 }

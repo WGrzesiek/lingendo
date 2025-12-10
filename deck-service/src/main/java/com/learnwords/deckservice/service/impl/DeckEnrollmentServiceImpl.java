@@ -2,9 +2,12 @@ package com.learnwords.deckservice.service.impl;
 
 import com.learnwords.common.KafkaTopic;
 import com.learnwords.common.events.DeckEnrollmentsCreated;
+import com.learnwords.deckservice.dto.course.FlashcardsWithStatus;
 import com.learnwords.deckservice.dto.deckEnrollment.CreateDeckEnrollmentDto;
 import com.learnwords.deckservice.dto.deckEnrollment.DeckEnrollmentDto;
 import com.learnwords.deckservice.dto.dashboard.StudentMyCourseListItemDto;
+import com.learnwords.deckservice.dto.flashcard.FlashcardDto;
+import com.learnwords.deckservice.dto.userFlashcardProgress.UserFlashcardProgressDto;
 import com.learnwords.deckservice.entity.Deck;
 import com.learnwords.deckservice.entity.DeckEnrollment;
 import com.learnwords.deckservice.enums.DeckEnrollmentRole;
@@ -14,6 +17,8 @@ import com.learnwords.deckservice.enums.LearnAlgorithm;
 import com.learnwords.deckservice.repository.DeckEnrollmentRepository;
 import com.learnwords.deckservice.repository.DeckRepository;
 import com.learnwords.deckservice.service.DeckEnrollmentService;
+import com.learnwords.deckservice.service.FlashcardService;
+import com.learnwords.deckservice.service.UserProgressService;
 import com.learnwords.deckservice.service.event.GenericEventProducer;
 import com.learnwords.deckservice.service.utils.DeckUtils;
 import jakarta.transaction.Transactional;
@@ -26,6 +31,7 @@ import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
+import java.util.List;
 
 @Slf4j
 @Service
@@ -33,11 +39,15 @@ public class DeckEnrollmentServiceImpl implements DeckEnrollmentService {
     private final DeckRepository deckRepository;
     private final DeckEnrollmentRepository deckEnrollmentRepository;
     private final GenericEventProducer eventProducer;
+    private final FlashcardService flashcardService;
+    private final UserProgressService userProgressService;
 
-    public DeckEnrollmentServiceImpl(DeckRepository deckRepository, DeckEnrollmentRepository deckEnrollmentRepository, GenericEventProducer eventProducer) {
+    public DeckEnrollmentServiceImpl(DeckRepository deckRepository, DeckEnrollmentRepository deckEnrollmentRepository, GenericEventProducer eventProducer, FlashcardService flashcardService, UserProgressService userProgressService) {
         this.eventProducer = eventProducer;
         this.deckRepository = deckRepository;
         this.deckEnrollmentRepository = deckEnrollmentRepository;
+        this.flashcardService = flashcardService;
+        this.userProgressService = userProgressService;
     }
 
     @Override
@@ -159,6 +169,27 @@ public class DeckEnrollmentServiceImpl implements DeckEnrollmentService {
                         ((double) deckEnrollment.getLearnedFlashcardsCount() / deckEnrollment.getDeck().getWordCount()) * 100)
                 .joinedAt(deckEnrollment.getJoinedAt())
                 .lastAccessedAt(deckEnrollment.getLastAccessedAt())
+                .build();
+    }
+
+    @Override
+    public FlashcardsWithStatus getFlashcardsForCourseView(String userId, String deckId, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by("id").ascending());
+        Page<List<FlashcardDto>> flashcardsPage = flashcardService.getFlashcardsFromDeckPaged(deckId, userId, pageable );
+        Page<List<UserFlashcardProgressDto>> progressPage = userProgressService.getProgressForEnrollment(deckId, userId, pageable);
+        List<FlashcardDto> flashcards =
+                flashcardsPage.getContent().stream()
+                        .flatMap(List::stream)
+                        .toList();
+
+        List<UserFlashcardProgressDto> progresses =
+                progressPage.getContent().stream()
+                        .flatMap(List::stream)
+                        .toList();
+
+        return FlashcardsWithStatus.builder()
+                .flashcardDto(flashcards)
+                .userFlashcardProgressDto(progresses)
                 .build();
     }
 

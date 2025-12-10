@@ -46,7 +46,6 @@ import java.util.List;
  * @see com.learnwords.deckservice.entity.Deck
  * @see DeckDto
  * @see DeckDetailsDto
- * @see DeckStatisticsDto
  * @see com.learnwords.deckservice.service.impl.DeckServiceImpl
  */
 public interface DeckService {
