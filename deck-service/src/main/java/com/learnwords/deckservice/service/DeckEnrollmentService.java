@@ -17,5 +17,4 @@ public interface DeckEnrollmentService {
     void updateHowManyFlashcardsForOneSession(String enrollmentId, String userId, int limit);
     Page<StudentMyCourseListItemDto> getStudentEnrollments(String userId, int page, int size);
     DeckEnrollmentDto getEnrollment(String userId, String deckId);
-    FlashcardsWithStatus getFlashcardsForCourseView(String userId, String deckId, int page, int size);
 }

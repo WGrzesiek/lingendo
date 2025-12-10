@@ -39,15 +39,12 @@ public class DeckEnrollmentServiceImpl implements DeckEnrollmentService {
     private final DeckRepository deckRepository;
     private final DeckEnrollmentRepository deckEnrollmentRepository;
     private final GenericEventProducer eventProducer;
-    private final FlashcardService flashcardService;
-    private final UserProgressService userProgressService;
 
-    public DeckEnrollmentServiceImpl(DeckRepository deckRepository, DeckEnrollmentRepository deckEnrollmentRepository, GenericEventProducer eventProducer, FlashcardService flashcardService, UserProgressService userProgressService) {
+
+    public DeckEnrollmentServiceImpl(DeckRepository deckRepository, DeckEnrollmentRepository deckEnrollmentRepository, GenericEventProducer eventProducer) {
         this.eventProducer = eventProducer;
         this.deckRepository = deckRepository;
         this.deckEnrollmentRepository = deckEnrollmentRepository;
-        this.flashcardService = flashcardService;
-        this.userProgressService = userProgressService;
     }
 
     @Override
@@ -169,27 +166,6 @@ public class DeckEnrollmentServiceImpl implements DeckEnrollmentService {
                         ((double) deckEnrollment.getLearnedFlashcardsCount() / deckEnrollment.getDeck().getWordCount()) * 100)
                 .joinedAt(deckEnrollment.getJoinedAt())
                 .lastAccessedAt(deckEnrollment.getLastAccessedAt())
-                .build();
-    }
-
-    @Override
-    public FlashcardsWithStatus getFlashcardsForCourseView(String userId, String deckId, int page, int size) {
-        Pageable pageable = PageRequest.of(page, size, Sort.by("id").ascending());
-        Page<List<FlashcardDto>> flashcardsPage = flashcardService.getFlashcardsFromDeckPaged(deckId, userId, pageable );
-        Page<List<UserFlashcardProgressDto>> progressPage = userProgressService.getProgressForEnrollment(deckId, userId, pageable);
-        List<FlashcardDto> flashcards =
-                flashcardsPage.getContent().stream()
-                        .flatMap(List::stream)
-                        .toList();
-
-        List<UserFlashcardProgressDto> progresses =
-                progressPage.getContent().stream()
-                        .flatMap(List::stream)
-                        .toList();
-
-        return FlashcardsWithStatus.builder()
-                .flashcardDto(flashcards)
-                .userFlashcardProgressDto(progresses)
                 .build();
     }
 

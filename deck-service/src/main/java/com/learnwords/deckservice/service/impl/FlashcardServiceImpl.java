@@ -231,6 +231,14 @@ public class FlashcardServiceImpl implements FlashcardService {
             return mapFlashcardsToDto(flashcards);
     }
 
+    @Override
+    public List<FlashcardDto> getFlashcardsByIds(List<String> flashcardIds) {
+        log.debug("Pobieranie fiszek po ID - flashcardIds count: {}", flashcardIds.size());
+        List<Flashcard> flashcards = flashcardRepository.findByIdIn(flashcardIds);
+        log.debug("Znaleziono fiszki po ID - found count: {}", flashcards.size());
+        return mapFlashcardsToDto(flashcards);
+    }
+
 
     /**
      * Aktualizuje słówko przypisane do fiszki.

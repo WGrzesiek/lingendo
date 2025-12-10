@@ -56,6 +56,7 @@ public interface FlashcardService {
     FlashcardDto getFlashcardById(String flashcardId, String userId);
     Page<List<FlashcardDto>> getFlashcardsFromDeckPaged(String deckId, String userId, Pageable pageable);
     List<FlashcardDto> getAllFlashcardsFromDeck(String deckId, String userId);
+    List<FlashcardDto> getFlashcardsByIds(List<String> flashcardIds);
 }
 
 //    public void addFlashcardToDeck(String deckId, String wordId, String userId);
