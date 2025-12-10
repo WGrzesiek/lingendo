@@ -10,8 +10,8 @@ import java.util.List;
 
 @Builder
 public record FlashcardsWithStatus(
-        List<FlashcardDto> flashcardDto,
-        List<UserFlashcardProgressDto> userFlashcardProgressDto,
-        List<FlashcardSessionNumber> sessionsNumber
+        FlashcardDto flashcard,
+        UserFlashcardProgressDto userFlashcardProgress,
+        Integer sessionNumber
 ) {
 }

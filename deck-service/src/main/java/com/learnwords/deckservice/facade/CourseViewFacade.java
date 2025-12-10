@@ -16,6 +16,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -33,14 +34,18 @@ public class CourseViewFacade {
         this.flashcardService = flashcardService;
     }
 
-    public FlashcardsWithStatus getFlashcardsForCourseView(String userId, String enrollmentId, int page, int size){
+    public Page<FlashcardsWithStatus> getFlashcardsForCourseView(
+            String userId,
+            String enrollmentId,
+            int page,
+            int size
+    ) {
         Pageable pageable = PageRequest.of(page, size, Sort.by("isLearned").descending());
 
         Page<UserFlashcardProgressDto> progressPage =
                 userProgressService.getProgressForEnrollment(enrollmentId, userId, pageable);
 
-        List<UserFlashcardProgressDto> progresses = progressPage.getContent().stream()
-                .toList();
+        List<UserFlashcardProgressDto> progresses = progressPage.getContent();
 
         List<String> flashcardIds = progresses.stream()
                 .map(UserFlashcardProgressDto::flashcardId)
@@ -49,11 +54,38 @@ public class CourseViewFacade {
         List<FlashcardDto> flashcards = flashcardService.getFlashcardsByIds(flashcardIds);
         List<FlashcardSessionNumber> flashcardSessionNumbers =
                 sessionFlashcardService.getFlashcardSessionNumbersByIds(flashcardIds);
-        return FlashcardsWithStatus.builder()
-                .flashcardDto(flashcards)
-                .userFlashcardProgressDto(progresses)
-                .sessionsNumber(flashcardSessionNumbers)
-                .build();
+
+        var flashcardById = flashcards.stream()
+                .collect(Collectors.toMap(FlashcardDto::id, f -> f));
+
+        var sessionNumberByFlashcardId = flashcardSessionNumbers.stream()
+                .collect(Collectors.toMap(
+                        FlashcardSessionNumber::flashcardId,
+                        FlashcardSessionNumber::sessionNumber,
+                        Math::max
+                ));
+
+        return progressPage.map(progress -> {
+            FlashcardDto flashcard = flashcardById.get(progress.flashcardId());
+            Integer sessionNumber = sessionNumberByFlashcardId.get(progress.flashcardId());
+
+            return FlashcardsWithStatus.builder()
+                    .flashcard(flashcard)
+                    .userFlashcardProgress(progress)
+                    .sessionNumber(sessionNumber)
+                    .build();
+        });
     }
+
+
+
+
+//        return new FlashcardsWithStatus(flashcards, progresses, flashcardSessionNumbers);
+//        return new FlashcardsWithStatus.builder()
+//                .flashcardDto(flashcards)
+//                .userFlashcardProgressDto(progresses)
+//                .sessionsNumber(flashcardSessionNumbers)
+//                .build();
+//    }
 }
 

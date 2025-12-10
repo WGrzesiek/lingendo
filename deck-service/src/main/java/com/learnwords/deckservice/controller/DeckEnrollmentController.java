@@ -161,7 +161,7 @@ public class DeckEnrollmentController {
      * Pobranie fiszek + statusów użytkownika dla widoku kursu (course-view).
      */
     @GetMapping("/enrollments/{enrollmentId}/course-view")
-    public ResponseEntity<FlashcardsWithStatus> getCourseView(
+    public ResponseEntity<Page<FlashcardsWithStatus>> getCourseView(
             @Parameter(description = "ID zapisu na talię (enrollment)", required = true, example = "enr-123")
             @PathVariable String enrollmentId,
 
@@ -177,11 +177,11 @@ public class DeckEnrollmentController {
         log.debug("Pobieranie course-view dla enrollment {} (userId: {}, page: {}, size: {})",
                 enrollmentId, userId, page, size);
 
-        FlashcardsWithStatus result =
+        Page<FlashcardsWithStatus> result =
                 courseViewFacade.getFlashcardsForCourseView(userId, enrollmentId, page, size);
 
         log.info("Pobrano {} fiszek dla enrollment {} (userId: {})",
-                result.flashcardDto().size(), enrollmentId, userId);
+                result.getContent().size(), enrollmentId, userId);
 
         return ResponseEntity.ok(result);
     }
