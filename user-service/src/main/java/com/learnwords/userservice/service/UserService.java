@@ -14,4 +14,5 @@ public interface UserService {
     void registerUser(RegisterRequest registerRequest) throws UsernameAlreadyExistsException, EmailAlreadyExistsException;
     AppUserDetails authenticate(String username, String password);
     AppUserDetails getUserInfo(String userId) throws UserNotFoundException;
+    String getUsernameById(String userId);
 }

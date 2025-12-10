@@ -101,6 +101,15 @@ public class UserServiceImpl implements UserService {
         return new AppUserDetails(user);
     }
 
+    @Override
+    public String getUsernameById(String userId) {
+        log.info("Getting username for userId: {}", userId);
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found with id: " + userId));
+        log.info("Username {} retrieved for userId: {}", user.getUsername(), userId);
+        return user.getUsername();
+    }
+
     private User loadUserByUsername(String username) throws UsernameNotFoundException {
         log.info("Loading user by username: {}", username);
         User user = userRepository.findByUsername(username)
