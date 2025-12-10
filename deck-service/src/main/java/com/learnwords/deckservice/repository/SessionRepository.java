@@ -15,5 +15,6 @@ import java.util.Collection;
  */
 public interface SessionRepository extends JpaRepository<Session, String> {
     boolean existsByEnrollment_IdAndStatusIn(String enrollmentId, Collection<SessionStatus> statuses);
+    int countByEnrollment_Id(String enrollmentId);
 
 }

@@ -43,6 +43,9 @@ public class Session {
     @Column(name = "completed_at")
     private Instant completedAt;
 
+    @Column(name = "session_number")
+    private Integer sessionNumber;
+
     @Builder.Default
     @Column(nullable = false, updatable = false)
     private Instant createdAt = Instant.now();

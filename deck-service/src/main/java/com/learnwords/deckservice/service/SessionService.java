@@ -1,7 +1,10 @@
 package com.learnwords.deckservice.service;
 
+import com.learnwords.deckservice.dto.session.FlashcardSessionNumber;
 import com.learnwords.deckservice.dto.session.SessionDto;
 import com.learnwords.deckservice.enums.SessionType;
+
+import java.util.List;
 
 /**
  * Serwis zarządzania sesjami nauki.

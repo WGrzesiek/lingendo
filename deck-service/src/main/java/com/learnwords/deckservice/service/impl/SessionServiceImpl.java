@@ -95,7 +95,7 @@ public class SessionServiceImpl implements SessionService {
 
         DeckEnrollment deckEnrollment = DeckUtils.getDeckEnrollmentIfUserHasPermissions(deckEnrollmentRepository, deckId, userId);
         AbstractAlgorithm algorithm = algorithmFactory.get(deckEnrollment.getPreferredAlgorithm());
-
+        int sessionNumber = sessionRepository.countByEnrollment_Id(deckEnrollment.getId()) + 1;
         log.debug("Liczba fiszek w sesji - deckId: '{}'", deckId);
 
         String sessionId = UUID.randomUUID().toString();
@@ -105,6 +105,7 @@ public class SessionServiceImpl implements SessionService {
                 .status(SessionStatus.IN_PROGRESS)
                 .type(SessionType.LEARNING)
                 .startedAt(Instant.now())
+                .sessionNumber(sessionNumber)
                 .build();
 
         sessionRepository.save(session);
