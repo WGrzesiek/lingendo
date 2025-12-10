@@ -119,6 +119,7 @@ public class DeckEnrollmentServiceImpl implements DeckEnrollmentService {
             int completionPercent = (totalWords == 0) ? 0 : (int) ((double) learnedWords / totalWords * 100);
 
             return new StudentMyCourseListItemDto(
+                    enrollment.getId(),
                     deck.getId(),
                     deck.getName(),
                     deck.getDescription(),

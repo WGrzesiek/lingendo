@@ -6,7 +6,8 @@ import com.learnwords.deckservice.enums.DeckOwner;
 
 import java.time.Instant;
 
-public record StudentMyCourseListItemDto(String deckId,
+public record StudentMyCourseListItemDto(String enrollmentId,
+                                         String deckId,
                                          String deckName,
                                          String deckDescription,
                                          Long totalSession,
