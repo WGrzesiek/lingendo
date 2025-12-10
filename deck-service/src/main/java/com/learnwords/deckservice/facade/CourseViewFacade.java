@@ -28,7 +28,7 @@ public class CourseViewFacade {
     }
 
     public FlashcardsWithStatus getFlashcardsForCourseView(String userId, String enrollmentId, int page, int size){
-        Pageable pageable = PageRequest.of(page, size, Sort.by("isLearned").ascending());
+        Pageable pageable = PageRequest.of(page, size, Sort.by("isLearned").descending());
 
         Page<UserFlashcardProgressDto> progressPage =
                 userProgressService.getProgressForEnrollment(enrollmentId, userId, pageable);
