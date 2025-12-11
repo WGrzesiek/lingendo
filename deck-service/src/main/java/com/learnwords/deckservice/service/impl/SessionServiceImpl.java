@@ -315,7 +315,7 @@ public class SessionServiceImpl implements SessionService {
     }
 
     @Override
-    public int getCompletedSessionsCount(String userId, String deckId){
+    public int getCompletedSessionsCount(String deckId, String userId){
         log.debug("Pobieranie liczby ukończonych sesji - deckId: '{}', userId: '{}'", deckId, userId);
         DeckEnrollment enrollment = DeckUtils.getDeckEnrollmentIfUserHasPermissions(
                 deckEnrollmentRepository, deckId, userId);
