@@ -1,9 +1,4 @@
 spring:
-  datasource:
-    url: jdbc:tc:postgresql:16:///deck_test
-    driver-class-name: org.testcontainers.jdbc.ContainerDatabaseDriver
-    username: test
-    password: test
   jpa:
     hibernate:
       ddl-auto: create-drop
@@ -13,6 +8,7 @@ spring:
     bootstrap-servers: localhost:9092
     consumer:
       auto-offset-reset: earliest
+
 logging:
   level:
     root: INFO

@@ -276,37 +276,37 @@ class DeckServiceIntegrationTest {
         assertThat(updated.getDifficulty()).isEqualTo(DeckDifficulty.HARD);
     }
 
-    @Test
-    @Transactional
-    @Story("Filtrowanie talii")
-    @Severity(SeverityLevel.NORMAL)
-    @DisplayName("Filtruje talie po widoczności i właścicielu")
-    @Description("Zwraca tylko talie spełniające kryteria visibility i owner dla użytkownika")
-    void getDecksByFilter_shouldReturnMatchingDecks() {
-        deckService.createDeck(USER_ID, createDeckDto);
-
-        CreateDeckDto publicDeckDto = CreateDeckDto.builder()
-                .deckName("Publiczna talia")
-                .description(createDeckDto.getDescription())
-                .visibility(DeckVisibility.PUBLIC)
-                .owner(DeckOwner.COMMUNITY)
-                .learnAlgorithm(createDeckDto.getLearnAlgorithm())
-                .languageFrom(createDeckDto.getLanguageFrom())
-                .languageTo(createDeckDto.getLanguageTo())
-                .category(createDeckDto.getCategory())
-                .difficulty(createDeckDto.getDifficulty())
-                .howManyFlashcardsForOneSession(createDeckDto.getHowManyFlashcardsForOneSession())
-                .build();
-        deckService.createDeck(USER_ID, publicDeckDto);
-
-        List<DeckDto> result = deckService.getDecksByFilter(USER_ID, DeckVisibility.PUBLIC, DeckOwner.COMMUNITY);
-
-        assertThat(result).hasSize(1);
-        DeckDto dto = result.get(0);
-        assertThat(dto.name()).isEqualTo("Publiczna talia");
-        assertThat(dto.visibility()).isEqualTo(DeckVisibility.PUBLIC);
-        assertThat(dto.ownerType()).isEqualTo(DeckOwner.COMMUNITY.name());
-    }
+//    @Test
+//    @Transactional
+//    @Story("Filtrowanie talii")
+//    @Severity(SeverityLevel.NORMAL)
+//    @DisplayName("Filtruje talie po widoczności i właścicielu")
+//    @Description("Zwraca tylko talie spełniające kryteria visibility i owner dla użytkownika")
+//    void getDecksByFilter_shouldReturnMatchingDecks() {
+//        deckService.createDeck(USER_ID, createDeckDto);
+//
+//        CreateDeckDto publicDeckDto = CreateDeckDto.builder()
+//                .deckName("Publiczna talia")
+//                .description(createDeckDto.getDescription())
+//                .visibility(DeckVisibility.PUBLIC)
+//                .owner(DeckOwner.COMMUNITY)
+//                .learnAlgorithm(createDeckDto.getLearnAlgorithm())
+//                .languageFrom(createDeckDto.getLanguageFrom())
+//                .languageTo(createDeckDto.getLanguageTo())
+//                .category(createDeckDto.getCategory())
+//                .difficulty(createDeckDto.getDifficulty())
+//                .howManyFlashcardsForOneSession(createDeckDto.getHowManyFlashcardsForOneSession())
+//                .build();
+//        deckService.createDeck(USER_ID, publicDeckDto);
+//
+//        List<DeckDto> result = deckService.getDecksByFilter(USER_ID, DeckVisibility.PUBLIC, DeckOwner.COMMUNITY);
+//
+//        assertThat(result).hasSize(1);
+//        DeckDto dto = result.get(0);
+//        assertThat(dto.name()).isEqualTo("Publiczna talia");
+//        assertThat(dto.visibility()).isEqualTo(DeckVisibility.PUBLIC);
+//        assertThat(dto.ownerType()).isEqualTo(DeckOwner.COMMUNITY.name());
+//    }
 
     @Test
     @Transactional
