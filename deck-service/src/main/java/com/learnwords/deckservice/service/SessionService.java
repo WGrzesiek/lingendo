@@ -39,6 +39,7 @@ public interface SessionService {
     void pauseSession(String sessionId, String userId);
     void resumeSession(String sessionId, String userId);
     SessionDto getSessionById(String sessionId, String userId);
+    int getCompletedSessionsCount(String userId, String deckId);
 }
 
 

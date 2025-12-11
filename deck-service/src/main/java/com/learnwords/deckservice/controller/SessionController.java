@@ -1,8 +1,10 @@
 package com.learnwords.deckservice.controller;
 
+import com.learnwords.deckservice.dto.course.SessionProgress;
 import com.learnwords.deckservice.dto.session.SessionDto;
 
 import com.learnwords.deckservice.enums.SessionType;
+import com.learnwords.deckservice.facade.CourseViewFacade;
 import com.learnwords.deckservice.service.FlashcardFetchStrategy;
 import com.learnwords.deckservice.service.SessionService;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -23,9 +25,12 @@ public class SessionController {
     private static final String USER_ID_HEADER = "X-User-Id";
 
     private final SessionService sessionService;
+    private final CourseViewFacade courseViewFacade;
 
-    public SessionController(SessionService sessionService) {
+
+    public SessionController(SessionService sessionService, CourseViewFacade courseViewFacade) {
         this.sessionService = sessionService;
+        this.courseViewFacade = courseViewFacade;
     }
 
     /**
@@ -150,5 +155,22 @@ public class SessionController {
         log.info("Pobrano sesję {} userId: {}",
                 sessionId, userId);
         return ResponseEntity.ok(sessionDto);
+    }
+
+    @GetMapping("/sessions/{enrollmentId}/session-progres")
+    public ResponseEntity<SessionProgress> getSessionProgress(
+            @Parameter(description = "ID zapisu do talii", required = true, example = "enrollment-123")
+            @PathVariable String enrollmentId,
+            @Parameter(description = "ID użytkownika z nagłówka", required = true, example = "user-123")
+            @RequestHeader(USER_ID_HEADER) String userId
+    ) {
+        log.debug("Pobieranie postępu sesji dla enrollmentId: {} userId: {}",
+                enrollmentId, userId);
+
+        SessionProgress sessionProgress = courseViewFacade.getSessionProgress(enrollmentId, userId);
+
+        log.info("Pobrano postęp sesji dla enrollmentId: {} userId: {}",
+                enrollmentId, userId);
+        return ResponseEntity.ok(sessionProgress);
     }
 }

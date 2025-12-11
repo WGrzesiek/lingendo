@@ -302,4 +302,11 @@ public class UserProgressServiceImpl implements UserProgressService {
         );
     }
 
+    @Override
+    public int countWordsToReview(String enrollmentId, String userId) {
+        log.debug("Pobieranie liczby słów do powtórki - enrollmentId: '{}', userId: '{}'", enrollmentId, userId);
+        return userFlashcardProgressRepository.countByEnrollment_IdAndUserIdAndPhase(enrollmentId,userId,LearningPhase.REVIEW);
+    }
+
+
 }

@@ -2,6 +2,7 @@ package com.learnwords.deckservice.service;
 
 import com.learnwords.deckservice.dto.userFlashcardProgress.UserFlashcardProgressDto;
 import com.learnwords.deckservice.entity.Flashcard;
+import com.learnwords.deckservice.enums.LearningPhase;
 import com.learnwords.deckservice.service.algorithm.state.AlgorithmState;
 import com.learnwords.deckservice.service.evaluationService.responseResult.AlgorithmResult;
 import org.springframework.data.domain.Page;
@@ -21,4 +22,5 @@ public interface UserProgressService {
     UserFlashcardProgressDto getFlashcardProgress(String flashcardId, String userId);
     void updateProgress(UserFlashcardProgressDto progressDto, AlgorithmResult result, boolean isCorrect);
     Page<UserFlashcardProgressDto> getProgressForEnrollment(String enrollmentId, String userId, Pageable pageable);
+    int countWordsToReview(String enrollmentId, String userId);
 }

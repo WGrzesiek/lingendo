@@ -314,5 +314,17 @@ public class SessionServiceImpl implements SessionService {
                 .build();
     }
 
+    @Override
+    public int getCompletedSessionsCount(String userId, String deckId){
+        log.debug("Pobieranie liczby ukończonych sesji - deckId: '{}', userId: '{}'", deckId, userId);
+        DeckEnrollment enrollment = DeckUtils.getDeckEnrollmentIfUserHasPermissions(
+                deckEnrollmentRepository, deckId, userId);
+        int completedSessions = sessionRepository.countByEnrollment_IdAndStatus(
+                enrollment.getId(), SessionStatus.COMPLETED);
+        log.debug("Liczba ukończonych sesji - deckId: '{}', userId: '{}', completedSessions: '{}'",
+                deckId, userId, completedSessions);
+        return completedSessions;
+    }
+
 
 }

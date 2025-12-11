@@ -3,16 +3,15 @@ package com.learnwords.deckservice.facade;
 import com.learnwords.auth.v1.GetUserNameByIdResponse;
 import com.learnwords.deckservice.dto.course.CourseHeaderInfo;
 import com.learnwords.deckservice.dto.course.FlashcardsWithStatus;
+import com.learnwords.deckservice.dto.course.SessionProgress;
 import com.learnwords.deckservice.dto.deckEnrollment.DeckEnrollmentDto;
 import com.learnwords.deckservice.dto.flashcard.FlashcardDto;
 import com.learnwords.deckservice.dto.session.FlashcardSessionNumber;
 import com.learnwords.deckservice.dto.userFlashcardProgress.UserFlashcardProgressDto;
 import com.learnwords.deckservice.entity.Deck;
-import com.learnwords.deckservice.entity.DeckEnrollment;
 import com.learnwords.deckservice.service.*;
 import com.learnwords.deckservice.service.grpcClient.UserGrcpClient;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.catalina.User;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -32,13 +31,15 @@ public class CourseViewFacade {
     private final DeckService deckService;
     private final UserGrcpClient userGrcpClient;
     private final DeckEnrollmentService deckEnrollmentService;
+    private final SessionService sessionService;
 
     public CourseViewFacade(UserProgressService userProgressService,
                             FlashcardService flashcardService,
                             SessionFlashcardService sessionFlashcardService,
                             DeckService deckService,
                             UserGrcpClient userGrcpClient,
-                            DeckEnrollmentService deckEnrollmentService
+                            DeckEnrollmentService deckEnrollmentService,
+                            SessionService sessionService
 
     ){
         this.sessionFlashcardService = sessionFlashcardService;
@@ -47,6 +48,7 @@ public class CourseViewFacade {
         this.deckService = deckService;
         this.userGrcpClient = userGrcpClient;
         this.deckEnrollmentService = deckEnrollmentService;
+        this.sessionService = sessionService;
     }
 
     public Page<FlashcardsWithStatus> getFlashcardsForCourseView(
@@ -108,6 +110,27 @@ public class CourseViewFacade {
                 .languageFrom(deck.getLanguageFrom().name())
                 .languageTo(deck.getLanguageTo().name())
                 .build();
+    }
+
+
+    public SessionProgress getSessionProgress(String enrollmentId, String userId) {
+        DeckEnrollmentDto enrollment = deckEnrollmentService.getEnrollment(userId,enrollmentId);
+        String deckId = enrollment.getDeckId();
+        Deck deck = deckService.getDeckById(deckId);
+
+        int totalWords = deck.getWordCount();
+        long wordsPerSession = deck.getHowManyFlashcardsForOneSession();
+        int totalSessions = (int) Math.ceil((double) totalWords / wordsPerSession);
+        int completedSessions = sessionService.getCompletedSessionsCount(enrollmentId, userId);
+        int wordsToReview = userProgressService.countWordsToReview(enrollmentId, userId);
+
+        return new SessionProgress(
+                completedSessions,
+                totalSessions,
+                (int) wordsPerSession,
+                totalWords,
+                wordsToReview
+        );
     }
 }
 
