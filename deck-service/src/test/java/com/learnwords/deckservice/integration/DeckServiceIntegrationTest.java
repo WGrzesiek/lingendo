@@ -23,6 +23,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.transaction.annotation.Transactional;
 import org.testcontainers.containers.PostgreSQLContainer;
@@ -46,6 +47,7 @@ import static org.mockito.Mockito.verifyNoInteractions;
 @Feature("DeckServiceImpl - integracja")
 @DisplayName("DeckServiceImpl - testy integracyjne (PostgreSQL/Testcontainers)")
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
+@ActiveProfiles("test")
 class DeckServiceIntegrationTest {
 
     @Container
