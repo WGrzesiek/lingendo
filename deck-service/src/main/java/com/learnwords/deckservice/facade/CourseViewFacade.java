@@ -18,6 +18,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -123,13 +124,16 @@ public class CourseViewFacade {
         int totalSessions = (int) Math.ceil((double) totalWords / wordsPerSession);
         int completedSessions = sessionService.getCompletedSessionsCount(enrollmentId, userId);
         int wordsToReview = userProgressService.countWordsToReview(enrollmentId, userId);
+        Instant nextNearReviewDate = userProgressService.getNextNearReviewDate(enrollmentId, userId);
+
 
         return new SessionProgress(
                 completedSessions,
                 totalSessions,
                 (int) wordsPerSession,
                 totalWords,
-                wordsToReview
+                wordsToReview,
+                nextNearReviewDate
         );
     }
 }

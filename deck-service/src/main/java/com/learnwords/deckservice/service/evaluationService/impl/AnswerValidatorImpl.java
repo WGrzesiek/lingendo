@@ -21,6 +21,14 @@ public class AnswerValidatorImpl implements AnswerValidator {
         };
     }
 
+    @Override
+    public boolean validateReview(FlashcardDto flashcard, TextAnswer answer) {
+        String given = normalize(answer.text());
+        String word = normalize(flashcard.wordDto().word());
+        return equalsNormalized(word, given);
+
+    }
+
     private boolean validateRemembered(RememberedAnswer answer, Step step) {
         if( step == GrzesiekStep.SHOW_BOTH || step == GrzesiekStep.SHOW_LANGUAGE_FROM|| step == GrzesiekStep.SHOW_LANGUAGE_TO){
             return answer.remembered();

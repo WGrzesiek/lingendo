@@ -264,13 +264,31 @@ public class UserProgressServiceImpl implements UserProgressService {
 
         if (result instanceof MaxLevel) {
             entity.setLearned(true);
-            entity.setNextReviewAt(null);
+            entity.setPhase(LearningPhase.REVIEW);
+            entity.setNextReviewAt(Instant.now().plusSeconds(604800));
         } else {
 
             entity.setLearned(false);
         }
 
         userFlashcardProgressRepository.save(entity);
+    }
+
+    @Override
+    public void updateProgressAfterReview(UserFlashcardProgressDto progressDto, boolean isCorrect) {
+        UserFlashcardProgress entity = userFlashcardProgressRepository.findById(progressDto.id())
+                .orElseThrow(() -> new EntityNotFoundException("Progress not found"));
+        entity.setUpdatedAt(Instant.now());
+        if (isCorrect && entity.getRepetitionCount() < 3) {
+            entity.setRepetitionCount(entity.getRepetitionCount() + 1);
+            switch (entity.getRepetitionCount()){
+                case 1 -> entity.setNextReviewAt(Instant.now().plusSeconds(604800));
+                case 2 -> entity.setNextReviewAt(Instant.now().plusSeconds(1209600));
+                default -> entity.setNextReviewAt(Instant.now().plusSeconds(1814400));
+            }
+        }
+        userFlashcardProgressRepository.save(entity);
+
     }
 
     @Override
@@ -302,11 +320,25 @@ public class UserProgressServiceImpl implements UserProgressService {
         );
     }
 
+
     @Override
     public int countWordsToReview(String enrollmentId, String userId) {
         log.debug("Pobieranie liczby słów do powtórki - enrollmentId: '{}', userId: '{}'", enrollmentId, userId);
-        return userFlashcardProgressRepository.countByEnrollment_IdAndUserIdAndPhase(enrollmentId,userId,LearningPhase.REVIEW);
+        return userFlashcardProgressRepository.countByEnrollment_IdAndUserIdAndIsLearnedAndPhaseAndNextReviewAtAfterAndRepetitionCountIsLessThan(enrollmentId,userId,true,LearningPhase.REVIEW, Instant.now(),3);
     }
+
+    @Override
+    public Instant getNextNearReviewDate(String enrollmentId, String userId) {
+        log.debug("Pobieranie najbliższej daty powtórki - enrollmentId: '{}', userId: '{}'", enrollmentId, userId);
+        return userFlashcardProgressRepository.findNextReviewAt(
+                enrollmentId,
+                userId,
+                Instant.now(),
+                3
+        ).orElse(null);
+    }
+
+
 
 
 }

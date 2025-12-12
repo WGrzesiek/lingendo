@@ -8,6 +8,7 @@ import com.learnwords.deckservice.service.evaluationService.responseResult.Algor
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
+import java.time.Instant;
 import java.util.List;
 
 public interface UserProgressService {
@@ -23,4 +24,6 @@ public interface UserProgressService {
     void updateProgress(UserFlashcardProgressDto progressDto, AlgorithmResult result, boolean isCorrect);
     Page<UserFlashcardProgressDto> getProgressForEnrollment(String enrollmentId, String userId, Pageable pageable);
     int countWordsToReview(String enrollmentId, String userId);
+    void updateProgressAfterReview(UserFlashcardProgressDto progressDto, boolean isCorrect);
+    Instant getNextNearReviewDate(String enrollmentId, String userId);
 }

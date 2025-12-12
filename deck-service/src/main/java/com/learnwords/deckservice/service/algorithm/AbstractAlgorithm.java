@@ -4,6 +4,7 @@ import com.learnwords.deckservice.enums.LearnAlgorithm;
 import com.learnwords.deckservice.service.algorithm.state.AlgorithmState;
 import com.learnwords.deckservice.service.evaluationService.responseResult.AlgorithmResult;
 import com.learnwords.deckservice.service.evaluationService.responseResult.Failure;
+import com.learnwords.deckservice.service.evaluationService.responseResult.MaxLevel;
 import com.learnwords.deckservice.service.evaluationService.responseResult.Success;
 
 
@@ -37,6 +38,9 @@ public abstract sealed class AbstractAlgorithm implements Algorithm<AlgorithmSta
     @Override
     public AlgorithmResult<AlgorithmState> processAnswer(AlgorithmState state, boolean correct) {
         if (correct) {
+            if(state.getStep().isMaxLevel()) {
+                return new MaxLevel<>(state);
+            }
             return new Success<>(promote(state));
         } else {
             return new Failure<>(demote(state));
