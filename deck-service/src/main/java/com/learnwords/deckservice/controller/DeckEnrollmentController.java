@@ -188,7 +188,7 @@ public class DeckEnrollmentController {
         return courseViewFacade.getCourseHeaderInfo(enrollmentId, userId);
     }
 
-    @GetMapping("/{enrollmentId}/settings")
+    @GetMapping("/enrollment/{enrollmentId}/settings")
     public ResponseEntity<CourseSettings> getCourseSettings(
             @Parameter(description = "ID zapisu na talię (enrollment)", required = true, example = "enr-123")
             @PathVariable String enrollmentId,
@@ -205,8 +205,8 @@ public class DeckEnrollmentController {
         return ResponseEntity.ok(settings);
     }
 
-    @PutMapping("/{enrollmentId}/review-schedule")
-    public ResponseEntity<Void> updateReviewSchedule(
+    @PutMapping("/enrollment/{enrollmentId}/review-schedule")
+    public ResponseEntity<Void> updateReviewSchedulePreference(
             @PathVariable String enrollmentId,
             @RequestParam("mode") ReviewSchedule schedule,
             @RequestHeader(USER_ID_HEADER) String userId
