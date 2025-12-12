@@ -2,6 +2,7 @@ package com.learnwords.deckservice.facade;
 
 import com.learnwords.auth.v1.GetUserNameByIdResponse;
 import com.learnwords.deckservice.dto.course.CourseHeaderInfo;
+import com.learnwords.deckservice.dto.course.CourseSettings;
 import com.learnwords.deckservice.dto.course.FlashcardsWithStatus;
 import com.learnwords.deckservice.dto.course.SessionProgress;
 import com.learnwords.deckservice.dto.deckEnrollment.DeckEnrollmentDto;
@@ -134,6 +135,17 @@ public class CourseViewFacade {
                 totalWords,
                 wordsToReview,
                 nextNearReviewDate
+        );
+    }
+
+    public CourseSettings getCourseSettings(String enrollmentId, String userId) {
+        DeckEnrollmentDto enrollment = deckEnrollmentService.getEnrollment(userId,enrollmentId);
+
+        return new CourseSettings(
+                enrollmentId,
+                enrollment.getPreferredAlgorithm(),
+                enrollment.getCardsPerSessionLimit(),
+                enrollment.getPreferredReviewSchedule()
         );
     }
 }

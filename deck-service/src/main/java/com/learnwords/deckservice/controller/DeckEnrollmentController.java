@@ -1,11 +1,13 @@
 package com.learnwords.deckservice.controller;
 
 import com.learnwords.deckservice.dto.course.CourseHeaderInfo;
+import com.learnwords.deckservice.dto.course.CourseSettings;
 import com.learnwords.deckservice.dto.course.FlashcardsWithStatus;
 import com.learnwords.deckservice.dto.deckEnrollment.DeckEnrollmentDto;
 import com.learnwords.deckservice.dto.dashboard.StudentMyCourseListItemDto;
 import com.learnwords.deckservice.dto.deckEnrollment.CreateDeckEnrollmentDto;
 import com.learnwords.deckservice.enums.LearnAlgorithm;
+import com.learnwords.deckservice.enums.ReviewSchedule;
 import com.learnwords.deckservice.facade.CourseViewFacade;
 import com.learnwords.deckservice.service.DeckEnrollmentService;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -184,6 +186,37 @@ public class DeckEnrollmentController {
             @RequestHeader(USER_ID_HEADER) String userId
     ) {
         return courseViewFacade.getCourseHeaderInfo(enrollmentId, userId);
+    }
+
+    @GetMapping("/{enrollmentId}/settings")
+    public ResponseEntity<CourseSettings> getCourseSettings(
+            @Parameter(description = "ID zapisu na talię (enrollment)", required = true, example = "enr-123")
+            @PathVariable String enrollmentId,
+
+            @Parameter(description = "ID użytkownika pobierany z nagłówka", required = true, example = "user-xyz-123")
+            @RequestHeader(USER_ID_HEADER) String userId
+    ) {
+        log.debug("Pobieranie CourseSettings: enrollmentId={}, userId={}", enrollmentId, userId);
+
+        CourseSettings settings = courseViewFacade.getCourseSettings(enrollmentId, userId);
+
+        log.info("Zwrócono ustawienia kursu dla enrollmentId={} (userId={})", enrollmentId, userId);
+
+        return ResponseEntity.ok(settings);
+    }
+
+    @PutMapping("/{enrollmentId}/review-schedule")
+    public ResponseEntity<Void> updateReviewSchedule(
+            @PathVariable String enrollmentId,
+            @RequestParam("mode") ReviewSchedule schedule,
+            @RequestHeader(USER_ID_HEADER) String userId
+    ) {
+        log.info("Żądanie zmiany harmonogramu powtórek: enrollmentId={}, userId={}, mode={}",
+                enrollmentId, userId, schedule);
+
+        deckEnrollmentService.updateReviewSchedule(enrollmentId, userId, schedule);
+
+        return ResponseEntity.noContent().build();
     }
 
 }

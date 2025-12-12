@@ -10,10 +10,7 @@ import com.learnwords.deckservice.dto.flashcard.FlashcardDto;
 import com.learnwords.deckservice.dto.userFlashcardProgress.UserFlashcardProgressDto;
 import com.learnwords.deckservice.entity.Deck;
 import com.learnwords.deckservice.entity.DeckEnrollment;
-import com.learnwords.deckservice.enums.DeckEnrollmentRole;
-import com.learnwords.deckservice.enums.DeckEnrollmentSource;
-import com.learnwords.deckservice.enums.DeckVisibility;
-import com.learnwords.deckservice.enums.LearnAlgorithm;
+import com.learnwords.deckservice.enums.*;
 import com.learnwords.deckservice.repository.DeckEnrollmentRepository;
 import com.learnwords.deckservice.repository.DeckRepository;
 import com.learnwords.deckservice.service.DeckEnrollmentService;
@@ -158,6 +155,7 @@ public class DeckEnrollmentServiceImpl implements DeckEnrollmentService {
                 .userId(deckEnrollment.getUserId())
                 .role(deckEnrollment.getRole())
                 .preferredAlgorithm(deckEnrollment.getPreferredAlgorithm())
+                .preferredReviewSchedule(deckEnrollment.getPreferredReviewSchedule())
                 .cardsPerSessionLimit(deckEnrollment.getHowManyFlashcardsForOneSession())
 
 
@@ -169,6 +167,23 @@ public class DeckEnrollmentServiceImpl implements DeckEnrollmentService {
                 .lastAccessedAt(deckEnrollment.getLastAccessedAt())
                 .build();
     }
+
+    @Override
+    public void updateReviewSchedule(String enrollmentId, String userId, ReviewSchedule schedule) {
+        log.info("Aktualizacja harmonogramu powtórek dla enrollmentId {} na {}", enrollmentId, schedule);
+
+        DeckEnrollment deckEnrollment = DeckUtils.getDeckEnrollmentIfUserHasPermissions(
+                deckEnrollmentRepository,
+                enrollmentId,
+                userId
+        );
+
+        deckEnrollment.setPreferredReviewSchedule(schedule);
+        deckEnrollmentRepository.save(deckEnrollment);
+
+        log.info("Zaktualizowano harmonogram powtórek dla enrollmentId {} na {}", enrollmentId, schedule);
+    }
+
 
     private DeckEnrollmentRole deckEnrollmentRole(DeckVisibility deckVisibility) {
         return switch (deckVisibility) {

@@ -37,6 +37,10 @@ public class DeckEnrollment {
     private LearnAlgorithm preferredAlgorithm;
 
     @Enumerated(EnumType.STRING)
+    @Column(name = "preferred_review_schedule", nullable = false)
+    private ReviewSchedule preferredReviewSchedule = ReviewSchedule.AUTO;
+
+    @Enumerated(EnumType.STRING)
     @Builder.Default
     private DeckStatus status = DeckStatus.NOT_STARTED;
 

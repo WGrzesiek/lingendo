@@ -71,6 +71,10 @@ public class Deck {
     @Column(name = "owner", nullable = false)
     private DeckOwner owner;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "review_schedule", nullable = false)
+    private ReviewSchedule reviewSchedule = ReviewSchedule.AUTO;
+
     @Builder.Default
     @Column(nullable = false, updatable = false)
     private Instant createdAt = Instant.now();

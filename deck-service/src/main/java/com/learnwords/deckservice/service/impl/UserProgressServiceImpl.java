@@ -281,11 +281,37 @@ public class UserProgressServiceImpl implements UserProgressService {
         entity.setUpdatedAt(Instant.now());
         if (isCorrect && entity.getRepetitionCount() < 3) {
             entity.setRepetitionCount(entity.getRepetitionCount() + 1);
-            switch (entity.getRepetitionCount()){
-                case 1 -> entity.setNextReviewAt(Instant.now().plusSeconds(604800));
-                case 2 -> entity.setNextReviewAt(Instant.now().plusSeconds(1209600));
-                default -> entity.setNextReviewAt(Instant.now().plusSeconds(1814400));
+            switch (entity.getEnrollment().getPreferredReviewSchedule()){
+                case AUTO -> {
+                    switch (entity.getRepetitionCount()){
+                        case 1 -> entity.setNextReviewAt(Instant.now().plusSeconds(604800));
+                        case 2 -> entity.setNextReviewAt(Instant.now().plusSeconds(1209600));
+                        default -> entity.setNextReviewAt(Instant.now().plusSeconds(1814400));
+                    }
+                }
+                case NORMAL -> {
+                    switch (entity.getRepetitionCount()){
+                        case 1 -> entity.setNextReviewAt(Instant.now().plusSeconds(604800));
+                        case 2 -> entity.setNextReviewAt(Instant.now().plusSeconds(1209600));
+                        default -> entity.setNextReviewAt(Instant.now().plusSeconds(2592000));
+                    }
+                }
+                case LIGHT -> {
+                    switch (entity.getRepetitionCount()){
+                        case 1 -> entity.setNextReviewAt(Instant.now().plusSeconds(259200));
+                        case 2 -> entity.setNextReviewAt(Instant.now().plusSeconds(604800));
+                        default -> entity.setNextReviewAt(Instant.now().plusSeconds(864000));
+                    }
+                }
+                case INTENSE -> {
+                    switch (entity.getRepetitionCount()){
+                        case 1 -> entity.setNextReviewAt(Instant.now().plusSeconds(86400));
+                        case 2 -> entity.setNextReviewAt(Instant.now().plusSeconds(259200));
+                        default -> entity.setNextReviewAt(Instant.now().plusSeconds(604800));
+                    }
+                }
             }
+
         }
         userFlashcardProgressRepository.save(entity);
 
