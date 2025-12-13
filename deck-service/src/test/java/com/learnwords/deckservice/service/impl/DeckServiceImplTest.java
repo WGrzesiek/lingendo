@@ -72,6 +72,7 @@ class DeckServiceImplTest {
                 .visibility(DeckVisibility.PRIVATE)
                 .owner(DeckOwner.I)
                 .learnAlgorithm(LearnAlgorithm.GRZESIEK_ALGORITHM)
+                .reviewSchedule(ReviewSchedule.AUTO)
                 .languageFrom(Language.ENGLISH)
                 .languageTo(Language.POLISH)
                 .category(DeckCategory.IT)
@@ -91,6 +92,7 @@ class DeckServiceImplTest {
                 .languageTo(Language.POLISH)
                 .category(DeckCategory.IT)
                 .difficulty(DeckDifficulty.EASY)
+                .reviewSchedule(ReviewSchedule.LIGHT)
                 .howManyFlashcardsForOneSession(20L)
                 .build();
     }
@@ -118,7 +120,7 @@ class DeckServiceImplTest {
         assertThat(savedDeck.getCategory()).isEqualTo(createDeckDto.getCategory());
         assertThat(savedDeck.getLanguageFrom()).isEqualTo(Language.ENGLISH);
         assertThat(savedDeck.getLanguageTo()).isEqualTo(Language.POLISH);
-
+        assertThat(savedDeck.getReviewSchedule()).isEqualTo(ReviewSchedule.LIGHT);
         ArgumentCaptor<DeckCreatedEvent> eventCaptor = ArgumentCaptor.forClass(DeckCreatedEvent.class);
         verify(eventProducer).send(eq(KafkaTopic.DECK_CREATED), eventCaptor.capture());
         DeckCreatedEvent event = eventCaptor.getValue();

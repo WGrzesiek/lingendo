@@ -89,6 +89,7 @@ public class DeckServiceImpl implements DeckService {
                 .languageTo(createDeckDto.getLanguageTo())
                 .category(createDeckDto.getCategory())
                 .difficulty(createDeckDto.getDifficulty())
+                .reviewSchedule(createDeckDto.getReviewSchedule())
                 .build();
         deckRepository.save(deck);
         DeckCreatedEvent deckCreatedEvent = DeckCreatedEvent.builder()

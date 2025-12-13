@@ -95,6 +95,7 @@ class DeckServiceIntegrationTest {
                 .category(DeckCategory.IT)
                 .difficulty(DeckDifficulty.EASY)
                 .howManyFlashcardsForOneSession(20L)
+                .reviewSchedule(ReviewSchedule.LIGHT)
                 .build();
         deckRepository.deleteAll();
     }
@@ -119,6 +120,7 @@ class DeckServiceIntegrationTest {
         assertThat(saved.getLanguageTo()).isEqualTo(Language.POLISH);
         assertThat(saved.getCategory()).isEqualTo(DeckCategory.IT);
         assertThat(saved.getDifficulty()).isEqualTo(DeckDifficulty.EASY);
+        assertThat(saved.getReviewSchedule()).isEqualTo(ReviewSchedule.LIGHT);
         assertThat(saved.getCreatedAt()).isNotNull();
 
         verify(eventProducer).send(eq(KafkaTopic.DECK_CREATED), any(DeckCreatedEvent.class));
