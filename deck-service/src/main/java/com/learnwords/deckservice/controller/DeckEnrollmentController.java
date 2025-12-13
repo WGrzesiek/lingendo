@@ -205,7 +205,7 @@ public class DeckEnrollmentController {
         return ResponseEntity.ok(settings);
     }
 
-    @PutMapping("/enrollment/{enrollmentId}/review-schedule")
+    @PutMapping("/enrollments/{enrollmentId}/review-schedule")
     public ResponseEntity<Void> updateReviewSchedulePreference(
             @PathVariable String enrollmentId,
             @RequestParam("mode") ReviewSchedule schedule,
