@@ -40,6 +40,7 @@ import {
   Settings2,
   BrainCircuit,
   Layers,
+    Calendar
 } from "lucide-react";
 
 import { useCreateDeck } from "../../hooks/mutation/useCreateDeck";
@@ -56,6 +57,13 @@ import {
   learnAlgorithmValues,
 } from "@/features/deck/types/deck.types";
 import { cn } from "@/lib/utils";
+import {
+    REVIEW_SCHEDULE,
+    REVIEW_SCHEDULE_LABELS,
+    reviewSchedules,
+    reviewSchedulesValue,
+    VISIBILITIES, VisibilityValue
+} from "@/types/learning";
 
 const formSchema = z.object({
   deckName: z
@@ -68,9 +76,10 @@ const formSchema = z.object({
   languageFrom: z.enum(languageValues),
   languageTo: z.enum(languageValues),
   owner: z.enum(deckOwnerTypeValues),
-  isPublic: z.boolean(),
+  visibility: z.enum(VisibilityValue),
   difficulty: z.enum(deckDifficultyValues),
   category: z.string().min(1, "Wybierz kategorię"),
+  reviewSchedule: z.enum(reviewSchedulesValue),
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -89,9 +98,10 @@ export const CreateDeckForm = () => {
       languageFrom: "ENGLISH",
       languageTo: "POLISH",
       owner: "I",
-      isPublic: false,
+      visibility: "PRIVATE",
       difficulty: "EASY",
       category: "GENERAL",
+      reviewSchedule: "AUTO"
     },
   });
 
@@ -461,28 +471,89 @@ export const CreateDeckForm = () => {
                 )}
               />
 
-              <FormField
-                control={form.control}
-                name="isPublic"
-                render={({ field }) => (
-                  <FormItem className="flex flex-row items-center justify-between rounded-lg border bg-background p-4 shadow-sm">
-                    <div className="space-y-0.5">
-                      <FormLabel className="text-base">
-                        Publiczna talia
-                      </FormLabel>
-                      <FormDescription>
-                        Inni użytkownicy będą mogli znaleźć i zapisać ten kurs.
-                      </FormDescription>
-                    </div>
-                    <FormControl>
-                      <Switch
-                        checked={field.value}
-                        onCheckedChange={field.onChange}
+                <FormField
+                    control={form.control}
+                    name="visibility"
+                    render={({ field }) => (
+                        <FormItem>
+                            <FormLabel className="flex items-center gap-2">
+                                <Calendar className="w-4 h-4" /> Widoczność kursu
+                            </FormLabel>
+
+                            <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                <FormControl>
+                                    <SelectTrigger className="bg-background">
+                                        <SelectValue placeholder="Wybierz widoczność" />
+                                    </SelectTrigger>
+                                </FormControl>
+
+                                <SelectContent>
+                                    {VISIBILITIES.map((vis) => {
+                                        const Icon = vis.icon;
+                                        return (
+                                            <SelectItem
+                                                key={vis.value}
+                                                value={vis.value}
+                                                className="flex items-center gap-2"
+                                            >
+                                                <Icon className={cn("w-4 h-4", vis.iconColor)} />
+                                                {vis.label}
+                                            </SelectItem>
+                                        );
+                                    })}
+                                </SelectContent>
+                            </Select>
+
+                            <FormDescription>
+                                Zdecyduj, czy kurs ma być widoczny publicznie, czy tylko dla Ciebie.
+                            </FormDescription>
+                            <FormMessage />
+                        </FormItem>
+                    )}
+                />
+            </div>
+              <div className="bg-secondary/20 p-6 rounded-xl space-y-6 border border-secondary/40">
+                  <div className="grid sm:grid-cols-2 gap-6">
+                      <FormField
+                          control={form.control}
+                          name="reviewSchedule"
+                          render={({ field }) => (
+                              <FormItem>
+                                  <FormLabel className="flex items-center gap-2">
+                                      <Calendar className="w-4 h-4" /> Harmonogram powtórek
+                                  </FormLabel>
+                                  <Select
+                                      onValueChange={field.onChange}
+                                      defaultValue={field.value}
+                                  >
+                                      <FormControl>
+                                          <SelectTrigger className="bg-background">
+                                              <SelectValue placeholder="Wybierz metodę" />
+                                          </SelectTrigger>
+                                      </FormControl>
+                                      <SelectContent>
+                                          {REVIEW_SCHEDULE.map((rev) => {
+
+
+                                              return (
+                                                  <SelectItem
+                                                      key={rev.value}
+                                                      value={rev.value}
+                                                      className="flex items-center gap-2"
+                                                  >
+                                                      {rev.label}
+                                                  </SelectItem>
+                                              );
+                                          })}
+                                      </SelectContent>
+                                  </Select>
+                                  <FormDescription>
+                                        Wybierz jak często chcesz powtarzać materiał.
+                                  </FormDescription>
+                              </FormItem>
+                          )}
                       />
-                    </FormControl>
-                  </FormItem>
-                )}
-              />
+                  </div>
             </div>
           </CardContent>
 

@@ -3,7 +3,7 @@
 import { CourseHeader } from "@/features/course/components/CourseHeader";
 import { CourseStats } from "@/features/course/components/stats/CourseStats";
 import { SessionProgress } from "@/features/course/components/SessionProgress";
-import { CourseSettings } from "@/features/course/components/settings/CourseSettings";
+import { CourseSettings } from "@/features/course/components/CourseSettings";
 import { WordsList } from "@/features/course/components/WordsListNew";
 /**
  * Interfejs kursu

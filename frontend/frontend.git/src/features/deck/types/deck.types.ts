@@ -33,6 +33,7 @@ import {
  */
 
 import type { Language } from "@/types/common";
+import {reviewSchedules, Visibility} from "@/types/learning";
 
 /**
  * DTO talii - podstawowe informacje
@@ -76,9 +77,10 @@ export interface CreateDeckDto {
   languageFrom: Language;
   languageTo: Language;
   owner: DeckOwnerType;
-  isPublic: boolean;
+  visibility: Visibility
   difficulty: DeckDifficulty;
   category: DeckCategory;
+  reviewSchedule: reviewSchedules
 }
 
 /**
@@ -183,11 +185,13 @@ export interface IDeckListItem {
   deckDifficulty: DeckDifficulty;
   deckOwner: DeckOwnerType;
   deckCategory: DeckCategory;
+
 }
 
 //============================================================================================
 //                                        Typy + wyglad
 //============================================================================================
+
 
 /**
  * Typy właściciela talii
