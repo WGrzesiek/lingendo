@@ -64,6 +64,9 @@ public class CourseViewFacade {
         Page<UserFlashcardProgressDto> progressPage =
                 userProgressService.getProgressForEnrollment(enrollmentId, userId, pageable);
 
+        if(progressPage.isEmpty()) {
+            return Page.empty();
+        }
         List<UserFlashcardProgressDto> progresses = progressPage.getContent();
 
         List<String> flashcardIds = progresses.stream()
