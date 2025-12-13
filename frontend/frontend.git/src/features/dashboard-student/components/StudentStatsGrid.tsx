@@ -1,50 +1,61 @@
+"use client";
+
 import { BookOpen, Target, TrendingUp, Award } from "lucide-react";
 import { StudentStatsCard } from "./StudentStatsCard";
+import { useStudentStatistics } from "../hooks/useStudentStatistics";
 
 /**
  * Siatka statystyk dla dashboardu ucznia
- * Wyświetla zmockowane dane o postępach ucznia
+ * Pobiera dane z API przez React Query
  */
 export const StudentStatsGrid = () => {
+  const { data, isLoading, error } = useStudentStatistics();
+
+  if (isLoading) {
+    return (
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        {[1, 2, 3, 4].map((i) => (
+          <div key={i} className="h-32 rounded-xl bg-muted animate-pulse" />
+        ))}
+      </div>
+    );
+  }
+
+  if (error || !data) {
+    return (
+      <p className="text-destructive text-sm">
+        Nie udało się pobrać statystyk.
+      </p>
+    );
+  }
+
   const stats = [
     {
       title: "Aktywne kursy",
-      value: 5,
+      value: data.activeDecks,
       description: "W trakcie nauki",
       icon: BookOpen,
-      trend: {
-        value: "+2 nowe kursy",
-        isPositive: true,
-      },
     },
     {
       title: "Ukończone lekcje",
-      value: 127,
+      value: data.completedLessonsThisMonth,
       description: "W tym miesiącu",
       icon: Target,
-      trend: {
-        value: "+23% od ostatniego miesiąca",
-        isPositive: true,
-      },
     },
     {
       title: "Seria dni nauki",
-      value: 14,
+      value: data.streakDays,
       description: "Dni z rzędu",
       icon: TrendingUp,
-      trend: {
-        value: "Rekord osobisty!",
-        isPositive: true,
-      },
     },
     {
       title: "Zdobyte punkty",
-      value: "3,420",
+      value: data.totalPoints.toLocaleString("pl-PL"),
       description: "Łącznie",
       icon: Award,
       trend: {
-        value: "+240 w tym tygodniu",
-        isPositive: true,
+        value: `+${data.pointsThisWeek} w tym tygodniu`,
+        isPositive: data.pointsThisWeek >= 0,
       },
     },
   ];

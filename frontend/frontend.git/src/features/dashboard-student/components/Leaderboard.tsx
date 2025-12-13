@@ -1,47 +1,35 @@
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { TrendingUp, Trophy, Target, Zap } from "lucide-react";
-
-interface LeaderboardEntry {
-  rank: number;
-  name: string;
-  points: number;
-  coursesCompleted: number;
-  isCurrentUser?: boolean;
-}
+import { TrendingUp, Trophy, Target } from "lucide-react";
+import { useLeaderBoardOverview } from "../hooks/useLeaderBoardOverview";
 
 /**
  * Ranking uczniów (leaderboard)
  * Pokazuje jak uczeń wypada na tle innych użytkowników
  */
 export const Leaderboard = () => {
-  const leaderboard: LeaderboardEntry[] = [
-    {
-      rank: 1,
-      name: "Anna Kowalska",
-      points: 12450,
-      coursesCompleted: 15,
-    },
-    {
-      rank: 2,
-      name: "Jan Nowak",
-      points: 11200,
-      coursesCompleted: 13,
-    },
-    {
-      rank: 3,
-      name: "Maria Wiśniewska",
-      points: 10800,
-      coursesCompleted: 12,
-    },
-    {
-      rank: 15,
-      name: "Ty",
-      points: 3420,
-      coursesCompleted: 5,
-      isCurrentUser: true,
-    },
-  ];
+  const { data, isLoading, isError } = useLeaderBoardOverview();
+  if (isLoading) {
+    return (
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        {[1, 2, 3, 4].map((i) => (
+          <div key={i} className="h-32 rounded-xl bg-muted animate-pulse" />
+        ))}
+      </div>
+    );
+  }
+
+  if (isError || !data) {
+    return (
+      <p className="text-destructive text-sm">
+        Nie udało się pobrać statystyk.
+      </p>
+    );
+  }
+
+  const pointsToNext = data.aboveYou
+    ? data.aboveYou.points - data.you.points
+    : 0;
 
   const getRankIcon = (rank: number) => {
     switch (rank) {
@@ -76,43 +64,66 @@ export const Leaderboard = () => {
       </div>
 
       <div className="space-y-3 mb-6">
-        {leaderboard.map((entry) => (
+        {data.top3.map((user) => (
           <div
-            key={entry.rank}
+            key={user.userId}
             className={`flex items-center gap-4 p-3 rounded-lg border transition-all ${
-              entry.isCurrentUser
+              user.userId === data.you.userId
                 ? "bg-primary/10 border-primary"
-                : "hover:bg-accent/50"
+                : "bg-background border-border hover:border-primary/50"
             }`}
           >
             <div className="flex items-center justify-center w-10">
-              {getRankIcon(entry.rank)}
+              {getRankIcon(user.rank)}
             </div>
 
             <div className="flex-1">
               <h3
                 className={`font-semibold ${
-                  entry.isCurrentUser ? "text-primary" : ""
+                  user.userId === data.you.userId
+                    ? "text-primary"
+                    : "text-foreground"
                 }`}
               >
-                {entry.name}
+                {user.displayName || "Użytkownik"}
+                {user.userId === data.you.userId && " (Ty)"}
               </h3>
               <p className="text-sm text-muted-foreground">
-                {entry.coursesCompleted} ukończonych kursów
+                {user.completedCourses} ukończonych kursów
               </p>
             </div>
 
             <div className="text-right">
-              <p className="font-bold text-lg">
-                {entry.points.toLocaleString()}
-              </p>
+              <p className="font-bold text-lg">{user.points}</p>
               <p className="text-xs text-muted-foreground">punktów</p>
             </div>
           </div>
         ))}
+
+        {data.you.rank > 3 && (
+          <div className="flex items-center gap-4 p-3 rounded-lg border transition-all bg-primary/10 border-primary">
+            <div className="flex items-center justify-center w-10">
+              {getRankIcon(data.you.rank)}
+            </div>
+
+            <div className="flex-1">
+              <h3 className="font-semibold text-primary">
+                {data.you.displayName || "Ty"}
+              </h3>
+              <p className="text-sm text-muted-foreground">
+                {data.you.completedCourses} ukończonych kursów
+              </p>
+            </div>
+
+            <div className="text-right">
+              <p className="font-bold text-lg">{data.you.points}</p>
+              <p className="text-xs text-muted-foreground">punktów</p>
+            </div>
+          </div>
+        )}
       </div>
 
-      <div className="grid grid-cols-3 gap-3 pt-4 border-t">
+      <div className="grid grid-cols-2 gap-3 pt-4 border-t">
         <div className="text-center">
           <div className="flex items-center justify-center w-10 h-10 mx-auto mb-2 rounded-full bg-info/10">
             <Target className="w-5 h-5 text-info" />
@@ -120,15 +131,9 @@ export const Leaderboard = () => {
           <p className="text-xs text-muted-foreground mb-1">
             Do następnego miejsca
           </p>
-          <p className="font-bold">820 pkt</p>
-        </div>
-
-        <div className="text-center">
-          <div className="flex items-center justify-center w-10 h-10 mx-auto mb-2 rounded-full bg-success/10">
-            <Zap className="w-5 h-5 text-success" />
-          </div>
-          <p className="text-xs text-muted-foreground mb-1">W tym tygodniu</p>
-          <p className="font-bold">+240 pkt</p>
+          <p className="font-bold">
+            {pointsToNext > 0 ? `${pointsToNext} pkt` : "🏆 Lider!"}
+          </p>
         </div>
 
         <div className="text-center">
@@ -136,7 +141,7 @@ export const Leaderboard = () => {
             <TrendingUp className="w-5 h-5 text-premium" />
           </div>
           <p className="text-xs text-muted-foreground mb-1">Twoja pozycja</p>
-          <p className="font-bold">#15</p>
+          <p className="font-bold">#{data.you.rank}</p>
         </div>
       </div>
     </Card>

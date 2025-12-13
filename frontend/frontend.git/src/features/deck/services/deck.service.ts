@@ -16,19 +16,23 @@ import type {
   UpdateFlashcardsPerSessionRequest,
   DeckStatisticsDto,
   UserDeckCountDto,
-  StudentMyCourseListItem,
-  PageResponse,
+  IDeckListItem,
+  DeckOwnerType,
 } from "../types";
-import type { DeckOwnerType } from "@/types/common";
+import type { PageResponse } from "@/types/common";
 
 const BASE_URL = "/v1/decks";
+const BASE_URL2 = "/v1/decks/enrollments";
 
+/**
+ * Pobiera talie kursów studenta z paginacją
+ */
 export const getIDecks = async (params?: {
   page?: number;
   size?: number;
-}): Promise<PageResponse<StudentMyCourseListItem>> => {
-  const response = await apiClient.get<PageResponse<StudentMyCourseListItem>>(
-    `${BASE_URL}/student-my-decks`,
+}): Promise<PageResponse<IDeckListItem>> => {
+  const response = await apiClient.get<PageResponse<IDeckListItem>>(
+    `${BASE_URL2}/my`,
     { params }
   );
 

@@ -1,12 +1,30 @@
 "use client";
 
-import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
+import { Slider } from "@/components/ui/slider";
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   Card,
   CardContent,
@@ -15,276 +33,479 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { useCreateDeck } from "../../hooks/mutation/useCreateDeck";
-import type { CreateDeckDto } from "../../types";
-import type { DeckOwnerType, Language, LearnAlgorithm } from "@/types/common";
-import type { AxiosError } from "axios";
-import { ApiErrorResponse } from "@/types/common";
+import {
+  ArrowRightLeft,
+  BookType,
+  Globe,
+  Settings2,
+  BrainCircuit,
+  Layers,
+} from "lucide-react";
 
-/**
- * Formularz do tworzenia nowej talii fiszek
- */
+import { useCreateDeck } from "../../hooks/mutation/useCreateDeck";
+import { LANGUAGES, languageValues } from "@/types/common";
+
+import {
+  CATEGORIES,
+  DeckCategory,
+  DECK_OWNERS,
+  deckOwnerTypeValues,
+  deckDifficultyValues,
+  DIFFICULTIES,
+  LEARN_ALGORITHMS,
+  learnAlgorithmValues,
+} from "@/features/deck/types/deck.types";
+import { cn } from "@/lib/utils";
+
+const formSchema = z.object({
+  deckName: z
+    .string()
+    .min(2, "Nazwa musi mieć minimum 2 znaki")
+    .max(100, "Maksymalnie 100 znaków"),
+  description: z.string().optional(),
+  learnAlgorithm: z.enum(learnAlgorithmValues),
+  howManyFlashcardsForOneSession: z.number().min(1).max(100),
+  languageFrom: z.enum(languageValues),
+  languageTo: z.enum(languageValues),
+  owner: z.enum(deckOwnerTypeValues),
+  isPublic: z.boolean(),
+  difficulty: z.enum(deckDifficultyValues),
+  category: z.string().min(1, "Wybierz kategorię"),
+});
+
+type FormValues = z.infer<typeof formSchema>;
+
 export const CreateDeckForm = () => {
   const router = useRouter();
   const { mutate: createDeck, isPending } = useCreateDeck();
 
-  const [formData, setFormData] = useState<CreateDeckDto>({
-    deckName: "",
-    description: "",
-    learnAlgorithm: "GRZESIEK_ALGORITHM",
-    howManyFlashcardsForOneSession: 10,
-    languageFrom: "ENGLISH",
-    languageTo: "POLISH",
-    owner: "I",
-    isPublic: false,
+  const form = useForm<FormValues>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      deckName: "",
+      description: "",
+      learnAlgorithm: "GRZESIEK_ALGORITHM",
+      howManyFlashcardsForOneSession: 10,
+      languageFrom: "ENGLISH",
+      languageTo: "POLISH",
+      owner: "I",
+      isPublic: false,
+      difficulty: "EASY",
+      category: "GENERAL",
+    },
   });
 
-  const [errors, setErrors] = useState<
-    Partial<Record<keyof CreateDeckDto, string>>
-  >({});
+  const onSubmit = (values: FormValues) => {
+    const payload = { ...values, category: values.category as DeckCategory };
 
-  const validate = (): boolean => {
-    const newErrors: Partial<Record<keyof CreateDeckDto, string>> = {};
-
-    if (!formData.deckName.trim()) {
-      newErrors.deckName = "Nazwa talii jest wymagana";
-    } else if (formData.deckName.length < 1 || formData.deckName.length > 100) {
-      newErrors.deckName = "Nazwa musi mieć od 1 do 100 znaków";
-    }
-
-    if (
-      formData.howManyFlashcardsForOneSession < 1 ||
-      formData.howManyFlashcardsForOneSession > 100
-    ) {
-      newErrors.howManyFlashcardsForOneSession =
-        "Liczba fiszek musi być od 1 do 100";
-    }
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-
-    if (!validate()) return;
-
-    createDeck(formData, {
+    createDeck(payload, {
       onSuccess: () => router.push("/dashboard"),
-
       onError: (error) => {
-        const status = error.response?.status;
-        const apiMessage = error.response?.data?.message;
-
-        if (
-          status === 409 &&
-          typeof apiMessage === "string" &&
-          apiMessage.includes("już istnieje dla tego użytkownika")
-        ) {
-          setErrors((prev) => ({
-            ...prev,
-            deckName: apiMessage,
-          }));
-          return;
+        if (error.response?.status === 409) {
+          form.setError("deckName", {
+            type: "manual",
+            message: "Taka talia już istnieje.",
+          });
+        } else {
+          console.error(error);
         }
-
-        console.error("Błąd tworzenia talii:", error);
       },
     });
   };
 
-  const handleChange = <K extends keyof CreateDeckDto>(
-    field: K,
-    value: CreateDeckDto[K]
-  ) => {
-    setFormData((prev) => ({ ...prev, [field]: value }));
-    // Usuń błąd dla tego pola po zmianie
-    if (errors[field]) {
-      setErrors((prev) => ({ ...prev, [field]: undefined }));
-    }
-  };
-
   return (
-    <Card className="max-w-2xl mx-auto">
-      <CardHeader>
-        <CardTitle>Utwórz nową talię</CardTitle>
-        <CardDescription>
-          Stwórz talię fiszek do nauki nowych słówek
+    <Card className="max-w-3xl mx-auto shadow-lg border-muted/60">
+      <CardHeader className="bg-muted/20 pb-8 border-b">
+        <div className="flex items-center gap-3 mb-2">
+          <div className="p-2 bg-primary/10 rounded-lg">
+            <BookType className="w-6 h-6 text-primary" />
+          </div>
+          <CardTitle className="text-2xl">Kreator Talii</CardTitle>
+        </div>
+        <CardDescription className="text-base">
+          Zaprojektuj nowy kurs. Wybierz języki, poziom trudności i algorytm
+          nauki.
         </CardDescription>
       </CardHeader>
 
-      <form onSubmit={handleSubmit}>
-        <CardContent className="space-y-6">
-          {/* Nazwa talii */}
-          <div className="space-y-2">
-            <Label htmlFor="deckName">
-              Nazwa talii <span className="text-destructive">*</span>
-            </Label>
-            <Input
-              id="deckName"
-              value={formData.deckName}
-              onChange={(e) => handleChange("deckName", e.target.value)}
-              placeholder="np. Angielski - Podstawowe słownictwo"
-              aria-invalid={!!errors.deckName}
-              disabled={isPending}
-            />
-            {errors.deckName && (
-              <p className="text-sm text-destructive">{errors.deckName}</p>
-            )}
-          </div>
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)}>
+          <CardContent className="space-y-8 pt-8">
+            <div className="grid gap-6">
+              <FormField
+                control={form.control}
+                name="deckName"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-base">Nazwa Kursu</FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder="np. Angielski Biznesowy B2"
+                        className="h-11"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-          {/* Opis */}
-          <div className="space-y-2">
-            <Label htmlFor="description">Opis (opcjonalnie)</Label>
-            <Textarea
-              id="description"
-              value={formData.description}
-              onChange={(e) => handleChange("description", e.target.value)}
-              placeholder="Krótki opis talii..."
-              rows={3}
-              disabled={isPending}
-            />
-          </div>
+              <div className="grid sm:grid-cols-2 gap-6">
+                <FormField
+                  control={form.control}
+                  name="category"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Kategoria</FormLabel>
+                      <Select
+                        onValueChange={field.onChange}
+                        defaultValue={field.value}
+                      >
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Wybierz kategorię" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {CATEGORIES.map((cat) => {
+                            const Icon = cat.icon;
+                            return (
+                              <SelectItem
+                                key={cat.value}
+                                value={cat.value}
+                                className="flex items-center gap-2"
+                              >
+                                <Icon
+                                  className={cn("w-4 h-4", cat.iconColor)}
+                                />
+                                {cat.label}
+                              </SelectItem>
+                            );
+                          })}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
-          {/* Języki */}
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="languageFrom">Język źródłowy</Label>
-              <select
-                id="languageFrom"
-                value={formData.languageFrom}
-                onChange={(e) =>
-                  handleChange("languageFrom", e.target.value as Language)
-                }
-                className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs transition-colors focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50"
-                disabled={isPending}
-              >
-                <option value="ENGLISH">Angielski</option>
-                <option value="POLISH">Polski</option>
-                <option value="SPANISH">Hiszpański</option>
-                <option value="GERMAN">Niemiecki</option>
-                <option value="FRENCH">Francuski</option>
-                <option value="ITALIAN">Włoski</option>
-              </select>
+                <FormField
+                  control={form.control}
+                  name="difficulty"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Poziom trudności</FormLabel>
+                      <Select
+                        onValueChange={field.onChange}
+                        defaultValue={field.value}
+                      >
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Wybierz poziom" />
+                          </SelectTrigger>
+                        </FormControl>
+
+                        <SelectContent>
+                          {DIFFICULTIES.map((diff) => {
+                            const Icon = diff.icon;
+                            return (
+                              <SelectItem
+                                key={diff.value}
+                                value={diff.value}
+                                className="flex items-center gap-2"
+                              >
+                                <Icon
+                                  className={cn("w-4 h-4", diff.iconColor)}
+                                />
+                                {diff.label}
+                              </SelectItem>
+                            );
+                          })}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              <FormField
+                control={form.control}
+                name="description"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Opis (opcjonalnie)</FormLabel>
+                    <FormControl>
+                      <Textarea
+                        placeholder="Czego nauczysz się w tym kursie?"
+                        className="resize-none"
+                        rows={3}
+                        {...field}
+                      />
+                    </FormControl>
+                  </FormItem>
+                )}
+              />
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="languageTo">Język docelowy</Label>
-              <select
-                id="languageTo"
-                value={formData.languageTo}
-                onChange={(e) =>
-                  handleChange("languageTo", e.target.value as Language)
-                }
-                className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs transition-colors focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50"
-                disabled={isPending}
-              >
-                <option value="POLISH">Polski</option>
-                <option value="ENGLISH">Angielski</option>
-                <option value="SPANISH">Hiszpański</option>
-                <option value="GERMAN">Niemiecki</option>
-                <option value="FRENCH">Francuski</option>
-                <option value="ITALIAN">Włoski</option>
-              </select>
+            <div className="relative py-4">
+              <div className="absolute inset-0 flex items-center">
+                <span className="w-full border-t" />
+              </div>
+              <div className="relative flex justify-center text-xs uppercase">
+                <span className="bg-card px-2 text-muted-foreground flex items-center gap-2">
+                  <Globe className="w-4 h-4" /> Konfiguracja Językowa
+                </span>
+              </div>
             </div>
-          </div>
 
-          {/* Algorytm nauki */}
-          <div className="space-y-2">
-            <Label htmlFor="learnAlgorithm">Algorytm nauki</Label>
-            <select
-              id="learnAlgorithm"
-              value={formData.learnAlgorithm}
-              onChange={(e) =>
-                handleChange("learnAlgorithm", e.target.value as LearnAlgorithm)
-              }
-              className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs transition-colors focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50"
+            <div className="grid sm:grid-cols-[1fr_auto_1fr] gap-4 items-end">
+              <FormField
+                control={form.control}
+                name="languageFrom"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Język źródłowy (Front)</FormLabel>
+
+                    <Select
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                    >
+                      <FormControl>
+                        <SelectTrigger className="bg-muted/30">
+                          <SelectValue placeholder="Wybierz język" />
+                        </SelectTrigger>
+                      </FormControl>
+
+                      <SelectContent>
+                        {LANGUAGES.map((lang) => {
+                          const Icon = lang.icon;
+                          return (
+                            <SelectItem
+                              key={lang.value}
+                              value={lang.value}
+                              className="flex items-center gap-2"
+                            >
+                              <Icon className={cn("w-4 h-4", lang.iconColor)} />
+                              {lang.label}
+                            </SelectItem>
+                          );
+                        })}
+                      </SelectContent>
+                    </Select>
+                  </FormItem>
+                )}
+              />
+
+              <div className="flex items-center justify-center pb-2 text-muted-foreground">
+                <ArrowRightLeft className="w-5 h-5" />
+              </div>
+
+              <FormField
+                control={form.control}
+                name="languageTo"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Język docelowy (Back)</FormLabel>
+                    <Select
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                    >
+                      <FormControl>
+                        <SelectTrigger className="bg-muted/30">
+                          <SelectValue />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {LANGUAGES.map((lang) => {
+                          const Icon = lang.icon;
+                          return (
+                            <SelectItem
+                              key={lang.value}
+                              value={lang.value}
+                              className="flex items-center gap-2"
+                            >
+                              <Icon className={cn("w-4 h-4", lang.iconColor)} />
+                              {lang.label}
+                            </SelectItem>
+                          );
+                        })}
+                      </SelectContent>
+                    </Select>
+                  </FormItem>
+                )}
+              />
+            </div>
+
+            <div className="relative py-4">
+              <div className="absolute inset-0 flex items-center">
+                <span className="w-full border-t" />
+              </div>
+              <div className="relative flex justify-center text-xs uppercase">
+                <span className="bg-card px-2 text-muted-foreground flex items-center gap-2">
+                  <BrainCircuit className="w-4 h-4" /> Algorytmika
+                </span>
+              </div>
+            </div>
+
+            <div className="bg-secondary/20 p-6 rounded-xl space-y-6 border border-secondary/40">
+              <div className="grid sm:grid-cols-2 gap-6">
+                <FormField
+                  control={form.control}
+                  name="learnAlgorithm"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="flex items-center gap-2">
+                        <Settings2 className="w-4 h-4" /> Metoda nauki
+                      </FormLabel>
+                      <Select
+                        onValueChange={field.onChange}
+                        defaultValue={field.value}
+                      >
+                        <FormControl>
+                          <SelectTrigger className="bg-background">
+                            <SelectValue placeholder="Wybierz metodę" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {LEARN_ALGORITHMS.map((alg) => {
+                            const Icon = alg.icon;
+
+                            return (
+                              <SelectItem
+                                key={alg.value}
+                                value={alg.value}
+                                className="flex items-center gap-2"
+                              >
+                                <Icon
+                                  className={cn("w-4 h-4", alg.iconColor)}
+                                />
+                                {alg.label}
+                              </SelectItem>
+                            );
+                          })}
+                        </SelectContent>
+                      </Select>
+                      <FormDescription>
+                        Określa jak często powtarzane są trudne słowa.
+                      </FormDescription>
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="owner"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="flex items-center gap-2">
+                        <Layers className="w-4 h-4" /> Typ Właściciela
+                      </FormLabel>
+                      <Select
+                        onValueChange={field.onChange}
+                        defaultValue={field.value}
+                      >
+                        <FormControl>
+                          <SelectTrigger className="bg-background">
+                            <SelectValue />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {DECK_OWNERS.map((owner) => {
+                            const Icon = owner.icon;
+                            const iconColor = owner.iconColor;
+                            return (
+                              <SelectItem
+                                key={owner.value}
+                                value={owner.value}
+                                className="flex items-center gap-2"
+                              >
+                                <Icon className={`w-4 h-4 ${iconColor}`} />
+                                {owner.label}
+                              </SelectItem>
+                            );
+                          })}
+                        </SelectContent>
+                      </Select>
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              <FormField
+                control={form.control}
+                name="howManyFlashcardsForOneSession"
+                render={({ field }) => (
+                  <FormItem>
+                    <div className="flex justify-between items-center">
+                      <FormLabel>Ilość fiszek na sesję</FormLabel>
+                      <span className="text-sm font-bold text-primary border px-2 py-0.5 rounded-md bg-background">
+                        {field.value}
+                      </span>
+                    </div>
+
+                    <FormControl>
+                      <Slider
+                        min={5}
+                        max={50}
+                        step={5}
+                        defaultValue={[field.value]}
+                        onValueChange={(vals) => field.onChange(vals[0])}
+                        className="py-4"
+                      />
+                    </FormControl>
+                    <FormDescription className="text-xs">
+                      Sugerujemy 10-20 fiszek dla optymalnego skupienia.
+                    </FormDescription>
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="isPublic"
+                render={({ field }) => (
+                  <FormItem className="flex flex-row items-center justify-between rounded-lg border bg-background p-4 shadow-sm">
+                    <div className="space-y-0.5">
+                      <FormLabel className="text-base">
+                        Publiczna talia
+                      </FormLabel>
+                      <FormDescription>
+                        Inni użytkownicy będą mogli znaleźć i zapisać ten kurs.
+                      </FormDescription>
+                    </div>
+                    <FormControl>
+                      <Switch
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                      />
+                    </FormControl>
+                  </FormItem>
+                )}
+              />
+            </div>
+          </CardContent>
+
+          <CardFooter className="flex justify-end gap-4 pb-8 bg-muted/20 pt-6 border-t">
+            <Button
+              type="button"
+              variant="ghost"
+              onClick={() => router.back()}
               disabled={isPending}
             >
-              <option value="GRZESIEK_ALGORITHM">Algorytm Grzeska</option>
-              <option value="LEINER_ALGORITHM">System Leitnera</option>
-              <option value="TEST_ALGORITHM">Algorytm testowy</option>
-            </select>
-          </div>
-
-          {/* Liczba fiszek na sesję */}
-          <div className="space-y-2">
-            <Label htmlFor="flashcardsPerSession">
-              Liczba fiszek na sesję (1-100)
-            </Label>
-            <Input
-              id="flashcardsPerSession"
-              type="number"
-              min={1}
-              max={100}
-              value={formData.howManyFlashcardsForOneSession}
-              onChange={(e) =>
-                handleChange(
-                  "howManyFlashcardsForOneSession",
-                  parseInt(e.target.value) || 1
-                )
-              }
-              aria-invalid={!!errors.howManyFlashcardsForOneSession}
+              Anuluj
+            </Button>
+            <Button
+              type="submit"
+              size="lg"
               disabled={isPending}
-            />
-            {errors.howManyFlashcardsForOneSession && (
-              <p className="text-sm text-destructive">
-                {errors.howManyFlashcardsForOneSession}
-              </p>
-            )}
-          </div>
-
-          {/* Typ właściciela */}
-          <div className="space-y-2">
-            <Label htmlFor="owner">Typ właściciela</Label>
-            <select
-              id="owner"
-              value={formData.owner}
-              onChange={(e) =>
-                handleChange("owner", e.target.value as DeckOwnerType)
-              }
-              className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs transition-colors focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50"
-              disabled={isPending}
+              className="min-w-[150px]"
             >
-              <option value="I">Ja</option>
-              <option value="TEACHER">Nauczyciel</option>
-              <option value="FRIEND">Znajomy</option>
-              <option value="COMMUNITY">Społeczność</option>
-            </select>
-          </div>
-
-          {/* Publiczna talia */}
-          <div className="flex items-center justify-between rounded-lg border p-4">
-            <div className="space-y-0.5">
-              <Label htmlFor="isPublic">Publiczna talia</Label>
-              <p className="text-sm text-muted-foreground">
-                Czy talia ma być widoczna dla innych użytkowników?
-              </p>
-            </div>
-            <Switch
-              id="isPublic"
-              checked={formData.isPublic}
-              onCheckedChange={(checked) => handleChange("isPublic", checked)}
-              disabled={isPending}
-            />
-          </div>
-        </CardContent>
-
-        <CardFooter className="flex gap-4">
-          <Button
-            type="button"
-            variant="outline"
-            onClick={() => router.back()}
-            disabled={isPending}
-            className="flex-1"
-          >
-            Anuluj
-          </Button>
-          <Button type="submit" disabled={isPending} className="flex-1">
-            {isPending ? "Tworzę..." : "Utwórz talię"}
-          </Button>
-        </CardFooter>
-      </form>
+              {isPending ? "Tworzenie..." : "Stwórz Kurs"}
+            </Button>
+          </CardFooter>
+        </form>
+      </Form>
     </Card>
   );
 };

@@ -6,7 +6,7 @@ import { getIDecks } from "../services/deck.service";
  */
 export const useIDecks = (page?: number, size?: number) => {
   return useQuery({
-    queryKey: ["deck-statistics", page, size],
+    queryKey: ["i-decks", page, size],
     queryFn: () => getIDecks({ page, size }),
   });
 };

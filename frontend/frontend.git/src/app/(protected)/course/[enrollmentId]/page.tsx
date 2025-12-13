@@ -1,11 +1,10 @@
 "use client";
 
-import { CourseHeader } from "@/components/course/header/CourseHeader";
-import { CourseStats } from "@/components/course/stats/CourseStats";
-import { SessionProgress } from "@/components/course/sessions/SessionProgress";
-import { WordsList } from "@/components/course/words/WordsList";
-import { CourseSettings } from "@/components/course/settings/CourseSettings";
-
+import { CourseHeader } from "@/features/course/components/CourseHeader";
+import { CourseStats } from "@/features/course/components/stats/CourseStats";
+import { SessionProgress } from "@/features/course/components/SessionProgress";
+import { CourseSettings } from "@/features/course/components/settings/CourseSettings";
+import { WordsList } from "@/features/course/components/WordsListNew";
 /**
  * Interfejs kursu
  */
@@ -48,9 +47,12 @@ const mockCourse: Course = {
  * Strona szczegółów kursu
  * Pokazuje słówka, statystyki, sesje i ustawienia kursu
  */
-const CoursePage = () => {
+const CoursePage = ({ params }: { params: { enrollmentId: string } }) => {
   const course = mockCourse;
   const isLoading = false;
+
+  // 👇 TU jest różnica
+  const enrollmentId = params.enrollmentId;
 
   if (isLoading) {
     return (
@@ -63,22 +65,32 @@ const CoursePage = () => {
     );
   }
 
+  if (!enrollmentId) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-destructive">Brak ID zapisu na kurs.</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-background">
       <div className="container mx-auto p-6 lg:p-8 space-y-6">
-        <CourseHeader course={course} />
+        <CourseHeader enrollmentId={enrollmentId} />
 
-        <CourseStats course={course} />
+        <CourseStats enrollmentId={enrollmentId} />
 
-        <SessionProgress course={course} />
+        <SessionProgress enrollmentId={enrollmentId} />
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2">
-            <WordsList course={course} />
+            <WordsList enrollmentId={enrollmentId} />
           </div>
 
           <div>
-            <CourseSettings course={course} />
+            <CourseSettings enrollmentId={enrollmentId} />
           </div>
         </div>
       </div>

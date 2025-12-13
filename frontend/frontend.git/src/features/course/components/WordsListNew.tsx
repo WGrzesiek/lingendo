@@ -1,12 +1,22 @@
+import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Skeleton } from "@/components/ui/skeleton"; // Import Skeletona
-import { PlusCircle, Frown } from "lucide-react";
-import { DeckCardForDashboard } from "./DeckCardForDashboard";
-import { useInfiniteIDecks } from "../../hooks/useInfiniteIDecks";
-import Link from "next/link";
-import { ChevronDown, ArrowRight, Loader2, Layers } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
+import {
+  ChevronDown,
+  Loader2,
+  Frown,
+  PlusCircle,
+  Layers,
+  ArrowRight,
+} from "lucide-react";
+import NextLink from "next/link";
+import { useInfiniteCourseWords } from "@/features/course/hooks/useCourseWords";
+import { WordCard } from "./WordCard";
 
-const DeckListSkeleton = () => (
+interface WordsListProps {
+  enrollmentId: string | null;
+}
+const WordListSkeleton = () => (
   <div className="space-y-4">
     {[1, 2, 3].map((i) => (
       <div key={i} className="p-4 border rounded-xl space-y-3">
@@ -28,15 +38,16 @@ const EmptyState = () => (
     <div className="bg-muted p-3 rounded-full mb-3">
       <PlusCircle className="w-6 h-6 text-muted-foreground" />
     </div>
-    <h3 className="font-semibold text-lg">Brak aktywnych kursów</h3>
+    <h3 className="font-semibold text-lg">Brak słówek</h3>
     <p className="text-sm text-muted-foreground max-w-xs mb-4">
-      Wygląda na to, że nie zapisałeś się jeszcze do żadnego kursu.
+      Wygląda na to, że ten kurs nie zawiera jeszcze żadnych słówek.
     </p>
-    <Button variant="outline">Przeglądaj katalog</Button>
+    <Button variant="outline">Przeglądaj kursy</Button>
   </div>
 );
 
-export const DecksForDashboard = () => {
+export const WordsList = ({ enrollmentId }: WordsListProps) => {
+  // const [isGenerating, setIsGenerating] = useState(false);
   const {
     data,
     isLoading,
@@ -44,9 +55,14 @@ export const DecksForDashboard = () => {
     fetchNextPage,
     hasNextPage,
     isFetchingNextPage,
-  } = useInfiniteIDecks(4);
+  } = useInfiniteCourseWords(enrollmentId, 10);
 
-  if (isLoading) return <DeckListSkeleton />;
+  // const handleGenerateSentences = () => {
+  //   setIsGenerating(true);
+  //   setTimeout(() => setIsGenerating(false), 2000);
+  // };
+
+  if (isLoading) return <WordListSkeleton />;
 
   if (isError || !data) {
     return (
@@ -58,17 +74,29 @@ export const DecksForDashboard = () => {
       </div>
     );
   }
-  const allDecks = data?.pages.flatMap((page) => page.content) || [];
 
-  if (allDecks.length === 0) {
+  const allWords = data.pages.flatMap((page) => page.content);
+  const totalElements = data.pages.flatMap((page) => page.totalElements);
+
+  if (allWords.length === 0) {
     return <EmptyState />;
   }
 
   return (
-    <div className="space-y-6">
-      <div className="space-y-4">
-        {allDecks.map((deck) => (
-          <DeckCardForDashboard key={deck.deckId} deck={deck} />
+    <Card className="p-6">
+      <div className="sm:flex items-center justify-between mb-6">
+        <div>
+          <h2 className="text-2xl font-bold mb-1">Słówka w kursie</h2>
+          <p className="text-muted-foreground">
+            {/* {allWords.length} słówek w kursie. */}
+            {totalElements} słówek w kursie.
+          </p>
+        </div>
+      </div>
+
+      <div className="space-y-3">
+        {allWords.map((word) => (
+          <WordCard key={word.id} word={word} />
         ))}
       </div>
 
@@ -88,21 +116,20 @@ export const DecksForDashboard = () => {
             {isFetchingNextPage ? "Ładowanie..." : "Załaduj więcej"}
           </Button>
         )}
-        <Button variant="outline" asChild className="w-full sm:w-auto">
-          <Link href="/decks">
-            {" "}
+        <Button variant="secondary" asChild className="w-full sm:w-auto">
+          <NextLink href="/decks">
             <Layers className="w-4 h-4 mr-2" />
             Przejdź do wszystkich kursów
             <ArrowRight className="w-4 h-4 ml-2 opacity-50" />
-          </Link>
+          </NextLink>
         </Button>
       </div>
 
-      {!hasNextPage && allDecks.length > 0 && (
+      {!hasNextPage && allWords.length > 0 && (
         <p className="text-center text-xs text-muted-foreground">
-          Wyświetlono wszystkie dostępne kursy ({allDecks.length}).
+          Wyświetlono wszystkie dostępne kursy ({allWords.length}).
         </p>
       )}
-    </div>
+    </Card>
   );
 };

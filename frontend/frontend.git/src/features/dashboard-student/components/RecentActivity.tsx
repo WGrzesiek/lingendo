@@ -1,72 +1,47 @@
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Calendar, Target, BookOpen, Flame } from "lucide-react";
-
-interface RecentActivity {
-  id: string;
-  type: "lesson_completed" | "course_started" | "achievement" | "streak";
-  title: string;
-  description: string;
-  time: string;
-  points?: number;
-}
-
+import { useStudentActivity } from "../hooks/useStudentActivity";
+import {
+  StudentActivityItem,
+  StudentActivityType,
+} from "../types/statistics.type";
+import { formatDistanceToNow, parseISO } from "date-fns";
+import { pl } from "date-fns/locale";
 /**
  * Historia aktywności ucznia
  * Wyświetla ostatnie osiągnięcia i ukończone lekcje
  */
 export const RecentActivity = () => {
-  const activities: RecentActivity[] = [
-    {
-      id: "1",
-      type: "lesson_completed",
-      title: "Ukończono lekcję",
-      description: "Past Simple - ćwiczenia praktyczne",
-      time: "2 godziny temu",
-      points: 50,
-    },
-    {
-      id: "2",
-      type: "streak",
-      title: "Seria dni nauki!",
-      description: "14 dni nauki z rzędu - nowy rekord!",
-      time: "Dzisiaj",
-      points: 100,
-    },
-    {
-      id: "3",
-      type: "achievement",
-      title: "Nowe osiągnięcie",
-      description: "Ukończono 100 lekcji",
-      time: "5 godzin temu",
-      points: 200,
-    },
-    {
-      id: "4",
-      type: "course_started",
-      title: "Rozpoczęto nowy kurs",
-      description: "Niemiecki w podróży",
-      time: "1 dzień temu",
-    },
-    {
-      id: "5",
-      type: "lesson_completed",
-      title: "Ukończono lekcję",
-      description: "Słownictwo biznesowe - część 3",
-      time: "2 dni temu",
-      points: 50,
-    },
-  ];
+  const { data, isLoading, error } = useStudentActivity();
 
-  const getActivityIcon = (type: RecentActivity["type"]) => {
+  if (isLoading) {
+    return (
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        {[1, 2, 3, 4].map((i) => (
+          <div key={i} className="h-32 rounded-xl bg-muted animate-pulse" />
+        ))}
+      </div>
+    );
+  }
+
+  if (error || !data) {
+    return (
+      <p className="text-destructive text-sm">
+        Nie udało się pobrać statystyk.
+      </p>
+    );
+  }
+
+  const getActivityIcon = (type: StudentActivityType) => {
     switch (type) {
-      case "lesson_completed":
+      case "LESSON_COMPLETED":
         return <BookOpen className="w-5 h-5 text-success" />;
-      case "course_started":
+      case "SESSION_STARTED":
         return <Target className="w-5 h-5 text-info" />;
-      case "achievement":
+      case "SESSION_COMPLETED":
         return <Calendar className="w-5 h-5 text-premium" />;
-      case "streak":
+      case "LOGIN":
         return <Flame className="w-5 h-5 text-streak" />;
     }
   };
@@ -76,9 +51,9 @@ export const RecentActivity = () => {
       <h2 className="text-2xl font-bold mb-6">Ostatnia aktywność</h2>
 
       <div className="space-y-4">
-        {activities.map((activity) => (
+        {data.map((activity) => (
           <div
-            key={activity.id}
+            key={activity.type + activity.eventTime}
             className="flex items-start gap-4 p-3 rounded-lg hover:bg-accent/50 transition-colors border"
           >
             <div className="p-2 bg-background rounded-lg">
@@ -88,19 +63,22 @@ export const RecentActivity = () => {
             <div className="flex-1 min-w-0">
               <div className="flex items-center justify-between gap-2 mb-1">
                 <h3 className="font-semibold">{activity.title}</h3>
-                {activity.points && (
+                {activity.points != null && (
                   <Badge variant="secondary" className="text-xs">
                     +{activity.points} pkt
                   </Badge>
                 )}
               </div>
               <p className="text-sm text-muted-foreground">
-                {activity.description}
+                {activity.subtitle}
               </p>
             </div>
 
             <span className="text-xs text-muted-foreground whitespace-nowrap">
-              {activity.time}
+              {formatDistanceToNow(parseISO(activity.eventTime), {
+                addSuffix: true,
+                locale: pl,
+              })}
             </span>
           </div>
         ))}
