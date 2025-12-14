@@ -34,8 +34,8 @@ public class FlashcardRepository {
     private static final String INSERT_FLASHCARD_ANSWERED_SQL = """
 
             INSERT INTO analytics.flashcard_answers
-                              (event_time, user_id, deck_enrollment_id, session_id, flashcard_id, correct, received_at)
-        VALUES (?, ?, ?, ?, ?, ?, ?)
+                              (event_time, user_id, deck_enrollment_id, session_id, flashcard_id, correct, received_at, time_taken_ms)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
         """;
 
     public void saveFlashcardAnswered(FlashcardAnsweredEvent event) {
@@ -47,7 +47,8 @@ public class FlashcardRepository {
                 event.sessionId(),
                 event.flashcardId(),
                 event.correct(),
-                event.receivedAt());
+                event.receivedAt(),
+                event.timeTaken());
     }
 
 }
