@@ -2,6 +2,7 @@ package com.learnwords.common.events;
 
 import lombok.Builder;
 
+import java.time.Duration;
 import java.time.Instant;
 
 @Builder
@@ -12,6 +13,7 @@ public record FlashcardAnsweredEvent(
         String sessionId,
         String flashcardId,
         boolean correct,
-        Instant receivedAt
+        Instant receivedAt,
+        Duration timeTaken
 ) implements DomainEvent {}
 
