@@ -64,7 +64,7 @@ public class ReviewsStrategyImpl implements ReviewsStrategy {
         return Optional.ofNullable(NextFlashcardRecommendation.builder()
                 .flashcardId(flashcard.id())
                 .content(flashcard.wordDto())
-                .interactionType(InteractionType.TYPING_INPUT)
+                .interactionType(InteractionType.REMEMBER_CHECK_TO)
                 .build());
 
     }
