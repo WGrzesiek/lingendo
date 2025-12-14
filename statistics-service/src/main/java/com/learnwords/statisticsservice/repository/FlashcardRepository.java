@@ -39,6 +39,8 @@ public class FlashcardRepository {
         """;
 
     public void saveFlashcardAnswered(FlashcardAnsweredEvent event) {
+        long timeTakenMs = event.timeTaken().toMillis();
+
         jdbcTemplate.update(
                 INSERT_FLASHCARD_ANSWERED_SQL,
                 event.eventTime(),
@@ -48,7 +50,7 @@ public class FlashcardRepository {
                 event.flashcardId(),
                 event.correct(),
                 event.receivedAt(),
-                event.timeTaken());
+                timeTakenMs);
     }
 
 }
