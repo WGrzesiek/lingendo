@@ -102,7 +102,8 @@ CREATE TABLE analytics.flashcard_answers
     session_id   String,
     flashcard_id String,
     correct      UInt8,
-    received_at  DateTime64(3, 'UTC')
+    received_at  DateTime64(3, 'UTC'),
+    time_taken_ms UInt32
 )
     ENGINE = MergeTree
         PARTITION BY toYYYYMM(event_time)
