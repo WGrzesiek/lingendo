@@ -26,4 +26,6 @@ public interface UserProgressService {
     int countWordsToReview(String enrollmentId, String userId);
     void updateProgressAfterReview(UserFlashcardProgressDto progressDto, boolean isCorrect);
     Instant getNextNearReviewDate(String enrollmentId, String userId);
+    void updateLastShownAt(String id);
+
 }

@@ -21,6 +21,7 @@ import com.learnwords.deckservice.service.learningStrategy.LearningStrategy;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
 @Slf4j
@@ -82,6 +83,7 @@ public class StudyFlowServiceImpl implements StudyFlowService {
         boolean isCorrect = answerValidator.validate(flashcardDto, userAnswer, currentState.getStep());
         AlgorithmResult<AlgorithmState> result = algorithm.processAnswer(currentState, isCorrect);
         userProgressService.updateProgress(progress, result, isCorrect);
+        long responseTimeMs = Duration.between(progress.lastShownAt(), Instant.now()).toMillis();
 
 
 
@@ -93,6 +95,7 @@ public class StudyFlowServiceImpl implements StudyFlowService {
                 .flashcardId(flashcardId)
                 .correct(isCorrect)
                 .receivedAt(Instant.now())
+                .timeTaken(Duration.ofMillis(responseTimeMs))
                 .build();
         eventProducer.send(KafkaTopic.FLASHCARD_ANSWERED, event);
 
@@ -101,7 +104,5 @@ public class StudyFlowServiceImpl implements StudyFlowService {
                 result
         );
     }
-
-
 }
 

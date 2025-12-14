@@ -51,6 +51,9 @@ public class UserFlashcardProgress {
     @Enumerated(EnumType.STRING)
     private LearningPhase phase;
 
+    @Column(name = "last_shown_at")
+    private Instant lastShownAt;
+
     @Builder.Default
     @Column(nullable = false, updatable = false)
     private Instant createdAt = Instant.now();

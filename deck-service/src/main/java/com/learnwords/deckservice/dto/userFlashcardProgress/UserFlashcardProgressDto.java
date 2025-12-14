@@ -1,10 +1,8 @@
 package com.learnwords.deckservice.dto.userFlashcardProgress;
 
 import com.learnwords.deckservice.enums.LearningPhase;
-import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+
 
 import java.time.Instant;
 
@@ -19,6 +17,7 @@ public record UserFlashcardProgressDto(
         boolean isSkipped,
         int repetitionCount,
         Instant nextReviewAt,
-        String algorithmState
+        String algorithmState,
+        Instant lastShownAt
 
 ) {}

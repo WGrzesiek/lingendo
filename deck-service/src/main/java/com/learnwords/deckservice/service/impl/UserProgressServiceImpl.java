@@ -246,6 +246,7 @@ public class UserProgressServiceImpl implements UserProgressService {
                 .repetitionCount(progress.getRepetitionCount())
                 .nextReviewAt(progress.getNextReviewAt())
                 .algorithmState(progress.getAlgorithmState())
+                .lastShownAt(progress.getLastShownAt())
                 .build();
     }
 
@@ -364,7 +365,16 @@ public class UserProgressServiceImpl implements UserProgressService {
         ).orElse(null);
     }
 
-
+    @Override
+    public void updateLastShownAt(String id) {
+        log.debug("Aktualizacja lastShownAt dla progresu fiszki - id: '{}'", id);
+        UserFlashcardProgress entity = userFlashcardProgressRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Progress not found"));
+        Instant now = Instant.now();
+        entity.setLastShownAt(now);
+        entity.setUpdatedAt(now);
+        userFlashcardProgressRepository.save(entity);
+    }
 
 
 }

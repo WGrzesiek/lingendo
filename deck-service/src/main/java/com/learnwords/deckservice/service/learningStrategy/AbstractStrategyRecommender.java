@@ -6,6 +6,7 @@ import com.learnwords.deckservice.dto.learningStrategy.NextFlashcardRecommendati
 import com.learnwords.deckservice.dto.userFlashcardProgress.UserFlashcardProgressDto;
 import com.learnwords.deckservice.entity.Session;
 import com.learnwords.deckservice.entity.SessionFlashcard;
+import com.learnwords.deckservice.entity.UserFlashcardProgress;
 import com.learnwords.deckservice.enums.LearnAlgorithm;
 import com.learnwords.deckservice.service.UserProgressService;
 import com.learnwords.deckservice.service.algorithm.AbstractAlgorithm;
@@ -59,7 +60,7 @@ public non-sealed abstract class AbstractStrategyRecommender implements Learning
                 .filter(p -> p.flashcardId().equals(chosen.getFlashcard().getId()))
                 .findFirst()
                 .orElseThrow(() -> new IllegalStateException("Progress not found for chosen card"));
-
+        userProgressService.updateLastShownAt(chosenProgress.id());
         return Optional.of(buildRecommendation(chosen, chosenProgress, session));    }
 
     protected List<UserFlashcardProgressDto> filterCommon(List<UserFlashcardProgressDto> progress) {
