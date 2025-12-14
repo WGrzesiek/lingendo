@@ -110,8 +110,16 @@ public final class GrzesiekStrategyImpl extends AbstractStrategyRecommender impl
         if (state.getStep() == GrzesiekStep.QUIZ) {
             type = InteractionType.QUIZ_CHOICE;
         } else if (state.getStep() == GrzesiekStep.WRITE_LANGUAGE_TO) {
-            type = InteractionType.TYPING_INPUT;
-        } else {
+            type = InteractionType.TYPING_INPUT_TO;
+        } else if (state.getStep() == GrzesiekStep.WRITE_LANGUAGE_FROM) {
+            type = InteractionType.TYPING_INPUT_FROM;
+        }
+        else if (state.getStep() == GrzesiekStep.SHOW_LANGUAGE_FROM) {
+            type = InteractionType.REMEMBER_CHECK_FROM;
+        } else if (state.getStep() == GrzesiekStep.SHOW_LANGUAGE_TO) {
+            type = InteractionType.REMEMBER_CHECK_TO;
+        }
+        else {
             type = InteractionType.PRESENTATION;
         }
 
