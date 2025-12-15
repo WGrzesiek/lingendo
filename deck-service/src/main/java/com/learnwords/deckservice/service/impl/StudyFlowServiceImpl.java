@@ -9,6 +9,7 @@ import com.learnwords.deckservice.dto.learningStrategy.NextFlashcardRecommendati
 import com.learnwords.deckservice.dto.userFlashcardProgress.UserFlashcardProgressDto;
 import com.learnwords.deckservice.entity.DeckEnrollment;
 import com.learnwords.deckservice.entity.SessionFlashcard;
+import com.learnwords.deckservice.exception.exceptions.IsNoMoreFlashcardsError;
 import com.learnwords.deckservice.exception.exceptions.SessionFinishedException;
 import com.learnwords.deckservice.service.*;
 import com.learnwords.deckservice.service.algorithm.AlgorithmFactory;
@@ -66,7 +67,7 @@ public class StudyFlowServiceImpl implements StudyFlowService {
                 .orElseThrow(() -> new IllegalStateException("No strategy found for algorithm: " + deckEnrollment.getPreferredAlgorithm()));
 
         return strategy.recommendNext(sessionFlashcards, userId)
-                .orElseThrow(() -> new SessionFinishedException("No more flashcards to learn in this session"));
+                .orElseThrow(() -> new IsNoMoreFlashcardsError());
     }
 
     @Override
