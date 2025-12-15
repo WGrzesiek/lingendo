@@ -81,6 +81,16 @@ public final class GrzesiekStrategyImpl extends AbstractStrategyRecommender impl
                     GrzesiekStep.SHOW_LANGUAGE_TO,
                     GrzesiekStep.WRITE_LANGUAGE_FROM);
         }
+        if (ratio(howMany, totalCards, GrzesiekStep.WRITE_LANGUAGE_TO) < THRESHOLD) {
+            return pick(eligibleCards, eligibleProgress,
+                    GrzesiekStep.SHOW_BOTH,
+                    GrzesiekStep.QUIZ,
+                    GrzesiekStep.SHOW_LANGUAGE_FROM,
+                    GrzesiekStep.SHOW_LANGUAGE_TO,
+                    GrzesiekStep.WRITE_LANGUAGE_FROM,
+                    GrzesiekStep.WRITE_LANGUAGE_TO
+            );
+        }
 
         return pick(eligibleCards, eligibleProgress,
                 GrzesiekStep.SHOW_BOTH,
@@ -137,6 +147,7 @@ public final class GrzesiekStrategyImpl extends AbstractStrategyRecommender impl
     }
 
     private double ratio(Map<GrzesiekStep, Long> map, int total, GrzesiekStep step) {
+        if (total <= 0) return 0.0;
         return (double) map.getOrDefault(step, 0L) / total;
     }
 

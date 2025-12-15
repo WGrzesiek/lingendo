@@ -38,7 +38,7 @@ public abstract sealed class AbstractAlgorithm implements Algorithm<AlgorithmSta
     @Override
     public AlgorithmResult<AlgorithmState> processAnswer(AlgorithmState state, boolean correct) {
         if (correct) {
-            if(state.getStep().isMaxLevel()) {
+            if(state.getStep().isLastLearnStep()) {
                 return new MaxLevel<>(state);
             }
             return new Success<>(promote(state));
