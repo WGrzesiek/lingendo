@@ -263,18 +263,19 @@ public class UserProgressServiceImpl implements UserProgressService {
                 entity.setLearned(true);
                 entity.setPhase(LearningPhase.REVIEW);
                 entity.setNextReviewAt(Instant.now().plusSeconds(604800));
+                entity.setUpdatedAt(Instant.now());
             }
             entity.setAlgorithmState(newState.serialize());
+            entity.setUpdatedAt(Instant.now());
 
-        }
-
-        if (result instanceof MaxLevel) {
+        } else if (result instanceof MaxLevel) {
             entity.setLearned(true);
             entity.setPhase(LearningPhase.REVIEW);
             entity.setNextReviewAt(Instant.now().plusSeconds(604800));
+            entity.setUpdatedAt(Instant.now());
         } else {
 
-            entity.setLearned(false);
+            entity.setUpdatedAt(Instant.now());
         }
 
         userFlashcardProgressRepository.save(entity);

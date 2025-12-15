@@ -29,6 +29,7 @@ public interface UserFlashcardProgressRepository extends JpaRepository<com.learn
           AND u.repetitionCount < :maxRep
           AND u.nextReviewAt > :now
         ORDER BY u.nextReviewAt ASC
+        LIMIT 1
 """)
     Optional<Instant> findNextReviewAt(
             String enrollmentId,
