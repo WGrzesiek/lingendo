@@ -1,10 +1,7 @@
 package com.learnwords.deckservice.facade;
 
 import com.learnwords.auth.v1.GetUserNameByIdResponse;
-import com.learnwords.deckservice.dto.course.CourseHeaderInfo;
-import com.learnwords.deckservice.dto.course.CourseSettings;
-import com.learnwords.deckservice.dto.course.FlashcardsWithStatus;
-import com.learnwords.deckservice.dto.course.SessionProgress;
+import com.learnwords.deckservice.dto.course.*;
 import com.learnwords.deckservice.dto.deckEnrollment.DeckEnrollmentDto;
 import com.learnwords.deckservice.dto.flashcard.FlashcardDto;
 import com.learnwords.deckservice.dto.session.FlashcardSessionNumber;
@@ -129,7 +126,7 @@ public class CourseViewFacade {
         int completedSessions = sessionService.getCompletedSessionsCount(enrollmentId, userId);
         int wordsToReview = userProgressService.countWordsToReview(enrollmentId, userId);
         Instant nextNearReviewDate = userProgressService.getNextNearReviewDate(enrollmentId, userId);
-
+        List<SessionInfo> sessions = sessionService.getSessionsInfoByDeckId(enrollmentId, userId);
 
         return new SessionProgress(
                 completedSessions,
@@ -137,7 +134,9 @@ public class CourseViewFacade {
                 (int) wordsPerSession,
                 totalWords,
                 wordsToReview,
-                nextNearReviewDate
+                nextNearReviewDate,
+                sessions
+
         );
     }
 

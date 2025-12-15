@@ -4,6 +4,7 @@ import com.learnwords.common.KafkaTopic;
 import com.learnwords.common.events.DeckEnrollmentsFinished;
 import com.learnwords.common.events.SessionFinishedEvent;
 import com.learnwords.common.events.SessionStartedEvent;
+import com.learnwords.deckservice.dto.course.SessionInfo;
 import com.learnwords.deckservice.dto.session.SessionDto;
 import com.learnwords.deckservice.entity.DeckEnrollment;
 import com.learnwords.deckservice.entity.Flashcard;
@@ -324,6 +325,24 @@ public class SessionServiceImpl implements SessionService {
         log.debug("Liczba ukończonych sesji - deckId: '{}', userId: '{}', completedSessions: '{}'",
                 deckId, userId, completedSessions);
         return completedSessions;
+    }
+
+    @Override
+    public List<SessionInfo> getSessionsInfoByDeckId(String enrollmentId, String userId) {
+        log.debug("Pobieranie informacji o sesjach - enrollmentId: '{}', userId: '{}'", enrollmentId, userId);
+        DeckEnrollment enrollment = DeckUtils.getDeckEnrollmentIfUserHasPermissions(
+                deckEnrollmentRepository, enrollmentId, userId);
+        List<Session> sessions = sessionRepository.findByEnrollment_Id(enrollment.getId());
+        List<SessionInfo> sessionInfos = sessions.stream()
+                .map(session -> new SessionInfo(
+                        session.getId(),
+                        session.getSessionNumber(),
+                        session.getStatus()
+                ))
+                .toList();
+        log.debug("Pobrano informacje o sesjach - enrollmentId: '{}', userId: '{}', sessionCount: '{}'",
+                enrollmentId, userId, sessionInfos.size());
+        return sessionInfos;
     }
 
 

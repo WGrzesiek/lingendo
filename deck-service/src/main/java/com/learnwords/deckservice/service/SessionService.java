@@ -1,7 +1,9 @@
 package com.learnwords.deckservice.service;
 
+import com.learnwords.deckservice.dto.course.SessionInfo;
 import com.learnwords.deckservice.dto.session.FlashcardSessionNumber;
 import com.learnwords.deckservice.dto.session.SessionDto;
+import com.learnwords.deckservice.entity.Session;
 import com.learnwords.deckservice.enums.SessionType;
 
 import java.util.List;
@@ -40,6 +42,7 @@ public interface SessionService {
     void resumeSession(String sessionId, String userId);
     SessionDto getSessionById(String sessionId, String userId);
     int getCompletedSessionsCount(String deckId, String userId);
+    List<SessionInfo> getSessionsInfoByDeckId(String enrollmentId, String userId);
 }
 
 

@@ -5,6 +5,7 @@ import com.learnwords.deckservice.enums.SessionStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Collection;
+import java.util.List;
 
 /**
  * Repozytorium dla encji Session.
@@ -17,5 +18,6 @@ public interface SessionRepository extends JpaRepository<Session, String> {
     boolean existsByEnrollment_IdAndStatusIn(String enrollmentId, Collection<SessionStatus> statuses);
     int countByEnrollment_Id(String enrollmentId);
     int countByEnrollment_IdAndStatus(String enrollmentId, SessionStatus status);
+    List<Session> findByEnrollment_Id(String enrollmentId);
 
 }
