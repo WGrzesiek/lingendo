@@ -30,15 +30,17 @@ public class LearnViewFacade {
         SessionDto session = sessionService.getSessionById(sessionId, userId);
 
         DeckEnrollment enrollment = session.enrollment();
+        long totalFlashcards = enrollment.getHowManyFlashcardsForOneSession();
         AbstractAlgorithm algorithm = algorithmFactory.get(enrollment.getPreferredAlgorithm());
 
         int totalSteps = algorithm.getInitialState().getTotalSteps();
         int correct = session.correctAnswers();
 
-        if (totalSteps <= 0 || correct <= 0) {
+        if (totalSteps <= 0 || correct <= 0 || totalFlashcards <= 0) {
             return new LearnHeader(sessionId, 0.0);
         }
-        double percent = (correct * 100.0) / totalSteps;
+        long totalStepsXFlashcards = totalFlashcards * (long) totalSteps;
+        double percent = (correct * 100.0) / totalStepsXFlashcards;
         percent = Math.min(100.0, Math.max(0.0, percent));
         return new LearnHeader(sessionId, percent);
     }
