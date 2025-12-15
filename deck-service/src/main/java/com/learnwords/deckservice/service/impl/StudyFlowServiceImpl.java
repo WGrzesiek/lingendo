@@ -86,7 +86,9 @@ public class StudyFlowServiceImpl implements StudyFlowService {
         long responseTimeMs = Duration.between(progress.lastShownAt(), Instant.now()).toMillis();
 
 
-
+        if(isCorrect){
+            sessionService.recordCorrectAnswer(sessionId, userId);
+        }
         FlashcardAnsweredEvent event = FlashcardAnsweredEvent.builder()
                 .eventTime(Instant.now())
                 .userId(userId)

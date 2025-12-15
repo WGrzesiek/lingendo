@@ -345,5 +345,14 @@ public class SessionServiceImpl implements SessionService {
         return sessionInfos;
     }
 
+    @Override
+    public void recordCorrectAnswer(String sessionId, String userId) {
+        log.debug("Rejestrowanie poprawnej odpowiedzi - sessionId: '{}', userId: '{}'", sessionId, userId);
+        Session session = getSessionIfUserHasPermissions(sessionRepository, userId, sessionId);
+        session.setCorrectAnswers(session.getCorrectAnswers()+1);
+        sessionRepository.save(session);
+        log.debug("Zarejestrowano poprawną odpowiedź - sessionId: '{}', userId: '{}', totalCorrectAnswers: '{}'",
+                sessionId, userId, session.getCorrectAnswers());
+    }
 
 }

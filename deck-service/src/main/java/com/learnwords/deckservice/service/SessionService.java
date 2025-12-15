@@ -41,6 +41,7 @@ public interface SessionService {
     SessionDto getSessionById(String sessionId, String userId);
     int getCompletedSessionsCount(String deckId, String userId);
     List<SessionInfo> getSessionsInfoByDeckId(String enrollmentId, String userId);
+    void recordCorrectAnswer(String sessionId, String userId);
 }
 
 
