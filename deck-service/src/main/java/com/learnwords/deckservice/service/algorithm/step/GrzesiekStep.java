@@ -47,4 +47,9 @@ public enum GrzesiekStep implements Step{
     public int index() {
         return ordinal();
     }
+
+    @Override
+    public int stepCount() {
+        return GrzesiekStep.values().length;
+    }
 }

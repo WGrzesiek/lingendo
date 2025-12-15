@@ -1,9 +1,7 @@
 package com.learnwords.deckservice.service;
 
-import com.learnwords.deckservice.dto.course.SessionInfo;
-import com.learnwords.deckservice.dto.session.FlashcardSessionNumber;
+import com.learnwords.deckservice.dto.facade.learn.SessionInfo;
 import com.learnwords.deckservice.dto.session.SessionDto;
-import com.learnwords.deckservice.entity.Session;
 import com.learnwords.deckservice.enums.SessionType;
 
 import java.util.List;

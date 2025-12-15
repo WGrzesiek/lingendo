@@ -48,7 +48,7 @@ public abstract sealed class AbstractAlgorithm implements Algorithm<AlgorithmSta
     }
 
 
-    protected abstract AlgorithmState getInitialState();
+    public abstract AlgorithmState getInitialState();
 
     public abstract LearnAlgorithm getType();
 }

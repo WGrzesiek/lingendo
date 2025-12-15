@@ -1,4 +1,4 @@
-package com.learnwords.deckservice.dto.course;
+package com.learnwords.deckservice.dto.facade.course;
 
 import com.learnwords.deckservice.dto.flashcard.FlashcardDto;
 import com.learnwords.deckservice.dto.session.FlashcardSessionNumber;

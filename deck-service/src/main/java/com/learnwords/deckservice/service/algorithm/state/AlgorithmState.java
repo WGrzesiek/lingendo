@@ -9,4 +9,5 @@ public sealed interface AlgorithmState permits AbstractState, GrzesiekState {
     AlgorithmState previous();
     AlgorithmState reset();
     Step getStep();
+    int getTotalSteps();
 }

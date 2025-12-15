@@ -1,8 +1,9 @@
 package com.learnwords.deckservice.facade;
 
 import com.learnwords.auth.v1.GetUserNameByIdResponse;
-import com.learnwords.deckservice.dto.course.*;
 import com.learnwords.deckservice.dto.deckEnrollment.DeckEnrollmentDto;
+import com.learnwords.deckservice.dto.facade.course.*;
+import com.learnwords.deckservice.dto.facade.learn.SessionInfo;
 import com.learnwords.deckservice.dto.flashcard.FlashcardDto;
 import com.learnwords.deckservice.dto.session.FlashcardSessionNumber;
 import com.learnwords.deckservice.dto.userFlashcardProgress.UserFlashcardProgressDto;

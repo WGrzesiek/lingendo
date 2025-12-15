@@ -17,4 +17,6 @@ public sealed interface Step permits GrzesiekStep {
     boolean isMaxLevel();
 
     int index();
+
+    int stepCount();
 }

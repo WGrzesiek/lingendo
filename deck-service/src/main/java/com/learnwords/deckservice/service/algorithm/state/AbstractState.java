@@ -44,6 +44,11 @@ public abstract non-sealed class AbstractState<T extends Step, S extends Abstrac
         return step;
     }
 
+    @Override
+    public int getTotalSteps() {
+        return step.initialStep().stepCount();
+    }
+
     protected abstract S createStateFromStepName(String stepName) throws StepWithThisNameNoExist;
 
 }

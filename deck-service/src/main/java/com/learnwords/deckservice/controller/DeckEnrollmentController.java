@@ -1,10 +1,10 @@
 package com.learnwords.deckservice.controller;
 
-import com.learnwords.deckservice.dto.course.CourseHeaderInfo;
-import com.learnwords.deckservice.dto.course.CourseSettings;
-import com.learnwords.deckservice.dto.course.FlashcardsWithStatus;
+import com.learnwords.deckservice.dto.facade.course.CourseHeaderInfo;
+import com.learnwords.deckservice.dto.facade.course.CourseSettings;
+import com.learnwords.deckservice.dto.facade.course.FlashcardsWithStatus;
 import com.learnwords.deckservice.dto.deckEnrollment.DeckEnrollmentDto;
-import com.learnwords.deckservice.dto.dashboard.StudentMyCourseListItemDto;
+import com.learnwords.deckservice.dto.facade.dashboard.StudentMyCourseListItemDto;
 import com.learnwords.deckservice.dto.deckEnrollment.CreateDeckEnrollmentDto;
 import com.learnwords.deckservice.enums.LearnAlgorithm;
 import com.learnwords.deckservice.enums.ReviewSchedule;

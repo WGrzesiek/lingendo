@@ -1,4 +1,4 @@
-package com.learnwords.deckservice.dto.dashboard;
+package com.learnwords.deckservice.dto.facade.dashboard;
 
 import com.learnwords.deckservice.enums.DeckCategory;
 import com.learnwords.deckservice.enums.DeckDifficulty;

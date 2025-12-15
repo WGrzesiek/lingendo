@@ -4,16 +4,14 @@ import com.learnwords.common.KafkaTopic;
 import com.learnwords.common.events.DeckEnrollmentsFinished;
 import com.learnwords.common.events.SessionFinishedEvent;
 import com.learnwords.common.events.SessionStartedEvent;
-import com.learnwords.deckservice.dto.course.SessionInfo;
+import com.learnwords.deckservice.dto.facade.learn.SessionInfo;
 import com.learnwords.deckservice.dto.session.SessionDto;
 import com.learnwords.deckservice.entity.DeckEnrollment;
-import com.learnwords.deckservice.entity.Flashcard;
 import com.learnwords.deckservice.entity.Session;
 import com.learnwords.deckservice.enums.SessionStatus;
 import com.learnwords.deckservice.enums.SessionType;
 import com.learnwords.deckservice.exception.exceptions.*;
 import com.learnwords.deckservice.repository.DeckEnrollmentRepository;
-import com.learnwords.deckservice.repository.FlashcardRepository;
 import com.learnwords.deckservice.repository.SessionRepository;
 import com.learnwords.deckservice.service.FlashcardFetchStrategy;
 import com.learnwords.deckservice.service.SessionFlashcardService;
@@ -312,6 +310,8 @@ public class SessionServiceImpl implements SessionService {
                 .startedAt(session.getStartedAt())
                 .completedAt(session.getCompletedAt())
                 .sessionFlashcards(session.getSessionFlashcards())
+                .correctAnswers(session.getCorrectAnswers())
+                .sessionNumber(session.getSessionNumber())
                 .build();
     }
 

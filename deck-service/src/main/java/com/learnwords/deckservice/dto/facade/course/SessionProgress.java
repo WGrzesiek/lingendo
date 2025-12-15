@@ -1,10 +1,9 @@
-package com.learnwords.deckservice.dto.course;
+package com.learnwords.deckservice.dto.facade.course;
 
-import org.apache.kafka.common.protocol.types.Field;
+import com.learnwords.deckservice.dto.facade.learn.SessionInfo;
 
 import java.time.Instant;
 import java.util.List;
-import java.util.Map;
 
 public record SessionProgress(
     int completedSessions,

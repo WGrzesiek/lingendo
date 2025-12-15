@@ -1,10 +1,12 @@
 package com.learnwords.deckservice.controller;
 
-import com.learnwords.deckservice.dto.course.SessionProgress;
+import com.learnwords.deckservice.dto.facade.course.SessionProgress;
+import com.learnwords.deckservice.dto.facade.learn.LearnHeader;
 import com.learnwords.deckservice.dto.session.SessionDto;
 
 import com.learnwords.deckservice.enums.SessionType;
 import com.learnwords.deckservice.facade.CourseViewFacade;
+import com.learnwords.deckservice.facade.LearnViewFacade;
 import com.learnwords.deckservice.service.FlashcardFetchStrategy;
 import com.learnwords.deckservice.service.SessionService;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -26,11 +28,13 @@ public class SessionController {
 
     private final SessionService sessionService;
     private final CourseViewFacade courseViewFacade;
+    private final LearnViewFacade learnViewFacade;
 
 
-    public SessionController(SessionService sessionService, CourseViewFacade courseViewFacade) {
+    public SessionController(SessionService sessionService, CourseViewFacade courseViewFacade, LearnViewFacade learnViewFacade) {
         this.sessionService = sessionService;
         this.courseViewFacade = courseViewFacade;
+        this.learnViewFacade = learnViewFacade;
     }
 
     /**
@@ -172,5 +176,22 @@ public class SessionController {
         log.info("Pobrano postęp sesji dla enrollmentId: {} userId: {}",
                 enrollmentId, userId);
         return ResponseEntity.ok(sessionProgress);
+    }
+
+    @GetMapping("/sessions/{sessionId}/learn-header")
+    public ResponseEntity<LearnHeader> getLearnHeader(
+            @Parameter(description = "ID sesji", required = true, example = "session-123")
+            @PathVariable String sessionId,
+            @Parameter(description = "ID użytkownika z nagłówka", required = true, example = "user-123")
+            @RequestHeader(USER_ID_HEADER) String userId
+    ) {
+        log.debug("Pobieranie nagłówka nauki dla sesji {}",
+                sessionId);
+
+        LearnHeader learnHeader = learnViewFacade.getLearnHeader(userId,sessionId);
+
+        log.info("Pobrano nagłówek nauki dla sesji {}",
+                sessionId);
+        return ResponseEntity.ok(learnHeader);
     }
 }

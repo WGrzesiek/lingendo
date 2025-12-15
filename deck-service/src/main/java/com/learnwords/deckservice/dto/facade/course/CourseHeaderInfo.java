@@ -1,4 +1,4 @@
-package com.learnwords.deckservice.dto.course;
+package com.learnwords.deckservice.dto.facade.course;
 
 import com.learnwords.deckservice.enums.DeckOwner;
 import com.learnwords.deckservice.enums.DeckVisibility;

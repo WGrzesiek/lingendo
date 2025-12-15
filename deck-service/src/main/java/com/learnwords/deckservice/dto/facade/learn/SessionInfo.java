@@ -1,4 +1,4 @@
-package com.learnwords.deckservice.dto.course;
+package com.learnwords.deckservice.dto.facade.learn;
 
 import com.learnwords.deckservice.enums.SessionStatus;
 

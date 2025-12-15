@@ -3,6 +3,7 @@ package com.learnwords.deckservice.entity;
 import com.learnwords.deckservice.enums.SessionStatus;
 import com.learnwords.deckservice.enums.SessionType;
 import jakarta.persistence.*;
+import jakarta.persistence.criteria.CriteriaBuilder;
 import lombok.*;
 
 import java.io.Serializable;
@@ -45,6 +46,10 @@ public class Session {
 
     @Column(name = "session_number")
     private Integer sessionNumber;
+
+    @Builder.Default
+    @Column(name = "correct_answers")
+    private Integer correctAnswers = 0;
 
     @Builder.Default
     @Column(nullable = false, updatable = false)

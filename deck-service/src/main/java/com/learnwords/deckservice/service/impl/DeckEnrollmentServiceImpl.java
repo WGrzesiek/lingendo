@@ -2,20 +2,15 @@ package com.learnwords.deckservice.service.impl;
 
 import com.learnwords.common.KafkaTopic;
 import com.learnwords.common.events.DeckEnrollmentsCreated;
-import com.learnwords.deckservice.dto.course.FlashcardsWithStatus;
 import com.learnwords.deckservice.dto.deckEnrollment.CreateDeckEnrollmentDto;
 import com.learnwords.deckservice.dto.deckEnrollment.DeckEnrollmentDto;
-import com.learnwords.deckservice.dto.dashboard.StudentMyCourseListItemDto;
-import com.learnwords.deckservice.dto.flashcard.FlashcardDto;
-import com.learnwords.deckservice.dto.userFlashcardProgress.UserFlashcardProgressDto;
+import com.learnwords.deckservice.dto.facade.dashboard.StudentMyCourseListItemDto;
 import com.learnwords.deckservice.entity.Deck;
 import com.learnwords.deckservice.entity.DeckEnrollment;
 import com.learnwords.deckservice.enums.*;
 import com.learnwords.deckservice.repository.DeckEnrollmentRepository;
 import com.learnwords.deckservice.repository.DeckRepository;
 import com.learnwords.deckservice.service.DeckEnrollmentService;
-import com.learnwords.deckservice.service.FlashcardService;
-import com.learnwords.deckservice.service.UserProgressService;
 import com.learnwords.deckservice.service.event.GenericEventProducer;
 import com.learnwords.deckservice.service.utils.DeckUtils;
 import jakarta.transaction.Transactional;
@@ -24,11 +19,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
-import java.util.List;
 
 @Slf4j
 @Service

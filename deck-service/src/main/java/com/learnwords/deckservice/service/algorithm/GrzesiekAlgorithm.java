@@ -25,7 +25,7 @@ public final class GrzesiekAlgorithm extends AbstractAlgorithm {
     }
 
     @Override
-    protected AlgorithmState getInitialState() {
+    public AlgorithmState getInitialState() {
         return new GrzesiekState(GrzesiekStep.SHOW_BOTH);
     }
 
