@@ -259,6 +259,11 @@ public class UserProgressServiceImpl implements UserProgressService {
         entity.setUpdatedAt(Instant.now());
         if(result instanceof Success<?>){
             AlgorithmState newState = ((Success<?>) result).newState();
+            if(newState.getStep().isMaxLevel() ){
+                entity.setLearned(true);
+                entity.setPhase(LearningPhase.REVIEW);
+                entity.setNextReviewAt(Instant.now().plusSeconds(604800));
+            }
             entity.setAlgorithmState(newState.serialize());
 
         }
