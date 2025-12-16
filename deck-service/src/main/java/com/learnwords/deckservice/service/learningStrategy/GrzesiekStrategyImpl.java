@@ -113,6 +113,7 @@ public final class GrzesiekStrategyImpl extends AbstractStrategyRecommender impl
 
 
         InteractionType type;
+        //Note bierze czasmi drugie tlumaczenie slowka jako opcje do quziu
         List<String> quizOptions = generateQuizOptions(content, session.getSessionFlashcards().stream()
                 .map(SessionFlashcard::getFlashcard)
                 .toList());

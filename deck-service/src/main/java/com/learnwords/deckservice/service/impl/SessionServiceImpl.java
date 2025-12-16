@@ -183,8 +183,8 @@ public class SessionServiceImpl implements SessionService {
                 enrollment.getId(),
                 List.of(SessionStatus.IN_PROGRESS, SessionStatus.PAUSED)
         );
-
-        if (!hasActiveSessions) {
+        int totalSessions = (int) Math.ceil((double) enrollment.getDeck().getWordCount() / enrollment.getHowManyFlashcardsForOneSession());
+        if (!hasActiveSessions && enrollment.getCompletedSessionsCount() >= totalSessions) {
             enrollment.markCompleted();
             log.info("Ukończono naukę talii - deckEnrollmentId: '{}'", enrollment.getId());
 
