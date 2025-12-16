@@ -1,5 +1,6 @@
 package com.learnwords.deckservice.service.impl;
 
+import com.learnwords.deckservice.dto.facade.review.ReviewCounters;
 import com.learnwords.deckservice.dto.userFlashcardProgress.UserFlashcardProgressDto;
 import com.learnwords.deckservice.entity.DeckEnrollment;
 import com.learnwords.deckservice.entity.Flashcard;
@@ -27,6 +28,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -357,7 +360,24 @@ public class UserProgressServiceImpl implements UserProgressService {
     @Override
     public int countWordsToReview(String enrollmentId, String userId) {
         log.debug("Pobieranie liczby słów do powtórki - enrollmentId: '{}', userId: '{}'", enrollmentId, userId);
-        return userFlashcardProgressRepository.countByEnrollment_IdAndUserIdAndIsLearnedAndPhaseAndNextReviewAtAfterAndRepetitionCountIsLessThan(enrollmentId,userId,true,LearningPhase.REVIEW, Instant.now(),3);
+        return userFlashcardProgressRepository.countToReview(enrollmentId,userId,LearningPhase.REVIEW, 3);
+    }
+
+    @Override
+    public ReviewCounters getReviewCounters(String enrollmentId, String userId) {
+        log.debug("Pobieranie liczby słów do powtórki na dziś - enrollmentId: '{}', userId: '{}'", enrollmentId, userId);
+        ZoneId zone = ZoneId.of("Europe/Warsaw");
+        Instant startOfTomorrow = LocalDate.now(zone).plusDays(1).atStartOfDay(zone).toInstant();
+        Instant now = Instant.now();
+
+        return userFlashcardProgressRepository.countReviewStats(
+                enrollmentId,
+                userId,
+                LearningPhase.REVIEW,
+                now,
+                startOfTomorrow
+                );
+
     }
 
     @Override

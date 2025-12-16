@@ -1,6 +1,8 @@
 package com.learnwords.deckservice.controller;
 
+import com.learnwords.deckservice.dto.facade.review.ReviewHeader;
 import com.learnwords.deckservice.dto.userFlashcardProgress.UserFlashcardProgressDto;
+import com.learnwords.deckservice.facade.ReviewViewFacade;
 import com.learnwords.deckservice.service.UserProgressService;
 import com.learnwords.deckservice.service.evaluationService.responseResult.AlgorithmResult;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -23,8 +25,10 @@ public class UserProgressController {
     private static final String USER_ID_HEADER = "X-User-Id";
 
     private final UserProgressService userProgressService;
+    private final ReviewViewFacade reviewViewFacade;
 
-    public UserProgressController(UserProgressService userProgressService) {
+    public UserProgressController(UserProgressService userProgressService, ReviewViewFacade reviewViewFacade) {
+        this.reviewViewFacade = reviewViewFacade;
         this.userProgressService = userProgressService;
     }
 
@@ -181,14 +185,18 @@ public class UserProgressController {
         return ResponseEntity.ok().build();
     }
 
-    // ---
-    // Metody:
-    // - setInitialFlashcardState(String deckId, Flashcard flashcard, String userId)
-    // - initializeSessionFlashcardsState(String deckId, List<String> flashcardIds, String userId)
-    // - initializeDeckFlashcardsState(String deckId, String userId)
-    //
-    // wyglądają na techniczne / wewnętrzne i najpewniej będą wołane
-    // z innych serwisów (np. przy inicjalizacji talii/sesji),
-    // więc sensownie jest zostawić je bez publicznych endpointów HTTP.
-    // ---
+    @GetMapping("/enrollments/{enrollmentId}/review-header")
+    public ResponseEntity<ReviewHeader> getReviewHeader(
+            @Parameter(description = "ID użytkownika z nagłówka", required = true, example = "user-123")
+            @RequestHeader(USER_ID_HEADER) String userId,
+        @Parameter(description = "ID zapisu na talię (enrollment)", required = true, example = "enrollment-123")
+        @PathVariable String enrollmentId)
+    {
+        log.info("Pobieranie nagłówka powtórki dla enrollment {} (userId: {})",
+                enrollmentId, userId);
+        ReviewHeader reviewHeader = reviewViewFacade.getReviewHeader(enrollmentId, userId);
+        log.info("Pobrano nagłówek powtórki dla enrollment {} (userId: {})",
+                enrollmentId, userId);
+        return ResponseEntity.ok(reviewHeader);
+    }
 }

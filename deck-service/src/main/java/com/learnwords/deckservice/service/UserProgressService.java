@@ -1,5 +1,6 @@
 package com.learnwords.deckservice.service;
 
+import com.learnwords.deckservice.dto.facade.review.ReviewCounters;
 import com.learnwords.deckservice.dto.userFlashcardProgress.UserFlashcardProgressDto;
 import com.learnwords.deckservice.entity.Flashcard;
 import com.learnwords.deckservice.enums.LearningPhase;
@@ -24,6 +25,7 @@ public interface UserProgressService {
     void updateProgress(UserFlashcardProgressDto progressDto, AlgorithmResult result, boolean isCorrect);
     Page<UserFlashcardProgressDto> getProgressForEnrollment(String enrollmentId, String userId, Pageable pageable);
     int countWordsToReview(String enrollmentId, String userId);
+    ReviewCounters getReviewCounters(String enrollmentId, String userId);
     void updateProgressAfterReview(UserFlashcardProgressDto progressDto, boolean isCorrect);
     Instant getNextNearReviewDate(String enrollmentId, String userId);
     void updateLastShownAt(String id);
