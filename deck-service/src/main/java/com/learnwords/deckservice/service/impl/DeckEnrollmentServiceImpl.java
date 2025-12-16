@@ -106,14 +106,17 @@ public class DeckEnrollmentServiceImpl implements DeckEnrollmentService {
 
             int totalWords = deck.getWordCount();
             int learnedWords = enrollment.getLearnedFlashcardsCount();
-            int completionPercent = (totalWords == 0) ? 0 : (int) ((double) learnedWords / totalWords * 100);
+            long wordsPerSession = deck.getHowManyFlashcardsForOneSession();
+            long totalSessions = (long) Math.ceil((double) totalWords / wordsPerSession);
+            int completionPercent = (totalWords == 0) ? 0 : (int) ((double) enrollment.getCompletedSessionsCount() / totalSessions * 100);
+
 
             return new StudentMyCourseListItemDto(
                     enrollment.getId(),
                     deck.getId(),
                     deck.getName(),
                     deck.getDescription(),
-                    (long) enrollment.getCompletedSessionsCount(),
+                    (long) Math.ceil((double) totalWords / wordsPerSession),
                     (long) enrollment.getCompletedSessionsCount(),
                     completionPercent,
                     enrollment.getLastAccessedAt(),
