@@ -356,6 +356,34 @@ public class UserProgressServiceImpl implements UserProgressService {
         );
     }
 
+    @Override
+    public Page<UserFlashcardProgressDto> getReviewProgressForEnrollment(
+            String enrollmentId,
+            String userId,
+            Pageable pageable
+    ) {
+        if (userId == null || userId.isBlank()) {
+            log.error("UserId jest pusty");
+            throw new IllegalArgumentException("UserId nie może być pusty");
+        }
+
+        Page<UserFlashcardProgress> progresses =
+                userFlashcardProgressRepository.findByEnrollment_IdAndPhase(enrollmentId, LearningPhase.REVIEW, pageable);
+
+        return progresses.map(progress -> UserFlashcardProgressDto.builder()
+                .id(progress.getId())
+                .flashcardId(progress.getFlashcard().getId())
+                .enrollmentId(progress.getEnrollment().getId())
+                .userId(progress.getUserId())
+                .phase(progress.getPhase())
+                .isLearned(progress.isLearned())
+                .isSkipped(progress.isSkipped())
+                .repetitionCount(progress.getRepetitionCount())
+                .nextReviewAt(progress.getNextReviewAt())
+                .algorithmState(progress.getAlgorithmState())
+                .build()
+        );
+    }
 
     @Override
     public int countWordsToReview(String enrollmentId, String userId) {

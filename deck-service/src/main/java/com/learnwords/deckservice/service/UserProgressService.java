@@ -24,6 +24,7 @@ public interface UserProgressService {
     UserFlashcardProgressDto getFlashcardProgress(String flashcardId, String userId);
     void updateProgress(UserFlashcardProgressDto progressDto, AlgorithmResult result, boolean isCorrect);
     Page<UserFlashcardProgressDto> getProgressForEnrollment(String enrollmentId, String userId, Pageable pageable);
+    Page<UserFlashcardProgressDto> getReviewProgressForEnrollment(String enrollmentId, String userId, Pageable pageable);
     int countWordsToReview(String enrollmentId, String userId);
     ReviewCounters getReviewCounters(String enrollmentId, String userId);
     void updateProgressAfterReview(UserFlashcardProgressDto progressDto, boolean isCorrect);

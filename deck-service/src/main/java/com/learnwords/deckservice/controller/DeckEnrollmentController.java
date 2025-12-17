@@ -9,6 +9,7 @@ import com.learnwords.deckservice.dto.deckEnrollment.CreateDeckEnrollmentDto;
 import com.learnwords.deckservice.enums.LearnAlgorithm;
 import com.learnwords.deckservice.enums.ReviewSchedule;
 import com.learnwords.deckservice.facade.CourseViewFacade;
+import com.learnwords.deckservice.facade.ReviewViewFacade;
 import com.learnwords.deckservice.service.DeckEnrollmentService;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -30,10 +31,12 @@ public class DeckEnrollmentController {
 
     private final DeckEnrollmentService deckEnrollmentService;
     private final CourseViewFacade courseViewFacade;
+    private final ReviewViewFacade reviewViewFacade;
 
-    public DeckEnrollmentController(DeckEnrollmentService deckEnrollmentService, CourseViewFacade courseViewFacade) {
+    public DeckEnrollmentController(DeckEnrollmentService deckEnrollmentService, CourseViewFacade courseViewFacade, ReviewViewFacade reviewViewFacade) {
         this.deckEnrollmentService = deckEnrollmentService;
         this.courseViewFacade = courseViewFacade;
+        this.reviewViewFacade = reviewViewFacade;
     }
 
     /**
@@ -158,6 +161,7 @@ public class DeckEnrollmentController {
     /**
      * Pobranie fiszek + statusów użytkownika dla widoku kursu (course-view).
      */
+    //Note nazwa do poprawy bo nie czytelna
     @GetMapping("/enrollments/{enrollmentId}/course-view")
     public ResponseEntity<Page<FlashcardsWithStatus>> getCourseView(
             @Parameter(description = "ID zapisu na talię (enrollment)", required = true, example = "enr-123")
@@ -174,6 +178,29 @@ public class DeckEnrollmentController {
         Page<FlashcardsWithStatus> result =
                 courseViewFacade.getFlashcardsForCourseView(userId, enrollmentId, page, size);
         log.info("Pobrano {} fiszek dla enrollment {} (userId: {})",
+                result.getContent().size(), enrollmentId, userId);
+        return ResponseEntity.ok(result);
+    }
+
+    /**
+     * Pobranie slowek do powtorek dla widoku powtorek w kursie (review-view).
+     */
+    @GetMapping("/enrollments/{enrollmentId}/review-words-view")
+    public ResponseEntity<Page<FlashcardsWithStatus>> getReviewWordsView(
+            @Parameter(description = "ID zapisu na talię (enrollment)", required = true, example = "enr-123")
+            @PathVariable String enrollmentId,
+            @Parameter(description = "ID użytkownika z nagłówka", required = true, example = "user-123")
+            @RequestHeader(USER_ID_HEADER) String userId,
+            @Parameter(description = "Numer strony (0-based)", example = "0")
+            @RequestParam(defaultValue = "0") int page,
+            @Parameter(description = "Rozmiar strony", example = "20")
+            @RequestParam(defaultValue = "20") int size
+    ) {
+        log.debug("Pobieranie review-words-view dla enrollment {} (userId: {}, page: {}, size: {})",
+                enrollmentId, userId, page, size);
+        Page<FlashcardsWithStatus> result =
+                reviewViewFacade.getFlashcardsForReviewView(userId, enrollmentId, page, size);
+        log.info("Pobrano {} fiszek do powtorek dla enrollment {} (userId: {})",
                 result.getContent().size(), enrollmentId, userId);
         return ResponseEntity.ok(result);
     }

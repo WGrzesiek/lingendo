@@ -19,6 +19,7 @@ public interface UserFlashcardProgressRepository extends JpaRepository<com.learn
     Optional<UserFlashcardProgress> findByFlashcard_IdAndUserId(String flashcardId, String userId);
     Page<UserFlashcardProgress> findByEnrollment_Id(String enrollmentId, Pageable pageable);
 
+    Page<UserFlashcardProgress> findByEnrollment_IdAndPhase(String enrollmentId, LearningPhase phase, Pageable pageable);
 
     @Query("""
         SELECT COUNT(u)
