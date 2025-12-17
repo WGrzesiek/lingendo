@@ -51,7 +51,7 @@ spring:
             - id: deck-api
               uri: http://deck-service:8814
               predicates:
-                - Path=/api/v1/decks/**,/api/v1/sessions/**,/api/v1/flashcards/**
+                - Path=/api/v1/decks/**,/api/v1/sessions/**,/api/v1/flashcards/**,/api/v1/enrollments/**
               filters:
                 - RemoveRequestHeader=X-User-Id
                 - RemoveRequestHeader=X-Client-Id
