@@ -10,6 +10,7 @@ public record FlashcardAnswersStats(
         int totalStudyTime,
         int fastestResponse,
         int slowestResponse,
-        int lastSessionDate
+        int lastSessionDate,
+        int until30SecAnswers
 ) {
 }

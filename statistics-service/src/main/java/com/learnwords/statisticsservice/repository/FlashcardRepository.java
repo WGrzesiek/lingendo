@@ -62,7 +62,8 @@ public class FlashcardRepository {
             max(time_taken_ms) AS slowest_response_time,
             avg(time_taken_ms) AS average_response_time,
             SUM(time_taken_ms) AS total_time_taken,
-            max(event_time) AS last_answered_at
+            max(event_time) AS last_answered_at,
+            SUM(CASE WHEN time_taken_ms < 30000 THEN 1 ELSE 0 END) AS answers_under_30_seconds
 
         FROM analytics.flashcard_answers
         WHERE analytics.flashcard_answers.deck_enrollment_id = ?
@@ -82,6 +83,7 @@ public class FlashcardRepository {
                     int totalStudyTime = rs.getInt("total_time_taken");
                     Timestamp lastAnsweredAt = rs.getTimestamp("last_answered_at");
                     int lastSessionDate = lastAnsweredAt != null ? (int) (lastAnsweredAt.getTime() / 1000) : 0;
+                    int until30SecAnswers = rs.getInt("answers_under_30_seconds");
 
                     return new FlashcardAnswersStats(
                             deckEnrollmentId,
@@ -93,7 +95,8 @@ public class FlashcardRepository {
                             totalStudyTime,
                             fastestResponse,
                             slowestResponse,
-                            lastSessionDate
+                            lastSessionDate,
+                            until30SecAnswers
                     );
                 },
                 deckEnrollmentId
