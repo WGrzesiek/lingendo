@@ -6,6 +6,7 @@ import com.learnwords.deckservice.dto.learningStrategy.NextFlashcardRecommendati
 import com.learnwords.deckservice.dto.userFlashcardProgress.UserFlashcardProgressDto;
 import com.learnwords.deckservice.entity.*;
 import com.learnwords.deckservice.enums.LearningPhase;
+import com.learnwords.deckservice.exception.exceptions.IsNoMoreFlashcardsError;
 import com.learnwords.deckservice.service.FlashcardService;
 import com.learnwords.deckservice.service.UserProgressService;
 import com.learnwords.deckservice.service.algorithm.state.AlgorithmState;
@@ -54,7 +55,7 @@ public class ReviewsStrategyImpl implements ReviewsStrategy {
                 .toList();
         if (toReview.isEmpty()) {
             //NOTE dorobic exception ze nie ma juz do powtorek na dzisiaj
-            return Optional.empty();
+            throw new IsNoMoreFlashcardsError();
         }
 
         List<UserFlashcardProgressDto> shuffled = new ArrayList<>(toReview);
