@@ -53,7 +53,7 @@ public class ReviewViewFacade {
             int page,
             int size
     ) {
-        Pageable pageable = PageRequest.of(page, size, Sort.by("repetitionCount").descending());
+        Pageable pageable = PageRequest.of(page, size, Sort.by("nextReviewAt").ascending());
 
         Page<UserFlashcardProgressDto> progressPage =
                 userProgressService.getReviewProgressForEnrollment(enrollmentId, userId, pageable);
