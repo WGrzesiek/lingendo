@@ -33,7 +33,7 @@ import {
  */
 
 import type { Language } from "@/types/common";
-import {reviewSchedules, Visibility} from "@/types/learning";
+import { reviewSchedules, Visibility } from "@/types/learning";
 
 /**
  * DTO talii - podstawowe informacje
@@ -58,12 +58,14 @@ export interface DeckDetailsDto {
   updatedAt: string;
   name: string;
   description: string;
-  isPublic: boolean;
   owner: DeckOwnerType;
   learnAlgorithm: LearnAlgorithm;
   howManyFlashcardsForOneSession: number;
   languageFrom: Language;
   languageTo: Language;
+  visibility: Visibility;
+  category: DeckCategory;
+  difficulty: DeckDifficulty;
 }
 
 /**
@@ -77,29 +79,10 @@ export interface CreateDeckDto {
   languageFrom: Language;
   languageTo: Language;
   owner: DeckOwnerType;
-  visibility: Visibility
+  visibility: Visibility;
   difficulty: DeckDifficulty;
   category: DeckCategory;
-  reviewSchedule: reviewSchedules
-}
-
-/**
- * Request do aktualizacji szczegółów talii
- */
-export interface UpdateDeckDetailsRequest {
-  id: string;
-  userId: string;
-  wordCount: number;
-  createdAt: string;
-  updatedAt: string;
-  name: string;
-  description: string;
-  isPublic: boolean;
-  owner: DeckOwnerType;
-  learnAlgorithm: LearnAlgorithm;
-  howManyFlashcardsForOneSession: number;
-  languageFrom: Language;
-  languageTo: Language;
+  reviewSchedule: reviewSchedules;
 }
 
 /**
@@ -185,13 +168,11 @@ export interface IDeckListItem {
   deckDifficulty: DeckDifficulty;
   deckOwner: DeckOwnerType;
   deckCategory: DeckCategory;
-
 }
 
 //============================================================================================
 //                                        Typy + wyglad
 //============================================================================================
-
 
 /**
  * Typy właściciela talii
@@ -540,7 +521,6 @@ export const LEARN_ALGORITHMS = learnAlgorithmValues.map((value) => ({
   iconColor: learnAlgorithmConfig[value].iconColor,
 }));
 
-
 /**
  * Typy właściciela talii
  */
@@ -554,13 +534,13 @@ export const deckVisibilityTypeValues = [
 export type DeckVisibilityType = (typeof deckVisibilityTypeValues)[number];
 
 export const deckVisibilityConfig: Record<
-    DeckVisibilityType,
-    {
-      label: string;
-      icon: LucideIcon;
-      className: string;
-      iconColor: string;
-    }
+  DeckVisibilityType,
+  {
+    label: string;
+    icon: LucideIcon;
+    className: string;
+    iconColor: string;
+  }
 > = {
   PRIVATE: {
     label: "Prywatny",

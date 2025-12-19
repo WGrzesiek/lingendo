@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { updateDeckDetails } from "../../services/deck.service";
-import { UpdateDeckDetailsRequest } from "../../types";
+import {type DeckDetailsDto} from "../../types";
 
 export const useUpdateDeckDetails = () => {
   const queryClient = useQueryClient();
@@ -11,7 +11,7 @@ export const useUpdateDeckDetails = () => {
       data,
     }: {
       deckId: string;
-      data: UpdateDeckDetailsRequest;
+      data: DeckDetailsDto;
     }) => updateDeckDetails(deckId, data),
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ["deck", variables.deckId] });
