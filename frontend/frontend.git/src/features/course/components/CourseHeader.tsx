@@ -1,59 +1,75 @@
+"use client";
+
+import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import {ArrowLeft, Settings, Share2, Lock, Globe, PlusCircle, Frown} from "lucide-react";
-import {useCourseHeader} from "@/features/course/hooks/useCourseHeader";
-import {Skeleton} from "@/components/ui/skeleton";
+import {
+  ArrowLeft,
+  Settings,
+  Share2,
+  Lock,
+  Globe,
+  PlusCircle,
+  Frown,
+  BarChart3,
+} from "lucide-react";
+import { useCourseHeader } from "@/features/course/hooks/useCourseHeader";
+import { Skeleton } from "@/components/ui/skeleton";
+import { CourseStatsModal } from "./CourseStatsModal";
+import {useRouter} from "next/navigation";
 
 interface CourseHeaderProps {
-    enrollmentId: string;
+  enrollmentId: string;
 }
 
 /**
  * Nagłówek strony kursu z tytułem, opisem i akcjami
  */
 const WordListSkeleton = () => (
-    <div className="space-y-4">
-      {[1, 2, 3].map((i) => (
-          <div key={i} className="p-4 border rounded-xl space-y-3">
-            <div className="flex justify-between">
-              <div className="space-y-2 w-2/3">
-                <Skeleton className="h-6 w-1/3" />
-                <Skeleton className="h-4 w-full" />
-              </div>
-              <Skeleton className="h-9 w-24 rounded-md" />
-            </div>
-            <Skeleton className="h-2 w-full rounded-full" />
+  <div className="space-y-4">
+    {[1, 2, 3].map((i) => (
+      <div key={i} className="p-4 border rounded-xl space-y-3">
+        <div className="flex justify-between">
+          <div className="space-y-2 w-2/3">
+            <Skeleton className="h-6 w-1/3" />
+            <Skeleton className="h-4 w-full" />
           </div>
-      ))}
-    </div>
+          <Skeleton className="h-9 w-24 rounded-md" />
+        </div>
+        <Skeleton className="h-2 w-full rounded-full" />
+      </div>
+    ))}
+  </div>
 );
 
 const EmptyState = () => (
-    <div className="flex flex-col items-center justify-center py-12 text-center border rounded-xl border-dashed bg-muted/20">
-      <div className="bg-muted p-3 rounded-full mb-3">
-        <PlusCircle className="w-6 h-6 text-muted-foreground" />
-      </div>
-      <h3 className="font-semibold text-lg">Brak słówek</h3>
-      <p className="text-sm text-muted-foreground max-w-xs mb-4">
-        Wygląda na to, że ten kurs nie zawiera jeszcze żadnych słówek.
-      </p>
-      <Button variant="outline">Przeglądaj kursy</Button>
+  <div className="flex flex-col items-center justify-center py-12 text-center border rounded-xl border-dashed bg-muted/20">
+    <div className="bg-muted p-3 rounded-full mb-3">
+      <PlusCircle className="w-6 h-6 text-muted-foreground" />
     </div>
+    <h3 className="font-semibold text-lg">Brak słówek</h3>
+    <p className="text-sm text-muted-foreground max-w-xs mb-4">
+      Wygląda na to, że ten kurs nie zawiera jeszcze żadnych słówek.
+    </p>
+    <Button variant="outline">Przeglądaj kursy</Button>
+  </div>
 );
 
-export const CourseHeader = ({enrollmentId} :CourseHeaderProps) => {
-  const {data, isLoading, isError} = useCourseHeader(enrollmentId)
+export const CourseHeader = ({ enrollmentId }: CourseHeaderProps) => {
+  const router = useRouter();
+    const [statsModalOpen, setStatsModalOpen] = useState(false);
+  const { data, isLoading, isError } = useCourseHeader(enrollmentId);
   if (isLoading) return <WordListSkeleton />;
 
   if (isError || !data) {
     return (
-        <div className="p-6 border border-destructive/50 rounded-lg bg-destructive/10 text-destructive flex items-center gap-3">
-          <Frown className="h-5 w-5" />
-          <span>
+      <div className="p-6 border border-destructive/50 rounded-lg bg-destructive/10 text-destructive flex items-center gap-3">
+        <Frown className="h-5 w-5" />
+        <span>
           Nie udało się załadować listy kursów. Spróbuj odświeżyć stronę.
         </span>
-        </div>
+      </div>
     );
   }
   // if (data === null) {
@@ -61,7 +77,9 @@ export const CourseHeader = ({enrollmentId} :CourseHeaderProps) => {
   // }
   return (
     <div className="space-y-4">
-      <Button variant="ghost" className="gap-2">
+      <Button variant="ghost" className="gap-2"
+      onClick={() => router.back()}
+      >
         <ArrowLeft className="w-4 h-4" />
         Powrót do dashboardu
       </Button>
@@ -82,7 +100,9 @@ export const CourseHeader = ({enrollmentId} :CourseHeaderProps) => {
                   Prywatny
                 </Badge>
               )}
-              {data.ownerType === "I" && <Badge variant="outline">Twój kurs</Badge>}
+              {data.ownerType === "I" && (
+                <Badge variant="outline">Twój kurs</Badge>
+              )}
             </div>
             <p className="text-muted-foreground mb-4">{data.description}</p>
             <p className="text-sm text-muted-foreground">
@@ -91,6 +111,16 @@ export const CourseHeader = ({enrollmentId} :CourseHeaderProps) => {
           </div>
 
           <div className="flex flex-wrap gap-2 md:flex-nowrap md:flex-shrink-0">
+            <Button
+              variant="outline"
+              size="sm"
+              className="gap-2 flex-1 sm:flex-initial"
+              onClick={() => setStatsModalOpen(true)}
+            >
+              <BarChart3 className="w-4 h-4" />
+              <span className="hidden sm:inline">Statystyki</span>
+              <span className="sm:hidden">Stats</span>
+            </Button>
             {data.ownerType === "I" && (
               <>
                 <Button
@@ -119,6 +149,13 @@ export const CourseHeader = ({enrollmentId} :CourseHeaderProps) => {
           </div>
         </div>
       </Card>
+
+      {/* Modal ze statystykami */}
+      <CourseStatsModal
+        enrollmentId={enrollmentId}
+        open={statsModalOpen}
+        onOpenChange={setStatsModalOpen}
+      />
     </div>
   );
 };

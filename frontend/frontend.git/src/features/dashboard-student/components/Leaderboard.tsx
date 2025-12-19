@@ -2,12 +2,14 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { TrendingUp, Trophy, Target } from "lucide-react";
 import { useLeaderBoardOverview } from "../hooks/useLeaderBoardOverview";
+import { useRouter } from "next/navigation";
 
 /**
  * Ranking uczniów (leaderboard)
  * Pokazuje jak uczeń wypada na tle innych użytkowników
  */
 export const Leaderboard = () => {
+  const router = useRouter();
   const { data, isLoading, isError } = useLeaderBoardOverview();
   if (isLoading) {
     return (
@@ -57,7 +59,11 @@ export const Leaderboard = () => {
             Porównaj swoje wyniki z innymi użytkownikami
           </p>
         </div>
-        <Button variant="outline" size="sm">
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => router.push("/leaderboard")}
+        >
           <TrendingUp className="w-4 h-4 mr-2" />
           Zobacz pełny ranking
         </Button>

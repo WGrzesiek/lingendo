@@ -84,7 +84,7 @@ export const LANGUAGES = languageValues.map((value) => ({
 /**
  * Status sesji nauki
  */
-export type SessionStatus = "ACTIVE" | "COMPLETED" | "PAUSED" | "ABANDONED";
+export type SessionStatus = "ACTIVE" | "COMPLETED" | "PAUSED" | "ABANDONED" | "IN_PROGRESS";
 
 /**
  * Typ sesji nauki

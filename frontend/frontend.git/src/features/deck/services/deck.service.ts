@@ -20,6 +20,7 @@ import type {
   DeckOwnerType,
 } from "../types";
 import type { PageResponse } from "@/types/common";
+import {DecksStats, DeckVisibility, ICreatedDeckListItem} from "@/features/deck/types/created-deck.types";
 
 const BASE_URL = "/v1/decks";
 const BASE_URL2 = "/v1/decks/enrollments";
@@ -44,16 +45,27 @@ export const getIDecks = async (params?: {
   return response.data;
 };
 
+
 /**
- * Pobiera listę talii z opcjonalnymi filtrami (isPublic, owner)
+ * Pobiera listę talii z opcjonalnymi filtrami (visibility, owner)
  * Bez filtrów zwraca wszystkie talie
  */
-export const getDecks = async (params?: {
-  isPublic?: boolean;
+export const getDecksCreatedByMe = async (params?: {
+  deckVisibility?: DeckVisibility[];
   owner?: DeckOwnerType;
-}): Promise<DeckDto[]> => {
-  const response = await apiClient.get<DeckDto[]>(BASE_URL, { params });
-  console.log("[Deck Service] Pobrano talie:", response.data.length);
+  page?: number;
+  size?: number;
+}): Promise<PageResponse<ICreatedDeckListItem>> => {
+  const response = await apiClient.get<PageResponse<ICreatedDeckListItem>>(
+      BASE_URL,
+      { params }
+  );
+
+  console.log(
+      "[Deck Service] Pobrano talie z filtrami:",
+      response.data.content.length
+  );
+
   return response.data;
 };
 
@@ -281,3 +293,15 @@ export const getPublicDecks = async (): Promise<DeckDto[]> => {
   console.log("[Deck Service] Pobrano publiczne talie:", response.data.length);
   return response.data;
 };
+export interface getMyDeckStatsBody {
+    deckIds: string[];
+}
+
+const STASTS_URL = "/v1/courses";
+
+export const getMyDeckStats = async (body: getMyDeckStatsBody): Promise<DecksStats> => {
+    const response = await apiClient.post<DecksStats>(`${STASTS_URL}/my-course/stats`, body);
+    console.log("[Deck Service] Pobrano statystyki moich kursów:", response.data);
+    return response.data;
+
+}

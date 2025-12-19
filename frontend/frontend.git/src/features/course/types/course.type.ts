@@ -1,4 +1,4 @@
-import {Language} from "@/types/common";
+import {Language, SessionStatus} from "@/types/common";
 import {reviewSchedules} from "@/types/learning";
 
 export type OwnerType = 'I' | 'TEACHER' | 'FRIRND' | 'COMMUNITY';
@@ -15,6 +15,13 @@ export interface CourseHeader{
     languageFrom: Language;
     languageTo: Language;
 }
+
+export interface SessionInfo {
+    sessionId: string;
+    sessionNumber: number;
+    status: SessionStatus
+}
+
 export interface CourseProgress
 {
     completedSessions: number;
@@ -23,6 +30,7 @@ export interface CourseProgress
     totalWords: number;
     wordsToReview: number;
     nextReviewDate?: string;
+    sessions: SessionInfo[];
 }
 
 export interface CourseSettings {

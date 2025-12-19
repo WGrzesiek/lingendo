@@ -1,115 +1,74 @@
 "use client";
 
-import { FlashcardView } from "../flashcard/FlashcardView";
-import { QuizStep } from "./QuizStep";
-import { ShowLanguageStep } from "./ShowLanguageStep";
-import { WriteLanguageStep } from "./WriteLanguageStep";
-import type { StepType } from "@/types/learning";
-
-interface Word {
-  id: string;
-  word: string;
-  translation: string;
-  exampleSentence?: string;
-  exampleTranslation?: string;
-}
+import { FlashcardView } from "./FlashcardView";
+import {QuizFrom} from "./QuizStep";
+import {TypingStepBase} from "./WriteLanguageStep";
+import type {InteractionType, SubmitAnswerRequest} from "@/features/learning/types/learning.types";
+import type { WordDto } from "@/types/word";
+import {
+    RememberCheckBase
+} from "@/features/learning/components/steps/RememberCheckBaseProps";
 
 interface StepRendererProps {
-  stepType: StepType;
-  word: Word;
+  interactionType: InteractionType;
+  flashcardId: string;
+  wordContent: WordDto;
   quizOptions?: string[];
-  onStepComplete: (result: {
-    type: StepType;
-    isCorrect?: boolean;
-    difficulty?: "easy" | "medium" | "hard";
-  }) => void;
+  onStepComplete: (answer: SubmitAnswerRequest) => void;
 }
 
 /**
  * Uniwersalny renderer kroków nauki
- * Wybiera odpowiedni komponent na podstawie typu kroku
+ * Wybiera odpowiedni komponent na podstawie typu interakcji z backendu
  */
-export const StepRenderer = ({
-  stepType,
-  word,
-  quizOptions,
-  onStepComplete,
+export const StepRenderer = ({interactionType, wordContent, onStepComplete, quizOptions
 }: StepRendererProps) => {
-  switch (stepType) {
-    case "SHOW_BOTH":
+  switch (interactionType) {
+    case "PRESENTATION":
       return (
-        <FlashcardView
-          word={word}
-          onAnswer={(difficulty) =>
-            onStepComplete({ type: stepType, difficulty })
-          }
-        />
+          <FlashcardView
+              data={wordContent}
+              onComplete={(answer) => onStepComplete(answer)}
+          />
       );
+      case "REMEMBER_CHECK_FROM":
+          return (
+              <RememberCheckBase
+                  data={wordContent}
+                  onComplete={onStepComplete}
+                  interactionType="REMEMBER_CHECK_FROM"
+              />
+          );
 
-    case "QUIZ":
-      return (
-        <QuizStep
-          word={word.word}
-          correctTranslation={word.translation}
-          options={quizOptions || [word.translation]}
-          showFrom={true}
-          onAnswer={(isCorrect) =>
-            onStepComplete({ type: stepType, isCorrect })
-          }
-        />
-      );
+      case "REMEMBER_CHECK_TO":
+          return (
+              <RememberCheckBase
+                  data={wordContent}
+                  onComplete={onStepComplete}
+                  interactionType="REMEMBER_CHECK_TO"
+              />
+          );
 
-    case "SHOW_LANGUAGE_FROM":
-      return (
-        <ShowLanguageStep
-          word={word.word}
-          translation={word.translation}
-          exampleSentence={word.exampleSentence}
-          exampleTranslation={word.exampleTranslation}
-          showFrom={true}
-          onReveal={() => onStepComplete({ type: stepType })}
-        />
-      );
+      case "TYPING_INPUT_FROM":
+          return (
+              <TypingStepBase
+                  data={wordContent}
+                  onComplete={onStepComplete}
+                  interactionType="TYPING_INPUT_FROM"
+              />
+          );
 
-    case "SHOW_LANGUAGE_TO":
-      return (
-        <ShowLanguageStep
-          word={word.word}
-          translation={word.translation}
-          exampleSentence={word.exampleSentence}
-          exampleTranslation={word.exampleTranslation}
-          showFrom={false}
-          onReveal={() => onStepComplete({ type: stepType })}
-        />
-      );
+      case "TYPING_INPUT_TO":
+          return (
+              <TypingStepBase
+                  data={wordContent}
+                  onComplete={onStepComplete}
+                  interactionType="TYPING_INPUT_TO"
+              />
+          );
 
-    case "WRITE_LANGUAGE_FROM":
-      return (
-        <WriteLanguageStep
-          word={word.word}
-          translation={word.translation}
-          exampleSentence={word.exampleSentence}
-          exampleTranslation={word.exampleTranslation}
-          writeFrom={true}
-          onAnswer={(isCorrect) =>
-            onStepComplete({ type: stepType, isCorrect })
-          }
-        />
-      );
-
-    case "WRITE_LANGUAGE_TO":
-      return (
-        <WriteLanguageStep
-          word={word.word}
-          translation={word.translation}
-          exampleSentence={word.exampleSentence}
-          exampleTranslation={word.exampleTranslation}
-          writeFrom={false}
-          onAnswer={(isCorrect) =>
-            onStepComplete({ type: stepType, isCorrect })
-          }
-        />
-      );
+    case "QUIZ_CHOICE":
+        return <QuizFrom data={wordContent} options={quizOptions ?? []} onComplete={onStepComplete} />;
 
     default:
       return null;

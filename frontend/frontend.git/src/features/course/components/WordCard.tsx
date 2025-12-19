@@ -4,6 +4,7 @@ import type { CourseWord } from "@/features/course/types/words.types";
 interface WordCardProps {
   word: CourseWord;
 }
+
 export const WordCard = ({ word }: WordCardProps) => {
   return (
     <div

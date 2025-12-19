@@ -45,6 +45,9 @@ export function Navbar() {
       href:
         user?.accountType === "TEACHER" ? "/dashboard-teacher" : "/dashboard",
     },
+    { label: "Moje kursy", href: "/my-courses" },
+    { label: "Statystyki", href: "/statistics" },
+    { label: "Znajomi", href: "/friends" },
     { label: "Społeczność", href: "/community" },
     { label: "Kursy", href: "/courses" },
   ];

@@ -23,3 +23,10 @@ export const getCourseSettings = async (enrollmentId: string): Promise<CourseSet
     );
     return response.data;
 }
+
+export const initializeSession = async (enrollmentId: string): Promise<void> => {
+    await apiClient.post(
+        `${BASE_URL}/${enrollmentId}/sessions?flashcardFetchStrategy=ALPHABETICAL&type=LEARNING`
+    );
+    console.log("[Learning Service] Initialized session");
+}

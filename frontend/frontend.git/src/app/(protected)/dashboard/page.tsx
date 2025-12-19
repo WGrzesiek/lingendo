@@ -8,6 +8,7 @@ import { Leaderboard } from "@/features/dashboard-student/components/Leaderboard
 import { RecentActivity } from "@/features/dashboard-student/components/RecentActivity";
 import { StudentQuickActions } from "@/features/dashboard-student/components/StudentQuickActions";
 import type { User } from "@/features/auth/types";
+import {useCurrentUser} from "@/features/auth/hooks/useCurrentUser";
 
 /**
  * Mock użytkownika dla celów deweloperskich
@@ -25,10 +26,10 @@ const mockUser: User = {
  * Dostępna dla wszystkich zalogowanych użytkowników (domyślny dashboard)
  */
 const DashboardPage = () => {
-  // const { user, isLoading } = useProtectedRoute();
+const {data: user, isLoading, isError} = useCurrentUser();
 
-  const user = mockUser;
-  const isLoading = false;
+
+
 
   if (isLoading) {
     return (
@@ -40,6 +41,16 @@ const DashboardPage = () => {
       </div>
     );
   }
+
+    if (isError || !user) {
+    return (
+        <div className="min-h-screen flex items-center justify-center bg-background">
+            <div className="text-center">
+                <p className="text-red-500">Wystąpił błąd podczas ładowania danych użytkownika. Proszę spróbować ponownie później.</p>
+            </div>
+        </div>
+    );
+    }
 
   return (
     <div className="min-h-screen bg-background">

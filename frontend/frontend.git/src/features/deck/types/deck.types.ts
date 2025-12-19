@@ -539,3 +539,58 @@ export const LEARN_ALGORITHMS = learnAlgorithmValues.map((value) => ({
   icon: learnAlgorithmConfig[value].icon,
   iconColor: learnAlgorithmConfig[value].iconColor,
 }));
+
+
+/**
+ * Typy właściciela talii
+ */
+export const deckVisibilityTypeValues = [
+  "PRIVATE",
+  "PUBLIC",
+  "FRIENDS_ONLY",
+  "STUDENTS_ONLY",
+] as const;
+
+export type DeckVisibilityType = (typeof deckVisibilityTypeValues)[number];
+
+export const deckVisibilityConfig: Record<
+    DeckVisibilityType,
+    {
+      label: string;
+      icon: LucideIcon;
+      className: string;
+      iconColor: string;
+    }
+> = {
+  PRIVATE: {
+    label: "Prywatny",
+    icon: User,
+    className: "bg-blue-500/15 text-blue-700 border-blue-200",
+    iconColor: "text-blue-700",
+  },
+  STUDENTS_ONLY: {
+    label: "Dla uczniów",
+    icon: GraduationCap,
+    className: "bg-violet-500/15 text-violet-700 border-violet-200",
+    iconColor: "text-violet-700",
+  },
+  FRIENDS_ONLY: {
+    label: "Dla znajomych",
+    icon: Users,
+    className: "bg-pink-500/15 text-pink-700 border-pink-200",
+    iconColor: "text-pink-700",
+  },
+  PUBLIC: {
+    label: "Publiczny",
+    icon: Globe,
+    className: "bg-teal-500/15 text-teal-700 border-teal-200",
+    iconColor: "text-teal-700",
+  },
+};
+
+export const DECK_VISIBILITY = deckOwnerTypeValues.map((value) => ({
+  value,
+  label: deckOwnerConfig[value].label,
+  icon: deckOwnerConfig[value].icon,
+  iconColor: deckOwnerConfig[value].iconColor,
+}));

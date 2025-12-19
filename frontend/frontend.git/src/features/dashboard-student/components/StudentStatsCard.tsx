@@ -6,10 +6,6 @@ interface StudentStatsCardProps {
   value: string | number;
   description?: string;
   icon: LucideIcon;
-  trend?: {
-    value: string;
-    isPositive: boolean;
-  };
 }
 
 /**
@@ -20,7 +16,6 @@ export const StudentStatsCard = ({
   value,
   description,
   icon: Icon,
-  trend,
 }: StudentStatsCardProps) => {
   return (
     <Card className="p-6 hover:shadow-lg transition-shadow">
@@ -33,15 +28,15 @@ export const StudentStatsCard = ({
           {description && (
             <p className="text-sm text-muted-foreground">{description}</p>
           )}
-          {trend && (
-            <p
-              className={`text-sm mt-2 ${
-                trend.isPositive ? "text-success" : "text-error"
-              }`}
-            >
-              {trend.isPositive ? "↑" : "↓"} {trend.value}
-            </p>
-          )}
+          {/*{trend && (*/}
+          {/*  <p*/}
+          {/*    className={`text-sm mt-2 ${*/}
+          {/*      trend.isPositive ? "text-success" : "text-error"*/}
+          {/*    }`}*/}
+          {/*  >*/}
+          {/*    {trend.isPositive ? "↑" : "↓"} {trend.value}*/}
+          {/*  </p>*/}
+          {/*)}*/}
         </div>
         <div className="p-3 bg-primary/10 rounded-lg">
           <Icon className="w-6 h-6 text-primary" />
