@@ -20,7 +20,11 @@ import type {
   DeckOwnerType,
 } from "../types";
 import type { PageResponse } from "@/types/common";
-import {DecksStats, DeckVisibility, ICreatedDeckListItem} from "@/features/deck/types/created-deck.types";
+import {
+  DecksStats,
+  DeckVisibility,
+  ICreatedDeckListItem,
+} from "@/features/deck/types/created-deck.types";
 
 const BASE_URL = "/v1/decks";
 const BASE_URL2 = "/v1/decks/enrollments";
@@ -45,7 +49,6 @@ export const getIDecks = async (params?: {
   return response.data;
 };
 
-
 /**
  * Pobiera listę talii z opcjonalnymi filtrami (visibility, owner)
  * Bez filtrów zwraca wszystkie talie
@@ -57,13 +60,13 @@ export const getDecksCreatedByMe = async (params?: {
   size?: number;
 }): Promise<PageResponse<ICreatedDeckListItem>> => {
   const response = await apiClient.get<PageResponse<ICreatedDeckListItem>>(
-      BASE_URL,
-      { params }
+    BASE_URL,
+    { params }
   );
 
   console.log(
-      "[Deck Service] Pobrano talie z filtrami:",
-      response.data.content.length
+    "[Deck Service] Pobrano talie z filtrami:",
+    response.data.content.length
   );
 
   return response.data;
@@ -294,14 +297,50 @@ export const getPublicDecks = async (): Promise<DeckDto[]> => {
   return response.data;
 };
 export interface getMyDeckStatsBody {
-    deckIds: string[];
+  deckIds: string[];
 }
 
 const STASTS_URL = "/v1/courses";
 
-export const getMyDeckStats = async (body: getMyDeckStatsBody): Promise<DecksStats> => {
-    const response = await apiClient.post<DecksStats>(`${STASTS_URL}/my-course/stats`, body);
-    console.log("[Deck Service] Pobrano statystyki moich kursów:", response.data);
-    return response.data;
+export const getMyDeckStats = async (
+  body: getMyDeckStatsBody
+): Promise<DecksStats> => {
+  const response = await apiClient.post<DecksStats>(
+    `${STASTS_URL}/my-course/stats`,
+    body
+  );
+  console.log("[Deck Service] Pobrano statystyki moich kursów:", response.data);
+  return response.data;
+};
 
+/**
+ * Pobiera szczegółowe informacje o talii (deckdetail)
+ * Response zawiera pełne informacje o decku z API
+ */
+export interface DeckDetailResponse {
+  id: string;
+  name: string;
+  deckDescription: string;
+  deckDifficulty: string;
+  deckOwner: string;
+  deckCategory: string;
+  ownerId: string;
+  wordCount: number;
+  visibility: string;
+  createdAt: string;
+  updatedAt: string;
+  username: string;
 }
+
+export const getDeckDetail = async (
+  deckId: string
+): Promise<DeckDetailResponse> => {
+  const response = await apiClient.get<DeckDetailResponse>(
+    `${BASE_URL}/${deckId}`
+  );
+  console.log(
+    "[Deck Service] Pobrano szczegóły deck detail:",
+    response.data.name
+  );
+  return response.data;
+};

@@ -30,7 +30,6 @@ export const DeckDetailsHeader = ({ deck }: DeckDetailsHeaderProps) => {
 
   return (
     <div className="space-y-6">
-      {/* Back button */}
       <Button
         variant="ghost"
         size="lg"
@@ -41,9 +40,7 @@ export const DeckDetailsHeader = ({ deck }: DeckDetailsHeaderProps) => {
         Powrót
       </Button>
 
-      {/* Main header */}
       <div className="flex flex-col lg:flex-row gap-6 lg:items-start lg:justify-between">
-        {/* Left: Title, description, badges */}
         <div className="flex-1 space-y-4">
           <div className="space-y-2">
             <h1 className="text-4xl font-bold">{deck.name}</h1>
@@ -80,7 +77,6 @@ export const DeckDetailsHeader = ({ deck }: DeckDetailsHeaderProps) => {
           </div>
         </div>
 
-        {/* Right: Action buttons (tylko dla właściciela) */}
         {deck.isOwner && (
           <div className="flex flex-col gap-3 lg:shrink-0">
             <Button

@@ -11,18 +11,20 @@ import {
   Globe,
   Calendar,
 } from "lucide-react";
-import {DeckStat, ICreatedDeckListItem} from "../../../types/created-deck.types";
+import {
+  DeckStat,
+  ICreatedDeckListItem,
+} from "../../../types/created-deck.types";
 import { DeckCategoryBadge } from "../DeckCategoryBadge";
 import { DeckDifficultyBadge } from "../DeckDifficultyBadge";
 import { timeAgo } from "@/lib/timeAgo";
 import { useRouter } from "next/navigation";
-import {DeckVisibilityBadge} from "@/features/deck/components/deck/DeckVisibilityBadge";
+import { DeckVisibilityBadge } from "@/features/deck/components/deck/DeckVisibilityBadge";
 
 interface CreatedDeckCardProps {
   deck: ICreatedDeckListItem;
   deckStat?: DeckStat;
 }
-
 
 /**
  * Komponent karty kursu utworzonego przez użytkownika
@@ -33,18 +35,19 @@ export const CreatedDeckCard = ({ deck, deckStat }: CreatedDeckCardProps) => {
 
   const handleEdit = (e: React.MouseEvent) => {
     e.stopPropagation();
-    router.push(`/decks/${deck.deckId}/edit`);
+    router.push(`/decks/${deck.id}/edit`);
   };
 
   const handleAddWords = (e: React.MouseEvent) => {
     e.stopPropagation();
-    router.push(`/decks/${deck.deckId}/words/add`);
+    router.push(`/decks/${deck.id}/words/add`);
   };
-
+  console.log("Z poprzedniej deckid", deck.id);
   const handleCardClick = () => {
-    router.push(`/decks/${deck.deckId}`);
+    router.push(`/my-courses/${deck.id}/details`);
   };
-  const avgRating = deckStat.completedStudents/(deckStat.totalStudents || 1) * 100;
+  const avgRating =
+    (deckStat.completedStudents / (deckStat.totalStudents || 1)) * 100;
   return (
     <Card
       className="group p-5 hover:shadow-lg hover:border-primary/50 transition-all cursor-pointer"

@@ -49,17 +49,17 @@ export const DeckDetailsStats = ({ stats }: DeckDetailsStatsProps) => {
         </div>
       </Card>
 
-      <Card className="p-6 border-l-4 border-l-purple-500">
-        <div className="flex items-center gap-3">
-          <div className="p-3 bg-purple-500/10 rounded-lg">
-            <TrendingUp className="w-6 h-6 text-purple-600" />
-          </div>
-          <div>
-            <p className="text-2xl font-bold">{stats.averageProgress}%</p>
-            <p className="text-sm text-muted-foreground">Średni postęp</p>
-          </div>
-        </div>
-      </Card>
+      {/*<Card className="p-6 border-l-4 border-l-purple-500">*/}
+      {/*  <div className="flex items-center gap-3">*/}
+      {/*    <div className="p-3 bg-purple-500/10 rounded-lg">*/}
+      {/*      <TrendingUp className="w-6 h-6 text-purple-600" />*/}
+      {/*    </div>*/}
+      {/*    /!*<div>*!/*/}
+      {/*    /!*  <p className="text-2xl font-bold">{stats.averageProgress}%</p>*!/*/}
+      {/*    /!*  <p className="text-sm text-muted-foreground">Średni postęp</p>*!/*/}
+      {/*    /!*</div>*!/*/}
+      {/*  </div>*/}
+      {/*</Card>*/}
 
       <Card className="p-6 border-l-4 border-l-indigo-500">
         <div className="flex items-center gap-3">
