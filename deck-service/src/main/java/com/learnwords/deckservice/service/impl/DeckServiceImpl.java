@@ -14,6 +14,10 @@ import com.learnwords.deckservice.service.DeckService;
 import com.learnwords.deckservice.service.event.GenericEventProducer;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
@@ -212,18 +216,17 @@ public class DeckServiceImpl implements DeckService {
      * @return Lista DeckDto spełniających kryteria
      */
     @Override
-    public List<DeckDto> getDecksByFilter(String userId, DeckVisibility visibility, DeckOwner owner) {
+    public Page<DeckDto> getDecksByFilter(String userId, List<DeckVisibility> visibility, DeckOwner owner, int page, int size) {
         log.info("Filtrowanie talii: userId={}, visibility={}, owner={}",
                 userId, visibility, owner);
         if(userId == null || userId.isBlank()) {
             log.error("UserId jest pusty");
             throw new IllegalArgumentException("UserId nie może być pusty");
         }
-        List<Deck> decks = deckRepository.findByFilters(userId, visibility, owner);
-        log.info("Znaleziono {} talii spełniających kryteria", decks.size());
-        return decks.stream()
-                .map(this::mapToDeckDto)
-                .toList();
+        Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
+        Page<Deck> decks = deckRepository.findByFilters(userId, visibility, owner, pageable);
+        log.info("Znaleziono {} talii spełniających kryteria", decks.getContent().size());
+        return decks.map(this::mapToDeckDto);
     }
 
     /**

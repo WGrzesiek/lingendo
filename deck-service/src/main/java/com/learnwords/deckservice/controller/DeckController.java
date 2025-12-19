@@ -19,6 +19,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -222,13 +223,20 @@ public class DeckController {
         )
     })
     @GetMapping()
-    public ResponseEntity<List<DeckDto>> getDecksByFilter(
+    public ResponseEntity<Page<DeckDto>> getDecksByFilter(
             @Parameter(description = "ID użytkownika z nagłówka", required = true, example = "user-123") @RequestHeader(USER_ID_HEADER) String userId,
-            @Parameter(description = "Czy talia jest publiczna", example = "true") @RequestParam(required = false) DeckVisibility deckVisibility,
-            @Parameter(description = "Typ właściciela talii", schema = @Schema(implementation = DeckOwner.class)) @RequestParam(required = false) DeckOwner owner) {
+            @Parameter(description = "Ty widocznosci", schema = @Schema(implementation = DeckVisibility.class))
+            @RequestParam(required = false) List<DeckVisibility> deckVisibility,
+            @Parameter(description = "Typ właściciela talii", schema = @Schema(implementation = DeckOwner.class))
+            @RequestParam(required = false) DeckOwner owner,
+            @Parameter(description = "Numer strony (0-based)", example = "0")
+            @RequestParam(defaultValue = "0") int page,
+            @Parameter(description = "Rozmiar strony", example = "10")
+            @RequestParam(defaultValue = "10") int size)
+    {
         log.debug("Pobieranie talii z filtrami - userId: {}, isPublic: {}, owner: {}", userId, deckVisibility, owner);
-        List<DeckDto> decks = deckService.getDecksByFilter(userId, deckVisibility, owner);
-        log.info("Znaleziono {} talii spełniających kryteria", decks.size());
+        Page<DeckDto> decks = deckService.getDecksByFilter(userId, deckVisibility, owner,page,size);
+        log.info("Znaleziono {} talii spełniających kryteria", decks.getContent().size());
         return ResponseEntity.ok(decks);
     }
 
@@ -461,50 +469,50 @@ public class DeckController {
         return ResponseEntity.ok(updatedDetails);
     }
 
-    /**
-     * Pobiera talie użytkownika z opcjonalnymi filtrami.
-     * 
-     * <p>Zwraca talie należące do konkretnego użytkownika z możliwością filtrowania według:
-     * <ul>
-     *   <li>Widoczności (publiczne/prywatne)</li>
-     *   <li>Typu właściciela (USER, ADMIN, SYSTEM)</li>
-     * </ul>
-     * 
-     * <p>ID użytkownika jest pobierane z nagłówka x-client-id (automatyczna autoryzacja).
-     * Bez filtrów zwraca wszystkie talie użytkownika.
-     * 
-     * @param userId ID użytkownika z nagłówka x-client-id
-     * @param deckVisibility czy talia jest publiczna (opcjonalny)
-     * @param owner typ właściciela talii (opcjonalny)
-     * @return lista talii użytkownika spełniających kryteria
-     * @throws IllegalArgumentException jeśli brak nagłówka x-client-id
-     */
-    @Operation(
-        summary = "Pobierz talie użytkownika z filtrami",
-        description = "Pobiera talie konkretnego użytkownika z opcjonalnymi filtrami widoczności i właściciela. UserId jest pobierany automatycznie z nagłówka."
-    )
-    @ApiResponses(value = {
-        @ApiResponse(
-            responseCode = "200",
-            description = "Lista talii użytkownika",
-            content = @Content(schema = @Schema(implementation = DeckDto.class))
-        ),
-        @ApiResponse(
-            responseCode = "400",
-            description = "Brak wymaganego nagłówka x-client-id",
-            content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))
-        )
-    })
-    @GetMapping("/user/filter")
-    public ResponseEntity<List<DeckDto>> filterUserDecks(
-            @Parameter(description = "ID użytkownika z nagłówka", required = true, example = "user-123") @RequestHeader(USER_ID_HEADER) String userId,
-            @Parameter(description = "Czy talia jest publiczna", example = "true") @RequestParam(required = false) DeckVisibility deckVisibility,
-            @Parameter(description = "Typ właściciela talii", schema = @Schema(implementation = DeckOwner.class)) @RequestParam(required = false) DeckOwner owner) {
-        log.debug("Filtrowanie talii użytkownika {} - isPublic: {}, owner: {}", userId, deckVisibility, owner);
-        List<DeckDto> decks = deckService.getDecksByFilter(userId, deckVisibility, owner);
-        log.info("Znaleziono {} talii użytkownika {} spełniających kryteria", decks.size(), userId);
-        return ResponseEntity.ok(decks);
-    }
+//    /**
+//     * Pobiera talie użytkownika z opcjonalnymi filtrami.
+//     *
+//     * <p>Zwraca talie należące do konkretnego użytkownika z możliwością filtrowania według:
+//     * <ul>
+//     *   <li>Widoczności (publiczne/prywatne)</li>
+//     *   <li>Typu właściciela (USER, ADMIN, SYSTEM)</li>
+//     * </ul>
+//     *
+//     * <p>ID użytkownika jest pobierane z nagłówka x-client-id (automatyczna autoryzacja).
+//     * Bez filtrów zwraca wszystkie talie użytkownika.
+//     *
+//     * @param userId ID użytkownika z nagłówka x-client-id
+//     * @param deckVisibility czy talia jest publiczna (opcjonalny)
+//     * @param owner typ właściciela talii (opcjonalny)
+//     * @return lista talii użytkownika spełniających kryteria
+//     * @throws IllegalArgumentException jeśli brak nagłówka x-client-id
+//     */
+//    @Operation(
+//        summary = "Pobierz talie użytkownika z filtrami",
+//        description = "Pobiera talie konkretnego użytkownika z opcjonalnymi filtrami widoczności i właściciela. UserId jest pobierany automatycznie z nagłówka."
+//    )
+//    @ApiResponses(value = {
+//        @ApiResponse(
+//            responseCode = "200",
+//            description = "Lista talii użytkownika",
+//            content = @Content(schema = @Schema(implementation = DeckDto.class))
+//        ),
+//        @ApiResponse(
+//            responseCode = "400",
+//            description = "Brak wymaganego nagłówka x-client-id",
+//            content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))
+//        )
+//    })
+//    @GetMapping("/user/filter")
+//    public ResponseEntity<List<DeckDto>> filterUserDecks(
+//            @Parameter(description = "ID użytkownika z nagłówka", required = true, example = "user-123") @RequestHeader(USER_ID_HEADER) String userId,
+//            @Parameter(description = "Czy talia jest publiczna", example = "true") @RequestParam(required = false) DeckVisibility deckVisibility,
+//            @Parameter(description = "Typ właściciela talii", schema = @Schema(implementation = DeckOwner.class)) @RequestParam(required = false) DeckOwner owner) {
+//        log.debug("Filtrowanie talii użytkownika {} - isPublic: {}, owner: {}", userId, deckVisibility, owner);
+//        List<DeckDto> decks = deckService.getDecksByFilter(userId, deckVisibility, owner);
+//        log.info("Znaleziono {} talii użytkownika {} spełniających kryteria", decks.size(), userId);
+//        return ResponseEntity.ok(decks);
+//    }
 
 //    /**
 //     * Pobiera wszystkie talie użytkownika.

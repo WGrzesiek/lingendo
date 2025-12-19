@@ -7,6 +7,7 @@ import com.learnwords.deckservice.dto.deck.DeckDto;
 import com.learnwords.deckservice.entity.Deck;
 import com.learnwords.deckservice.enums.DeckOwner;
 import com.learnwords.deckservice.enums.DeckVisibility;
+import org.springframework.data.domain.Page;
 
 import java.util.List;
 
@@ -59,7 +60,7 @@ public interface DeckService {
     DeckDto getDeckById(String deckId, String userId);
     Deck getDeckById(String deckId);
 
-    List<DeckDto> getDecksByFilter(String userId, DeckVisibility visibility, DeckOwner owner);
+    Page<DeckDto> getDecksByFilter(String userId, List<DeckVisibility> visibility, DeckOwner owner, int page, int size);
     DeckDetailsDto getDeckDetailsById(String deckId, String userId); // Szczegóły statyczne (opis, ilość słów)
     DeckDetailsDto editDeckDetails(String deckId, DeckDetailsDto deckDetailsDto, String userId);
     long getTotalFlashcardsCount(String deckId, String userId);

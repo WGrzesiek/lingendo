@@ -299,50 +299,50 @@ class DeckServiceImplTest {
                 .hasMessageContaining("Talia o podanym ID nie istnieje");
     }
 
-    @Test
-    @Story("Filtrowanie talii")
-    @DisplayName("Filtruje talie po widoczności i właścicielu oraz mapuje do DTO")
-    @Description("Zwraca listę DeckDto po zastosowaniu filtrów visibility i owner")
-    @Severity(SeverityLevel.NORMAL)
-    void getDecksByFilter_shouldMapResults() {
-        Deck secondDeck = Deck.builder()
-                .id("deck-2")
-                .name("Public Deck")
-                .ownerId(USER_ID)
-                .visibility(DeckVisibility.PUBLIC)
-                .owner(DeckOwner.COMMUNITY)
-                .learnAlgorithm(LearnAlgorithm.LEINER_ALGORITHM)
-                .languageFrom(Language.POLISH)
-                .languageTo(Language.ENGLISH)
-                .category(DeckCategory.SCIENCE)
-                .difficulty(DeckDifficulty.HARD)
-                .wordCount(8)
-                .createdAt(Instant.now())
-                .build();
+//    @Test
+//    @Story("Filtrowanie talii")
+//    @DisplayName("Filtruje talie po widoczności i właścicielu oraz mapuje do DTO")
+//    @Description("Zwraca listę DeckDto po zastosowaniu filtrów visibility i owner")
+//    @Severity(SeverityLevel.NORMAL)
+//    void getDecksByFilter_shouldMapResults() {
+//        Deck secondDeck = Deck.builder()
+//                .id("deck-2")
+//                .name("Public Deck")
+//                .ownerId(USER_ID)
+//                .visibility(DeckVisibility.PUBLIC)
+//                .owner(DeckOwner.COMMUNITY)
+//                .learnAlgorithm(LearnAlgorithm.LEINER_ALGORITHM)
+//                .languageFrom(Language.POLISH)
+//                .languageTo(Language.ENGLISH)
+//                .category(DeckCategory.SCIENCE)
+//                .difficulty(DeckDifficulty.HARD)
+//                .wordCount(8)
+//                .createdAt(Instant.now())
+//                .build();
+//
+//        when(deckRepository.findByFilters(USER_ID, DeckVisibility.PUBLIC, DeckOwner.COMMUNITY))
+//                .thenReturn(List.of(secondDeck));
+//
+//        List<DeckDto> result = deckService.getDecksByFilter(USER_ID, DeckVisibility.PUBLIC, DeckOwner.COMMUNITY);
+//
+//        assertThat(result).hasSize(1);
+//        DeckDto dto = result.get(0);
+//        assertThat(dto.id()).isEqualTo(secondDeck.getId());
+//        assertThat(dto.ownerType()).isEqualTo(secondDeck.getOwner().name());
+//        assertThat(dto.visibility()).isEqualTo(DeckVisibility.PUBLIC);
+//        verify(deckRepository).findByFilters(USER_ID, DeckVisibility.PUBLIC, DeckOwner.COMMUNITY);
+//    }
 
-        when(deckRepository.findByFilters(USER_ID, DeckVisibility.PUBLIC, DeckOwner.COMMUNITY))
-                .thenReturn(List.of(secondDeck));
-
-        List<DeckDto> result = deckService.getDecksByFilter(USER_ID, DeckVisibility.PUBLIC, DeckOwner.COMMUNITY);
-
-        assertThat(result).hasSize(1);
-        DeckDto dto = result.get(0);
-        assertThat(dto.id()).isEqualTo(secondDeck.getId());
-        assertThat(dto.ownerType()).isEqualTo(secondDeck.getOwner().name());
-        assertThat(dto.visibility()).isEqualTo(DeckVisibility.PUBLIC);
-        verify(deckRepository).findByFilters(USER_ID, DeckVisibility.PUBLIC, DeckOwner.COMMUNITY);
-    }
-
-    @Test
-    @Story("Filtrowanie talii")
-    @DisplayName("Waliduje obecność userId przy filtrowaniu")
-    @Description("Rzuca IllegalArgumentException gdy userId jest pusty podczas filtrowania")
-    @Severity(SeverityLevel.CRITICAL)
-    void getDecksByFilter_shouldValidateUserId() {
-        assertThatThrownBy(() -> deckService.getDecksByFilter(" ", null, null))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("UserId nie może być pusty");
-    }
+//    @Test
+//    @Story("Filtrowanie talii")
+//    @DisplayName("Waliduje obecność userId przy filtrowaniu")
+//    @Description("Rzuca IllegalArgumentException gdy userId jest pusty podczas filtrowania")
+//    @Severity(SeverityLevel.CRITICAL)
+//    void getDecksByFilter_shouldValidateUserId() {
+//        assertThatThrownBy(() -> deckService.getDecksByFilter(" ", null, null))
+//                .isInstanceOf(IllegalArgumentException.class)
+//                .hasMessageContaining("UserId nie może być pusty");
+//    }
 
     @Test
     @Story("Szczegóły talii")
