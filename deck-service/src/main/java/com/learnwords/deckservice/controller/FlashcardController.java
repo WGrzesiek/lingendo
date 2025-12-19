@@ -137,9 +137,9 @@ public class FlashcardController {
             @Parameter(description = "ID talii (kursu)", required = true, example = "deck-123")
             @PathVariable String deckId,
             @Parameter(description = "Numer strony (0-indexed)", required = true, example = "0")
-            @RequestParam int page,
+            @RequestParam(defaultValue = "0") int page,
             @Parameter(description = "Rozmiar strony", required = true, example = "10")
-            @RequestParam int size,
+            @RequestParam(defaultValue = "10") int size,
             @Parameter(description = "ID użytkownika z nagłówka", required = true, example = "user-123")
             @RequestHeader(USER_ID_HEADER) String userId
     ) {
