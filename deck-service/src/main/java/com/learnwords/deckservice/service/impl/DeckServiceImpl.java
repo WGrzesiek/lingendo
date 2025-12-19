@@ -313,14 +313,25 @@ public class DeckServiceImpl implements DeckService {
     }
 
     private DeckDto mapToDeckDto(Deck deck) {
-        return new DeckDto(
-                deck.getId(),
-                deck.getName(),
-                deck.getOwnerId(),
-                deck.getOwner().name(),
-                deck.getWordCount(),
-                deck.getVisibility()
-        );
+        return DeckDto.builder()
+                .id(deck.getId())
+                .name(deck.getName())
+                .deckDescription(deck.getDescription())
+                .deckDifficulty(deck.getDifficulty())
+                .deckOwner(deck.getOwner())
+                .deckCategory(deck.getCategory())
+                .ownerId(deck.getOwnerId())
+                .wordCount(deck.getWordCount())
+                .visibility(deck.getVisibility())
+                .build();
+//        return new DeckDto(
+//                deck.getId(),
+//                deck.getName(),
+//                deck.getOwnerId(),
+//                deck.getOwner(),
+//                deck.getWordCount(),
+//                deck.getVisibility()
+//        );
     }
 }
 

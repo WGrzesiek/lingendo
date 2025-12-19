@@ -1,6 +1,9 @@
 package com.learnwords.deckservice.enums;
 
-public enum DeckVisibility {
+
+import java.io.Serializable;
+
+public enum DeckVisibility implements Serializable {
     PRIVATE,
     PUBLIC,
     FRIENDS_ONLY,
