@@ -1,15 +1,16 @@
 package com.learnwords.statisticsservice.controller;
 
+import com.learnwords.statisticsservice.dto.course.DeckStatsRequest;
+import com.learnwords.statisticsservice.dto.course.DeckStudentsStats;
 import com.learnwords.statisticsservice.dto.course.FlashcardAnswersStats;
 import com.learnwords.statisticsservice.service.CourseService;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.Map;
 
 @Slf4j
 @RestController
@@ -32,6 +33,37 @@ public class CourseController {
         FlashcardAnswersStats stats = courseService.getFlashcardAnswersStats(enrollmentId);
         return ResponseEntity.ok(stats);
     }
+
+    @PostMapping("/my-course/stats")
+    public ResponseEntity<Map<String, DeckStudentsStats>> getStatsForMyDecks(
+            @RequestHeader(USER_ID_HEADER) String userId,
+            @RequestBody DeckStatsRequest request
+    ) {
+        if (request.deckIds() == null || request.deckIds().isEmpty()) {
+            return ResponseEntity.badRequest().build();
+        }
+
+        // log: z jakich talii użytkownik chce statystyki
+        log.info("Statystyki talii dla userId={} | deckIds={}", userId, request.deckIds());
+
+        // pobierz statystyki z serwisu
+        Map<String, DeckStudentsStats> stats =
+                courseService.getTotalStudentsAndCompletedStudentsForDecks(request.deckIds());
+
+//        // konwersja do listy DTO
+//        List<DeckStatsResponse> response = stats.entrySet().stream()
+//                .map(e -> new DeckStatsResponse(
+//                        e.getKey(),
+//                        e.getValue().totalStudents(),
+//                        e.getValue().completedStudents()
+//                ))
+//                .toList();
+
+        return ResponseEntity.ok(stats);
+    }
+
+
+
 
 
 }

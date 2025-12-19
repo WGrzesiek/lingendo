@@ -7,6 +7,8 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
 import java.time.Instant;
+import java.util.List;
+import java.util.Map;
 
 @Repository
 public class DeckEnrollmentRepository {
@@ -71,6 +73,82 @@ public class DeckEnrollmentRepository {
                 userId
         );
     }
+
+    private static final String GET_TOTAL_STUDENTS_FOR_DECK_SQL = """
+        SELECT COUNT(DISTINCT user_id) AS total_students
+        FROM analytics.deck_enrollments_created
+        WHERE deck_id = ?
+    """;
+
+    public Long getTotalStudentsForDeck(String deckId) {
+        return jdbcTemplate.queryForObject(
+                GET_TOTAL_STUDENTS_FOR_DECK_SQL,
+                (rs, rowNum) -> rs.getLong("total_students"),
+                deckId
+        );
+    }
+
+    private static final String GET_TOTAL_COMPLETED_STUDENTS_FOR_DECK_SQL = """
+        SELECT COUNT(DISTINCT user_id) AS total_completed_students
+        FROM analytics.deck_enrollments_finished
+        WHERE deck_id = ?
+    """;
+
+    public Long getTotalCompletedStudentsForDeck(String deckId) {
+        return jdbcTemplate.queryForObject(
+                GET_TOTAL_COMPLETED_STUDENTS_FOR_DECK_SQL,
+                (rs, rowNum) -> rs.getLong("total_completed_students"),
+                deckId
+        );
+    }
+
+    private static final String  GET_TOTAL_STUDENTS_FOR_DECKS_SQL = """
+        SELECT deck_id, COUNT(DISTINCT user_id) AS total_students
+        FROM analytics.deck_enrollments_created
+        WHERE deck_id IN (%s)
+        GROUP BY deck_id
+    """;
+
+    public Map<String, Long> getTotalStudentsForDecks(List<String> deckIds) {
+        String inSql = String.join(",", java.util.Collections.nCopies(deckIds.size(), "?"));
+        String finalSql = String.format(GET_TOTAL_STUDENTS_FOR_DECKS_SQL, inSql);
+
+        return jdbcTemplate.query(finalSql,
+                rs -> {
+                    java.util.Map<String, Long> result = new java.util.HashMap<>();
+                    while (rs.next()) {
+                        result.put(rs.getString("deck_id"), rs.getLong("total_students"));
+                    }
+                    return result;
+                },
+                deckIds.toArray()
+        );
+    }
+
+    private static final String GET_TOTAL_COMPLETED_STUDENTS_FOR_DECKS_SQL = """
+        SELECT deck_id, COUNT(DISTINCT user_id) AS total_completed_students
+        FROM analytics.deck_enrollments_finished
+        WHERE deck_id IN (%s)
+        GROUP BY deck_id
+    """;
+
+    public Map<String, Long> getTotalCompletedStudentsForDecks(List<String> deckIds) {
+        String inSql = String.join(",", java.util.Collections.nCopies(deckIds.size(), "?"));
+        String finalSql = String.format(GET_TOTAL_COMPLETED_STUDENTS_FOR_DECKS_SQL, inSql);
+
+        return jdbcTemplate.query(finalSql,
+                rs -> {
+                    java.util.Map<String, Long> result = new java.util.HashMap<>();
+                    while (rs.next()) {
+                        result.put(rs.getString("deck_id"), rs.getLong("total_completed_students"));
+                    }
+                    return result;
+                },
+                deckIds.toArray()
+        );
+    }
+
+
 
 
 }

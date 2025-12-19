@@ -4,7 +4,8 @@ import com.learnwords.statisticsservice.dto.leaderboard.LeaderboardEntryDto;
 import com.learnwords.statisticsservice.dto.StudentActivityItemDto;
 import com.learnwords.statisticsservice.dto.UserPointsDto;
 import com.learnwords.statisticsservice.dto.leaderboard.LeaderboardOverviewDto;
-import org.apache.kafka.common.protocol.types.Field;
+
+
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
