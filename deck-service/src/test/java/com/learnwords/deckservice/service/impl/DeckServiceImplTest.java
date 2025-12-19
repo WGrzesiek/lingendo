@@ -256,7 +256,7 @@ class DeckServiceImplTest {
         assertThat(result.id()).isEqualTo(DECK_ID);
         assertThat(result.name()).isEqualTo(DECK_NAME);
         assertThat(result.ownerId()).isEqualTo(USER_ID);
-        assertThat(result.ownerType()).isEqualTo(deck.getOwner().name());
+        assertThat(result.deckOwner()).isEqualTo(deck.getOwner().name());
         assertThat(result.visibility()).isEqualTo(deck.getVisibility());
     }
 
