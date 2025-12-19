@@ -54,7 +54,7 @@ public interface FlashcardService {
     void processFlashcardCreateFromKafka(SendWordFromKafkaDto sendWordFromKafkaDto);
     void updateFlashcardContent(String flashcardId, WordDto newWord, String userId);
     FlashcardDto getFlashcardById(String flashcardId, String userId);
-    Page<List<FlashcardDto>> getFlashcardsFromDeckPaged(String deckId, String userId, Pageable pageable);
+    Page<FlashcardDto> getFlashcardsFromDeckPaged(String deckId, String userId, int page, int size);
     List<FlashcardDto> getAllFlashcardsFromDeck(String deckId, String userId);
     List<FlashcardDto> getFlashcardsByIds(List<String> flashcardIds);
 }

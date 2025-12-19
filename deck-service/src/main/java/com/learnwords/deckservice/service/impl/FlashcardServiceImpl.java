@@ -25,10 +25,7 @@ import com.learnwords.vocabulary.v1.Word;
 
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.*;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Service;
 
@@ -118,14 +115,21 @@ public class FlashcardServiceImpl implements FlashcardService {
     }
 
     @Override
-    public Page<List<FlashcardDto>> getFlashcardsFromDeckPaged(String deckId, String userId, Pageable pageable) {
+    public Page<FlashcardDto> getFlashcardsFromDeckPaged(String deckId, String userId, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").ascending());
         if (userId == null || userId.isBlank()) {
             log.error("UserId jest pusty");
             throw new IllegalArgumentException("UserId nie może być pusty");
         }
-        Page<List<Flashcard>> flashcardsPage = flashcardRepository.findByDeckId(deckId, pageable);
+        Page<Flashcard> flashcardsPage = flashcardRepository.findByDeckId(deckId, pageable);
         log.debug("Pobieranie fiszek z talii - deckId: '{}' userId: '{}'", deckId, userId);
-        return flashcardsPage.map(this::mapFlashcardsToDto);
+        List<Flashcard> flashcards = flashcardsPage.getContent();
+        List<FlashcardDto> flashcardDtos = mapFlashcardsToDto(flashcards);
+        return new PageImpl<>(
+                flashcardDtos,
+                flashcardsPage.getPageable(),
+                flashcardsPage.getTotalElements()
+        );
     }
 
     /**
@@ -353,7 +357,14 @@ public class FlashcardServiceImpl implements FlashcardService {
                 deckId, deck.getWordCount());
 
     }
-
+    private FlashcardDto mapFlashcardToDto(Flashcard flashcard) {
+        var wordResponse = vocabularyGrpcClient.getWordById(flashcard.getWordId());
+        WordDto wordDto = mapProtoToWordDto(wordResponse.getWord());
+        return new FlashcardDto(
+                flashcard.getId(),
+                wordDto
+        );
+    }
     /**
      * Mapuje listę fiszek wraz z danymi słówek na FlashcardDto.
      * 

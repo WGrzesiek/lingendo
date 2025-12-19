@@ -7,6 +7,7 @@ import com.learnwords.deckservice.service.FlashcardService;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -129,6 +130,27 @@ public class FlashcardController {
         log.info("Pobrano {} fiszek z talii {} (userId: {})",
                 flashcards.size(), deckId, userId);
         return ResponseEntity.ok(flashcards);
+    }
+
+    @GetMapping("/decks/{deckId}/flashcards/page")
+    public ResponseEntity<Page<FlashcardDto>> getFlashcardsPageFromDeck(
+            @Parameter(description = "ID talii (kursu)", required = true, example = "deck-123")
+            @PathVariable String deckId,
+            @Parameter(description = "Numer strony (0-indexed)", required = true, example = "0")
+            @RequestParam int page,
+            @Parameter(description = "Rozmiar strony", required = true, example = "10")
+            @RequestParam int size,
+            @Parameter(description = "ID użytkownika z nagłówka", required = true, example = "user-123")
+            @RequestHeader(USER_ID_HEADER) String userId
+    ) {
+        log.debug("Pobieranie strony {} (rozmiar {}) fiszek z talii {} dla userId {}",
+                page, size, deckId, userId);
+
+        Page<FlashcardDto> flashcardsPage = flashcardService.getFlashcardsFromDeckPaged(deckId, userId, page, size);
+
+        log.info("Pobrano stronę {} fiszek z talii {} (userId: {})",
+                page, deckId, userId);
+        return ResponseEntity.ok(flashcardsPage);
     }
 
 }

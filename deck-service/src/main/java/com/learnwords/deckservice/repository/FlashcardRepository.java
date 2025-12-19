@@ -11,7 +11,7 @@ import org.springframework.data.repository.query.Param;
 
 public interface FlashcardRepository extends JpaRepository<Flashcard, String> {
     List<Flashcard> findByDeckId(String deckId);
-    Page<List<Flashcard>> findByDeckId(String deckId, Pageable pageable);
+    Page<Flashcard> findByDeckId(String deckId, Pageable pageable);
     List<Flashcard> findByIdIn(List<String> flashcardIds);
 
 
