@@ -10,13 +10,9 @@ import { SentenceInput } from "./SentenceInput";
 import { WordToAdd, emptySentence } from "../../types/word.types";
 
 interface WordFormCardProps {
-  /** Słówko do edycji */
   word: WordToAdd;
-  /** Index słówka w tablicy */
   index: number;
-  /** Callback wywoływany przy zmianie słówka */
   onChange: (index: number, updatedWord: WordToAdd) => void;
-  /** Callback wywoływany przy usunięciu słówka */
   onRemove: (index: number) => void;
   /** Czy można usunąć słówko */
   canRemove: boolean;
