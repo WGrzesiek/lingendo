@@ -1,5 +1,6 @@
 package com.learnwords.deckservice.service.impl;
 
+import com.learnwords.auth.v1.GetUserNameByIdResponse;
 import com.learnwords.common.KafkaTopic;
 import com.learnwords.common.events.DeckCreatedEvent;
 import com.learnwords.deckservice.dto.deck.CreateDeckDto;
@@ -12,6 +13,7 @@ import com.learnwords.deckservice.repository.DeckRepository;
 import com.learnwords.deckservice.service.DeckEnrollmentService;
 import com.learnwords.deckservice.service.DeckService;
 import com.learnwords.deckservice.service.event.GenericEventProducer;
+import com.learnwords.deckservice.service.grpcClient.UserGrcpClient;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -54,16 +56,15 @@ import static com.learnwords.deckservice.service.utils.DeckUtils.getDeckIfUserHa
 @Service
 public class DeckServiceImpl implements DeckService {
     private final DeckRepository deckRepository;
-    private final DeckEnrollmentService deckEnrollmentService;
     private final GenericEventProducer eventProducer;
+    private final UserGrcpClient userGrcpClient;
 
     public DeckServiceImpl(
             DeckRepository deckRepository,
-            DeckEnrollmentService deckEnrollmentService,
-            GenericEventProducer eventProducer) {
+            GenericEventProducer eventProducer, UserGrcpClient userGrcpClient) {
         this.deckRepository = deckRepository;
-        this.deckEnrollmentService = deckEnrollmentService;
         this.eventProducer = eventProducer;
+        this.userGrcpClient = userGrcpClient;
     }
 
     /**
@@ -189,8 +190,9 @@ public class DeckServiceImpl implements DeckService {
     @Override
     public DeckDto getDeckById(String deckId, String userId) {
         Deck deck = getDeckIfUserHasPermissions(deckRepository, deckId, userId);
+
         log.info("Pomyślnie pobrano talię o ID '{}'", deckId);
-        return mapToDeckDto(deck);
+        return mapToDeckDto(deck, true);
     }
 
     @Override
@@ -226,7 +228,7 @@ public class DeckServiceImpl implements DeckService {
         Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
         Page<Deck> decks = deckRepository.findByFilters(userId, visibility, owner, pageable);
         log.info("Znaleziono {} talii spełniających kryteria", decks.getContent().size());
-        return decks.map(this::mapToDeckDto);
+        return decks.map(deck -> mapToDeckDto(deck, false));
     }
 
     /**
@@ -312,7 +314,8 @@ public class DeckServiceImpl implements DeckService {
         }
     }
 
-    private DeckDto mapToDeckDto(Deck deck) {
+    private DeckDto mapToDeckDto(Deck deck, Boolean includeUsername) {
+        GetUserNameByIdResponse userResponse = userGrcpClient.getUserNameById(deck.getOwnerId());
         return DeckDto.builder()
                 .id(deck.getId())
                 .name(deck.getName())
@@ -325,8 +328,8 @@ public class DeckServiceImpl implements DeckService {
                 .visibility(deck.getVisibility())
                 .createdAt(deck.getCreatedAt())
                 .updatedAt(deck.getUpdatedAt())
+                .username(includeUsername ? userResponse.getUsername() : null)
                 .build();
-
     }
 }
 

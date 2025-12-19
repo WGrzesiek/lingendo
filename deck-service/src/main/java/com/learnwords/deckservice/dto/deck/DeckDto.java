@@ -19,5 +19,6 @@ public record DeckDto(String id,
                       int wordCount,
                       DeckVisibility visibility,
                       Instant createdAt,
-                      Instant updatedAt) {
+                      Instant updatedAt,
+                      String username) {
 }
