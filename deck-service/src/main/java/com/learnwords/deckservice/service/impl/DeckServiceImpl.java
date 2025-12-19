@@ -323,15 +323,10 @@ public class DeckServiceImpl implements DeckService {
                 .ownerId(deck.getOwnerId())
                 .wordCount(deck.getWordCount())
                 .visibility(deck.getVisibility())
+                .createdAt(deck.getCreatedAt())
+                .updatedAt(deck.getUpdatedAt())
                 .build();
-//        return new DeckDto(
-//                deck.getId(),
-//                deck.getName(),
-//                deck.getOwnerId(),
-//                deck.getOwner(),
-//                deck.getWordCount(),
-//                deck.getVisibility()
-//        );
+
     }
 }
 

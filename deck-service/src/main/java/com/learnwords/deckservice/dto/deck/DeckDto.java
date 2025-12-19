@@ -6,6 +6,8 @@ import com.learnwords.deckservice.enums.DeckOwner;
 import com.learnwords.deckservice.enums.DeckVisibility;
 import lombok.Builder;
 
+import java.time.Instant;
+
 @Builder
 public record DeckDto(String id,
                       String name,
@@ -15,5 +17,7 @@ public record DeckDto(String id,
                       DeckCategory deckCategory,
                       String ownerId,
                       int wordCount,
-                      DeckVisibility visibility) {
+                      DeckVisibility visibility,
+                      Instant createdAt,
+                      Instant updatedAt) {
 }
