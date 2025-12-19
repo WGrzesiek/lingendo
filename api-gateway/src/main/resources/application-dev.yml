@@ -41,5 +41,6 @@ security:
   jwt:
     issuer: "learnwords-api"
     kid: "gateway-kid"
-    access-ttl: 15m
+    access-ttl: 60m
     refresh-ttl: 30d
+#    //na czcas deva 60min a normalnie 15min
