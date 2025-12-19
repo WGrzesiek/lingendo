@@ -6,18 +6,24 @@ import { DeckOwnerBadge } from "./DeckOwnerBadge";
 import { DeckDifficultyBadge } from "./DeckDifficultyBadge";
 import { timeAgo } from "@/lib/timeAgo";
 import { DeckCategoryBadge } from "./DeckCategoryBadge";
+import {useRouter} from "next/navigation";
 
 interface DeckCardProps {
   deck: IDeckListItem;
   onClick?: () => void;
 }
 
-export const DeckCardForDashboard = ({ deck, onClick }: DeckCardProps) => {
+export const DeckCardForDashboard = ({ deck }: DeckCardProps) => {
+  const router = useRouter();
   const progress = deck.progressPercentage ?? 0;
+
+  const handleCardClick = () => {
+    router.push(`/my-courses/${deck.deckId}/details`);
+  };
 
   return (
     <div
-      onClick={onClick}
+      onClick={handleCardClick}
       className="group p-4 border rounded-xl hover:shadow-md hover:border-primary/50 transition-all bg-card text-card-foreground cursor-pointer"
     >
       <div className="flex flex-col sm:flex-row gap-4 justify-between mb-4">

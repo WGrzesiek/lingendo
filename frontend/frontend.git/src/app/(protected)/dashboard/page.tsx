@@ -10,16 +10,6 @@ import { StudentQuickActions } from "@/features/dashboard-student/components/Stu
 import type { User } from "@/features/auth/types";
 import {useCurrentUser} from "@/features/auth/hooks/useCurrentUser";
 
-/**
- * Mock użytkownika dla celów deweloperskich
- */
-const mockUser: User = {
-  userId: "student-456",
-  username: "Piotr Wiśniewski",
-  accountType: "STUDENT",
-  userType: "NORMAL",
-  isEnabled: true,
-};
 
 /**
  * Strona dashboardu dla uczniów
