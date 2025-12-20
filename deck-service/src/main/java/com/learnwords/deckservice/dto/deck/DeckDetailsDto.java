@@ -85,5 +85,8 @@ public class DeckDetailsDto {
         deck.setLanguageTo(this.languageTo);
         deck.setCategory(this.category);
         deck.setDifficulty(this.difficulty);
+        deck.setCategory(this.category);
+        deck.setLanguageFrom(this.languageFrom);
+        deck.setLanguageTo(this.languageTo);
     }
 }
