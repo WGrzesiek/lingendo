@@ -37,5 +37,20 @@ public class DeckRepository {
                 event.receivedAt()
         );
     }
+
+    private static final String GET_CREATED_DECKS_COUNT_BY_USER_SQL = """
+        SELECT count(*) AS created_decks
+        FROM analytics.decks_created
+        WHERE user_id = ?
+        """;
+
+    public int getCreatedDecksCountByUser(String userId) {
+        Integer result = jdbcTemplate.queryForObject(
+                GET_CREATED_DECKS_COUNT_BY_USER_SQL,
+                (rs, rowNum) -> rs.getInt("created_decks"),
+                userId
+        );
+        return result != null ? result : 0;
+    }
 }
 

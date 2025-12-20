@@ -5,6 +5,8 @@ import com.learnwords.common.events.UserLoginEvent;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
+import java.util.Map;
+
 @Repository
 public class UserRepository {
 
@@ -30,4 +32,54 @@ public class UserRepository {
                 event.received_at()
         );
     }
+
+    private static final String get_user_streak_SQL = """
+        SELECT streak AS user_streak
+        FROM analytics.user_logins
+        WHERE user_id = ?
+        ORDER BY event_time DESC
+        LIMIT 1
+        """;
+
+    public Integer getUserStreak(String userId) {
+        return jdbcTemplate.queryForObject(
+                get_user_streak_SQL,
+                (rs, rowNum) -> rs.getInt("user_streak"),
+                userId
+        );
+    }
+
+    private static final String GET_TOTAL_POINTS_SQL = """
+        SELECT points AS total_points
+        FROM analytics.user_points_total
+        WHERE user_id = ?
+        """;
+
+    public Long getTotalPoints(String userId) {
+        return jdbcTemplate.queryForObject(
+                GET_TOTAL_POINTS_SQL,
+                ((rs, rowNum) -> rs.getLong("total_points")),
+                userId
+        );
+    }
+
+    private static final String GET_POINTS_PER_MONTH_BY_USER = """
+        SELECT toYYYYMM(month) AS month, sum(points) AS points
+        FROM analytics.user_points_monthly
+        WHERE user_id = '127fd33b-90d0-46b2-ae4f-17e575abf1e0'
+        GROUP BY month
+        ORDER BY month DESC
+    """;
+
+    public Map<String,Long> getPointsPerMonth(String userId) {
+        return jdbcTemplate.queryForObject(
+                GET_POINTS_PER_MONTH_BY_USER,
+                (rs, rowNum) -> Map.of(
+                        rs.getString("month"),
+                        rs.getLong("points")
+                ),
+                userId
+        );
+    }
+
 }

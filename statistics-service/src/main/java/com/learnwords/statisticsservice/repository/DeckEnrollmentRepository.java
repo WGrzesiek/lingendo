@@ -148,6 +148,34 @@ public class DeckEnrollmentRepository {
         );
     }
 
+    private static final String GET_DECK_ENROLLMENTS_COUNT_BY_USER_SQL = """
+        SELECT COUNT(*) AS enrollments_count
+        FROM analytics.deck_enrollments_created
+        WHERE user_id = ?
+    """;
+
+    public Long getDeckEnrollmentsCountByUser(String userId) {
+        return jdbcTemplate.queryForObject(
+                GET_DECK_ENROLLMENTS_COUNT_BY_USER_SQL,
+                (rs, rowNum) -> rs.getLong("enrollments_count"),
+                userId
+        );
+    }
+
+    private static final String GET_DECK_COMPLETIONS_COUNT_BY_USER_SQL = """
+        SELECT COUNT(*) AS completions_count
+        FROM analytics.deck_enrollments_finished
+        WHERE user_id = ?
+    """;
+
+    public Long getDeckCompletionsCountByUser(String userId) {
+        return jdbcTemplate.queryForObject(
+                GET_DECK_COMPLETIONS_COUNT_BY_USER_SQL,
+                (rs, rowNum) -> rs.getLong("completions_count"),
+                userId
+        );
+    }
+
 
 
 

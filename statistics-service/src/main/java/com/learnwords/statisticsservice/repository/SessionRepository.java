@@ -53,4 +53,42 @@ public class SessionRepository {
                 event.receivedAt()
         );
     }
+
+    private static final String GET_COMPLETED_SESSIONS_COUNT_BY_USER_SQL = """
+        SELECT count(*) AS completed_sessions
+        FROM analytics.sessions_finished
+        WHERE user_id = ?
+        """;
+
+    public int getCompletedSessionsCountByUser(String userId) {
+        Integer result = jdbcTemplate.queryForObject(
+                GET_COMPLETED_SESSIONS_COUNT_BY_USER_SQL,
+                (rs, rowNum) -> rs.getInt("completed_sessions"),
+                userId
+        );
+        return result != null ? result : 0;
+    }
+
+    private static final String GET_AVERAGE_ANSWERS_PER_SESSION_SQL = """
+        WITH answer_per_session AS (
+            SELECT COUNT() AS answers_per_session
+            FROM analytics.flashcard_answers
+            WHERE user_id = ?
+            GROUP BY session_id
+        ),
+        average AS (
+            SELECT avg(answers_per_session) AS avg_answers
+            FROM answer_per_session
+        )
+        SELECT avg_answers
+        FROM average;
+        """;
+
+    public Double getAverageAnswersPerSession(String userId) {
+        return jdbcTemplate.queryForObject(
+                GET_AVERAGE_ANSWERS_PER_SESSION_SQL,
+                (rs, rowNum) -> rs.getDouble("avg_answers"),
+                userId
+        );
+    }
 }

@@ -7,6 +7,8 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
 import java.sql.Timestamp;
+import java.util.HashMap;
+import java.util.Map;
 
 @Repository
 public class FlashcardRepository {
@@ -103,4 +105,38 @@ public class FlashcardRepository {
         );
     }
 
+    private static final String GET_CREATED_FLASHCARDS_COUNT_BY_USER_SQL = """
+        SELECT count(*) AS created_flashcards
+        FROM analytics.flashcard_answers
+        WHERE user_id = ?
+        """;
+
+    public int getCreatedFlashcardsCountByUser(String userId) {
+        Integer result = jdbcTemplate.queryForObject(
+                GET_CREATED_FLASHCARDS_COUNT_BY_USER_SQL,
+                (rs, rowNum) -> rs.getInt("created_flashcards"),
+                userId
+        );
+        return result != null ? result : 0;
+    }
+
+    private static final String GET_ANSWERED_FLASHCARDS_COUNT_BY_USER_SQL = """
+        SELECT COUNT(flashcard_id) AS answered_flashcards,
+        SUM(CASE WHEN correct THEN 1 ELSE 0 END) AS correct_answers
+        FROM analytics.flashcard_answers
+        WHERE user_id = ?
+        """;
+
+    public Map<String, Integer> getAnsweredFlashcardsCountByUser(String userId) {
+        return jdbcTemplate.queryForObject(
+                GET_ANSWERED_FLASHCARDS_COUNT_BY_USER_SQL,
+                (rs, rowNum) -> {
+                    Map<String, Integer> map = new HashMap<>();
+                    map.put("answered_flashcards", rs.getInt("answered_flashcards"));
+                    map.put("correct_answers", rs.getInt("correct_answers"));
+                    return map;
+                },
+                userId
+        );
+    }
 }
