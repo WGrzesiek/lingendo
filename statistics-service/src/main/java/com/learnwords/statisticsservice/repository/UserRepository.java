@@ -5,6 +5,7 @@ import com.learnwords.common.events.UserLoginEvent;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 @Repository
@@ -50,7 +51,7 @@ public class UserRepository {
     }
 
     private static final String GET_TOTAL_POINTS_SQL = """
-        SELECT points AS total_points
+        SELECT sum(points) AS total_points
         FROM analytics.user_points_total
         WHERE user_id = ?
         """;
@@ -66,20 +67,27 @@ public class UserRepository {
     private static final String GET_POINTS_PER_MONTH_BY_USER = """
         SELECT toYYYYMM(month) AS month, sum(points) AS points
         FROM analytics.user_points_monthly
-        WHERE user_id = '127fd33b-90d0-46b2-ae4f-17e575abf1e0'
+        WHERE user_id = ?
         GROUP BY month
         ORDER BY month DESC
     """;
 
-    public Map<String,Long> getPointsPerMonth(String userId) {
-        return jdbcTemplate.queryForObject(
+    public Map<String, Long> getPointsPerMonth(String userId) {
+        return jdbcTemplate.query(
                 GET_POINTS_PER_MONTH_BY_USER,
-                (rs, rowNum) -> Map.of(
-                        rs.getString("month"),
-                        rs.getLong("points")
-                ),
+                rs -> {
+                    Map<String, Long> result = new LinkedHashMap<>();
+                    while (rs.next()) {
+                        result.put(
+                                rs.getString("month"),
+                                rs.getLong("points")
+                        );
+                    }
+                    return result;
+                },
                 userId
         );
     }
+
 
 }
