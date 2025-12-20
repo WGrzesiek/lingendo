@@ -1,63 +1,35 @@
 "use client";
 
-import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { TrendingUp, Calendar } from "lucide-react";
+import { TrendingUp } from "lucide-react";
 import { IUserPointsData } from "@/features/statistics/types/statistics.types";
 
 interface PointsChartProps {
-  dailyPoints: IUserPointsData[];
   monthlyPoints: IUserPointsData[];
 }
 
 /**
- * Wykres punktów w czasie (dzienne/miesięczne)
+ * Wykres punktów w czasie (miesięczne)
  * Prosty wykres słupkowy bez zewnętrznych bibliotek
  */
-export const PointsChart = ({
-  dailyPoints,
-  monthlyPoints,
-}: PointsChartProps) => {
-  const [activeTab, setActiveTab] = useState<"daily" | "monthly">("daily");
-
-  const data = activeTab === "daily" ? dailyPoints : monthlyPoints;
+export const PointsChart = ({ monthlyPoints }: PointsChartProps) => {
+  const data = monthlyPoints;
   const maxPoints = Math.max(...data.map((d) => d.points), 1);
 
   const formatDate = (dateStr: string) => {
     const date = new Date(dateStr);
-    if (activeTab === "daily") {
-      return date.toLocaleDateString("pl-PL", {
-        day: "2-digit",
-        month: "2-digit",
-      });
-    } else {
-      return date.toLocaleDateString("pl-PL", { month: "short" });
-    }
+    return date.toLocaleDateString("pl-PL", { month: "short" });
   };
 
   return (
     <Card>
       <CardHeader>
-        <div className="flex items-center justify-between">
-          <CardTitle className="flex items-center gap-2">
-            <TrendingUp className="w-5 h-5" />
-            Punkty w czasie
-          </CardTitle>
-          <Tabs
-            value={activeTab}
-            onValueChange={(value) =>
-              setActiveTab(value as "daily" | "monthly")
-            }
-          >
-            <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="daily">Dzienne</TabsTrigger>
-              <TabsTrigger value="monthly">Miesięczne</TabsTrigger>
-            </TabsList>
-          </Tabs>
-        </div>
+        <CardTitle className="flex items-center gap-2">
+          <TrendingUp className="w-5 h-5" />
+          Punkty w czasie
+        </CardTitle>
         <p className="text-sm text-muted-foreground mt-1">
-          {activeTab === "daily" ? "Ostatnie 30 dni" : "Ostatnie 12 miesięcy"}
+          Ostatnie 12 miesięcy
         </p>
       </CardHeader>
       <CardContent>

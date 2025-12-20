@@ -101,3 +101,31 @@ export interface IFullUserStatistics {
   /** Statystyki dla kursów */
   deckStats: IDeckStatistics[];
 }
+
+/**
+ * Statystyki użytkownika z API /api/v1/stats
+ */
+export interface IStatisticsApiResponse {
+  /** Liczba utworzonych kursów */
+  createdDecks: number;
+  /** Średnia liczba odpowiedzi na sesję */
+  averageAnswersPerSession: number;
+  /** Liczba utworzonych fiszek */
+  flashcardsCreated: number;
+  /** Całkowita liczba punktów */
+  totalPoints: number;
+  /** Liczba poprawnych odpowiedzi na fiszki */
+  flashcardsAnsweredCorrectly: number;
+  /** Liczba ukończonych sesji */
+  sessionsCompleted: number;
+  /** Aktualny streak (dni z rzędu) */
+  streak: number;
+  /** Punkty pogrupowane po miesiącach (YYYYMM: punkty) */
+  pointsPerMonth: Record<string, number>;
+  /** Liczba zapisanych kursów */
+  enrolledDecks: number;
+  /** Liczba ukończonych kursów */
+  completedDecks: number;
+  /** Całkowita liczba odpowiedzi na fiszki */
+  flashcardsAnswered: number;
+}

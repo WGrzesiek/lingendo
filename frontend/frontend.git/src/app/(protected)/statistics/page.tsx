@@ -11,173 +11,11 @@ import {
   IUserStatistics,
   IUserPointsData,
   ISessionStatistics,
-  IUserActivityItem,
 } from "@/features/statistics/types/statistics.types";
-
-// Mock data - statystyki użytkownika
-const mockUserStatistics: IUserStatistics = {
-  totalPoints: 8420,
-  currentStreak: 7,
-  finishedDecks: 12,
-  createdDecks: 5,
-  createdFlashcards: 234,
-  enrolledDecks: 8,
-  completedSessions: 156,
-  accuracy: 87,
-};
-
-// Mock data - punkty dzienne (ostatnie 30 dni)
-const mockDailyPoints: IUserPointsData[] = Array.from(
-  { length: 30 },
-  (_, i) => {
-    const date = new Date();
-    date.setDate(date.getDate() - (29 - i));
-    return {
-      date: date.toISOString(),
-      points: Math.floor(Math.random() * 300) + 50,
-    };
-  }
-);
-
-// Mock data - punkty miesięczne (ostatnie 12 miesięcy)
-const mockMonthlyPoints: IUserPointsData[] = Array.from(
-  { length: 12 },
-  (_, i) => {
-    const date = new Date();
-    date.setMonth(date.getMonth() - (11 - i));
-    return {
-      date: date.toISOString(),
-      points: Math.floor(Math.random() * 2000) + 500,
-    };
-  }
-);
-
-// Mock data - statystyki sesji
-const mockSessionStatistics: ISessionStatistics = {
-  totalSessionsStarted: 168,
-  totalSessionsFinished: 156,
-  totalCorrectAnswers: 2340,
-  totalIncorrectAnswers: 350,
-  accuracy: 87,
-  avgCorrectPerSession: 15,
-};
-
-// Mock data - historia aktywności (ostatnie 20)
-const mockRecentActivity: IUserActivityItem[] = [
-  {
-    eventTime: new Date(Date.now() - 1000 * 60 * 30).toISOString(),
-    type: "LESSON_COMPLETED",
-    title: "Ukończono lekcję",
-    subtitle: "Angielski biznesowy w praktyce",
-    points: 50,
-  },
-  {
-    eventTime: new Date(Date.now() - 1000 * 60 * 60 * 2).toISOString(),
-    type: "LOGIN",
-    title: "Seria dni nauki!",
-    subtitle: "7 dni nauki z rzędu – nowy rekord!",
-    points: 10,
-  },
-  {
-    eventTime: new Date(Date.now() - 1000 * 60 * 60 * 5).toISOString(),
-    type: "LESSON_COMPLETED",
-    title: "Ukończono lekcję",
-    subtitle: "Hiszpański dla podróżników",
-    points: 50,
-  },
-  {
-    eventTime: new Date(Date.now() - 1000 * 60 * 60 * 24).toISOString(),
-    type: "SESSION_COMPLETED",
-    title: "Ukończono kurs",
-    subtitle: "Programowanie - terminologia angielska",
-    points: 100,
-  },
-  {
-    eventTime: new Date(Date.now() - 1000 * 60 * 60 * 24 * 2).toISOString(),
-    type: "LESSON_COMPLETED",
-    title: "Ukończono lekcję",
-    subtitle: "Niemiecki od podstaw",
-    points: 50,
-  },
-  {
-    eventTime: new Date(
-      Date.now() - 1000 * 60 * 60 * 24 * 2 - 1000 * 60 * 60 * 3
-    ).toISOString(),
-    type: "LOGIN",
-    title: "Seria dni nauki!",
-    subtitle: "6 dni nauki z rzędu – nowy rekord!",
-    points: 10,
-  },
-  {
-    eventTime: new Date(Date.now() - 1000 * 60 * 60 * 24 * 3).toISOString(),
-    type: "SESSION_STARTED",
-    title: "Rozpoczęto nowy kurs",
-    subtitle: "Medycyna - słownictwo specjalistyczne",
-    points: 0,
-  },
-  {
-    eventTime: new Date(
-      Date.now() - 1000 * 60 * 60 * 24 * 3 - 1000 * 60 * 60 * 4
-    ).toISOString(),
-    type: "LESSON_COMPLETED",
-    title: "Ukończono lekcję",
-    subtitle: "Francuski - kultura i sztuka",
-    points: 50,
-  },
-  {
-    eventTime: new Date(Date.now() - 1000 * 60 * 60 * 24 * 4).toISOString(),
-    type: "LESSON_COMPLETED",
-    title: "Ukończono lekcję",
-    subtitle: "Fizyka i matematyka po angielsku",
-    points: 50,
-  },
-  {
-    eventTime: new Date(Date.now() - 1000 * 60 * 60 * 24 * 5).toISOString(),
-    type: "LOGIN",
-    title: "Seria dni nauki!",
-    subtitle: "5 dni nauki z rzędu – nowy rekord!",
-    points: 10,
-  },
-  {
-    eventTime: new Date(
-      Date.now() - 1000 * 60 * 60 * 24 * 5 - 1000 * 60 * 60 * 2
-    ).toISOString(),
-    type: "LESSON_COMPLETED",
-    title: "Ukończono lekcję",
-    subtitle: "Włoski dla początkujących",
-    points: 50,
-  },
-  {
-    eventTime: new Date(Date.now() - 1000 * 60 * 60 * 24 * 6).toISOString(),
-    type: "SESSION_COMPLETED",
-    title: "Ukończono kurs",
-    subtitle: "Biznes międzynarodowy - negocjacje",
-    points: 100,
-  },
-  {
-    eventTime: new Date(Date.now() - 1000 * 60 * 60 * 24 * 7).toISOString(),
-    type: "LESSON_COMPLETED",
-    title: "Ukończono lekcję",
-    subtitle: "Technologia - AI i Machine Learning",
-    points: 50,
-  },
-  {
-    eventTime: new Date(
-      Date.now() - 1000 * 60 * 60 * 24 * 7 - 1000 * 60 * 60 * 5
-    ).toISOString(),
-    type: "LOGIN",
-    title: "Seria dni nauki!",
-    subtitle: "4 dni nauki z rzędu – nowy rekord!",
-    points: 10,
-  },
-  {
-    eventTime: new Date(Date.now() - 1000 * 60 * 60 * 24 * 8).toISOString(),
-    type: "LESSON_COMPLETED",
-    title: "Ukończono lekcję",
-    subtitle: "Angielski biznesowy w praktyce",
-    points: 50,
-  },
-];
+import { useStatistics } from "@/features/statistics/hooks/useStatistics";
+// import { useUserActivity } from "@/features/statistics/hooks/useUserActivity";
+import { useMemo } from "react";
+import { useStudentActivity } from "@/features/dashboard-student/hooks/useStudentActivity";
 
 /**
  * Strona statystyk użytkownika
@@ -185,6 +23,90 @@ const mockRecentActivity: IUserActivityItem[] = [
  */
 const StatisticsPage = () => {
   const router = useRouter();
+  const { data: statsData, isLoading: isStatsLoading } = useStatistics();
+  const { data: activityData, isLoading: isActivityLoading } =
+    useStudentActivity();
+
+  // Konwersja danych z API do formatu komponentów
+  const userStatistics: IUserStatistics | undefined = useMemo(() => {
+    if (!statsData) return undefined;
+
+    const accuracy =
+      statsData.flashcardsAnswered > 0
+        ? Math.round(
+            (statsData.flashcardsAnsweredCorrectly /
+              statsData.flashcardsAnswered) *
+              100
+          )
+        : 0;
+
+    return {
+      totalPoints: statsData.totalPoints,
+      currentStreak: statsData.streak,
+      finishedDecks: statsData.completedDecks,
+      createdDecks: statsData.createdDecks,
+      createdFlashcards: statsData.flashcardsCreated,
+      enrolledDecks: statsData.enrolledDecks,
+      completedSessions: statsData.sessionsCompleted,
+      accuracy,
+    };
+  }, [statsData]);
+
+  // Konwersja pointsPerMonth na tablicę do wykresu
+  const monthlyPoints: IUserPointsData[] = useMemo(() => {
+    if (!statsData?.pointsPerMonth) return [];
+
+    return Object.entries(statsData.pointsPerMonth)
+      .map(([yearMonth, points]) => {
+        // Format: YYYYMM -> konwersja na datę
+        const year = parseInt(yearMonth.substring(0, 4));
+        const month = parseInt(yearMonth.substring(4, 6)) - 1;
+        const date = new Date(year, month, 1);
+
+        return {
+          date: date.toISOString(),
+          points,
+        };
+      })
+      .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+  }, [statsData]);
+
+  // Statystyki sesji
+  const sessionStatistics: ISessionStatistics | undefined = useMemo(() => {
+    if (!statsData) return undefined;
+
+    const accuracy =
+      statsData.flashcardsAnswered > 0
+        ? Math.round(
+            (statsData.flashcardsAnsweredCorrectly /
+              statsData.flashcardsAnswered) *
+              100
+          )
+        : 0;
+
+    return {
+      totalSessionsStarted: statsData.sessionsCompleted, // API nie zwraca rozpoczętych
+      totalSessionsFinished: statsData.sessionsCompleted,
+      totalCorrectAnswers: statsData.flashcardsAnsweredCorrectly,
+      totalIncorrectAnswers:
+        statsData.flashcardsAnswered - statsData.flashcardsAnsweredCorrectly,
+      accuracy,
+      avgCorrectPerSession: statsData.averageAnswersPerSession,
+    };
+  }, [statsData]);
+
+  const isLoading = isStatsLoading || isActivityLoading;
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="text-center">
+          <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+          <p className="text-muted-foreground">Ładowanie statystyk...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background">
@@ -211,26 +133,25 @@ const StatisticsPage = () => {
         </div>
 
         {/* Główne statystyki */}
-        <StatisticsOverview statistics={mockUserStatistics} />
+        {userStatistics && <StatisticsOverview statistics={userStatistics} />}
 
         {/* Layout - wykresy i aktywność */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Lewa kolumna - wykres punktów */}
           <div className="lg:col-span-2 space-y-6">
-            <PointsChart
-              dailyPoints={mockDailyPoints}
-              monthlyPoints={mockMonthlyPoints}
-            />
+            <PointsChart monthlyPoints={monthlyPoints} />
           </div>
 
           {/* Prawa kolumna - statystyki sesji */}
           <div className="lg:col-span-1">
-            <SessionStatistics statistics={mockSessionStatistics} />
+            {sessionStatistics && (
+              <SessionStatistics statistics={sessionStatistics} />
+            )}
           </div>
         </div>
 
         {/* Historia aktywności */}
-        <ActivityHistory activities={mockRecentActivity} />
+        {activityData && <ActivityHistory activities={activityData} />}
       </div>
     </div>
   );
