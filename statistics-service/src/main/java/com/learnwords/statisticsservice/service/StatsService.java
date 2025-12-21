@@ -52,7 +52,14 @@ public class StatsService {
         result.put("flashcardsAnsweredCorrectly", flashcardAnswersStats.get("correct_answers"));
         result.put("pointsPerMonth", pointsPerMonth);
         result.put("averageAnswersPerSession", averageAnswersPerSession);
-
         return result;
+    }
+
+    public Map<String, Long> getPointsPerMonth(String userId) {
+        return userRepository.getPointsPerMonth(userId);
+    }
+
+    public Map<String, Long> getPointsPerDay(String userId) {
+        return userRepository.getPointsPerDay(userId);
     }
 }

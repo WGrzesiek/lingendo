@@ -89,5 +89,30 @@ public class UserRepository {
         );
     }
 
+    private static final String GET_POINTS_PER_DAY_BY_USER = """
+        SELECT toYYYYMMDD(day) AS day, sum(points) AS points
+        FROM analytics.user_points_daily
+        WHERE user_id = ?
+        GROUP BY day
+        ORDER BY day DESC
+    """;
+
+    public Map<String, Long> getPointsPerDay(String userId) {
+        return jdbcTemplate.query(
+                GET_POINTS_PER_DAY_BY_USER,
+                rs -> {
+                    Map<String, Long> result = new LinkedHashMap<>();
+                    while (rs.next()) {
+                        result.put(
+                                rs.getString("day"),
+                                rs.getLong("points")
+                        );
+                    }
+                    return result;
+                },
+                userId
+        );
+    }
+
 
 }

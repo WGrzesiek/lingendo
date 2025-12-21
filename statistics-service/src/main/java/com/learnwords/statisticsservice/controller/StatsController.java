@@ -1,6 +1,5 @@
 package com.learnwords.statisticsservice.controller;
 
-import com.learnwords.statisticsservice.dto.PdfExportOptionsDto;
 import com.learnwords.statisticsservice.service.PdfService;
 import com.learnwords.statisticsservice.service.StatsService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -41,7 +40,7 @@ public class StatsController {
         return ResponseEntity.ok(stats);
     }
 
-    @PostMapping("/export/pdf")
+    @GetMapping("/export/pdf.pdf")
     @Operation(
             summary = "Eksportuj statystyki do PDF",
             description = "Generuje i pobiera raport PDF z kompletnymi statystykami użytkownika. Możliwość wyboru sekcji do uwzględnienia.",
@@ -69,35 +68,13 @@ public class StatsController {
                     required = true,
                     example = "user-123"
             )
-            @RequestHeader(USER_ID_HEADER) String userId,
-            @RequestBody(required = false) PdfExportOptionsDto options
-    ) {
-        log.info("Rozpoczęcie eksportu statystyk do PDF dla użytkownika: {} z opcjami: {}", userId, options);
+            @RequestHeader(USER_ID_HEADER) String userId) {
+        byte[] pdf = pdfService.generateStatsPdf(userId);
 
-        try {
-            PdfExportOptionsDto exportOptions = options != null ? options : PdfExportOptionsDto.createDefault();
-            
-            byte[] pdfBytes = pdfService.generateStatsPdf(userId, exportOptions);
-
-            String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm-ss"));
-            String filename = String.format("statystyki_learnwords_%s.pdf", timestamp);
-
-            HttpHeaders headers = new HttpHeaders();
-            headers.setContentType(MediaType.APPLICATION_PDF);
-            headers.setContentDispositionFormData("attachment", filename);
-            headers.setContentLength(pdfBytes.length);
-
-            log.info("Pomyślnie wygenerowano PDF dla użytkownika: {} (rozmiar: {} KB)",
-                    userId, pdfBytes.length / 1024);
-
-            return ResponseEntity.ok()
-                    .headers(headers)
-                    .body(pdfBytes);
-
-        } catch (Exception e) {
-            log.error("Błąd podczas eksportu statystyk do PDF dla użytkownika: {}", userId, e);
-            return ResponseEntity.internalServerError().build();
-        }
+        return ResponseEntity.ok()
+                .header("Content-Disposition", "attachment; filename=\"learnwords-statistics-" + userId + ".pdf\"")
+                .contentType(MediaType.APPLICATION_PDF)
+                .body(pdf);
     }
 
 }

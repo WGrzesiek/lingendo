@@ -4,6 +4,27 @@
     <meta charset="UTF-8" />
     <title>Raport Statystyk - LearnWords</title>
     <style>
+      /* Fonty - wsparcie polskich znaków */
+      @font-face {
+        font-family: "Inter";
+        src: url("/fonts/Inter-Regular.ttf") format("truetype");
+        font-weight: 400;
+        font-style: normal;
+      }
+
+      @font-face {
+        font-family: "Inter";
+        src: url("/fonts/Inter-Bold.ttf") format("truetype");
+        font-weight: 700;
+        font-style: normal;
+      }
+
+      /* Konfiguracja strony PDF */
+      @page {
+        size: A4;
+        margin: 12mm 15mm;
+      }
+
       /* Reset i podstawowe style */
       * {
         margin: 0;
@@ -12,49 +33,49 @@
       }
 
       body {
-        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-          "Helvetica Neue", Arial, sans-serif;
-        line-height: 1.6;
+        font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI",
+          Roboto, "Helvetica Neue", Arial, sans-serif;
+        line-height: 1.5;
         color: #1f2937;
         background: #ffffff;
       }
 
-      /* Container */
+      /* Container - kompaktowy layout */
       .container {
-        max-width: 210mm;
+        max-width: 100%;
         margin: 0 auto;
-        padding: 20px;
+        padding: 8px;
       }
 
-      /* Header */
+      /* Header - zielony motyw */
       .header {
         text-align: center;
-        border-bottom: 3px solid #3b82f6;
-        padding-bottom: 20px;
-        margin-bottom: 30px;
+        border-bottom: 3px solid #22c55e;
+        padding-bottom: 14px;
+        margin-bottom: 18px;
       }
 
       .header h1 {
-        font-size: 32px;
+        font-size: 28px;
         font-weight: 700;
-        color: #1e40af;
-        margin-bottom: 8px;
+        color: #166534;
+        margin-bottom: 6px;
       }
 
       .header p {
-        font-size: 14px;
+        font-size: 13px;
         color: #6b7280;
       }
 
-      /* Metadata Section */
+      /* Metadata Section - kompaktowy */
       .metadata {
         display: flex;
         justify-content: space-between;
-        padding: 15px;
-        background: #f3f4f6;
-        border-radius: 8px;
-        margin-bottom: 30px;
-        font-size: 14px;
+        padding: 10px;
+        background: #f9fafb;
+        border-radius: 6px;
+        margin-bottom: 16px;
+        font-size: 13px;
       }
 
       .metadata-item {
@@ -73,90 +94,89 @@
         font-weight: 500;
       }
 
-      /* Stats Grid */
+      /* Stats Grid - zielony motyw, kompaktowy */
       .stats-grid {
         display: grid;
         grid-template-columns: repeat(3, 1fr);
-        gap: 20px;
-        margin-bottom: 30px;
+        gap: 12px;
+        margin-bottom: 16px;
       }
 
       .stat-card {
-        background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+        background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
         color: white;
-        padding: 20px;
-        border-radius: 12px;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        padding: 14px;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
       }
 
       .stat-card.accent-purple {
-        background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+        background: linear-gradient(135deg, #16a34a 0%, #15803d 100%);
       }
 
       .stat-card.accent-green {
-        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
       }
 
       .stat-card.accent-orange {
-        background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+        background: linear-gradient(135deg, #16a34a 0%, #166534 100%);
       }
 
       .stat-card.accent-pink {
-        background: linear-gradient(135deg, #ec4899 0%, #db2777 100%);
+        background: linear-gradient(135deg, #22c55e 0%, #15803d 100%);
       }
 
       .stat-card.accent-indigo {
-        background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+        background: linear-gradient(135deg, #16a34a 0%, #166534 100%);
       }
 
       .stat-label {
-        font-size: 14px;
-        opacity: 0.9;
-        margin-bottom: 8px;
+        font-size: 12px;
+        opacity: 0.95;
+        margin-bottom: 6px;
       }
 
       .stat-value {
-        font-size: 32px;
+        font-size: 26px;
         font-weight: 700;
       }
 
-      /* Section */
+      /* Section - kompaktowy */
       .section {
-        margin-bottom: 30px;
-        page-break-inside: avoid;
+        margin-bottom: 16px;
       }
 
       .section-title {
-        font-size: 20px;
+        font-size: 18px;
         font-weight: 700;
-        color: #1e40af;
-        margin-bottom: 15px;
+        color: #166534;
+        margin-bottom: 10px;
         border-bottom: 2px solid #e5e7eb;
-        padding-bottom: 8px;
+        padding-bottom: 6px;
       }
 
-      /* Chart Container */
+      /* Chart Container - lekko zielony */
       .chart-container {
         background: #f9fafb;
-        padding: 20px;
-        border-radius: 8px;
-        margin-bottom: 20px;
+        padding: 14px;
+        border-radius: 6px;
+        margin-bottom: 12px;
       }
 
       .chart-title {
-        font-size: 16px;
+        font-size: 15px;
         font-weight: 600;
-        color: #374151;
-        margin-bottom: 15px;
+        color: #166534;
+        margin-bottom: 10px;
       }
 
-      /* Bar Chart */
+      /* Bar Chart - zielony motyw, kompaktowy */
       .bar-chart {
         display: flex;
         align-items: flex-end;
-        height: 200px;
-        gap: 15px;
-        padding: 10px 0;
+        height: 140px;
+        gap: 12px;
+        padding: 6px 0;
       }
 
       .bar-item {
@@ -168,42 +188,49 @@
 
       .bar {
         width: 100%;
-        background: linear-gradient(180deg, #3b82f6 0%, #2563eb 100%);
-        border-radius: 4px 4px 0 0;
-        transition: all 0.3s ease;
+        background: linear-gradient(180deg, #22c55e 0%, #16a34a 100%);
+        border-radius: 3px 3px 0 0;
         position: relative;
+        min-height: 6px;
       }
 
       .bar-value {
         position: absolute;
-        top: -20px;
-        font-size: 12px;
+        top: -18px;
+        font-size: 11px;
         font-weight: 600;
-        color: #1f2937;
+        color: #166534;
       }
 
       .bar-label {
-        margin-top: 8px;
-        font-size: 12px;
+        margin-top: 6px;
+        font-size: 10px;
         color: #6b7280;
         text-align: center;
       }
 
-      /* Progress Bar */
+      .empty-chart-message {
+        text-align: center;
+        color: #6b7280;
+        font-size: 13px;
+        padding: 20px;
+      }
+
+      /* Progress Bar - zielony motyw, kompaktowy */
       .progress-container {
-        margin-bottom: 20px;
+        margin-bottom: 14px;
       }
 
       .progress-label {
         display: flex;
         justify-content: space-between;
-        margin-bottom: 8px;
-        font-size: 14px;
+        margin-bottom: 6px;
+        font-size: 12px;
       }
 
       .progress-label-text {
         font-weight: 600;
-        color: #374151;
+        color: #166534;
       }
 
       .progress-label-value {
@@ -212,49 +239,50 @@
 
       .progress-bar {
         width: 100%;
-        height: 24px;
+        height: 20px;
         background: #e5e7eb;
-        border-radius: 12px;
+        border-radius: 10px;
         overflow: hidden;
       }
 
       .progress-fill {
         height: 100%;
-        background: linear-gradient(90deg, #3b82f6 0%, #2563eb 100%);
-        border-radius: 12px;
+        background: linear-gradient(90deg, #22c55e 0%, #16a34a 100%);
+        border-radius: 10px;
         display: flex;
         align-items: center;
         justify-content: flex-end;
-        padding-right: 10px;
+        padding-right: 8px;
         color: white;
-        font-size: 12px;
+        font-size: 11px;
         font-weight: 600;
       }
 
-      /* Table */
+      /* Table - kompaktowy, nie dziel w połowie */
       .data-table {
         width: 100%;
         border-collapse: collapse;
         background: white;
-        border-radius: 8px;
+        border-radius: 6px;
         overflow: hidden;
-        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+        page-break-inside: avoid;
       }
 
       .data-table th {
         background: #f3f4f6;
-        padding: 12px;
+        padding: 10px;
         text-align: left;
         font-weight: 600;
-        color: #374151;
-        font-size: 14px;
+        color: #166534;
+        font-size: 12px;
         border-bottom: 2px solid #e5e7eb;
       }
 
       .data-table td {
-        padding: 12px;
+        padding: 9px 10px;
         border-bottom: 1px solid #f3f4f6;
-        font-size: 14px;
+        font-size: 12px;
       }
 
       .data-table tr:last-child td {
@@ -265,34 +293,35 @@
         background: #f9fafb;
       }
 
-      /* Footer */
+      /* Footer - kompaktowy */
       .footer {
         text-align: center;
-        padding-top: 20px;
-        margin-top: 30px;
+        padding-top: 12px;
+        margin-top: 16px;
         border-top: 2px solid #e5e7eb;
-        font-size: 12px;
+        font-size: 11px;
         color: #6b7280;
       }
 
-      /* Highlights */
+      /* Highlights - zielony motyw */
       .highlight-box {
-        background: #eff6ff;
-        border-left: 4px solid #3b82f6;
-        padding: 15px;
+        background: #ecfdf3;
+        border-left: 4px solid #22c55e;
+        padding: 12px;
         border-radius: 4px;
-        margin-bottom: 20px;
+        margin-bottom: 12px;
       }
 
       .highlight-title {
         font-weight: 600;
-        color: #1e40af;
-        margin-bottom: 8px;
+        color: #15803d;
+        margin-bottom: 6px;
+        font-size: 13px;
       }
 
       .highlight-text {
         color: #1f2937;
-        font-size: 14px;
+        font-size: 12px;
       }
 
       /* Page break control */
@@ -329,8 +358,8 @@
         </div>
       </div>
 
-      <!-- Main Stats -->
-      <div class="stats-grid">
+      <!-- Main Stats - warunek includeOverview -->
+      <div class="stats-grid" th:if="${options.includeOverview}">
         <div class="stat-card">
           <div class="stat-label">🔥 Seria dni nauki</div>
           <div class="stat-value" th:text="${stats.streak}">0</div>
@@ -357,8 +386,8 @@
         </div>
       </div>
 
-      <!-- Flashcards Stats -->
-      <div class="section">
+      <!-- Flashcards Stats - warunek includeSessionStats -->
+      <div class="section" th:if="${options.includeSessionStats}">
         <h2 class="section-title">🎴 Statystyki fiszek</h2>
 
         <div class="highlight-box">
@@ -419,11 +448,15 @@
         </div>
       </div>
 
-      <!-- Monthly Points Chart -->
-      <div class="section">
+      <!-- Monthly Points Chart - warunek includeMonthlyPoints -->
+      <div class="section" th:if="${options.includeMonthlyPoints}">
         <h2 class="section-title">📈 Punkty w poszczególnych miesiącach</h2>
         <div class="chart-container">
-          <div class="bar-chart">
+          <!-- Wykres słupkowy - tylko jeśli są dane -->
+          <div
+            class="bar-chart"
+            th:if="${monthlyPoints != null and #lists.size(monthlyPoints) > 0}"
+          >
             <div class="bar-item" th:each="entry : ${monthlyPoints}">
               <div
                 class="bar"
@@ -433,6 +466,13 @@
               </div>
               <div class="bar-label" th:text="${entry.key}">Miesiąc</div>
             </div>
+          </div>
+          <!-- Komunikat gdy brak danych -->
+          <div
+            class="empty-chart-message"
+            th:if="${monthlyPoints == null or #lists.size(monthlyPoints) == 0}"
+          >
+            Brak zarejestrowanych punktów w poszczególnych miesiącach.
           </div>
         </div>
       </div>
