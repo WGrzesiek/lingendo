@@ -10,6 +10,8 @@ import {
   IPdfExportOptions,
   defaultPdfExportOptions,
 } from "@/features/statistics/types/pdf-export.types";
+import { useExportStatisticsToPdf } from "@/features/statistics/hooks/useStatistics";
+import { useProtectedRoute } from "@/features/auth/hooks/useProtectedRoute";
 
 /**
  * Strona eksportu statystyk do PDF
@@ -17,32 +19,19 @@ import {
  */
 const StatisticsExportPage = () => {
   const router = useRouter();
+  const { isLoading: authLoading } = useProtectedRoute();
   const [options, setOptions] = useState<IPdfExportOptions>(
     defaultPdfExportOptions
   );
-  const [isGenerating, setIsGenerating] = useState(false);
-  const [generationSuccess, setGenerationSuccess] = useState(false);
 
-  const handleGeneratePdf = async () => {
-    setIsGenerating(true);
-    setGenerationSuccess(false);
+  const {
+    mutate: exportPdf,
+    isPending: isGenerating,
+    isSuccess: generationSuccess,
+  } = useExportStatisticsToPdf();
 
-    // Symulacja generowania PDF
-    await new Promise((resolve) => setTimeout(resolve, 2000));
-
-    // TODO: Tutaj będzie prawdziwe generowanie PDF
-    console.log("Generowanie PDF z opcjami:", options);
-
-    setIsGenerating(false);
-    setGenerationSuccess(true);
-
-    // Reset sukcesu po 3 sekundach
-    setTimeout(() => {
-      setGenerationSuccess(false);
-    }, 3000);
-
-    // Symulacja pobierania pliku
-    // W prawdziwej implementacji tutaj będzie API call i pobranie pliku
+  const handleGeneratePdf = () => {
+    exportPdf(options);
   };
 
   const hasAnyOptionSelected = Object.entries(options).some(
@@ -59,6 +48,14 @@ const StatisticsExportPage = () => {
     };
     return labels[options.dateRange];
   };
+
+  if (authLoading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background">

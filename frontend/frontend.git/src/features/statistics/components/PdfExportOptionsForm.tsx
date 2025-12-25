@@ -70,12 +70,6 @@ export const PdfExportOptionsForm = ({
       description: "Ostatnie wydarzenia i osiągnięcia",
       checked: options.includeActivity,
     },
-    {
-      id: "includeDeckStats",
-      label: "Statystyki per kurs",
-      description: "Szczegółowe statystyki dla każdego kursu osobno",
-      checked: options.includeDeckStats,
-    },
   ];
 
   return (

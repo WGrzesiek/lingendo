@@ -12,8 +12,6 @@ export interface IPdfExportOptions {
   includeSessionStats: boolean;
   /** Czy dołączyć historię aktywności */
   includeActivity: boolean;
-  /** Czy dołączyć statystyki per kurs */
-  includeDeckStats: boolean;
   /** Okres danych do eksportu */
   dateRange:
     | "last-7-days"
@@ -32,6 +30,5 @@ export const defaultPdfExportOptions: IPdfExportOptions = {
   includeMonthlyPoints: false,
   includeSessionStats: true,
   includeActivity: true,
-  includeDeckStats: false,
   dateRange: "last-30-days",
 };
