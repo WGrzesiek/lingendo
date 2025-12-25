@@ -55,6 +55,33 @@ public class StatsService {
         return result;
     }
 
+    public Map<String, Object> getUserStats(String userId, Integer lastDays) {
+        Integer streak = userRepository.getUserStreak(userId);
+        Long totalPoints = userRepository.getTotalPoints(userId);
+        Integer createdDecks = deckRepository.getCreatedDecksCountByUser(userId, lastDays);
+        Long enrolledDecks = deckEnrollmentRepository.getDeckEnrollmentsCountByUser(userId, lastDays);
+        Long completedDecks = deckEnrollmentRepository.getDeckCompletionsCountByUser(userId, lastDays);
+        Integer sessionsCompleted = sessionRepository.getCompletedSessionsCountByUser(userId, lastDays);
+        Integer flashcardsCreated = flashcardRepository.getCreatedFlashcardsCountByUser(userId, lastDays);
+        Map<String, Integer> flashcardAnswersStats = flashcardRepository.getAnsweredFlashcardsCountByUser(userId, lastDays);
+        Map<String, Long> pointsPerMonth = userRepository.getPointsPerMonth(userId);
+        Double averageAnswersPerSession = sessionRepository.getAverageAnswersPerSession(userId, lastDays);
+
+        Map<String, Object> result = new HashMap<>();
+        result.put("streak", streak);
+        result.put("totalPoints", totalPoints);
+        result.put("createdDecks", createdDecks);
+        result.put("enrolledDecks", enrolledDecks);
+        result.put("completedDecks", completedDecks);
+        result.put("sessionsCompleted", sessionsCompleted);
+        result.put("flashcardsCreated", flashcardsCreated);
+        result.put("flashcardsAnswered", flashcardAnswersStats.get("answered_flashcards"));
+        result.put("flashcardsAnsweredCorrectly", flashcardAnswersStats.get("correct_answers"));
+        result.put("pointsPerMonth", pointsPerMonth);
+        result.put("averageAnswersPerSession", averageAnswersPerSession);
+        return result;
+    }
+
     public Map<String, Long> getPointsPerMonth(String userId) {
         return userRepository.getPointsPerMonth(userId);
     }

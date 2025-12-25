@@ -6,7 +6,11 @@ import com.learnwords.statisticsservice.dto.UserPointsDto;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
+import java.sql.Timestamp;
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -133,12 +137,12 @@ public class DeckEnrollmentRepository {
     """;
 
     public Map<String, Long> getTotalCompletedStudentsForDecks(List<String> deckIds) {
-        String inSql = String.join(",", java.util.Collections.nCopies(deckIds.size(), "?"));
+        String inSql = String.join(",", Collections.nCopies(deckIds.size(), "?"));
         String finalSql = String.format(GET_TOTAL_COMPLETED_STUDENTS_FOR_DECKS_SQL, inSql);
 
         return jdbcTemplate.query(finalSql,
                 rs -> {
-                    java.util.Map<String, Long> result = new java.util.HashMap<>();
+                    Map<String, Long> result = new HashMap<>();
                     while (rs.next()) {
                         result.put(rs.getString("deck_id"), rs.getLong("total_completed_students"));
                     }
@@ -154,6 +158,12 @@ public class DeckEnrollmentRepository {
         WHERE user_id = ?
     """;
 
+    private static final String GET_DECK_ENROLLMENTS_COUNT_BY_USER_SQL_WITH_DATE = """
+        SELECT COUNT(*) AS enrollments_count
+        FROM analytics.deck_enrollments_created
+        WHERE user_id = ? AND event_time >= ?
+    """;
+
     public Long getDeckEnrollmentsCountByUser(String userId) {
         return jdbcTemplate.queryForObject(
                 GET_DECK_ENROLLMENTS_COUNT_BY_USER_SQL,
@@ -162,10 +172,29 @@ public class DeckEnrollmentRepository {
         );
     }
 
+    public Long getDeckEnrollmentsCountByUser(String userId, Integer lastDays) {
+        if (lastDays == null || lastDays <= 0) {
+            return getDeckEnrollmentsCountByUser(userId);
+        }
+        Instant since = Instant.now().minusSeconds(lastDays * 24L * 60L * 60L);
+        return jdbcTemplate.queryForObject(
+                GET_DECK_ENROLLMENTS_COUNT_BY_USER_SQL_WITH_DATE,
+                (rs, rowNum) -> rs.getLong("enrollments_count"),
+                userId,
+                since
+        );
+    }
+
     private static final String GET_DECK_COMPLETIONS_COUNT_BY_USER_SQL = """
         SELECT COUNT(*) AS completions_count
         FROM analytics.deck_enrollments_finished
         WHERE user_id = ?
+    """;
+
+    private static final String GET_DECK_COMPLETIONS_COUNT_BY_USER_SQL_WITH_DATE = """
+        SELECT COUNT(*) AS completions_count
+        FROM analytics.deck_enrollments_finished
+        WHERE user_id = ? AND event_time >= ?
     """;
 
     public Long getDeckCompletionsCountByUser(String userId) {
@@ -176,7 +205,17 @@ public class DeckEnrollmentRepository {
         );
     }
 
-
-
-
+    public Long getDeckCompletionsCountByUser(String userId, Integer lastDays) {
+        if (lastDays == null || lastDays <= 0) {
+            return getDeckCompletionsCountByUser(userId);
+        }
+        Instant threshold = Instant.now().minus(lastDays.longValue(), ChronoUnit.DAYS);
+        Timestamp ts = Timestamp.from(threshold);
+        return jdbcTemplate.queryForObject(
+                GET_DECK_COMPLETIONS_COUNT_BY_USER_SQL_WITH_DATE,
+                (rs, rowNum) -> rs.getLong("completions_count"),
+                userId,
+                ts
+        );
+    }
 }

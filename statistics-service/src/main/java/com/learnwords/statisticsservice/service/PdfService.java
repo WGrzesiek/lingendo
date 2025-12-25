@@ -10,6 +10,7 @@ import com.itextpdf.kernel.font.PdfFontFactory;
 import com.itextpdf.kernel.geom.PageSize;
 import com.itextpdf.kernel.pdf.PdfDocument;
 import com.itextpdf.kernel.pdf.PdfWriter;
+import com.itextpdf.kernel.pdf.canvas.draw.SolidLine;
 import com.itextpdf.layout.Document;
 import com.itextpdf.layout.borders.Border;
 import com.itextpdf.layout.element.*;
@@ -46,20 +47,7 @@ import java.util.stream.Collectors;
 @Slf4j
 @Service
 public class PdfService {
-    private PdfFont loadFont(String resourcePath) throws IOException {
-        try (InputStream is = getClass().getResourceAsStream(resourcePath)) {
-            if (is == null) {
-                throw new IllegalStateException("Nie znaleziono fontu: " + resourcePath);
-            }
-            byte[] fontBytes = is.readAllBytes();
-            return PdfFontFactory.createFont(
-                    fontBytes,
-                    PdfEncodings.IDENTITY_H,
-                    PdfFontFactory.EmbeddingStrategy.PREFER_EMBEDDED,
-                    false
-            );
-        }
-    }
+
     private Map<String, Object> stats() {
      Map<String,Object> stats = new HashMap<>();
         stats.put("streak", 5L);
@@ -98,8 +86,8 @@ public class PdfService {
             log.info("Generowanie raportu PDF (iText+JFreeChart) dla uzytkownika: {}, opcje: {}",
                     userId, options);
 
-//            Map<String, Object> stats = statsService.getUserStats(userId);
-            Map<String, Object> stats = stats();
+            Map<String, Object> stats = getStatsForDateRange(userId, options.dateRange());
+            stats.put("userId", userId);
 
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             PdfWriter writer = new PdfWriter(baos);
@@ -117,7 +105,7 @@ public class PdfService {
 
             addHeader(doc, fontBold);
 
-            addMetadata(doc, userId, fontRegular);
+            addMetadata(doc, userId, options.dateRange(), fontRegular);
 
             if (options.includeOverview()) {
                 addOverviewSection(doc, stats, fontBold);
@@ -127,11 +115,18 @@ public class PdfService {
                 addFlashcardsSection(doc, stats, fontBold);
             }
 
+            if (options.includeDailyPoints()) {
+                addDailyPointsChartSection(doc, userId, stats);
+            }
+
             if (options.includeMonthlyPoints()) {
                 addMonthlyPointsChartSection(doc, stats);
             }
 
-            addDetailedTableSection(doc, stats, fontBold);
+            if (options.includeActivity()) {
+//                addActivityHistorySection(doc, stats, fontBold);
+                addDetailedTableSection(doc, stats, fontBold);
+            }
 
             addFooter(doc);
 
@@ -164,22 +159,23 @@ public class PdfService {
         doc.add(title);
         doc.add(subtitle);
 
-        LineSeparator line = new LineSeparator(new com.itextpdf.kernel.pdf.canvas.draw.SolidLine());
+        LineSeparator line = new LineSeparator(new SolidLine());
         line.setStrokeColor(GREEN_MAIN);
         line.setMarginTop(8);
         line.setMarginBottom(12);
         doc.add(line);
     }
 
-    private void addMetadata(Document doc, String userId, PdfFont fontRegular) {
+    private void addMetadata(Document doc, String userId, String dateRange, PdfFont fontRegular) {
         String date = LocalDate.now().format(DateTimeFormatter.ofPattern("dd.MM.yyyy"));
+        String periodLabel = getDateRangeLabel(dateRange);
 
         Table meta = new Table(UnitValue.createPercentArray(new float[]{2, 3, 2}))
                 .setWidth(UnitValue.createPercentValue(100));
 
         meta.addCell(metaCell("Data wygenerowania:", date));
         meta.addCell(metaCell("Uzytkownik:", userId));
-        meta.addCell(metaCell("Okres:", "Wszystkie dane"));
+        meta.addCell(metaCell("Okres:", periodLabel));
 
         doc.add(meta);
         doc.add(new Paragraph("\n"));
@@ -267,7 +263,7 @@ public class PdfService {
 
         Cell highlight = new Cell()
                 .add(summary)
-                .setBackgroundColor(new DeviceRgb(236, 252, 243)) // #ecfdf3
+                .setBackgroundColor(new DeviceRgb(236, 252, 243))
                 .setBorderLeft(new com.itextpdf.layout.borders.SolidBorder(GREEN_MAIN, 3))
                 .setBorderTop(Border.NO_BORDER)
                 .setBorderRight(Border.NO_BORDER)
@@ -339,7 +335,7 @@ public class PdfService {
     }
 
     private void addMonthlyPointsChartSection(Document doc, Map<String, Object> stats) throws Exception {
-        @SuppressWarnings("unchecked")
+
         Map<String, Long> pointsPerMonth = (Map<String, Long>) stats.getOrDefault("pointsPerMonth", new HashMap<>());
 
         if (pointsPerMonth.isEmpty()) {
@@ -393,10 +389,10 @@ public class PdfService {
     private void addDetailedTableSection(Document doc, Map<String, Object> stats, PdfFont fontBold) {
         doc.add(sectionTitle("Szczegolowe zestawienie", fontBold));
 
-        Table table = new Table(UnitValue.createPercentArray(new float[]{3, 1, 6}))
+//        Table table = new Table(UnitValue.createPercentArray(new float[]{3, 1, 6}))
+        Table table = new Table(UnitValue.createPercentArray(new float[]{1, 1, 1}))
                 .setWidth(UnitValue.createPercentValue(100));
 
-        // naglowki
         table.addHeaderCell(headerCell("Kategoria"));
         table.addHeaderCell(headerCell("Wartosc"));
         table.addHeaderCell(headerCell("Opis"));
@@ -440,8 +436,8 @@ public class PdfService {
         Paragraph p = new Paragraph(text)
                 .setFontSize(12)
                 .setFontColor(GREEN_DEEP)
-                .setMarginTop(8)
-                .setMarginBottom(4);
+                .setMarginTop(4)
+                .setMarginBottom(2);
         if (fontBold != null) {
             p.setFont(fontBold);
         } else {
@@ -512,5 +508,103 @@ public class PdfService {
         if (v == null) return 0.0;
         if (v instanceof Number n) return n.doubleValue();
         return Double.parseDouble(v.toString());
+    }
+
+    /**
+     * Pobiera statystyki dla określonego zakresu czasowego
+     */
+    private Map<String, Object> getStatsForDateRange(String userId, String dateRange) {
+        Integer lastDays = getDaysFromDateRange(dateRange);
+        
+        if (lastDays == null) {
+            // "all-time" - pobierz wszystkie statystyki
+            return statsService.getUserStats(userId);
+        } else {
+            // Zakres czasowy - pobierz statystyki z ostatnich N dni
+            return statsService.getUserStats(userId, lastDays);
+        }
+    }
+
+    /**
+     * Konwertuje string dateRange na liczbę dni
+     */
+    private Integer getDaysFromDateRange(String dateRange) {
+        return switch (dateRange) {
+            case "last-7-days" -> 7;
+            case "last-30-days" -> 30;
+            case "last-3-months" -> 90;
+            case "last-year" -> 365;
+            case "all-time" -> null;
+            default -> null;
+        };
+    }
+
+    /**
+     * Zwraca czytelną etykietę dla zakresu czasowego
+     */
+    private String getDateRangeLabel(String dateRange) {
+        return switch (dateRange) {
+            case "last-7-days" -> "Ostatnie 7 dni";
+            case "last-30-days" -> "Ostatnie 30 dni";
+            case "last-3-months" -> "Ostatnie 3 miesiace";
+            case "last-year" -> "Ostatni rok";
+            case "all-time" -> "Caly okres";
+            default -> "Caly okres";
+        };
+    }
+
+    /**
+     * Dodaje sekcję z wykresem punktów dziennych
+     */
+    private void addDailyPointsChartSection(Document doc, String userId, Map<String, Object> stats) throws Exception {
+        Map<String, Long> pointsPerDay = statsService.getPointsPerDay(userId);
+
+        if (pointsPerDay.isEmpty()) {
+            return;
+        }
+
+        Paragraph title = sectionTitle("Punkty w poszczegolnych dniach", null);
+        doc.add(title);
+
+        DefaultCategoryDataset dataset = new DefaultCategoryDataset();
+
+        List<Map.Entry<String, Long>> sorted = pointsPerDay.entrySet().stream()
+                .sorted(Map.Entry.comparingByKey())
+                .limit(30)
+                .toList();
+
+        for (Map.Entry<String, Long> entry : sorted) {
+            dataset.addValue(entry.getValue(), "Punkty", entry.getKey());
+        }
+
+        JFreeChart chart = ChartFactory.createBarChart(
+                null,
+                "Dzien",
+                "Punkty",
+                dataset,
+                PlotOrientation.VERTICAL,
+                false,
+                false,
+                false
+        );
+
+        chart.setBackgroundPaint(Color.WHITE);
+        chart.getCategoryPlot().setBackgroundPaint(new Color(249, 250, 251));
+        chart.getCategoryPlot().getRenderer().setSeriesPaint(0, new Color(34, 197, 94));
+        chart.getCategoryPlot().setOutlineVisible(false);
+
+        int width = 500;
+        int height = 200;
+        BufferedImage bufferedImage = chart.createBufferedImage(width, height);
+
+        ByteArrayOutputStream imageBaos = new ByteArrayOutputStream();
+        javax.imageio.ImageIO.write(bufferedImage, "png", imageBaos);
+        ImageData imageData = ImageDataFactory.create(imageBaos.toByteArray());
+        Image image = new Image(imageData);
+        image.setAutoScale(true);
+        image.setHorizontalAlignment(HorizontalAlignment.CENTER);
+
+        doc.add(image);
+        doc.add(new Paragraph("\n"));
     }
 }

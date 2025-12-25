@@ -1,5 +1,6 @@
 package com.learnwords.statisticsservice.controller;
 
+import com.learnwords.statisticsservice.dto.PdfExportOptionsDto;
 import com.learnwords.statisticsservice.service.PdfService;
 import com.learnwords.statisticsservice.service.StatsService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -40,10 +41,10 @@ public class StatsController {
         return ResponseEntity.ok(stats);
     }
 
-    @GetMapping("/export/pdf.pdf")
+    @PostMapping("/export/pdf")
     @Operation(
             summary = "Eksportuj statystyki do PDF",
-            description = "Generuje i pobiera raport PDF z kompletnymi statystykami użytkownika. Możliwość wyboru sekcji do uwzględnienia.",
+            description = "Generuje i pobiera raport PDF ze statystykami użytkownika. Możliwość wyboru sekcji i zakresu czasowego.",
             responses = {
                     @ApiResponse(
                             responseCode = "200",
@@ -68,8 +69,12 @@ public class StatsController {
                     required = true,
                     example = "user-123"
             )
-            @RequestHeader(USER_ID_HEADER) String userId) {
-        byte[] pdf = pdfService.generateStatsPdf(userId);
+            @RequestHeader(USER_ID_HEADER) String userId,
+            @RequestBody(required = false) PdfExportOptionsDto options) {
+        
+        PdfExportOptionsDto exportOptions = options != null ? options : PdfExportOptionsDto.createDefault();
+        
+        byte[] pdf = pdfService.generateStatsPdf(userId, exportOptions);
 
         return ResponseEntity.ok()
                 .header("Content-Disposition", "attachment; filename=\"learnwords-statistics-" + userId + ".pdf\"")

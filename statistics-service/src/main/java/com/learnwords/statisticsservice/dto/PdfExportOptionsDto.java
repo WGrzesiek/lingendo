@@ -9,7 +9,6 @@ package com.learnwords.statisticsservice.dto;
  * @param includeMonthlyPoints    czy dołączyć wykres punktów miesięcznych
  * @param includeSessionStats     czy dołączyć statystyki sesji
  * @param includeActivity         czy dołączyć historię aktywności
- * @param includeDeckStats        czy dołączyć statystyki per kurs
  * @param dateRange               okres danych do eksportu
  *
  * @author Grzegorz Wawrzeń
@@ -22,7 +21,6 @@ public record PdfExportOptionsDto(
         boolean includeMonthlyPoints,
         boolean includeSessionStats,
         boolean includeActivity,
-        boolean includeDeckStats,
         String dateRange
 ) {
     /**
@@ -31,11 +29,10 @@ public record PdfExportOptionsDto(
     public static PdfExportOptionsDto createDefault() {
         return new PdfExportOptionsDto(
                 true,  // includeOverview
-                true,  // includeDailyPoints
+                false,  // includeDailyPoints
                 true,  // includeMonthlyPoints
                 true,  // includeSessionStats
                 true,  // includeActivity
-                true,  // includeDeckStats
                 "all-time"  // dateRange
         );
     }
