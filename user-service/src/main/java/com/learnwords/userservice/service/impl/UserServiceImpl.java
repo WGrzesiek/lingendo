@@ -1,15 +1,15 @@
 package com.learnwords.userservice.service.impl;
 
+import com.learnwords.common.KafkaTopic;
 import com.learnwords.common.events.UserLoginEvent;
 import com.learnwords.userservice.dtos.RegisterRequest;
 import com.learnwords.userservice.entity.User;
-import com.learnwords.userservice.events.UserLoginEventProducer;
+import com.learnwords.userservice.events.GenericEventProducer;
 import com.learnwords.userservice.exception.exceptions.EmailAlreadyExistsException;
 import com.learnwords.userservice.exception.exceptions.UsernameAlreadyExistsException;
 import com.learnwords.userservice.exception.exceptions.WrongPasswordException;
 import com.learnwords.userservice.repository.UserRepository;
 import com.learnwords.userservice.security.AppUserDetails;
-//import com.learnwords.userservice.service.AppUserDetailService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import com.learnwords.userservice.service.PasswordService;
@@ -18,8 +18,6 @@ import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 
 import java.time.Instant;
-import java.time.LocalDate;
-import java.time.ZoneId;
 import java.util.UUID;
 
 
@@ -29,13 +27,13 @@ public class UserServiceImpl implements UserService {
 
     private final PasswordService passwordService;
     private final UserRepository userRepository;
-    private final UserLoginEventProducer userLoginEventProducer;
+    private final GenericEventProducer genericEventProducer;
 
 
-    public UserServiceImpl(PasswordService passwordService, UserRepository userRepository, UserLoginEventProducer userLoginEventProducer) {
+    public UserServiceImpl(PasswordService passwordService, UserRepository userRepository, GenericEventProducer genericEventProducer) {
         this.passwordService = passwordService;
         this.userRepository = userRepository;
-        this.userLoginEventProducer = userLoginEventProducer;
+        this.genericEventProducer = genericEventProducer;
 
     }
 
@@ -81,7 +79,7 @@ public class UserServiceImpl implements UserService {
         user.registerLogin(now);
         userRepository.save(user);
         if(user.getSteak() != currentStreak){
-            userLoginEventProducer.send(UserLoginEvent.builder()
+            genericEventProducer.send(KafkaTopic.USER_LOGINS_TOPIC, UserLoginEvent.builder()
                             .eventTime(Instant.now())
                             .userId(userDetails.getId())
                             .username(userDetails.getUsername())

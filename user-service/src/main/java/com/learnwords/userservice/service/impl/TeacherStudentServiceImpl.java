@@ -1,5 +1,6 @@
 package com.learnwords.userservice.service.impl;
 
+import com.learnwords.common.KafkaTopic;
 import com.learnwords.common.events.TeacherStudentJoinedEvent;
 import com.learnwords.common.events.TeacherStudentRemovedEvent;
 import com.learnwords.userservice.dtos.teacher.*;
@@ -10,7 +11,7 @@ import com.learnwords.userservice.enums.AccountType;
 import com.learnwords.userservice.enums.InvitationStatus;
 import com.learnwords.userservice.enums.TeacherStudentStatus;
 import com.learnwords.userservice.enums.UserType;
-import com.learnwords.userservice.events.TeacherStudentEventProducer;
+import com.learnwords.userservice.events.GenericEventProducer;
 import com.learnwords.userservice.exception.exceptions.*;
 import com.learnwords.userservice.repository.TeacherInvitationRepository;
 import com.learnwords.userservice.repository.TeacherStudentRepository;
@@ -41,7 +42,8 @@ public class TeacherStudentServiceImpl implements TeacherStudentService {
     private final TeacherStudentRepository teacherStudentRepository;
     private final TeacherInvitationRepository invitationRepository;
     private final UserRepository userRepository;
-    private final TeacherStudentEventProducer eventProducer;
+//    private final TeacherStudentEventProducer eventProducer;
+    private final GenericEventProducer genericEventProducer;
 
     @Value("${app.invitation.base-url:https://learnwords.app/join/}")
     private String invitationBaseUrl;
@@ -50,11 +52,13 @@ public class TeacherStudentServiceImpl implements TeacherStudentService {
             TeacherStudentRepository teacherStudentRepository,
             TeacherInvitationRepository invitationRepository,
             UserRepository userRepository,
-            TeacherStudentEventProducer eventProducer) {
+//            TeacherStudentEventProducer eventProducer,
+            GenericEventProducer genericEventProducer){
         this.teacherStudentRepository = teacherStudentRepository;
         this.invitationRepository = invitationRepository;
         this.userRepository = userRepository;
-        this.eventProducer = eventProducer;
+//        this.eventProducer = eventProducer;
+        this.genericEventProducer = genericEventProducer;
     }
 
     // === Operacje nauczyciela - zaproszenia ===
@@ -138,7 +142,7 @@ public class TeacherStudentServiceImpl implements TeacherStudentService {
         TeacherStudent relation = findRelation(teacherId, studentId);
         teacherStudentRepository.delete(relation);
 
-        eventProducer.sendStudentRemoved(TeacherStudentRemovedEvent.builder()
+        genericEventProducer.send(KafkaTopic.TEACHER_STUDENT_REMOVED,TeacherStudentRemovedEvent.builder()
                 .eventTime(Instant.now())
                 .teacherId(teacherId)
                 .studentId(studentId)
@@ -158,7 +162,7 @@ public class TeacherStudentServiceImpl implements TeacherStudentService {
         relation.setStatus(TeacherStudentStatus.BLOCKED);
         teacherStudentRepository.save(relation);
 
-        eventProducer.sendStudentRemoved(TeacherStudentRemovedEvent.builder()
+        genericEventProducer.send(KafkaTopic.TEACHER_STUDENT_REMOVED, TeacherStudentRemovedEvent.builder()
                 .eventTime(Instant.now())
                 .teacherId(teacherId)
                 .studentId(studentId)
@@ -249,7 +253,7 @@ public class TeacherStudentServiceImpl implements TeacherStudentService {
         invitation.incrementUses();
         invitationRepository.save(invitation);
 
-        eventProducer.sendStudentJoined(TeacherStudentJoinedEvent.builder()
+        genericEventProducer.send(KafkaTopic.TEACHER_STUDENT_JOINED, TeacherStudentJoinedEvent.builder()
                 .eventTime(Instant.now())
                 .teacherId(teacher.getId())
                 .teacherUsername(teacher.getUsername())
@@ -285,7 +289,7 @@ public class TeacherStudentServiceImpl implements TeacherStudentService {
 
         teacherStudentRepository.delete(relation);
 
-        eventProducer.sendStudentRemoved(TeacherStudentRemovedEvent.builder()
+        genericEventProducer.send(KafkaTopic.TEACHER_STUDENT_REMOVED, TeacherStudentRemovedEvent.builder()
                 .eventTime(Instant.now())
                 .teacherId(teacherId)
                 .studentId(studentId)
