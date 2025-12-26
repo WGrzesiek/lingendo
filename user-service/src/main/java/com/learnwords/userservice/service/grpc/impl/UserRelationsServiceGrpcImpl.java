@@ -3,6 +3,7 @@ package com.learnwords.userservice.service.grpc.impl;
 import com.learnwords.userservice.entity.User;
 import com.learnwords.userservice.enums.AccessType;
 import com.learnwords.userservice.repository.FriendshipRepository;
+import com.learnwords.userservice.repository.StudentGroupRepository;
 import com.learnwords.userservice.repository.TeacherStudentRepository;
 import com.learnwords.userservice.repository.UserRepository;
 import com.learnwords.users.v1.*;
@@ -29,6 +30,7 @@ public class UserRelationsServiceGrpcImpl extends UserRelationsServiceGrpc.UserR
     private final TeacherStudentRepository teacherStudentRepository;
     private final FriendshipRepository friendshipRepository;
     private final UserRepository userRepository;
+    private final StudentGroupRepository groupRepository;
 
     // === Teacher-Student ===
 
@@ -328,10 +330,16 @@ public class UserRelationsServiceGrpcImpl extends UserRelationsServiceGrpc.UserR
             
             accessibleUserFIds.addAll(friendshipRepository.findFriendIdsByUserId(userId));
 
+            // Pobierz grupy użytkownika (jako nauczyciel lub uczeń)
+            Set<String> groupIds = new HashSet<>();
+            groupIds.addAll(groupRepository.findGroupIdsByTeacherId(userId));
+            groupIds.addAll(groupRepository.findGroupIdsByStudentId(userId));
+
             var response = GetAccessibleUsersResponse.newBuilder()
                     .addAllTeacherIds(accessibleUserTIds)
                     .addAllStudentIds(accessibleUserSIds)
                     .addAllFriendIds(accessibleUserFIds)
+                    .addAllGroupIds(groupIds)
                     .build();
             
             responseObserver.onNext(response);

@@ -88,6 +88,27 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(errorResponse);
     }
 
+    @ExceptionHandler(GroupNotFoundException.class)
+    public ResponseEntity<ApiErrorResponse> handleGroupNotFoundException(GroupNotFoundException ex) {
+        log.error("Group not found: {}", ex.getMessage());
+        ApiErrorResponse errorResponse = new ApiErrorResponse(HttpStatus.NOT_FOUND.value(), ex.getMessage());
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
+    }
+
+    @ExceptionHandler(GroupMemberNotFoundException.class)
+    public ResponseEntity<ApiErrorResponse> handleGroupMemberNotFoundException(GroupMemberNotFoundException ex) {
+        log.error("Group member not found: {}", ex.getMessage());
+        ApiErrorResponse errorResponse = new ApiErrorResponse(HttpStatus.NOT_FOUND.value(), ex.getMessage());
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
+    }
+
+    @ExceptionHandler(GroupMemberAlreadyExistsException.class)
+    public ResponseEntity<ApiErrorResponse> handleGroupMemberAlreadyExistsException(GroupMemberAlreadyExistsException ex) {
+        log.error("Group member already exists: {}", ex.getMessage());
+        ApiErrorResponse errorResponse = new ApiErrorResponse(HttpStatus.CONFLICT.value(), ex.getMessage());
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(errorResponse);
+    }
+
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public Map<String,String> handleValidationExceptions(MethodArgumentNotValidException ex){
