@@ -22,7 +22,8 @@ import com.learnwords.userservice.service.StudentGroupService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -78,8 +79,9 @@ public class StudentGroupServiceImpl implements StudentGroupService {
 
     @Override
     @Transactional(readOnly = true)
-    public Page<GroupResponse> getTeacherGroups(String teacherId, boolean includeArchived, Pageable pageable) {
+    public Page<GroupResponse> getTeacherGroups(String teacherId, boolean includeArchived, int page, int size) {
         log.debug("Pobieranie grup nauczyciela: {}, includeArchived: {}", teacherId, includeArchived);
+        PageRequest pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
 
         if (includeArchived) {
             return groupRepository.findByTeacherId(teacherId, pageable)
@@ -304,10 +306,11 @@ public class StudentGroupServiceImpl implements StudentGroupService {
 
     @Override
     @Transactional(readOnly = true)
-    public Page<GroupMemberResponse> getGroupMembers(String teacherId, String groupId, Pageable pageable) {
+    public Page<GroupMemberResponse> getGroupMembers(String teacherId, String groupId, int page, int size) {
         log.debug("Pobieranie członków grupy: {} dla nauczyciela: {}", groupId, teacherId);
 
         findGroupByIdAndTeacher(groupId, teacherId);
+        PageRequest pageable = PageRequest.of(page, size, Sort.by("joinedAt").descending());
 
         return memberRepository.findByGroupIdAndStatus(groupId, GroupMemberStatus.ACTIVE, pageable)
                 .map(this::mapToGroupMemberResponse);
@@ -331,8 +334,9 @@ public class StudentGroupServiceImpl implements StudentGroupService {
 
     @Override
     @Transactional(readOnly = true)
-    public Page<GroupResponse> getStudentGroups(String studentId, Pageable pageable) {
+    public Page<GroupResponse> getStudentGroups(String studentId, int page, int size) {
         log.debug("Pobieranie grup ucznia: {}", studentId);
+        PageRequest pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
         return groupRepository.findGroupsByStudentId(studentId, pageable)
                 .map(this::mapToGroupResponse);
     }

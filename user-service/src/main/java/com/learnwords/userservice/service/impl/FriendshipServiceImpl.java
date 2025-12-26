@@ -14,7 +14,8 @@ import com.learnwords.userservice.repository.UserRepository;
 import com.learnwords.userservice.service.FriendshipService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -148,16 +149,18 @@ public class FriendshipServiceImpl implements FriendshipService {
 
     @Override
     @Transactional(readOnly = true)
-    public Page<FriendRequestResponse> getPendingRequests(String userId, Pageable pageable) {
+    public Page<FriendRequestResponse> getPendingRequests(String userId, int page, int size) {
         log.debug("Pobieranie oczekujących zaproszeń dla: {}", userId);
+        PageRequest pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
         return friendshipRepository.findPendingRequestsForUser(userId, pageable)
                 .map(this::mapToFriendRequestResponse);
     }
 
     @Override
     @Transactional(readOnly = true)
-    public Page<FriendRequestResponse> getSentRequests(String userId, Pageable pageable) {
+    public Page<FriendRequestResponse> getSentRequests(String userId, int page, int size) {
         log.debug("Pobieranie wysłanych zaproszeń przez: {}", userId);
+        PageRequest pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
         return friendshipRepository.findPendingSentByUser(userId, pageable)
                 .map(this::mapToFriendRequestResponse);
     }
@@ -166,8 +169,9 @@ public class FriendshipServiceImpl implements FriendshipService {
 
     @Override
     @Transactional(readOnly = true)
-    public Page<FriendResponse> getFriends(String userId, Pageable pageable) {
+    public Page<FriendResponse> getFriends(String userId, int page, int size) {
         log.debug("Pobieranie znajomych użytkownika: {}", userId);
+        PageRequest pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
         return friendshipRepository
                 .findFriendsByUserIdAndStatus(userId, FriendshipStatus.ACCEPTED, pageable)
                 .map(f -> mapToFriendResponse(f, userId));
@@ -274,8 +278,9 @@ public class FriendshipServiceImpl implements FriendshipService {
 
     @Override
     @Transactional(readOnly = true)
-    public Page<FriendResponse> getBlockedUsers(String userId, Pageable pageable) {
+    public Page<FriendResponse> getBlockedUsers(String userId, int page, int size) {
         log.debug("Pobieranie zablokowanych użytkowników przez: {}", userId);
+        PageRequest pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
         return friendshipRepository
                 .findFriendsByUserIdAndStatus(userId, FriendshipStatus.BLOCKED, pageable)
                 .map(f -> mapToFriendResponse(f, userId));
@@ -285,9 +290,9 @@ public class FriendshipServiceImpl implements FriendshipService {
 
     @Override
     @Transactional(readOnly = true)
-    public Page<UserSearchResponse> searchUsers(String userId, String query, Pageable pageable) {
+    public Page<UserSearchResponse> searchUsers(String userId, String query, int page, int size) {
         log.debug("Wyszukiwanie użytkowników: '{}' przez: {}", query, userId);
-
+        PageRequest pageable = PageRequest.of(page, size);
         return userRepository.searchUsers(userId, query, pageable)
                 .map(user -> mapToUserSearchResponse(user, userId));
     }
@@ -306,8 +311,7 @@ public class FriendshipServiceImpl implements FriendshipService {
         long totalFriends = friendshipRepository.countByUserIdAndStatus(userId, FriendshipStatus.ACCEPTED);
         long pendingReceived = friendshipRepository.countPendingRequestsForUser(userId);
         long blockedUsers = friendshipRepository.countByUserIdAndStatus(userId, FriendshipStatus.BLOCKED);
-
-        long pendingSent = friendshipRepository.findPendingSentByUser(userId, Pageable.unpaged()).getTotalElements();
+        long pendingSent = friendshipRepository.countPendingSentByUser(userId);
 
         return new FriendshipStatsResponse(totalFriends, pendingReceived, pendingSent, blockedUsers);
     }

@@ -20,7 +20,8 @@ import com.learnwords.userservice.service.TeacherStudentService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -91,8 +92,9 @@ public class TeacherStudentServiceImpl implements TeacherStudentService {
 
     @Override
     @Transactional(readOnly = true)
-    public Page<InvitationResponse> getTeacherInvitations(String teacherId, Pageable pageable) {
+    public Page<InvitationResponse> getTeacherInvitations(String teacherId, int page, int size) {
         log.debug("Pobieranie zaproszeń nauczyciela: {}", teacherId);
+        PageRequest pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
         return invitationRepository.findByTeacherId(teacherId, pageable)
                 .map(this::mapToInvitationResponse);
     }
@@ -127,8 +129,9 @@ public class TeacherStudentServiceImpl implements TeacherStudentService {
 
     @Override
     @Transactional(readOnly = true)
-    public Page<StudentResponse> getStudents(String teacherId, Pageable pageable) {
+    public Page<StudentResponse> getStudents(String teacherId, int page, int size) {
         log.debug("Pobieranie uczniów nauczyciela: {}", teacherId);
+        PageRequest pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
         return teacherStudentRepository
                 .findStudentsByTeacherId(teacherId, TeacherStudentStatus.ACTIVE, pageable)
                 .map(this::mapToStudentResponse);
@@ -270,8 +273,9 @@ public class TeacherStudentServiceImpl implements TeacherStudentService {
 
     @Override
     @Transactional(readOnly = true)
-    public Page<TeacherResponse> getMyTeachers(String studentId, Pageable pageable) {
+    public Page<TeacherResponse> getMyTeachers(String studentId, int page, int size) {
         log.debug("Pobieranie nauczycieli ucznia: {}", studentId);
+        PageRequest pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
         return teacherStudentRepository
                 .findTeachersByStudentId(studentId, TeacherStudentStatus.ACTIVE, pageable)
                 .map(this::mapToTeacherResponse);

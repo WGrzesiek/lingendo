@@ -11,8 +11,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -73,9 +71,10 @@ public class FriendshipController {
     public ResponseEntity<Page<FriendRequestResponse>> getPendingRequests(
             @Parameter(description = "ID użytkownika", required = true)
             @RequestHeader(USER_ID_HEADER) String userId,
-            @PageableDefault(size = 20) Pageable pageable) {
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size) {
         log.debug("Pobieranie oczekujących zaproszeń dla: {}", userId);
-        Page<FriendRequestResponse> requests = friendshipService.getPendingRequests(userId, pageable);
+        Page<FriendRequestResponse> requests = friendshipService.getPendingRequests(userId, page, size);
         return ResponseEntity.ok(requests);
     }
 
@@ -90,9 +89,10 @@ public class FriendshipController {
     public ResponseEntity<Page<FriendRequestResponse>> getSentRequests(
             @Parameter(description = "ID użytkownika", required = true)
             @RequestHeader(USER_ID_HEADER) String userId,
-            @PageableDefault(size = 20) Pageable pageable) {
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size) {
         log.debug("Pobieranie wysłanych zaproszeń przez: {}", userId);
-        Page<FriendRequestResponse> requests = friendshipService.getSentRequests(userId, pageable);
+        Page<FriendRequestResponse> requests = friendshipService.getSentRequests(userId, page, size);
         return ResponseEntity.ok(requests);
     }
 
@@ -173,9 +173,10 @@ public class FriendshipController {
     public ResponseEntity<Page<FriendResponse>> getFriends(
             @Parameter(description = "ID użytkownika", required = true)
             @RequestHeader(USER_ID_HEADER) String userId,
-            @PageableDefault(size = 20) Pageable pageable) {
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size) {
         log.debug("Pobieranie znajomych użytkownika: {}", userId);
-        Page<FriendResponse> friends = friendshipService.getFriends(userId, pageable);
+        Page<FriendResponse> friends = friendshipService.getFriends(userId, page, size);
         return ResponseEntity.ok(friends);
     }
 
@@ -267,9 +268,10 @@ public class FriendshipController {
     public ResponseEntity<Page<FriendResponse>> getBlockedUsers(
             @Parameter(description = "ID użytkownika", required = true)
             @RequestHeader(USER_ID_HEADER) String userId,
-            @PageableDefault(size = 20) Pageable pageable) {
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size) {
         log.debug("Pobieranie zablokowanych użytkowników przez: {}", userId);
-        Page<FriendResponse> blocked = friendshipService.getBlockedUsers(userId, pageable);
+        Page<FriendResponse> blocked = friendshipService.getBlockedUsers(userId, page, size);
         return ResponseEntity.ok(blocked);
     }
 
@@ -288,9 +290,10 @@ public class FriendshipController {
             @RequestHeader(USER_ID_HEADER) String userId,
             @Parameter(description = "Fraza wyszukiwania", required = true)
             @RequestParam String query,
-            @PageableDefault(size = 20) Pageable pageable) {
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size) {
         log.debug("Wyszukiwanie użytkowników: '{}' przez: {}", query, userId);
-        Page<UserSearchResponse> results = friendshipService.searchUsers(userId, query, pageable);
+        Page<UserSearchResponse> results = friendshipService.searchUsers(userId, query, page, size);
         return ResponseEntity.ok(results);
     }
 

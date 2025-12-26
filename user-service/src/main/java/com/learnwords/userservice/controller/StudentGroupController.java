@@ -12,8 +12,6 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -71,9 +69,12 @@ public class StudentGroupController {
             @RequestHeader(USER_ID_HEADER) String teacherId,
             @Parameter(description = "Czy uwzględnić zarchiwizowane grupy")
             @RequestParam(defaultValue = "false") boolean includeArchived,
-            @PageableDefault(size = 20) Pageable pageable) {
+            @Parameter(description = "Numer strony (0-based)", example = "0")
+            @RequestParam(defaultValue = "0") int page,
+            @Parameter(description = "Rozmiar strony", example = "20")
+            @RequestParam(defaultValue = "20") int size) {
         log.debug("Pobieranie grup nauczyciela: {}", teacherId);
-        Page<GroupResponse> groups = groupService.getTeacherGroups(teacherId, includeArchived, pageable);
+        Page<GroupResponse> groups = groupService.getTeacherGroups(teacherId, includeArchived, page, size);
         return ResponseEntity.ok(groups);
     }
 
@@ -245,9 +246,12 @@ public class StudentGroupController {
             @RequestHeader(USER_ID_HEADER) String teacherId,
             @Parameter(description = "ID grupy", required = true)
             @PathVariable String groupId,
-            @PageableDefault(size = 20) Pageable pageable) {
+            @Parameter(description = "Numer strony (0-based)", example = "0")
+            @RequestParam(defaultValue = "0") int page,
+            @Parameter(description = "Rozmiar strony", example = "20")
+            @RequestParam(defaultValue = "20") int size) {
         log.debug("Pobieranie członków grupy: {} dla nauczyciela: {}", groupId, teacherId);
-        Page<GroupMemberResponse> members = groupService.getGroupMembers(teacherId, groupId, pageable);
+        Page<GroupMemberResponse> members = groupService.getGroupMembers(teacherId, groupId, page, size);
         return ResponseEntity.ok(members);
     }
 
@@ -262,9 +266,12 @@ public class StudentGroupController {
     public ResponseEntity<Page<GroupResponse>> getStudentGroups(
             @Parameter(description = "ID ucznia", required = true)
             @RequestHeader(USER_ID_HEADER) String studentId,
-            @PageableDefault(size = 20) Pageable pageable) {
+            @Parameter(description = "Numer strony (0-based)", example = "0")
+            @RequestParam(defaultValue = "0") int page,
+            @Parameter(description = "Rozmiar strony", example = "20")
+            @RequestParam(defaultValue = "20") int size) {
         log.debug("Pobieranie grup ucznia: {}", studentId);
-        Page<GroupResponse> groups = groupService.getStudentGroups(studentId, pageable);
+        Page<GroupResponse> groups = groupService.getStudentGroups(studentId, page, size);
         return ResponseEntity.ok(groups);
     }
 }

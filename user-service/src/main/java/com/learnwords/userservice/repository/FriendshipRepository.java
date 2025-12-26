@@ -70,6 +70,10 @@ public interface FriendshipRepository extends JpaRepository<UserFriendship, Stri
             "(f.user2.id = :userId AND f.requestedBy.id != :userId)) AND f.status = 'PENDING'")
     long countPendingRequestsForUser(@Param("userId") String userId);
 
+    @Query("SELECT COUNT(f) FROM UserFriendship f WHERE " +
+            "f.requestedBy.id = :userId AND f.status = 'PENDING'")
+    long countPendingSentByUser(@Param("userId") String userId);
+
     @Query("SELECT CASE WHEN f.user1.id = :userId THEN f.user2.id ELSE f.user1.id END " +
             "FROM UserFriendship f WHERE " +
             "(f.user1.id = :userId OR f.user2.id = :userId) AND f.status = 'ACCEPTED'")

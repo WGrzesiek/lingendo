@@ -11,8 +11,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -71,9 +69,12 @@ public class TeacherStudentController {
     public ResponseEntity<Page<InvitationResponse>> getTeacherInvitations(
             @Parameter(description = "ID nauczyciela", required = true)
             @RequestHeader(USER_ID_HEADER) String teacherId,
-            @PageableDefault(size = 20) Pageable pageable) {
+            @Parameter(description = "Numer strony (0-based)", example = "0")
+            @RequestParam(defaultValue = "0") int page,
+            @Parameter(description = "Rozmiar strony", example = "20")
+            @RequestParam(defaultValue = "20") int size) {
         log.debug("Pobieranie zaproszeń nauczyciela: {}", teacherId);
-        Page<InvitationResponse> invitations = teacherStudentService.getTeacherInvitations(teacherId, pageable);
+        Page<InvitationResponse> invitations = teacherStudentService.getTeacherInvitations(teacherId, page, size);
         return ResponseEntity.ok(invitations);
     }
 
@@ -130,9 +131,12 @@ public class TeacherStudentController {
     public ResponseEntity<Page<StudentResponse>> getStudents(
             @Parameter(description = "ID nauczyciela", required = true)
             @RequestHeader(USER_ID_HEADER) String teacherId,
-            @PageableDefault(size = 20) Pageable pageable) {
+            @Parameter(description = "Numer strony (0-based)", example = "0")
+            @RequestParam(defaultValue = "0") int page,
+            @Parameter(description = "Rozmiar strony", example = "20")
+            @RequestParam(defaultValue = "20") int size) {
         log.debug("Pobieranie uczniów nauczyciela: {}", teacherId);
-        Page<StudentResponse> students = teacherStudentService.getStudents(teacherId, pageable);
+        Page<StudentResponse> students = teacherStudentService.getStudents(teacherId, page, size);
         return ResponseEntity.ok(students);
     }
 
@@ -245,9 +249,12 @@ public class TeacherStudentController {
     public ResponseEntity<Page<TeacherResponse>> getMyTeachers(
             @Parameter(description = "ID ucznia", required = true)
             @RequestHeader(USER_ID_HEADER) String studentId,
-            @PageableDefault(size = 20) Pageable pageable) {
+            @Parameter(description = "Numer strony (0-based)", example = "0")
+            @RequestParam(defaultValue = "0") int page,
+            @Parameter(description = "Rozmiar strony", example = "20")
+            @RequestParam(defaultValue = "20") int size) {
         log.debug("Pobieranie nauczycieli ucznia: {}", studentId);
-        Page<TeacherResponse> teachers = teacherStudentService.getMyTeachers(studentId, pageable);
+        Page<TeacherResponse> teachers = teacherStudentService.getMyTeachers(studentId, page, size);
         return ResponseEntity.ok(teachers);
     }
 
