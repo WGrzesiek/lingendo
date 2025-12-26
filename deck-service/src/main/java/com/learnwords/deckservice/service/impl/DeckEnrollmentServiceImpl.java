@@ -7,14 +7,17 @@ import com.learnwords.deckservice.dto.deckEnrollment.DeckEnrollmentDto;
 import com.learnwords.deckservice.dto.facade.dashboard.StudentMyCourseListItemDto;
 import com.learnwords.deckservice.entity.Deck;
 import com.learnwords.deckservice.entity.DeckEnrollment;
+import com.learnwords.deckservice.entity.DeckShare;
 import com.learnwords.deckservice.enums.*;
 import com.learnwords.deckservice.repository.DeckEnrollmentRepository;
 import com.learnwords.deckservice.repository.DeckRepository;
 import com.learnwords.deckservice.service.DeckEnrollmentService;
+import com.learnwords.deckservice.service.DeckShareService;
 import com.learnwords.deckservice.service.event.GenericEventProducer;
 import com.learnwords.deckservice.service.utils.DeckUtils;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -22,31 +25,42 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
+import java.util.Optional;
 
 @Slf4j
 @Service
 public class DeckEnrollmentServiceImpl implements DeckEnrollmentService {
     private final DeckRepository deckRepository;
     private final DeckEnrollmentRepository deckEnrollmentRepository;
+    private final DeckShareService deckShareService;
     private final GenericEventProducer eventProducer;
 
 
-    public DeckEnrollmentServiceImpl(DeckRepository deckRepository, DeckEnrollmentRepository deckEnrollmentRepository, GenericEventProducer eventProducer) {
+    public DeckEnrollmentServiceImpl(DeckRepository deckRepository, 
+                                     DeckEnrollmentRepository deckEnrollmentRepository, 
+                                     @Lazy DeckShareService deckShareService,
+                                     GenericEventProducer eventProducer) {
         this.eventProducer = eventProducer;
         this.deckRepository = deckRepository;
         this.deckEnrollmentRepository = deckEnrollmentRepository;
+        this.deckShareService = deckShareService;
     }
 
     @Override
     @Transactional
     public void enrollUserToDeck(String userId, String deckId, CreateDeckEnrollmentDto createDeckEnrollmentDto) {
-        DeckVisibility deckVisibility = deckRepository.getReferenceById(deckId).getVisibility();
-        log.info("Przypisanie uzytkownika {} do talii {}", userId, deckId);
+        Deck deck = deckRepository.getReferenceById(deckId);
+        
+        EnrollmentContext context = resolveEnrollmentContext(userId, deck);
+        
+        log.info("Przypisanie uzytkownika {} do talii {} (rola: {}, źródło: {})", 
+                userId, deckId, context.role(), context.source());
+        
         DeckEnrollment deckEnrollment = DeckEnrollment.builder()
                 .userId(userId)
-                .deck(deckRepository.getReferenceById(deckId))
-                .role(deckEnrollmentRole(deckVisibility))
-                .source(deckEnrollmentSource(deckVisibility))
+                .deck(deck)
+                .role(context.role())
+                .source(context.source())
                 .howManyFlashcardsForOneSession(createDeckEnrollmentDto.getHowManyFlashcardsForOneSession())
                 .preferredAlgorithm(createDeckEnrollmentDto.getPreferredAlgorithm())
                 .joinedAt(Instant.now())
@@ -180,23 +194,42 @@ public class DeckEnrollmentServiceImpl implements DeckEnrollmentService {
         log.info("Zaktualizowano harmonogram powtórek dla enrollmentId {} na {}", enrollmentId, schedule);
     }
 
+    /**
+     * Rozwiązuje kontekst zapisu użytkownika do talii na podstawie:
+     * 1. Czy jest właścicielem
+     * 2. Czy talia jest publiczna
+     * 3. Czy ma udostępnienie (DeckShare) i jakiego typu
+     */
+    private EnrollmentContext resolveEnrollmentContext(String userId, Deck deck) {
+        if (userId.equals(deck.getOwnerId())) {
+            return new EnrollmentContext(DeckEnrollmentRole.OWNER, DeckEnrollmentSource.I);
+        }
 
-    private DeckEnrollmentRole deckEnrollmentRole(DeckVisibility deckVisibility) {
-        return switch (deckVisibility) {
-            case PRIVATE -> DeckEnrollmentRole.OWNER;
-            case STUDENTS_ONLY -> DeckEnrollmentRole.STUDENT;
-            case FRIENDS_ONLY -> DeckEnrollmentRole.FRIEND_OWNER;
-            case PUBLIC -> DeckEnrollmentRole.COMMUNITY_OWNER;
+        if (deck.getVisibility() == DeckVisibility.PUBLIC) {
+            return new EnrollmentContext(DeckEnrollmentRole.COMMUNITY_OWNER, DeckEnrollmentSource.COMMUNITY);
+        }
+        
+        Optional<DeckShare> shareOpt = deckShareService.findActiveShareForUser(userId, deck.getId());
+        
+        if (shareOpt.isPresent()) {
+            DeckShare share = shareOpt.get();
+            return resolveEnrollmentFromShare(share);
+        }
+        
+        log.warn("Użytkownik {} nie ma dostępu do talii {}", userId, deck.getId());
+        throw new IllegalStateException("Brak uprawnień do zapisu na tę talię");
+    }
+    
+
+    private EnrollmentContext resolveEnrollmentFromShare(DeckShare share) {
+        return switch (share.getTargetType()) {
+            case GROUP, ALL_STUDENTS, USER -> 
+                new EnrollmentContext(DeckEnrollmentRole.STUDENT, DeckEnrollmentSource.TEACHER_COURSE);
+            case ALL_FRIENDS -> 
+                new EnrollmentContext(DeckEnrollmentRole.FRIEND_OWNER, DeckEnrollmentSource.FRIEND_SHARED);
         };
     }
 
-    private DeckEnrollmentSource deckEnrollmentSource(DeckVisibility deckVisibility) {
-        return switch (deckVisibility) {
-            case PRIVATE -> DeckEnrollmentSource.I;
-            case STUDENTS_ONLY -> DeckEnrollmentSource.TEACHER_COURSE;
-            case FRIENDS_ONLY -> DeckEnrollmentSource.FRIEND_SHARED;
-            case PUBLIC -> DeckEnrollmentSource.COMMUNITY;
-        };
-    }
+    private record EnrollmentContext(DeckEnrollmentRole role, DeckEnrollmentSource source) {}
 
 }

@@ -150,4 +150,18 @@ public class GlobalExceptionHandler {
         ApiErrorResponse errorResponse = new ApiErrorResponse(HttpStatus.BAD_REQUEST.value(), ex.getMessage());
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
     }
+
+    @ExceptionHandler(DeckShareNotFoundException.class)
+    public ResponseEntity<ApiErrorResponse> handleDeckShareNotFoundException(DeckShareNotFoundException ex) {
+        log.error("Deck share not found: {}", ex.getMessage());
+        ApiErrorResponse errorResponse = new ApiErrorResponse(HttpStatus.NOT_FOUND.value(), ex.getMessage());
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
+    }
+
+    @ExceptionHandler(UnauthorizedDeckAccessException.class)
+    public ResponseEntity<ApiErrorResponse> handleUnauthorizedDeckAccessException(UnauthorizedDeckAccessException ex) {
+        log.error("Unauthorized deck access: {}", ex.getMessage());
+        ApiErrorResponse errorResponse = new ApiErrorResponse(HttpStatus.FORBIDDEN.value(), ex.getMessage());
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(errorResponse);
+    }
 }
