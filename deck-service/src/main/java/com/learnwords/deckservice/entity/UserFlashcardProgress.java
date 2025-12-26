@@ -8,7 +8,19 @@ import org.hibernate.annotations.Type;
 import java.time.Instant;
 
 @Entity
-@Table(name = "user_flashcard_progress")
+@Table(name = "user_flashcard_progress",
+        uniqueConstraints = {
+                @UniqueConstraint(name = "uk_user_flashcard_progress",
+                        columnNames = {"user_id", "flashcard_id", "enrollment_id"})
+        },
+        indexes = {
+                @Index(name = "idx_user_flashcard_progress_user_id", columnList = "user_id"),
+                @Index(name = "idx_user_flashcard_progress_flashcard_id", columnList = "flashcard_id"),
+                @Index(name = "idx_user_flashcard_progress_enrollment_id", columnList = "enrollment_id"),
+                @Index(name = "idx_user_flashcard_progress_phase", columnList = "learning_phase"),
+                @Index(name = "idx_user_flashcard_progress_next_review", columnList = "next_review_at"),
+                @Index(name = "idx_user_flashcard_progress_is_learned", columnList = "is_learned")
+        })
 @Getter @Setter @Builder @NoArgsConstructor @AllArgsConstructor
 public class UserFlashcardProgress {
 

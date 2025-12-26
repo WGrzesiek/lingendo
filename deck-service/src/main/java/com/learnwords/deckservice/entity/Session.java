@@ -16,7 +16,13 @@ import java.util.List;
 @Entity
 @Setter
 @Getter
-@Table(name = "session")
+@Table(name = "session",
+        indexes = {
+                @Index(name = "idx_session_enrollment_id", columnList = "enrollment_id"),
+                @Index(name = "idx_session_status", columnList = "status"),
+                @Index(name = "idx_session_type", columnList = "type"),
+                @Index(name = "idx_session_started_at", columnList = "started_at")
+        })
 public class Session {
     @Id
     @Column(nullable = false, unique = true, length = 36)
