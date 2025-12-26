@@ -17,4 +17,13 @@ public class KafkaTopic {
     public static final String DECK_ENROLLMENT_CREATED = "deck.enrollment.created";
     public static final String DECK_ENROLLMENT_FINISHED = "deck.enrollment.finished";
 
+    // Teacher-Student events
+    public static final String TEACHER_STUDENT_JOINED = "teacher.student.joined";
+    public static final String TEACHER_STUDENT_REMOVED = "teacher.student.removed";
+    public static final String TEACHER_DECK_SHARED = "teacher.deck.shared";
+
+    // Friendship events
+    public static final String FRIENDSHIP_ACCEPTED = "friendship.accepted";
+    public static final String FRIENDSHIP_REMOVED = "friendship.removed";
+
 }
