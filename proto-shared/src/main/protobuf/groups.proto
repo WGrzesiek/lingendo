@@ -1,0 +1,149 @@
+syntax = "proto3";
+
+package com.learnwords.groups.v1;
+
+option java_multiple_files = true;
+option java_package = "com.learnwords.groups.v1";
+option java_outer_classname = "GroupsProto";
+
+
+message GroupBasicInfo {
+  string group_id = 1;
+  string name = 2;
+  string description = 3;
+  string teacher_id = 4;
+  string color = 5;
+  int32 member_count = 6;
+}
+
+message GroupMemberInfo {
+  string member_id = 1;
+  string student_id = 2;
+  string username = 3;
+  string first_name = 4;
+  string last_name = 5;
+  int64 joined_at = 6;
+}
+
+
+message GetTeacherGroupsRequest {
+  string teacher_id = 1;
+}
+
+message GetTeacherGroupsResponse {
+  repeated GroupBasicInfo groups = 1;
+}
+
+message GetTeacherGroupIdsRequest {
+  string teacher_id = 1;
+}
+
+message GetTeacherGroupIdsResponse {
+  repeated string group_ids = 1;
+}
+
+message GetGroupRequest {
+  string group_id = 1;
+}
+
+message GetGroupResponse {
+  GroupBasicInfo group = 1;
+}
+
+message GetGroupMembersRequest {
+  string group_id = 1;
+}
+
+message GetGroupMembersResponse {
+  repeated GroupMemberInfo members = 1;
+}
+
+message GetGroupMemberIdsRequest {
+  string group_id = 1;
+}
+
+message GetGroupMemberIdsResponse {
+  repeated string student_ids = 1;
+}
+
+message GetStudentIdsFromGroupsRequest {
+  repeated string group_ids = 1;
+}
+
+message GetStudentIdsFromGroupsResponse {
+  repeated string student_ids = 1;
+}
+
+message GetStudentGroupsRequest {
+  string student_id = 1;
+}
+
+message GetStudentGroupsResponse {
+  repeated GroupBasicInfo groups = 1;
+}
+
+message GetStudentGroupIdsRequest {
+  string student_id = 1;
+}
+
+message GetStudentGroupIdsResponse {
+  repeated string group_ids = 1;
+}
+
+message IsStudentInGroupRequest {
+  string student_id = 1;
+  string group_id = 2;
+}
+
+message IsStudentInGroupResponse {
+  bool is_member = 1;
+}
+
+message IsStudentInAnyGroupRequest {
+  string student_id = 1;
+  repeated string group_ids = 2;
+}
+
+message IsStudentInAnyGroupResponse {
+  bool is_member = 1;
+  repeated string member_group_ids = 2;
+}
+
+message CheckGroupAccessRequest {
+  string teacher_id = 1;
+  repeated string group_ids = 2;
+}
+
+message CheckGroupAccessResponse {
+  map<string, bool> access_map = 1;
+}
+
+message CheckStudentGroupMembershipRequest {
+  string student_id = 1;
+  repeated string group_ids = 2;
+}
+
+message CheckStudentGroupMembershipResponse {
+  map<string, bool> membership_map = 1;
+}
+
+
+service StudentGroupService {
+
+  rpc GetTeacherGroups(GetTeacherGroupsRequest) returns (GetTeacherGroupsResponse);
+  rpc GetTeacherGroupIds(GetTeacherGroupIdsRequest) returns (GetTeacherGroupIdsResponse);
+  rpc GetGroup(GetGroupRequest) returns (GetGroupResponse);
+  rpc CheckGroupAccess(CheckGroupAccessRequest) returns (CheckGroupAccessResponse);
+  
+  // --- Operacje na członkach ---
+  rpc GetGroupMembers(GetGroupMembersRequest) returns (GetGroupMembersResponse);
+  rpc GetGroupMemberIds(GetGroupMemberIdsRequest) returns (GetGroupMemberIdsResponse);
+  rpc GetStudentIdsFromGroups(GetStudentIdsFromGroupsRequest) returns (GetStudentIdsFromGroupsResponse);
+  
+  // --- Operacje ucznia ---
+  rpc GetStudentGroups(GetStudentGroupsRequest) returns (GetStudentGroupsResponse);
+  rpc GetStudentGroupIds(GetStudentGroupIdsRequest) returns (GetStudentGroupIdsResponse);
+  rpc IsStudentInGroup(IsStudentInGroupRequest) returns (IsStudentInGroupResponse);
+  rpc IsStudentInAnyGroup(IsStudentInAnyGroupRequest) returns (IsStudentInAnyGroupResponse);
+  rpc CheckStudentGroupMembership(CheckStudentGroupMembershipRequest) returns (CheckStudentGroupMembershipResponse);
+}

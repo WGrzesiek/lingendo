@@ -99,7 +99,6 @@ message CheckFriendshipAccessRequest {
 }
 
 message CheckFriendshipAccessResponse {
-  // Mapa other_user_id -> czy są znajomymi
   map<string, bool> friendship_map = 1;
 }
 
@@ -118,12 +117,11 @@ message GetAccessibleUsersRequest {
 }
 
 message GetAccessibleUsersResponse {
-  repeated string student_ids = 1;    // Jeśli user jest nauczycielem - jego uczniowie
-  repeated string teacher_ids = 2;    // Nauczyciele usera
-  repeated string friend_ids = 3;     // Znajomi usera
+  repeated string student_ids = 1;
+  repeated string teacher_ids = 2;
+  repeated string friend_ids = 3;
+  repeated string group_ids = 4;
 }
-
-// --- Batch User Info ---
 
 message GetUsersByIdsRequest {
   repeated string user_ids = 1;
@@ -133,54 +131,26 @@ message GetUsersByIdsResponse {
   repeated UserBasicInfo users = 1;
 }
 
-// ==================== SERVICE ====================
-
 service UserRelationsService {
   
   // --- Teacher-Student ---
-  
-  // Pobiera listę ID uczniów nauczyciela
   rpc GetStudentIds(GetStudentIdsRequest) returns (GetStudentIdsResponse);
-  
-  // Pobiera pełne informacje o uczniach nauczyciela
   rpc GetStudents(GetStudentsRequest) returns (GetStudentsResponse);
-  
-  // Pobiera listę ID nauczycieli ucznia
   rpc GetTeacherIds(GetTeacherIdsRequest) returns (GetTeacherIdsResponse);
-  
-  // Pobiera pełne informacje o nauczycielach ucznia
   rpc GetTeachers(GetTeachersRequest) returns (GetTeachersResponse);
-  
-  // Sprawdza czy użytkownik jest nauczycielem drugiego
   rpc IsTeacherOf(IsTeacherOfRequest) returns (IsTeacherOfResponse);
-  
-  // Sprawdza dostęp nauczyciela do wielu uczniów (batch)
   rpc CheckTeacherStudentAccess(CheckTeacherStudentAccessRequest) returns (CheckTeacherStudentAccessResponse);
   
   // --- Friendship ---
-  
-  // Pobiera listę ID znajomych
   rpc GetFriendIds(GetFriendIdsRequest) returns (GetFriendIdsResponse);
-  
-  // Pobiera pełne informacje o znajomych
   rpc GetFriends(GetFriendsRequest) returns (GetFriendsResponse);
-  
-  // Sprawdza czy dwóch użytkowników jest znajomymi
   rpc AreFriends(AreFriendsRequest) returns (AreFriendsResponse);
-  
-  // Sprawdza znajomość z wieloma użytkownikami (batch)
   rpc CheckFriendshipAccess(CheckFriendshipAccessRequest) returns (CheckFriendshipAccessResponse);
   
   // --- Combined Access ---
-  
-  // Sprawdza czy użytkownik ma dostęp do zasobów innego (nauczyciel/uczeń/znajomy)
   rpc CheckUserAccess(CheckUserAccessRequest) returns (CheckUserAccessResponse);
-  
-  // Pobiera wszystkich użytkowników, do których dany user ma dostęp
   rpc GetAccessibleUsers(GetAccessibleUsersRequest) returns (GetAccessibleUsersResponse);
   
   // --- User Info ---
-  
-  // Pobiera informacje o wielu użytkownikach na raz
   rpc GetUsersByIds(GetUsersByIdsRequest) returns (GetUsersByIdsResponse);
 }
