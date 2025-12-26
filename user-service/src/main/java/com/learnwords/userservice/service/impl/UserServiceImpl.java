@@ -74,16 +74,16 @@ public class UserServiceImpl implements UserService {
         if (!isAuth)
             throw new WrongPasswordException();
         log.info("User {} authenticated successfully", username);
-        int currentStreak = user.getSteak();
+        int currentStreak = user.getStreak();
         Instant now = Instant.now();
         user.registerLogin(now);
         userRepository.save(user);
-        if(user.getSteak() != currentStreak){
+        if(user.getStreak() != currentStreak){
             genericEventProducer.send(KafkaTopic.USER_LOGINS_TOPIC, UserLoginEvent.builder()
                             .eventTime(Instant.now())
                             .userId(userDetails.getId())
                             .username(userDetails.getUsername())
-                            .streak(user.getSteak())
+                            .streak(user.getStreak())
                             .received_at(Instant.now())
                             .build());
         }

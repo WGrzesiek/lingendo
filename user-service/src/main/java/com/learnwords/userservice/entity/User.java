@@ -66,7 +66,7 @@ public class User {
 
     @Column(nullable = false)
     @Builder.Default
-    private int steak = 0;
+    private int streak = 0;
 
     @PrePersist
     public void prePersist() {
@@ -82,16 +82,15 @@ public class User {
         loginCount++;
 
         if (lastLogin == null) {
-            steak = 1;
+            streak = 1;
         } else {
             long diffHours = ChronoUnit.HOURS.between(lastLogin, now);
 
             if (diffHours < 24) {
-
             } else if (diffHours < 48) {
-                steak++;
+                streak++;
             } else {
-                steak = 1;
+                streak = 1;
             }
         }
         lastLogin = now;
