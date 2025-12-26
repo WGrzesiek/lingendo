@@ -18,7 +18,8 @@ import java.time.Instant;
 @Entity
 @Table(name = "teacher_invitation", indexes = {
         @Index(name = "idx_invitation_code", columnList = "invitationCode", unique = true),
-        @Index(name = "idx_invitation_teacher", columnList = "teacher_id")
+        @Index(name = "idx_invitation_teacher", columnList = "teacher_id"),
+        @Index(name = "idx_invitation_status", columnList = "status")
 })
 public class TeacherInvitation {
 

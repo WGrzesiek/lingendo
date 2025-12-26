@@ -12,7 +12,15 @@ import java.time.Instant;
 @Setter
 @Builder
 @Entity
-@Table(name = "teacher_student")
+@Table(name = "teacher_student",
+        uniqueConstraints = {
+                @UniqueConstraint(name = "uk_teacher_student", columnNames = {"teacher_id", "student_id"})
+        },
+        indexes = {
+                @Index(name = "idx_teacher_student_teacher_id", columnList = "teacher_id"),
+                @Index(name = "idx_teacher_student_student_id", columnList = "student_id"),
+                @Index(name = "idx_teacher_student_status", columnList = "status")
+        })
 public class TeacherStudent {
 
     @Id

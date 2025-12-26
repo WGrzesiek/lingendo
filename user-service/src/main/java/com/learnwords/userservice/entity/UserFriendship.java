@@ -12,7 +12,15 @@ import java.time.Instant;
 @Setter
 @Builder
 @Entity
-@Table(name = "user_friendship")
+@Table(name = "user_friendship",
+        uniqueConstraints = {
+                @UniqueConstraint(name = "uk_user_friendship", columnNames = {"user_id_1", "user_id_2"})
+        },
+        indexes = {
+                @Index(name = "idx_user_friendship_user1", columnList = "user_id_1"),
+                @Index(name = "idx_user_friendship_user2", columnList = "user_id_2"),
+                @Index(name = "idx_user_friendship_status", columnList = "status")
+        })
 public class UserFriendship {
 
     @Id
