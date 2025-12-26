@@ -26,4 +26,13 @@ public class KafkaTopic {
     public static final String FRIENDSHIP_ACCEPTED = "friendship.accepted";
     public static final String FRIENDSHIP_REMOVED = "friendship.removed";
 
+    // Group events
+    public static final String GROUP_CREATED = "group.created";
+    public static final String GROUP_MEMBER_ADDED = "group.member.added";
+    public static final String GROUP_MEMBER_REMOVED = "group.member.removed";
+
+    // Deck sharing events
+    public static final String DECK_SHARED = "deck.shared";
+    public static final String DECK_SHARE_REVOKED = "deck.share.revoked";
+
 }
