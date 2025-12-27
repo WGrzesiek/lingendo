@@ -5,18 +5,17 @@ import com.learnwords.common.KafkaTopic;
 import com.learnwords.common.events.SessionFinishedEvent;
 import com.learnwords.common.events.SessionStartedEvent;
 import com.learnwords.statisticsservice.repository.SessionRepository;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Service;
 
 @Slf4j
 @Service
+@RequiredArgsConstructor
 public class SessionEventsConsumer {
-    private final SessionRepository repository;
 
-    public SessionEventsConsumer(SessionRepository repository) {
-        this.repository = repository;
-    }
+    private final SessionRepository repository;
 
     @KafkaListener(topics = KafkaTopic.SESSION_STARTED, groupId = KafkaGroup.STATISTICS_SERVICE)
     public void consumeSessionStartedEvent(SessionStartedEvent event) {

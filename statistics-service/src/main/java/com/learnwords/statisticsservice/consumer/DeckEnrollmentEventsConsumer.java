@@ -5,18 +5,17 @@ import com.learnwords.common.KafkaTopic;
 import com.learnwords.common.events.DeckEnrollmentsCreated;
 import com.learnwords.common.events.DeckEnrollmentsFinished;
 import com.learnwords.statisticsservice.repository.DeckEnrollmentRepository;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Service;
 
 @Slf4j
 @Service
+@RequiredArgsConstructor
 public class DeckEnrollmentEventsConsumer {
-    private final DeckEnrollmentRepository repository;
 
-    public DeckEnrollmentEventsConsumer(DeckEnrollmentRepository repository) {
-        this.repository = repository;
-    }
+    private final DeckEnrollmentRepository repository;
 
     @KafkaListener(topics = KafkaTopic.DECK_ENROLLMENT_CREATED, groupId = KafkaGroup.STATISTICS_SERVICE)
     public void consumeDeckEnrollmentCreated(DeckEnrollmentsCreated event) {

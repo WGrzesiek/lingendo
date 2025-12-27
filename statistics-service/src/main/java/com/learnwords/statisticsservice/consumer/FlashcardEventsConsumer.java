@@ -5,18 +5,17 @@ import com.learnwords.common.KafkaTopic;
 import com.learnwords.common.events.FlashcardAnsweredEvent;
 import com.learnwords.common.events.FlashcardCreatedEvent;
 import com.learnwords.statisticsservice.repository.FlashcardRepository;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Service;
 
 @Slf4j
 @Service
+@RequiredArgsConstructor
 public class FlashcardEventsConsumer {
-    private final FlashcardRepository repository;
 
-    public FlashcardEventsConsumer(FlashcardRepository repository) {
-        this.repository = repository;
-    }
+    private final FlashcardRepository repository;
 
     @KafkaListener(topics = KafkaTopic.FLASHCARD_CREATED, groupId = KafkaGroup.STATISTICS_SERVICE)
     public void consumeFlashcardCreatedEvent(FlashcardCreatedEvent event) {
