@@ -283,7 +283,6 @@ public class UserRelationsServiceGrpcImpl extends UserRelationsServiceGrpc.UserR
             String requesterId = request.getRequesterId();
             String targetId = request.getOwnerId();
             
-            // Sprawdź czy to ten sam użytkownik
             if (requesterId.equals(targetId)) {
                 responseObserver.onNext(buildAccessResponse(true, AccessType.SELF));
                 responseObserver.onCompleted();
@@ -330,7 +329,6 @@ public class UserRelationsServiceGrpcImpl extends UserRelationsServiceGrpc.UserR
             
             accessibleUserFIds.addAll(friendshipRepository.findFriendIdsByUserId(userId));
 
-            // Pobierz grupy użytkownika (jako nauczyciel lub uczeń)
             Set<String> groupIds = new HashSet<>();
             groupIds.addAll(groupRepository.findGroupIdsByTeacherId(userId));
             groupIds.addAll(groupRepository.findGroupIdsByStudentId(userId));
