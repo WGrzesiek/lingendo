@@ -8,9 +8,7 @@ import java.time.Instant;
 public record GroupMemberRemovedEvent(
         Instant eventTime,
         String groupId,
-        String groupName,
         String teacherId,
         String studentId,
-        String reason,
-        Instant receivedAt
+        String reason
 ) implements DomainEvent {}

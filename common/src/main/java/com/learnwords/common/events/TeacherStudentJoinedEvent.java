@@ -8,9 +8,6 @@ import java.time.Instant;
 public record TeacherStudentJoinedEvent(
         Instant eventTime,
         String teacherId,
-        String teacherUsername,
         String studentId,
-        String studentUsername,
-        String invitationCode,
-        Instant receivedAt
+        String studentUsername
 ) implements DomainEvent {}

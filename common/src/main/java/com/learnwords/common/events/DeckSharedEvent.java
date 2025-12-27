@@ -10,9 +10,7 @@ public record DeckSharedEvent(
         String deckId,
         String deckName,
         String ownerId,
-        String targetType,
-        String targetId,
-        Instant sharedAt,
-        Instant receivedAt
+        String targetType,  // GROUP, USER
+        String targetId
 ) implements DomainEvent {
 }
