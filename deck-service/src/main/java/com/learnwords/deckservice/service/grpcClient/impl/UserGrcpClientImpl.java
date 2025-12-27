@@ -11,10 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 import net.devh.boot.grpc.client.inject.GrpcClient;
 import org.springframework.stereotype.Component;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -50,7 +47,7 @@ public class UserGrcpClientImpl implements UserGrcpClient {
         try {
             var request = CheckUserAccessRequest.newBuilder()
                     .setRequesterId(requesterId)
-                    .setTargetUserId(targetUserId)
+                    .setOwnerId(targetUserId)
                     .build();
             
             CheckUserAccessResponse response = userRelationsStub
@@ -116,7 +113,11 @@ public class UserGrcpClientImpl implements UserGrcpClient {
                     .withDeadlineAfter(GRPC_DEADLINE_MS, TimeUnit.MILLISECONDS)
                     .getAccessibleUsers(request);
             
-            return response.getUserIdsList();
+            List<String> userIds = new ArrayList<>();
+            userIds.addAll(response.getFriendIdsList());
+            userIds.addAll(response.getStudentIdsList());
+            userIds.addAll(response.getGroupIdsList());
+            return userIds;
         } catch (StatusRuntimeException e) {
             log.error("Błąd gRPC podczas pobierania dostępnych użytkowników dla {}: {}", 
                     userId, e.getMessage());
