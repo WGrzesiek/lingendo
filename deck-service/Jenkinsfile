@@ -61,8 +61,10 @@ stage('Build & Install deck-service') {
 
 stage('Code Stats') {
     steps {
-        sh 'scc --format json --output scc.json .'
-        archiveArtifacts artifacts: 'scc.json', fingerprint: true
+        dir('deck-service') {
+            sh 'scc --format json --output scc.json .'
+            archiveArtifacts artifacts: 'scc.json', fingerprint: true
+        }
     }
 }
 
