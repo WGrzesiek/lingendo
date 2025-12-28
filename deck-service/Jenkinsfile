@@ -58,6 +58,14 @@ stage('Build & Install deck-service') {
         }
     }
 }
+
+stage('Code Stats') {
+    steps {
+        sh 'scc --format json --output scc.json .'
+        archiveArtifacts artifacts: 'scc.json', fingerprint: true
+    }
+}
+
 stage('Test & Coverage') {
     when { expression { !params.SKIP_TESTS } }
     steps {
