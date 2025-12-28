@@ -145,12 +145,11 @@ public class TeacherStudentServiceImpl implements TeacherStudentService {
         TeacherStudent relation = findRelation(teacherId, studentId);
         teacherStudentRepository.delete(relation);
 
-        genericEventProducer.send(KafkaTopic.TEACHER_STUDENT_REMOVED,TeacherStudentRemovedEvent.builder()
+        genericEventProducer.send(KafkaTopic.TEACHER_STUDENT_REMOVED, TeacherStudentRemovedEvent.builder()
                 .eventTime(Instant.now())
                 .teacherId(teacherId)
                 .studentId(studentId)
                 .reason("REMOVED_BY_TEACHER")
-                .receivedAt(Instant.now())
                 .build());
 
         log.info("Usunięto relację nauczyciel-uczeń: {} - {}", teacherId, studentId);
@@ -170,7 +169,6 @@ public class TeacherStudentServiceImpl implements TeacherStudentService {
                 .teacherId(teacherId)
                 .studentId(studentId)
                 .reason("BLOCKED")
-                .receivedAt(Instant.now())
                 .build());
 
         log.info("Zablokowano ucznia: {} przez nauczyciela: {}", studentId, teacherId);
@@ -259,11 +257,8 @@ public class TeacherStudentServiceImpl implements TeacherStudentService {
         genericEventProducer.send(KafkaTopic.TEACHER_STUDENT_JOINED, TeacherStudentJoinedEvent.builder()
                 .eventTime(Instant.now())
                 .teacherId(teacher.getId())
-                .teacherUsername(teacher.getUsername())
                 .studentId(studentId)
                 .studentUsername(student.getUsername())
-                .invitationCode(invitationCode)
-                .receivedAt(Instant.now())
                 .build());
 
         log.info("Uczeń: {} dołączył do nauczyciela: {}", studentId, teacher.getId());
@@ -298,7 +293,6 @@ public class TeacherStudentServiceImpl implements TeacherStudentService {
                 .teacherId(teacherId)
                 .studentId(studentId)
                 .reason("LEFT_BY_STUDENT")
-                .receivedAt(Instant.now())
                 .build());
 
         log.info("Uczeń: {} opuścił nauczyciela: {}", studentId, teacherId);

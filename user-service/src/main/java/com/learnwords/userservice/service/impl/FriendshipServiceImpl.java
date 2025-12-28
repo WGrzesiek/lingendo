@@ -94,14 +94,10 @@ public class FriendshipServiceImpl implements FriendshipService {
         friendship.setStatus(FriendshipStatus.ACCEPTED);
         friendshipRepository.save(friendship);
 
-        genericEventProducer.send(KafkaTopic.FRIENDSHIP_ACCEPTED,FriendshipAcceptedEvent.builder()
+        genericEventProducer.send(KafkaTopic.FRIENDSHIP_ACCEPTED, FriendshipAcceptedEvent.builder()
                 .eventTime(Instant.now())
-                .friendshipId(friendshipId)
                 .userId1(friendship.getUser1().getId())
-                .username1(friendship.getUser1().getUsername())
                 .userId2(friendship.getUser2().getId())
-                .username2(friendship.getUser2().getUsername())
-                .receivedAt(Instant.now())
                 .build());
 
         log.info("Zaakceptowano zaproszenie: {}", friendshipId);
@@ -198,16 +194,13 @@ public class FriendshipServiceImpl implements FriendshipService {
                 .orElseThrow(() -> new RelationNotFoundException(
                         "Nie znaleziono relacji z tym użytkownikiem"));
 
-        String friendshipId = friendship.getId();
         friendshipRepository.delete(friendship);
 
-        genericEventProducer.send(KafkaTopic.FRIENDSHIP_REMOVED,FriendshipRemovedEvent.builder()
+        genericEventProducer.send(KafkaTopic.FRIENDSHIP_REMOVED, FriendshipRemovedEvent.builder()
                 .eventTime(Instant.now())
-                .friendshipId(friendshipId)
                 .userId1(userId)
                 .userId2(friendId)
                 .reason("REMOVED")
-                .receivedAt(Instant.now())
                 .build());
 
         log.info("Usunięto znajomego: {} przez użytkownika: {}", friendId, userId);
@@ -225,19 +218,16 @@ public class FriendshipServiceImpl implements FriendshipService {
         User blocker = findUserById(userId);
         User blocked = findUserById(userToBlockId);
 
-        String friendshipId;
         var existingRelation = friendshipRepository.findByUsers(userId, userToBlockId);
 
         if (existingRelation.isPresent()) {
             UserFriendship friendship = existingRelation.get();
-            friendshipId = friendship.getId();
             friendship.setStatus(FriendshipStatus.BLOCKED);
             friendship.setRequestedBy(blocker);
             friendshipRepository.save(friendship);
         } else {
-            friendshipId = UUID.randomUUID().toString();
             UserFriendship friendship = UserFriendship.builder()
-                    .id(friendshipId)
+                    .id(UUID.randomUUID().toString())
                     .user1(blocker)
                     .user2(blocked)
                     .requestedBy(blocker)
@@ -246,13 +236,11 @@ public class FriendshipServiceImpl implements FriendshipService {
             friendshipRepository.save(friendship);
         }
 
-        genericEventProducer.send(KafkaTopic.FRIENDSHIP_REMOVED,FriendshipRemovedEvent.builder()
+        genericEventProducer.send(KafkaTopic.FRIENDSHIP_REMOVED, FriendshipRemovedEvent.builder()
                 .eventTime(Instant.now())
-                .friendshipId(friendshipId)
                 .userId1(userId)
                 .userId2(userToBlockId)
                 .reason("BLOCKED")
-                .receivedAt(Instant.now())
                 .build());
 
         log.info("Zablokowano użytkownika: {} przez: {}", userToBlockId, userId);

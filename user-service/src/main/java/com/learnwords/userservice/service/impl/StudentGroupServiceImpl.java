@@ -296,11 +296,9 @@ public class StudentGroupServiceImpl implements StudentGroupService {
         eventProducer.send(KafkaTopic.GROUP_MEMBER_REMOVED, GroupMemberRemovedEvent.builder()
                 .eventTime(Instant.now())
                 .groupId(group.getId())
-                .groupName(group.getName())
                 .teacherId(teacherId)
                 .studentId(studentId)
                 .reason("REMOVED_BY_TEACHER")
-                .receivedAt(Instant.now())
                 .build());
     }
 
