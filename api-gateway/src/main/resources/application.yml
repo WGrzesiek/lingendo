@@ -71,7 +71,7 @@ spring:
             - id: statistics-service
               uri: http://statistics-service:8799
               predicates:
-                - Path=/api/v1/dashboard/**,/api/v1/courses/**, /api/v1/stats/**
+                - Path=/api/v1/dashboard/**,/api/v1/courses/**, /api/v1/stats/**, /api/v1/stats/friends/**, /api/v1/dashboard/teacher/**, /api/v1/stats/groups/**
               filters:
                 - RemoveRequestHeader=X-User-Id
                 - RemoveRequestHeader=X-Client-Id
