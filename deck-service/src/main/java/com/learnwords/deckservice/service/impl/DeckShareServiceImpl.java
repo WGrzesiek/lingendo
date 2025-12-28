@@ -416,8 +416,6 @@ public class DeckShareServiceImpl implements DeckShareService {
                     .ownerId(share.getOwnerId())
                     .targetType(share.getTargetType().name())
                     .targetId(share.getTargetId())
-                    .sharedAt(share.getSharedAt())
-                    .receivedAt(Instant.now())
                     .build();
             eventProducer.send(KafkaTopic.DECK_SHARED, event);
         } catch (Exception e) {

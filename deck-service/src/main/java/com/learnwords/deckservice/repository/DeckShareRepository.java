@@ -94,4 +94,7 @@ public interface DeckShareRepository extends JpaRepository<DeckShare, String> {
             @Param("groupIds") List<String> groupIds,
             @Param("teacherIds") List<String> teacherIds,
             @Param("friendIds") List<String> friendIds);
+
+    List<DeckShare> findAllByDeckIdAndOwnerId(String deckId, String userId);
 }
+

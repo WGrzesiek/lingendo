@@ -209,25 +209,31 @@ public class DeckServiceImpl implements DeckService {
 
 
     /**
-     * Filtruje talie na podstawie podanych parametrów.
+     * Filtruje talie należące do użytkownika na podstawie podanych parametrów.
+     * Zwraca tylko talie, których właścicielem jest userId.
      * Parametr userId jest wymagany, pozostałe są opcjonalne.
      * 
+     * <p>Uwaga: Ta metoda NIE zwraca talii udostępnionych użytkownikowi.
+     * Do pobierania udostępnionych talii użyj {@link com.learnwords.deckservice.service.DeckShareService#getSharedWithMe(String, int, int)}.
+     * 
      * @param userId ID użytkownika (wymagany)
-     * @param visibility Czy talia jest publiczna (opcjonalne)
+     * @param visibility Lista widoczności do filtrowania (opcjonalne)
      * @param owner Typ właściciela talii (opcjonalne)
-     * @return Lista DeckDto spełniających kryteria
+     * @param page Numer strony
+     * @param size Rozmiar strony
+     * @return Strona DeckDto spełniających kryteria
      */
     @Override
     public Page<DeckDto> getDecksByFilter(String userId, List<DeckVisibility> visibility, DeckOwner owner, int page, int size) {
-        log.info("Filtrowanie talii: userId={}, visibility={}, owner={}",
+        log.info("Filtrowanie talii użytkownika: userId={}, visibility={}, owner={}",
                 userId, visibility, owner);
         if(userId == null || userId.isBlank()) {
             log.error("UserId jest pusty");
             throw new IllegalArgumentException("UserId nie może być pusty");
         }
         Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
-        Page<Deck> decks = deckRepository.findByFilters(userId, visibility, owner, pageable);
-        log.info("Znaleziono {} talii spełniających kryteria", decks.getContent().size());
+        Page<Deck> decks = deckRepository.findOwnedDecksWithFilters(userId, visibility, owner, pageable);
+        log.info("Znaleziono {} talii należących do użytkownika", decks.getContent().size());
         return decks.map(deck -> mapToDeckDto(deck, false));
     }
 
