@@ -359,7 +359,7 @@ public class TeacherStudentServiceImpl implements TeacherStudentService {
     }
 
     private void validateTeacherRole(User user) {
-        if (user.getAccountType() == AccountType.TEACHER) {
+        if (user.getAccountType() != AccountType.TEACHER) {
             throw new UnauthorizedOperationException("Użytkownik nie jest nauczycielem");
         }
     }
