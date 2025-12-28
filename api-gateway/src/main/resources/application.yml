@@ -68,7 +68,7 @@ spring:
               uri: http://vocabulary-read-service:8813
               predicates:
                 - Path=/api/v1/read/vocabulary/**,/api/v1/read/sentences/**
-            - id: statistics-service
+            - id: statistics-api
               uri: http://statistics-service:8799
               predicates:
                 - Path=/api/v1/dashboard/**,/api/v1/courses/**, /api/v1/stats/**, /api/v1/stats/friends/**, /api/v1/dashboard/teacher/**, /api/v1/stats/groups/**
@@ -76,6 +76,12 @@ spring:
                 - RemoveRequestHeader=X-User-Id
                 - RemoveRequestHeader=X-Client-Id
                 - RemoveRequestHeader=X-Roles
+            - id: statistics-service
+              uri: http://statistics-service:8799
+              predicates:
+                - Path=/openapi/statistics-service
+              filters:
+                - SetPath=/api-docs
           globalcors:
             cors-configurations:
               '[/**]':
@@ -117,6 +123,8 @@ springdoc:
         url: /openapi/vocabulary-read-service
       - name: deck-service
         url: /openapi/deck-service
+      - name: statistics-service
+        url: /openapi/statistics-service
 management:
   endpoints:
     web:
