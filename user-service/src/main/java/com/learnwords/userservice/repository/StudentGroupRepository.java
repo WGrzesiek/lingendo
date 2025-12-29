@@ -19,7 +19,10 @@ public interface StudentGroupRepository extends JpaRepository<StudentGroup, Stri
     boolean existsByIdAndTeacherId(String id, String teacherId);
     long countByTeacherIdAndStatus(String teacherId, GroupStatus status);
 
-    @Query("SELECT g.id FROM StudentGroup g WHERE g.teacher.id = :teacherId AND g.status = 'ACTIVE'")
+    @Query("SELECT g.id FROM StudentGroup g WHERE g.teacher.id = :teacherId AND g.status = :status")
+    List<String> findGroupIdsByTeacherIdAndStatus(@Param("teacherId") String teacherId, @Param("status") GroupStatus status);
+
+    @Query("SELECT g.id FROM StudentGroup g WHERE g.teacher.id = :teacherId")
     List<String> findGroupIdsByTeacherId(@Param("teacherId") String teacherId);
 
     @Query("SELECT DISTINCT gm.group FROM GroupMember gm " +

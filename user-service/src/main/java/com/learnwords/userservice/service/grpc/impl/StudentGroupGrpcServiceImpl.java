@@ -122,9 +122,14 @@ public class StudentGroupGrpcServiceImpl extends StudentGroupServiceGrpc.Student
             Set<String> ownedGroups = new HashSet<>(
                     groupRepository.findGroupIdsByTeacherId(request.getTeacherId()));
 
+            log.info("Sprawdzanie dostępu do grup - teacherId: {}, sprawdzane grupy: {}, posiadane grupy: {}",
+                    request.getTeacherId(), request.getGroupIdsList(), ownedGroups);
+
             var responseBuilder = CheckGroupAccessResponse.newBuilder();
             for (String groupId : request.getGroupIdsList()) {
-                responseBuilder.putAccessMap(groupId, ownedGroups.contains(groupId));
+                boolean hasAccess = ownedGroups.contains(groupId);
+                log.debug("Grupa {} - dostęp: {}", groupId, hasAccess);
+                responseBuilder.putAccessMap(groupId, hasAccess);
             }
 
             responseObserver.onNext(responseBuilder.build());
