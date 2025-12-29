@@ -17,7 +17,6 @@ spring:
     locations: classpath:db/migration
     baseline-on-migrate: true
 
-
   kafka:
     producer:
       bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:127.0.0.1:9092}
@@ -48,11 +47,17 @@ logging:
 grpc:
   client:
     vocabulary-read:
-      address: ${GRPC_VOCAB_READ_ADDRESS:static://192.168.23.9:9099}           # np. static://vocabulary-read-service:0002
+      address: ${GRPC_VOCAB_READ_ADDRESS:static://192.168.23.9:9099} # np. static://vocabulary-read-service:0002
       negotiationType: ${GRPC_VOCAB_READ_NEGOTIATION:PLAINTEXT}
     auth:
       address: ${GRPC_CLIENT_AUTH_ADDRESS:static://192.168.23.9:9098}
       negotiationType: ${GRPC_CLIENT_AUTH_NEGOTIATIONTYPE:PLAINTEXT}
+    user-relations:
+      address: ${GRPC_USER_RELATIONS_ADDRESS:static://192.168.23.9:9098}
+      negotiationType: ${GRPC_USER_RELATIONS_NEGOTIATION:PLAINTEXT}
+    student-groups:
+      address: ${GRPC_STUDENT_GROUPS_ADDRESS:static://192.168.23.9:9098}
+      negotiationType: ${GRPC_STUDENT_GROUPS_NEGOTIATION:PLAINTEXT}
 
 springdoc:
   api-docs:
