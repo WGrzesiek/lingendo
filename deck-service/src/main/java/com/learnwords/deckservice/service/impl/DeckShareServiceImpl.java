@@ -313,12 +313,15 @@ public class DeckShareServiceImpl implements DeckShareService {
     }
 
     private void validateShareTarget(String userId, ShareTargetType targetType, String targetId) {
+        log.debug("Walidacja celu udostępnienia: userId={}, targetType={}, targetId={}", userId, targetType, targetId);
         switch (targetType) {
             case GROUP -> {
                 if (targetId == null || targetId.isBlank()) {
                     throw new IllegalArgumentException("ID grupy jest wymagane");
                 }
-                if (!userGrpcClient.isGroupOwner(userId, targetId)) {
+                boolean isOwner = userGrpcClient.isGroupOwner(userId, targetId);
+                log.info("Sprawdzanie właściciela grupy: userId={}, groupId={}, isOwner={}", userId, targetId, isOwner);
+                if (!isOwner) {
                     throw new UnauthorizedDeckAccessException("Nie jesteś właścicielem tej grupy");
                 }
             }
