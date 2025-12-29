@@ -289,8 +289,25 @@ public class UserGrcpClientImpl implements UserGrcpClient {
             var response = groupsStub
                     .withDeadlineAfter(GRPC_DEADLINE_MS, TimeUnit.MILLISECONDS)
                     .checkGroupAccess(request);
-            
-            return response.getAccessMapOrDefault(groupId, false);
+            log.error("Odpowiedz: {}", response.getAccessMapMap());
+            log.error("Odpowiedz: {}", response.getAccessMapMap());
+            log.error("Odpowiedz: {}", response.getAccessMapMap());
+            log.error("Odpowiedz: {}", response.getAccessMapMap());
+            log.error("Odpowiedz: {}", response.getAccessMapMap());
+            log.error("Odpowiedz: {}", response.getAccessMapMap());
+            log.error("Odpowiedz: {}", response.getAccessMapMap());
+            log.error("Odpowiedz: {}", response.getAccessMapMap());
+            log.error("Odpowiedz: {}", response.getAccessMapMap());
+            return response.getAccessMapMap().getOrDefault(groupId, false);
+
+//            for (var accessEntry : response.getAccessMapMap().entrySet()) {
+//                if (accessEntry.getKey().equals(groupId)) {
+//                    return accessEntry.getValue();
+//                }
+//            }
+
+//            return response.getAccessMapOrDefault(groupId, false);
+
         } catch (StatusRuntimeException e) {
             log.error("Błąd gRPC podczas sprawdzania właściciela grupy {} -> {}: {}", 
                     userId, groupId, e.getMessage());
