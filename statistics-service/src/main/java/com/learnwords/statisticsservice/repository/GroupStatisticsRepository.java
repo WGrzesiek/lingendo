@@ -77,7 +77,7 @@ public class GroupStatisticsRepository {
 
     private static final String SELECT_GROUP_TOP_MEMBERS_SQL = """
         SELECT
-            gm.student_id,
+            gm.student_id AS student_id,
             dictGet('analytics.usernames_dict', 'username', gm.student_id) AS student_name,
             coalesce(sum(gl.points), 0) AS total_points,
             max(ga.event_time) AS last_active
@@ -118,8 +118,8 @@ public class GroupStatisticsRepository {
 
     private static final String SELECT_GROUP_SHARED_COURSES_SQL = """
         SELECT
-            gsd.deck_id,
-            gsd.deck_name,
+            gsd.deck_id AS deck_id,
+            gsd.deck_name AS deck_name,
             count(DISTINCT ga.student_id) AS students_count,
             max(ga.event_time) AS last_activity
         FROM analytics.group_shared_decks gsd FINAL
@@ -134,8 +134,8 @@ public class GroupStatisticsRepository {
 
     private static final String SELECT_TEACHER_GROUPS_SQL = """
         SELECT
-            g.group_id,
-            g.group_name,
+            g.group_id AS group_id,
+            g.group_name AS group_name,
             count(DISTINCT gm.student_id) AS member_count
         FROM analytics.groups g FINAL
         LEFT JOIN analytics.group_members gm FINAL
@@ -215,12 +215,15 @@ public class GroupStatisticsRepository {
     public List<GroupMemberDto> getTopMembers(String groupId, int limit) {
         return jdbcTemplate.query(
                 SELECT_GROUP_TOP_MEMBERS_SQL,
-                (rs, rowNum) -> new GroupMemberDto(
-                        rs.getString("student_id"),
-                        rs.getString("student_name"),
-                        rs.getLong("total_points"),
-                        rs.getTimestamp("last_active").toInstant()
-                ),
+                (rs, rowNum) -> {
+                    Timestamp lastActive = rs.getTimestamp("last_active");
+                    return new GroupMemberDto(
+                            rs.getString("student_id"),
+                            rs.getString("student_name"),
+                            rs.getLong("total_points"),
+                            lastActive != null ? lastActive.toInstant() : Instant.now()
+                    );
+                },
                 groupId, limit
         );
     }
@@ -232,14 +235,17 @@ public class GroupStatisticsRepository {
     public List<GroupActivityItemDto> getActivityFeed(String groupId, int limit) {
         return jdbcTemplate.query(
                 SELECT_GROUP_ACTIVITY_FEED_SQL,
-                (rs, rowNum) -> new GroupActivityItemDto(
-                        rs.getTimestamp("event_time").toInstant(),
-                        rs.getString("student_id"),
-                        rs.getString("student_name"),
-                        rs.getString("activity_type"),
-                        rs.getString("deck_id"),
-                        rs.getString("deck_name")
-                ),
+                (rs, rowNum) -> {
+                    Timestamp eventTime = rs.getTimestamp("event_time");
+                    return new GroupActivityItemDto(
+                            eventTime != null ? eventTime.toInstant() : Instant.now(),
+                            rs.getString("student_id"),
+                            rs.getString("student_name"),
+                            rs.getString("activity_type"),
+                            rs.getString("deck_id"),
+                            rs.getString("deck_name")
+                    );
+                },
                 groupId, limit
         );
     }
@@ -262,12 +268,15 @@ public class GroupStatisticsRepository {
     public List<GroupCourseDto> getSharedCourses(String groupId, int limit) {
         return jdbcTemplate.query(
                 SELECT_GROUP_SHARED_COURSES_SQL,
-                (rs, rowNum) -> new GroupCourseDto(
-                        rs.getString("deck_id"),
-                        rs.getString("deck_name"),
-                        rs.getInt("students_count"),
-                        rs.getTimestamp("last_activity").toInstant()
-                ),
+                (rs, rowNum) -> {
+                    Timestamp lastActivity = rs.getTimestamp("last_activity");
+                    return new GroupCourseDto(
+                            rs.getString("deck_id"),
+                            rs.getString("deck_name"),
+                            rs.getInt("students_count"),
+                            lastActivity != null ? lastActivity.toInstant() : Instant.now()
+                    );
+                },
                 groupId, limit
         );
     }

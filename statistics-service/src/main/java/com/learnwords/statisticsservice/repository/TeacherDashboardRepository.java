@@ -73,7 +73,7 @@ public class TeacherDashboardRepository {
 
     private static final String SELECT_TOP_STUDENTS_SQL = """
         SELECT
-            ts.student_id,
+            ts.student_id AS student_id,
             dictGet('analytics.usernames_dict', 'username', ts.student_id) AS student_name,
             coalesce(sum(upd.points), 0) AS total_points,
             max(tsa.event_time) AS last_active
@@ -91,8 +91,8 @@ public class TeacherDashboardRepository {
 
     private static final String SELECT_TEACHER_COURSES_SQL = """
         SELECT
-            tsd.deck_id,
-            tsd.deck_name,
+            tsd.deck_id AS deck_id,
+            tsd.deck_name AS deck_name,
             count(DISTINCT tsa.student_id) AS students_count,
             max(tsa.event_time) AS last_activity
         FROM analytics.teacher_shared_decks tsd FINAL
@@ -161,12 +161,15 @@ public class TeacherDashboardRepository {
     public List<TeacherStudentDto> getTopStudents(String teacherId, int limit) {
         return jdbcTemplate.query(
                 SELECT_TOP_STUDENTS_SQL,
-                (rs, rowNum) -> new TeacherStudentDto(
-                        rs.getString("student_id"),
-                        rs.getString("student_name"),
-                        rs.getLong("total_points"),
-                        rs.getTimestamp("last_active").toInstant()
-                ),
+                (rs, rowNum) -> {
+                    Timestamp lastActive = rs.getTimestamp("last_active");
+                    return new TeacherStudentDto(
+                            rs.getString("student_id"),
+                            rs.getString("student_name"),
+                            rs.getLong("total_points"),
+                            lastActive != null ? lastActive.toInstant() : Instant.now()
+                    );
+                },
                 teacherId, limit
         );
     }
@@ -174,12 +177,15 @@ public class TeacherDashboardRepository {
     public List<TeacherCourseDto> getTeacherCourses(String teacherId, int limit) {
         return jdbcTemplate.query(
                 SELECT_TEACHER_COURSES_SQL,
-                (rs, rowNum) -> new TeacherCourseDto(
-                        rs.getString("deck_id"),
-                        rs.getString("deck_name"),
-                        rs.getInt("students_count"),
-                        rs.getTimestamp("last_activity").toInstant()
-                ),
+                (rs, rowNum) -> {
+                    Timestamp lastActivity = rs.getTimestamp("last_activity");
+                    return new TeacherCourseDto(
+                            rs.getString("deck_id"),
+                            rs.getString("deck_name"),
+                            rs.getInt("students_count"),
+                            lastActivity != null ? lastActivity.toInstant() : Instant.now()
+                    );
+                },
                 teacherId, limit
         );
     }
@@ -187,14 +193,17 @@ public class TeacherDashboardRepository {
     public List<TeacherActivityItemDto> getActivityFeed(String teacherId, int limit) {
         return jdbcTemplate.query(
                 SELECT_ACTIVITY_FEED_SQL,
-                (rs, rowNum) -> new TeacherActivityItemDto(
-                        rs.getTimestamp("event_time").toInstant(),
-                        rs.getString("student_id"),
-                        rs.getString("student_name"),
-                        rs.getString("activity_type"),
-                        rs.getString("deck_id"),
-                        rs.getString("deck_name")
-                ),
+                (rs, rowNum) -> {
+                    Timestamp eventTime = rs.getTimestamp("event_time");
+                    return new TeacherActivityItemDto(
+                            eventTime != null ? eventTime.toInstant() : Instant.now(),
+                            rs.getString("student_id"),
+                            rs.getString("student_name"),
+                            rs.getString("activity_type"),
+                            rs.getString("deck_id"),
+                            rs.getString("deck_name")
+                    );
+                },
                 teacherId, limit
         );
     }

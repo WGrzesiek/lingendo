@@ -43,11 +43,12 @@ public class UserRepository {
         """;
 
     public Integer getUserStreak(String userId) {
-        return jdbcTemplate.queryForObject(
+        Integer result = jdbcTemplate.queryForObject(
                 get_user_streak_SQL,
                 (rs, rowNum) -> rs.getInt("user_streak"),
                 userId
         );
+        return result != null ? result : 0;
     }
 
     private static final String GET_TOTAL_POINTS_SQL = """
@@ -57,11 +58,12 @@ public class UserRepository {
         """;
 
     public Long getTotalPoints(String userId) {
-        return jdbcTemplate.queryForObject(
+        Long result = jdbcTemplate.queryForObject(
                 GET_TOTAL_POINTS_SQL,
                 ((rs, rowNum) -> rs.getLong("total_points")),
                 userId
         );
+        return result != null ? result : 0L;
     }
 
     private static final String GET_POINTS_PER_MONTH_BY_USER = """

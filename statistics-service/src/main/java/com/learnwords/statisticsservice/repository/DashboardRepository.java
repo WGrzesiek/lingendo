@@ -71,23 +71,32 @@ public class DashboardRepository {
     }
 
     public int getStreakDays(String userId) {
-        String result =  jdbcTemplate.queryForObject(
+        String result = jdbcTemplate.queryForObject(
                 GET_STREAK_SQL,
                 String.class,
                 userId
         );
-        return Integer.parseInt(result.replaceAll("\\D+", ""));
+        if (result == null || result.isEmpty()) {
+            return 0;
+        }
+        String digits = result.replaceAll("\\D+", "");
+        return digits.isEmpty() ? 0 : Integer.parseInt(digits);
     }
 
     public UserPointsDto getUserPoints(String userId) {
-        return jdbcTemplate.queryForObject(
+        UserPointsDto result = jdbcTemplate.queryForObject(
                 GET_USER_POINTS_SQL,
-                (rs, rowNum) -> new UserPointsDto(
-                        rs.getLong("total_points"),
-                        rs.getLong("points_this_week")
-                ),
+                (rs, rowNum) -> {
+                    long totalPoints = rs.getLong("total_points");
+                    long pointsThisWeek = rs.getLong("points_this_week");
+                    return new UserPointsDto(
+                            rs.wasNull() ? 0L : totalPoints,
+                            rs.wasNull() ? 0L : pointsThisWeek
+                    );
+                },
                 userId
         );
+        return result != null ? result : new UserPointsDto(0L, 0L);
     }
 
     private static final String GET_RECENT_ACTIVITY_SQL = """

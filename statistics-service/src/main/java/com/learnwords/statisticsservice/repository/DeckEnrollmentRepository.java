@@ -68,14 +68,19 @@ public class DeckEnrollmentRepository {
 
 
     public UserPointsDto getUserPoints(String userId) {
-        return jdbcTemplate.queryForObject(
+        UserPointsDto result = jdbcTemplate.queryForObject(
                 GET_USER_POINTS_SQL,
-                (rs, rowNum) -> new UserPointsDto(
-                        rs.getLong("total_points"),
-                        rs.getLong("points_this_week")
-                ),
+                (rs, rowNum) -> {
+                    long totalPoints = rs.getLong("total_points");
+                    long pointsThisWeek = rs.getLong("points_this_week");
+                    return new UserPointsDto(
+                            rs.wasNull() ? 0L : totalPoints,
+                            rs.wasNull() ? 0L : pointsThisWeek
+                    );
+                },
                 userId
         );
+        return result != null ? result : new UserPointsDto(0L, 0L);
     }
 
     private static final String GET_TOTAL_STUDENTS_FOR_DECK_SQL = """
@@ -85,11 +90,12 @@ public class DeckEnrollmentRepository {
     """;
 
     public Long getTotalStudentsForDeck(String deckId) {
-        return jdbcTemplate.queryForObject(
+        Long result = jdbcTemplate.queryForObject(
                 GET_TOTAL_STUDENTS_FOR_DECK_SQL,
                 (rs, rowNum) -> rs.getLong("total_students"),
                 deckId
         );
+        return result != null ? result : 0L;
     }
 
     private static final String GET_TOTAL_COMPLETED_STUDENTS_FOR_DECK_SQL = """
@@ -99,11 +105,12 @@ public class DeckEnrollmentRepository {
     """;
 
     public Long getTotalCompletedStudentsForDeck(String deckId) {
-        return jdbcTemplate.queryForObject(
+        Long result = jdbcTemplate.queryForObject(
                 GET_TOTAL_COMPLETED_STUDENTS_FOR_DECK_SQL,
                 (rs, rowNum) -> rs.getLong("total_completed_students"),
                 deckId
         );
+        return result != null ? result : 0L;
     }
 
     private static final String  GET_TOTAL_STUDENTS_FOR_DECKS_SQL = """
@@ -165,11 +172,12 @@ public class DeckEnrollmentRepository {
     """;
 
     public Long getDeckEnrollmentsCountByUser(String userId) {
-        return jdbcTemplate.queryForObject(
+        Long result = jdbcTemplate.queryForObject(
                 GET_DECK_ENROLLMENTS_COUNT_BY_USER_SQL,
                 (rs, rowNum) -> rs.getLong("enrollments_count"),
                 userId
         );
+        return result != null ? result : 0L;
     }
 
     public Long getDeckEnrollmentsCountByUser(String userId, Integer lastDays) {
@@ -177,12 +185,13 @@ public class DeckEnrollmentRepository {
             return getDeckEnrollmentsCountByUser(userId);
         }
         Instant since = Instant.now().minusSeconds(lastDays * 24L * 60L * 60L);
-        return jdbcTemplate.queryForObject(
+        Long result = jdbcTemplate.queryForObject(
                 GET_DECK_ENROLLMENTS_COUNT_BY_USER_SQL_WITH_DATE,
                 (rs, rowNum) -> rs.getLong("enrollments_count"),
                 userId,
                 since
         );
+        return result != null ? result : 0L;
     }
 
     private static final String GET_DECK_COMPLETIONS_COUNT_BY_USER_SQL = """
@@ -198,11 +207,12 @@ public class DeckEnrollmentRepository {
     """;
 
     public Long getDeckCompletionsCountByUser(String userId) {
-        return jdbcTemplate.queryForObject(
+        Long result = jdbcTemplate.queryForObject(
                 GET_DECK_COMPLETIONS_COUNT_BY_USER_SQL,
                 (rs, rowNum) -> rs.getLong("completions_count"),
                 userId
         );
+        return result != null ? result : 0L;
     }
 
     public Long getDeckCompletionsCountByUser(String userId, Integer lastDays) {
@@ -211,11 +221,12 @@ public class DeckEnrollmentRepository {
         }
         Instant threshold = Instant.now().minus(lastDays.longValue(), ChronoUnit.DAYS);
         Timestamp ts = Timestamp.from(threshold);
-        return jdbcTemplate.queryForObject(
+        Long result = jdbcTemplate.queryForObject(
                 GET_DECK_COMPLETIONS_COUNT_BY_USER_SQL_WITH_DATE,
                 (rs, rowNum) -> rs.getLong("completions_count"),
                 userId,
                 ts
         );
+        return result != null ? result : 0L;
     }
 }
