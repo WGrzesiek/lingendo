@@ -56,13 +56,21 @@ public class DeckEnrollmentServiceImpl implements DeckEnrollmentService {
         log.info("Przypisanie uzytkownika {} do talii {} (rola: {}, źródło: {})", 
                 userId, deckId, context.role(), context.source());
         
+        Long flashcardsPerSession = createDeckEnrollmentDto != null && createDeckEnrollmentDto.getHowManyFlashcardsForOneSession() != null
+                ? createDeckEnrollmentDto.getHowManyFlashcardsForOneSession()
+                : deck.getHowManyFlashcardsForOneSession();
+        
+        LearnAlgorithm algorithm = createDeckEnrollmentDto != null && createDeckEnrollmentDto.getPreferredAlgorithm() != null
+                ? createDeckEnrollmentDto.getPreferredAlgorithm()
+                : deck.getLearnAlgorithm();
+        
         DeckEnrollment deckEnrollment = DeckEnrollment.builder()
                 .userId(userId)
                 .deck(deck)
                 .role(context.role())
                 .source(context.source())
-                .howManyFlashcardsForOneSession(createDeckEnrollmentDto.getHowManyFlashcardsForOneSession())
-                .preferredAlgorithm(createDeckEnrollmentDto.getPreferredAlgorithm())
+                .howManyFlashcardsForOneSession(flashcardsPerSession)
+                .preferredAlgorithm(algorithm)
                 .joinedAt(Instant.now())
                 .build();
         deckEnrollmentRepository.save(deckEnrollment);
