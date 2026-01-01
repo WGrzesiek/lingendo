@@ -8,8 +8,11 @@ import com.learnwords.deckservice.dto.deck.DeckDetailsDto;
 import com.learnwords.deckservice.dto.deck.DeckDto;
 import com.learnwords.deckservice.entity.Deck;
 import com.learnwords.deckservice.enums.*;
+import com.learnwords.deckservice.exception.exceptions.DeckNotFoundException;
 import com.learnwords.deckservice.exception.exceptions.DeckWithThisNameForThisUserAlreadyExistsException;
+import com.learnwords.deckservice.exception.exceptions.UserPermissionsMissing;
 import com.learnwords.deckservice.repository.DeckRepository;
+import com.learnwords.deckservice.service.DeckAccessService;
 import com.learnwords.deckservice.service.DeckEnrollmentService;
 import com.learnwords.deckservice.service.DeckService;
 import com.learnwords.deckservice.service.event.GenericEventProducer;
@@ -58,13 +61,17 @@ public class DeckServiceImpl implements DeckService {
     private final DeckRepository deckRepository;
     private final GenericEventProducer eventProducer;
     private final UserGrcpClient userGrcpClient;
+    private final DeckAccessService deckAccessService;
 
     public DeckServiceImpl(
             DeckRepository deckRepository,
-            GenericEventProducer eventProducer, UserGrcpClient userGrcpClient) {
+            GenericEventProducer eventProducer, 
+            UserGrcpClient userGrcpClient,
+            DeckAccessService deckAccessService) {
         this.deckRepository = deckRepository;
         this.eventProducer = eventProducer;
         this.userGrcpClient = userGrcpClient;
+        this.deckAccessService = deckAccessService;
     }
 
     /**
@@ -181,17 +188,28 @@ public class DeckServiceImpl implements DeckService {
     }
 
     /**
-     * Pobiera podstawowe informacje o talii
+     * Pobiera podstawowe informacje o talii.
+     * Sprawdza czy użytkownik ma dostęp (jest właścicielem, talia jest publiczna lub ma udostępnienie).
      * 
      * @param deckId ID talii
      * @param userId ID użytkownika próbującego pobrać talię
      * @return DeckDto z podstawowymi informacjami o talii
+     * @throws DeckNotFoundException gdy talia nie istnieje
+     * @throws UserPermissionsMissing gdy użytkownik nie ma dostępu do talii
      */
     @Override
     public DeckDto getDeckById(String deckId, String userId) {
-        Deck deck = getDeckIfUserHasPermissions(deckRepository, deckId, userId);
+        Deck deck = deckRepository.findById(deckId)
+                .orElseThrow(() -> new DeckNotFoundException(
+                        "Talia o ID '%s' nie istnieje".formatted(deckId)
+                ));
+        
+        if (!deckAccessService.canAccessDeck(userId, deckId, deck.getOwnerId())) {
+            log.warn("Użytkownik '{}' nie ma dostępu do talii o ID '{}'", userId, deckId);
+            throw new UserPermissionsMissing("Użytkownik nie ma dostępu do tej talii");
+        }
 
-        log.info("Pomyślnie pobrano talię o ID '{}'", deckId);
+        log.info("Pomyślnie pobrano talię o ID '{}' dla użytkownika '{}'", deckId, userId);
         return mapToDeckDto(deck, true);
     }
 
