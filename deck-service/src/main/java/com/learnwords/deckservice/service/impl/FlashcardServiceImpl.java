@@ -17,6 +17,7 @@ import com.learnwords.deckservice.exception.exceptions.InvalidWordDataException;
 import com.learnwords.deckservice.exception.exceptions.UserPermissionsMissing;
 import com.learnwords.deckservice.repository.DeckRepository;
 import com.learnwords.deckservice.repository.FlashcardRepository;
+import com.learnwords.deckservice.service.DeckAccessService;
 import com.learnwords.deckservice.service.algorithm.GrzesiekAlgorithm;
 import com.learnwords.deckservice.service.FlashcardService;
 import com.learnwords.deckservice.service.event.GenericEventProducer;
@@ -68,6 +69,7 @@ public class FlashcardServiceImpl implements FlashcardService {
     private final DeckRepository deckRepository;
     private final VocabularyGrpcClient vocabularyGrpcClient;
     private final GenericEventProducer eventProducer;
+    private final DeckAccessService deckAccessService;
 
     /**
      * Konstruktor z dependency injection.
@@ -75,12 +77,19 @@ public class FlashcardServiceImpl implements FlashcardService {
      * @param flashcardRepository repozytorium fiszek
      * @param deckRepository repozytorium talii
      * @param vocabularyGrpcClient klient gRPC do komunikacji z Vocabulary Service
+     * @param deckAccessService serwis sprawdzający dostęp do talii
      */
-    public FlashcardServiceImpl(FlashcardRepository flashcardRepository, DeckRepository deckRepository, VocabularyGrpcClient vocabularyGrpcClient, GenericEventProducer eventProducer) {
+    public FlashcardServiceImpl(
+            FlashcardRepository flashcardRepository, 
+            DeckRepository deckRepository, 
+            VocabularyGrpcClient vocabularyGrpcClient, 
+            GenericEventProducer eventProducer,
+            DeckAccessService deckAccessService) {
         this.flashcardRepository = flashcardRepository;
         this.deckRepository = deckRepository;
         this.vocabularyGrpcClient = vocabularyGrpcClient;
         this.eventProducer = eventProducer;
+        this.deckAccessService = deckAccessService;
     }
 
     @Override
@@ -539,10 +548,12 @@ public class FlashcardServiceImpl implements FlashcardService {
                     log.error("Nie znaleziono fiszki - flashcardId: '{}'", flashcardId);
                     return new FlashcardNotFoundException(flashcardId);
                 });
-        if (!flashcard.getDeck().getOwnerId().equals(userId)) {
-            log.warn("Brak uprawnień do fiszki - userId: '{}', flashcardId: '{}', deckOwnerId: '{}'", 
-                    userId, flashcardId, flashcard.getDeck().getOwnerId());
-            throw new UserPermissionsMissing("Użytkownik nie ma uprawnień do tej fiszki");
+        
+        Deck deck = flashcard.getDeck();
+        if (!deckAccessService.canAccessDeck(userId, deck.getId(), deck.getOwnerId())) {
+            log.warn("Brak dostępu do fiszki - userId: '{}', flashcardId: '{}', deckId: '{}'", 
+                    userId, flashcardId, deck.getId());
+            throw new UserPermissionsMissing("Użytkownik nie ma dostępu do tej fiszki");
         }
         return flashcard;
     }
