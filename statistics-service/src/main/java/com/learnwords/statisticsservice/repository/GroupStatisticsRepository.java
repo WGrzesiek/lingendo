@@ -125,15 +125,17 @@ public class GroupStatisticsRepository {
 
     private static final String SELECT_GROUP_LEADERBOARD_SQL = """
         SELECT
-            student_id,
-            dictGet('analytics.usernames_dict', 'username', student_id) AS student_name,
-            sum(points) AS total_points,
-            sum(sessions) AS total_sessions,
-            if(sum(total) > 0, sum(correct) * 100.0 / sum(total), 0) AS accuracy
-        FROM analytics.group_leaderboard
-        WHERE group_id = ? AND day >= today() - ?
-        GROUP BY student_id
-        ORDER BY total_points DESC
+            fa.user_id AS student_id,
+            dictGet('analytics.usernames_dict', 'username', fa.user_id) AS student_name,
+            countIf(fa.correct = 1) AS correct_answers,
+            count(DISTINCT fa.session_id) AS total_sessions,
+            if(count() > 0, countIf(fa.correct = 1) * 100.0 / count(), 0) AS accuracy
+        FROM analytics.flashcard_answers fa
+        INNER JOIN analytics.group_members gm FINAL ON fa.user_id = gm.student_id
+        WHERE gm.group_id = ? AND gm.status = 'ACTIVE'
+          AND fa.event_time >= today() - ?
+        GROUP BY fa.user_id
+        ORDER BY correct_answers DESC
         LIMIT ?
         """;
 
@@ -306,7 +308,7 @@ public class GroupStatisticsRepository {
                         rowNum + 1,
                         rs.getString("student_id"),
                         rs.getString("student_name"),
-                        rs.getLong("total_points"),
+                        rs.getLong("correct_answers"),
                         rs.getInt("total_sessions"),
                         rs.getDouble("accuracy")
                 ),

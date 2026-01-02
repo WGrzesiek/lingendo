@@ -7,7 +7,7 @@ public record GroupLeaderboardEntryDto(
         int rank,
         String studentId,
         String studentName,
-        long points,
+        long correctAnswers,
         int sessions,
         double accuracy
 ) {}
