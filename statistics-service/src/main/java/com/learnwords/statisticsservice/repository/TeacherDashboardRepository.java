@@ -3,6 +3,7 @@ package com.learnwords.statisticsservice.repository;
 import com.learnwords.statisticsservice.dto.teacher.TeacherActivityItemDto;
 import com.learnwords.statisticsservice.dto.teacher.TeacherCourseDto;
 import com.learnwords.statisticsservice.dto.teacher.TeacherDashboardStatsDto;
+import com.learnwords.statisticsservice.dto.teacher.TeacherStatsDetailsDto;
 import com.learnwords.statisticsservice.dto.teacher.TeacherStudentDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -10,7 +11,9 @@ import org.springframework.stereotype.Repository;
 
 import java.sql.Timestamp;
 import java.time.Instant;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Repository
 @RequiredArgsConstructor
@@ -113,6 +116,59 @@ public class TeacherDashboardRepository {
         LIMIT ?
         """;
 
+    // === Szczegółowe statystyki nauczyciela ===
+    
+    private static final String SELECT_TEACHER_CREATED_DECKS_SQL = """
+        SELECT count()
+        FROM analytics.deck_created
+        WHERE user_id = ?
+        """;
+
+    private static final String SELECT_TEACHER_CREATED_FLASHCARDS_SQL = """
+        SELECT count()
+        FROM analytics.flashcard_created
+        WHERE user_id = ?
+        """;
+
+    private static final String SELECT_STUDENT_POINTS_SQL = """
+        SELECT coalesce(sum(upd.points), 0)
+        FROM analytics.user_points_daily upd
+        INNER JOIN analytics.teacher_students ts FINAL ON upd.user_id = ts.student_id
+        WHERE ts.teacher_id = ?
+          AND ts.status = 'ACTIVE'
+        """;
+
+    private static final String SELECT_STUDENT_SESSIONS_SQL = """
+        SELECT count()
+        FROM analytics.sessions_finished sf
+        INNER JOIN analytics.teacher_students ts FINAL ON sf.user_id = ts.student_id
+        WHERE ts.teacher_id = ?
+          AND ts.status = 'ACTIVE'
+        """;
+
+    private static final String SELECT_STUDENT_ANSWERS_SQL = """
+        SELECT 
+            coalesce(countIf(correct = 1), 0) AS correct_answers,
+            count() AS total_answers
+        FROM analytics.flashcard_answers fa
+        INNER JOIN analytics.teacher_students ts FINAL ON fa.user_id = ts.student_id
+        WHERE ts.teacher_id = ?
+          AND ts.status = 'ACTIVE'
+        """;
+
+    private static final String SELECT_STUDENT_POINTS_PER_MONTH_SQL = """
+        SELECT 
+            formatDateTime(date, '%Y%m') AS year_month,
+            sum(points) AS total_points
+        FROM analytics.user_points_daily upd
+        INNER JOIN analytics.teacher_students ts FINAL ON upd.user_id = ts.student_id
+        WHERE ts.teacher_id = ?
+          AND ts.status = 'ACTIVE'
+          AND upd.date >= toStartOfMonth(today() - INTERVAL 11 MONTH)
+        GROUP BY year_month
+        ORDER BY year_month
+        """;
+
     public void addStudent(String teacherId, String studentId) {
         jdbcTemplate.update(INSERT_STUDENT_SQL, teacherId, studentId);
     }
@@ -205,6 +261,75 @@ public class TeacherDashboardRepository {
                     );
                 },
                 teacherId, limit
+        );
+    }
+
+    public TeacherStatsDetailsDto getTeacherStatsDetails(String teacherId) {
+        // Utworzone kursy
+        Integer createdDecksRaw = jdbcTemplate.queryForObject(
+                SELECT_TEACHER_CREATED_DECKS_SQL, Integer.class, teacherId);
+        int createdDecks = createdDecksRaw != null ? createdDecksRaw : 0;
+
+        // Utworzone fiszki
+        Integer createdFlashcardsRaw = jdbcTemplate.queryForObject(
+                SELECT_TEACHER_CREATED_FLASHCARDS_SQL, Integer.class, teacherId);
+        int createdFlashcards = createdFlashcardsRaw != null ? createdFlashcardsRaw : 0;
+
+        // Suma punktów studentów
+        Long studentPointsRaw = jdbcTemplate.queryForObject(
+                SELECT_STUDENT_POINTS_SQL, Long.class, teacherId);
+        long totalStudentPoints = studentPointsRaw != null ? studentPointsRaw : 0L;
+
+        // Sesje ukończone przez studentów
+        Long studentSessionsRaw = jdbcTemplate.queryForObject(
+                SELECT_STUDENT_SESSIONS_SQL, Long.class, teacherId);
+        long totalStudentSessions = studentSessionsRaw != null ? studentSessionsRaw : 0L;
+
+        // Poprawne i wszystkie odpowiedzi
+        long[] answers = jdbcTemplate.queryForObject(
+                SELECT_STUDENT_ANSWERS_SQL,
+                (rs, rowNum) -> new long[] {
+                        rs.getLong("correct_answers"),
+                        rs.getLong("total_answers")
+                },
+                teacherId
+        );
+        long totalCorrectAnswers = answers != null ? answers[0] : 0L;
+        long totalAnswers = answers != null ? answers[1] : 0L;
+        double averageAccuracy = totalAnswers > 0 
+                ? Math.round((double) totalCorrectAnswers / totalAnswers * 1000) / 10.0 
+                : 0.0;
+
+        // Uczniowie
+        Integer totalStudentsRaw = jdbcTemplate.queryForObject(
+                SELECT_TOTAL_STUDENTS_SQL, Integer.class, teacherId);
+        int totalStudents = totalStudentsRaw != null ? totalStudentsRaw : 0;
+
+        Integer activeStudentsRaw = jdbcTemplate.queryForObject(
+                SELECT_ACTIVE_STUDENTS_SQL, Integer.class, teacherId);
+        int activeStudents = activeStudentsRaw != null ? activeStudentsRaw : 0;
+
+        // Punkty na miesiąc
+        Map<String, Long> pointsPerMonth = new HashMap<>();
+        jdbcTemplate.query(
+                SELECT_STUDENT_POINTS_PER_MONTH_SQL,
+                (rs) -> {
+                    pointsPerMonth.put(rs.getString("year_month"), rs.getLong("total_points"));
+                },
+                teacherId
+        );
+
+        return new TeacherStatsDetailsDto(
+                createdDecks,
+                createdFlashcards,
+                totalStudentPoints,
+                totalStudentSessions,
+                averageAccuracy,
+                activeStudents,
+                totalStudents,
+                totalCorrectAnswers,
+                totalAnswers,
+                pointsPerMonth
         );
     }
 }

@@ -159,4 +159,24 @@ public class TeacherDashboardController {
         log.debug("Pobieranie {} aktywności dla nauczyciela: {}", limit, teacherId);
         return ResponseEntity.ok(teacherDashboardService.getActivityFeed(teacherId, limit));
     }
+
+    @Operation(
+            summary = "Pobierz szczegółowe statystyki nauczyciela",
+            description = "Zwraca szczegółowe statystyki: utworzone kursy, fiszki, suma punktów uczniów, sesje, dokładność, aktywni uczniowie, historia punktów."
+    )
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Szczegółowe statystyki pobrane poprawnie",
+                    content = @Content(schema = @Schema(implementation = TeacherStatsDetailsDto.class))
+            )
+    })
+    @GetMapping("/stats-details")
+    public ResponseEntity<TeacherStatsDetailsDto> getTeacherStatsDetails(
+            @Parameter(description = "ID nauczyciela", required = true)
+            @RequestHeader(USER_ID_HEADER) String teacherId
+    ) {
+        log.debug("Pobieranie szczegółowych statystyk dla nauczyciela: {}", teacherId);
+        return ResponseEntity.ok(teacherDashboardService.getTeacherStatsDetails(teacherId));
+    }
 }

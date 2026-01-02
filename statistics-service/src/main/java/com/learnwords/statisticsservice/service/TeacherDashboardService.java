@@ -69,4 +69,9 @@ public class TeacherDashboardService {
         log.debug("Pobieranie {} aktywności dla nauczyciela: {}", limit, teacherId);
         return teacherDashboardRepository.getActivityFeed(teacherId, limit);
     }
+
+    public TeacherStatsDetailsDto getTeacherStatsDetails(String teacherId) {
+        log.debug("Pobieranie szczegółowych statystyk dla nauczyciela: {}", teacherId);
+        return teacherDashboardRepository.getTeacherStatsDetails(teacherId);
+    }
 }
