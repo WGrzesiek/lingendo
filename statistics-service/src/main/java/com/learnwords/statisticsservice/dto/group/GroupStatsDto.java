@@ -8,5 +8,10 @@ public record GroupStatsDto(
         int activeMembers,
         int sharedDecks,
         long completedLessons,
-        long totalPoints
+        long totalPoints,
+        long totalWordsLearned,
+        long totalStudyTimeMinutes,
+        long totalSessions,
+        double averageAccuracy,
+        double averageWordsPerDay
 ) {}
