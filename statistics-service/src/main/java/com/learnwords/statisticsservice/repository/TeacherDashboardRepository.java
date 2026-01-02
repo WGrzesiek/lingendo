@@ -158,13 +158,13 @@ public class TeacherDashboardRepository {
 
     private static final String SELECT_STUDENT_POINTS_PER_MONTH_SQL = """
         SELECT 
-            formatDateTime(date, '%Y%m') AS year_month,
-            sum(points) AS total_points
+            formatDateTime(upd.day, '%Y%m') AS year_month,
+            sum(upd.points) AS total_points
         FROM analytics.user_points_daily upd
         INNER JOIN analytics.teacher_students ts FINAL ON upd.user_id = ts.student_id
         WHERE ts.teacher_id = ?
           AND ts.status = 'ACTIVE'
-          AND upd.date >= toStartOfMonth(today() - INTERVAL 11 MONTH)
+          AND upd.day >= toStartOfMonth(today() - INTERVAL 11 MONTH)
         GROUP BY year_month
         ORDER BY year_month
         """;
