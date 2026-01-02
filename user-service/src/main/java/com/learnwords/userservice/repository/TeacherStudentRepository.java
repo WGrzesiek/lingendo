@@ -27,6 +27,12 @@ public interface TeacherStudentRepository extends JpaRepository<TeacherStudent, 
             @Param("status") TeacherStudentStatus status,
             Pageable pageable);
 
+    @Query("SELECT ts FROM TeacherStudent ts WHERE ts.teacher.id = :teacherId AND ts.status IN :statuses")
+    Page<TeacherStudent> findStudentsByTeacherIdAndStatuses(
+            @Param("teacherId") String teacherId,
+            @Param("statuses") List<TeacherStudentStatus> statuses,
+            Pageable pageable);
+
     List<TeacherStudent> findByTeacherIdAndStatus(String teacherId, TeacherStudentStatus status);
 
     @Query("SELECT ts FROM TeacherStudent ts WHERE ts.student.id = :studentId AND ts.status = :status")

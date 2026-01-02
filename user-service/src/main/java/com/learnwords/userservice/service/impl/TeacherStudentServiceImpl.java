@@ -27,6 +27,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.security.SecureRandom;
 import java.time.Instant;
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -133,7 +134,10 @@ public class TeacherStudentServiceImpl implements TeacherStudentService {
         log.debug("Pobieranie uczniów nauczyciela: {}", teacherId);
         PageRequest pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
         return teacherStudentRepository
-                .findStudentsByTeacherId(teacherId, TeacherStudentStatus.ACTIVE, pageable)
+                .findStudentsByTeacherIdAndStatuses(
+                        teacherId,
+                        List.of(TeacherStudentStatus.ACTIVE, TeacherStudentStatus.BLOCKED),
+                        pageable)
                 .map(this::mapToStudentResponse);
     }
 
