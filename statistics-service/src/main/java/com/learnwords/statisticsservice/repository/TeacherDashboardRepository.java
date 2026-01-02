@@ -120,13 +120,13 @@ public class TeacherDashboardRepository {
     
     private static final String SELECT_TEACHER_CREATED_DECKS_SQL = """
         SELECT count()
-        FROM analytics.deck_created
+        FROM analytics.decks_created
         WHERE user_id = ?
         """;
 
     private static final String SELECT_TEACHER_CREATED_FLASHCARDS_SQL = """
         SELECT count()
-        FROM analytics.flashcard_created
+        FROM analytics.flashcards_created
         WHERE user_id = ?
         """;
 
