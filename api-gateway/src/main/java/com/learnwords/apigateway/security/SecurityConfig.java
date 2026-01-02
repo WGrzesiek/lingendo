@@ -86,7 +86,7 @@ public class SecurityConfig {
                 "http://100.74.36.70:3000"
         ));
         corsConfig.setMaxAge(8000L);
-        corsConfig.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        corsConfig.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
         corsConfig.setAllowedHeaders(List.of("*"));
         corsConfig.setAllowCredentials(true);
 
