@@ -77,12 +77,12 @@ public class GroupStatisticsRepository {
 
     private static final String SELECT_GROUP_EXTENDED_STATS_SQL = """
         SELECT
-            coalesce(sum(sf.correct_answers + sf.incorrect_answers), 0) AS total_words_learned,
-            toInt64(coalesce(sum(dateDiff('second', sf.started_at, sf.event_time)) / 60, 0)) AS total_study_time_minutes,
-            count() AS total_sessions,
-            if(count() > 0, avg(sf.correct_answers * 100.0 / nullif(sf.correct_answers + sf.incorrect_answers, 0)), 0) AS average_accuracy
-        FROM analytics.sessions_finished sf
-        INNER JOIN analytics.group_members gm FINAL ON sf.user_id = gm.student_id
+            countIf(fa.correct = 1) AS total_correct_answers,
+            toInt64(coalesce(sum(fa.time_taken_ms) / 60000, 0)) AS total_study_time_minutes,
+            count(DISTINCT fa.session_id) AS total_sessions,
+            if(count() > 0, countIf(fa.correct = 1) * 100.0 / count(), 0) AS average_accuracy
+        FROM analytics.flashcard_answers fa
+        INNER JOIN analytics.group_members gm FINAL ON fa.user_id = gm.student_id
         WHERE gm.group_id = ? AND gm.status = 'ACTIVE'
         """;
 
@@ -225,11 +225,11 @@ public class GroupStatisticsRepository {
         long totalPoints = totalPointsRaw != null ? totalPointsRaw : 0L;
 
         // Rozszerzone statystyki
-        record ExtendedStats(long totalWordsLearned, long totalStudyTimeMinutes, long totalSessions, double averageAccuracy) {}
+        record ExtendedStats(long totalCorrectAnswers, long totalStudyTimeMinutes, long totalSessions, double averageAccuracy) {}
         ExtendedStats extendedStats = jdbcTemplate.queryForObject(
                 SELECT_GROUP_EXTENDED_STATS_SQL,
                 (rs, rowNum) -> new ExtendedStats(
-                        rs.getLong("total_words_learned"),
+                        rs.getLong("total_correct_answers"),
                         rs.getLong("total_study_time_minutes"),
                         rs.getLong("total_sessions"),
                         rs.getDouble("average_accuracy")
@@ -240,7 +240,7 @@ public class GroupStatisticsRepository {
         Double avgWordsPerDayRaw = jdbcTemplate.queryForObject(
                 SELECT_GROUP_AVG_WORDS_PER_DAY_SQL, Double.class, groupId);
 
-        long totalWordsLearned = extendedStats != null ? extendedStats.totalWordsLearned() : 0L;
+        long totalWordsLearned = extendedStats != null ? extendedStats.totalCorrectAnswers() : 0L;
         long totalStudyTimeMinutes = extendedStats != null ? extendedStats.totalStudyTimeMinutes() : 0L;
         long totalSessions = extendedStats != null ? extendedStats.totalSessions() : 0L;
         double averageAccuracy = extendedStats != null ? extendedStats.averageAccuracy() : 0.0;
