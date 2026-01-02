@@ -78,7 +78,7 @@ public class GroupStatisticsRepository {
     private static final String SELECT_GROUP_EXTENDED_STATS_SQL = """
         SELECT
             coalesce(sum(sf.correct_answers + sf.incorrect_answers), 0) AS total_words_learned,
-            coalesce(sum(dateDiff('second', sf.started_at, sf.event_time)) / 60, 0) AS total_study_time_minutes,
+            toInt64(coalesce(sum(dateDiff('second', sf.started_at, sf.event_time)) / 60, 0)) AS total_study_time_minutes,
             count() AS total_sessions,
             if(count() > 0, avg(sf.correct_answers * 100.0 / nullif(sf.correct_answers + sf.incorrect_answers, 0)), 0) AS average_accuracy
         FROM analytics.sessions_finished sf
