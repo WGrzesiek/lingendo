@@ -551,39 +551,45 @@ public class DeckController {
 //        log.info("Znaleziono {} talii użytkownika {}", decks.size(), userId);
 //        return ResponseEntity.ok(decks);
 //    }
-//    /**
-//     * Pobiera wszystkie talie publiczne.
-//     *
-//     * <p>Zwraca listę wszystkich talii oznaczonych jako publiczne.
-//     * Endpoint nie wymaga autoryzacji - każdy może przeglądać publiczne talie.
-//     *
-//     * <p>Publiczne talie mogą być:
-//     * <ul>
-//     *   <li>Utworzone przez użytkowników i udostępnione publicznie</li>
-//     *   <li>Talie systemowe dostępne dla wszystkich</li>
-//     *   <li>Talie administracyjne jako materiały edukacyjne</li>
-//     * </ul>
-//     *
-//     * @return lista wszystkich publicznych talii
-//     */
-//    @Operation(
-//        summary = "Pobierz wszystkie talie publiczne",
-//        description = "Pobiera listę wszystkich talii oznaczonych jako publiczne. Nie wymaga autoryzacji."
-//    )
-//    @ApiResponses(value = {
-//        @ApiResponse(
-//            responseCode = "200",
-//            description = "Lista publicznych talii",
-//            content = @Content(schema = @Schema(implementation = DeckDto.class))
-//        )
-//    })
-//    @GetMapping("/public")
-//    public ResponseEntity<List<DeckDto>> getPublicDecks() {
-//        log.debug("Pobieranie wszystkich talii publicznych");
-//        List<DeckDto> decks = deckService.getPublicDecks();
-//        log.info("Znaleziono {} talii publicznych", decks.size());
-//        return ResponseEntity.ok(decks);
-//    }
+
+    /**
+     * Pobiera wszystkie talie publiczne z paginacją.
+     *
+     * <p>Zwraca stronę wszystkich talii oznaczonych jako publiczne.
+     * Endpoint nie wymaga autoryzacji - każdy może przeglądać publiczne talie.
+     *
+     * <p>Publiczne talie mogą być:
+     * <ul>
+     *   <li>Utworzone przez użytkowników i udostępnione publicznie</li>
+     *   <li>Talie systemowe dostępne dla wszystkich</li>
+     *   <li>Talie administracyjne jako materiały edukacyjne</li>
+     * </ul>
+     *
+     * @param owner opcjonalny filtr typu właściciela (USER, ADMIN, SYSTEM)
+     * @param page numer strony (domyślnie 0)
+     * @param size rozmiar strony (domyślnie 20)
+     * @return strona publicznych talii
+     */
+    @Operation(
+        summary = "Pobierz wszystkie talie publiczne",
+        description = "Pobiera stronę wszystkich talii oznaczonych jako publiczne. Nie wymaga autoryzacji."
+    )
+    @ApiResponses(value = {
+        @ApiResponse(
+            responseCode = "200",
+            description = "Strona publicznych talii",
+            content = @Content(schema = @Schema(implementation = DeckDto.class))
+        )
+    })
+    @GetMapping("/public")
+    public ResponseEntity<Page<DeckDto>> getPublicDecks(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size) {
+        log.debug("Pobieranie talii community (PUBLIC + COMMUNITY): page={}, size={}", page, size);
+        Page<DeckDto> decks = deckService.getPublicDecks(DeckOwner.COMMUNITY, page, size);
+        log.info("Znaleziono {} talii community", decks.getTotalElements());
+        return ResponseEntity.ok(decks);
+    }
 
     /**
      * Zmienia nazwę talii.

@@ -256,6 +256,24 @@ public class DeckServiceImpl implements DeckService {
     }
 
     /**
+     * Pobiera wszystkie publiczne talie (z paginacją).
+     * Nie wymaga userId - zwraca talie wszystkich użytkowników oznaczone jako PUBLIC .
+     *
+     * @param owner Typ właściciela talii (opcjonalne)
+     * @param page Numer strony (0-based)
+     * @param size Rozmiar strony
+     * @return Strona publicznych talii
+     */
+    @Override
+    public Page<DeckDto> getPublicDecks(DeckOwner owner, int page, int size) {
+        log.info("Pobieranie publicznych talii: owner={}, page={}, size={}", owner, page, size);
+        Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
+        Page<Deck> decks = deckRepository.findPublicDecks(owner, pageable);
+        log.info("Znaleziono {} publicznych talii", decks.getTotalElements());
+        return decks.map(deck -> mapToDeckDto(deck, false));
+    }
+
+    /**
      * Pobiera szczegółowe informacje o talii
      * @param deckId ID talii
      * @param userId ID użytkownika próbującego pobrać szczegóły talii

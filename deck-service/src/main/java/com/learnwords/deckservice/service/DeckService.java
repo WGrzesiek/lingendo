@@ -61,6 +61,7 @@ public interface DeckService {
     Deck getDeckById(String deckId);
 
     Page<DeckDto> getDecksByFilter(String userId, List<DeckVisibility> visibility, DeckOwner owner, int page, int size);
+    Page<DeckDto> getPublicDecks(DeckOwner owner, int page, int size);
     DeckDetailsDto getDeckDetailsById(String deckId, String userId); // Szczegóły statyczne (opis, ilość słów)
     DeckDetailsDto editDeckDetails(String deckId, DeckDetailsDto deckDetailsDto, String userId);
     long getTotalFlashcardsCount(String deckId, String userId);
