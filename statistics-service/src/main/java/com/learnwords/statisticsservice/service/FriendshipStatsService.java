@@ -1,7 +1,9 @@
 package com.learnwords.statisticsservice.service;
 
+import com.learnwords.statisticsservice.dto.friendship.FriendEnrichedDto;
 import com.learnwords.statisticsservice.dto.friendship.FriendLeaderboardEntryDto;
 import com.learnwords.statisticsservice.dto.friendship.FriendsStatsDto;
+import com.learnwords.statisticsservice.dto.friendship.UserStatsDto;
 import com.learnwords.statisticsservice.repository.FriendshipStatsRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -32,5 +34,15 @@ public class FriendshipStatsService {
 
     public int countFriends(String userId) {
         return repository.countFriends(userId);
+    }
+
+    public UserStatsDto getUserStats(String targetUserId) {
+        log.debug("Pobieranie statystyk dla użytkownika userId={}", targetUserId);
+        return repository.getUserStats(targetUserId);
+    }
+
+    public List<FriendEnrichedDto> getFriendsEnriched(String userId) {
+        log.debug("Pobieranie wzbogaconej listy znajomych dla userId={}", userId);
+        return repository.getFriendsEnriched(userId);
     }
 }

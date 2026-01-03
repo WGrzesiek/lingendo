@@ -78,16 +78,20 @@ public class TeacherDashboardRepository {
         SELECT
             ts.student_id AS student_id,
             dictGet('analytics.usernames_dict', 'username', ts.student_id) AS student_name,
-            coalesce(sum(upd.points), 0) AS total_points,
+            coalesce(points_agg.total_points, 0) AS total_points,
             max(tsa.event_time) AS last_active
         FROM analytics.teacher_students ts FINAL
-        LEFT JOIN analytics.user_points_daily upd ON ts.student_id = upd.user_id
+        LEFT JOIN (
+            SELECT user_id, sum(points) AS total_points
+            FROM analytics.user_points_daily
+            GROUP BY user_id
+        ) AS points_agg ON ts.student_id = points_agg.user_id
         LEFT JOIN analytics.teacher_student_activity tsa 
             ON ts.teacher_id = tsa.teacher_id 
            AND ts.student_id = tsa.student_id
         WHERE ts.teacher_id = ?
           AND ts.status = 'ACTIVE'
-        GROUP BY ts.student_id
+        GROUP BY ts.student_id, points_agg.total_points
         ORDER BY total_points DESC
         LIMIT ?
         """;

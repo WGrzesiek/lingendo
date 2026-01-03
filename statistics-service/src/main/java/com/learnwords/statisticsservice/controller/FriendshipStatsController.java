@@ -1,7 +1,9 @@
 package com.learnwords.statisticsservice.controller;
 
+import com.learnwords.statisticsservice.dto.friendship.FriendEnrichedDto;
 import com.learnwords.statisticsservice.dto.friendship.FriendLeaderboardEntryDto;
 import com.learnwords.statisticsservice.dto.friendship.FriendsStatsDto;
+import com.learnwords.statisticsservice.dto.friendship.UserStatsDto;
 import com.learnwords.statisticsservice.service.FriendshipStatsService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -84,5 +86,38 @@ public class FriendshipStatsController {
         List<FriendLeaderboardEntryDto> leaderboard = 
                 friendshipStatsService.getLeaderboard(userId, start, end, limit);
         return ResponseEntity.ok(leaderboard);
+    }
+
+    @GetMapping("/user/{targetUserId}")
+    @Operation(
+            summary = "Pobierz statystyki użytkownika",
+            description = "Zwraca szczegółowe statystyki konkretnego użytkownika (dla widoku szczegółów znajomego)"
+    )
+    public ResponseEntity<UserStatsDto> getUserStats(
+            @Parameter(description = "ID zalogowanego użytkownika", required = true)
+            @RequestHeader("X-User-Id") String userId,
+            
+            @Parameter(description = "ID użytkownika, którego statystyki pobieramy", required = true)
+            @PathVariable String targetUserId
+    ) {
+        log.debug("GET /api/v1/stats/friends/user/{} - wywołane przez userId={}", targetUserId, userId);
+        
+        UserStatsDto stats = friendshipStatsService.getUserStats(targetUserId);
+        return ResponseEntity.ok(stats);
+    }
+
+    @GetMapping("/enriched")
+    @Operation(
+            summary = "Pobierz wzbogaconą listę znajomych",
+            description = "Zwraca listę znajomych z punktami i pozycją w rankingu"
+    )
+    public ResponseEntity<List<FriendEnrichedDto>> getFriendsEnriched(
+            @Parameter(description = "ID użytkownika", required = true)
+            @RequestHeader("X-User-Id") String userId
+    ) {
+        log.debug("GET /api/v1/stats/friends/enriched - userId={}", userId);
+        
+        List<FriendEnrichedDto> enriched = friendshipStatsService.getFriendsEnriched(userId);
+        return ResponseEntity.ok(enriched);
     }
 }
