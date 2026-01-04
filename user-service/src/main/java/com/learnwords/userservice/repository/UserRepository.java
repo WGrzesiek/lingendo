@@ -20,9 +20,6 @@ public interface UserRepository extends JpaRepository<User, UUID> {
 
     List<User> findAllById(String ids);
 
-    /**
-     * Wyszukuje użytkowników po nazwie użytkownika lub emailu (do znajomych)
-     */
     @Query("SELECT u FROM User u WHERE " +
             "u.id != :excludeUserId AND " +
             "(LOWER(u.username) LIKE LOWER(CONCAT('%', :query, '%')) OR " +

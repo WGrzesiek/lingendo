@@ -2,7 +2,10 @@ package com.learnwords.userservice.service.impl;
 
 import com.learnwords.common.KafkaTopic;
 import com.learnwords.common.events.UserLoginEvent;
+import com.learnwords.userservice.dtos.ChangePasswordRequest;
 import com.learnwords.userservice.dtos.RegisterRequest;
+import com.learnwords.userservice.dtos.UpdateProfileRequest;
+import com.learnwords.userservice.dtos.UserProfileResponse;
 import com.learnwords.userservice.entity.User;
 import com.learnwords.userservice.events.GenericEventProducer;
 import com.learnwords.userservice.exception.exceptions.EmailAlreadyExistsException;
@@ -114,6 +117,83 @@ public class UserServiceImpl implements UserService {
                 .orElseThrow(() -> new UsernameNotFoundException("User not found: " + username));
         log.info("User found with username: {}", username);
         return user;
+    }
+
+    @Override
+    public UserProfileResponse getProfile(String userId) {
+        log.info("Pobieranie profilu dla userId: {}", userId);
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new UsernameNotFoundException("Nie znaleziono użytkownika o id: " + userId));
+        
+        return new UserProfileResponse(
+                user.getId(),
+                user.getUsername(),
+                user.getEmail(),
+                user.getFirstName(),
+                user.getLastName(),
+                user.getUserType(),
+                user.getAccountType(),
+                user.getCreatedAt(),
+                user.getLastLogin(),
+                user.getStreak()
+        );
+    }
+
+    @Override
+    @Transactional
+    public UserProfileResponse updateProfile(String userId, UpdateProfileRequest request) {
+        log.info("Aktualizacja profilu dla userId: {}", userId);
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new UsernameNotFoundException("Nie znaleziono użytkownika o id: " + userId));
+
+        if (request.email() != null && !request.email().equals(user.getEmail())) {
+            if (userRepository.existsByEmail(request.email())) {
+                throw new EmailAlreadyExistsException(request.email());
+            }
+            user.setEmail(request.email());
+        }
+
+        if (request.firstName() != null) {
+            user.setFirstName(request.firstName());
+        }
+        if (request.lastName() != null) {
+            user.setLastName(request.lastName());
+        }
+
+        userRepository.save(user);
+        log.info("Profil zaktualizowany dla userId: {}", userId);
+
+        return new UserProfileResponse(
+                user.getId(),
+                user.getUsername(),
+                user.getEmail(),
+                user.getFirstName(),
+                user.getLastName(),
+                user.getUserType(),
+                user.getAccountType(),
+                user.getCreatedAt(),
+                user.getLastLogin(),
+                user.getStreak()
+        );
+    }
+
+    @Override
+    @Transactional
+    public void changePassword(String userId, ChangePasswordRequest request) {
+        log.info("Zmiana hasła dla userId: {}", userId);
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new UsernameNotFoundException("Nie znaleziono użytkownika o id: " + userId));
+
+        if (!passwordService.matchPassword(request.currentPassword(), user.getPassword())) {
+            log.warn("Nieprawidłowe aktualne hasło dla userId: {}", userId);
+            throw new WrongPasswordException();
+        }
+
+        user.setPassword(passwordService.hashPassword(request.newPassword()));
+        user.setLastPasswordChange(Instant.now());
+        userRepository.save(user);
+        
+        log.info("Hasło zmienione pomyślnie dla userId: {}", userId);
     }
 
 }
