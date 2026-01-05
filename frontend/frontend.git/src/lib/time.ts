@@ -1,4 +1,6 @@
-export function timeAgo(dateString: string): string {
+
+
+export function time(dateString: string): string {
   const date = new Date(dateString);
   const now = new Date();
 
@@ -39,4 +41,32 @@ export function timeAgo(dateString: string): string {
     value,
     unit
   );
+}
+
+export const timee = {
+  /**
+   * Formatuje datę
+   */
+  formatDate: (dateString?: string): string => {
+    if (!dateString) return "Brak danych";
+    return new Date(dateString).toLocaleDateString("pl-PL", {
+      day: "numeric",
+      month: "long",
+      year: "numeric",
+    });
+  },
+
+  /**
+   * Formatuje datę z czasem
+   */
+  formatDateTime: (dateString?: string): string => {
+    if (!dateString) return "Nigdy";
+    return new Date(dateString).toLocaleString("pl-PL", {
+      day: "numeric",
+      month: "long",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  }
 }
