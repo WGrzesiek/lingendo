@@ -1,11 +1,31 @@
 "use client";
 
 import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { UserPlus, Search, CheckCircle2, XCircle } from "lucide-react";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormMessage,
+} from "@/components/ui/form";
+import { UserPlus, Search, CheckCircle2, XCircle, Loader2 } from "lucide-react";
+
+const addFriendSchema = z.object({
+  username: z
+    .string()
+    .min(1, "Wprowadź nazwę użytkownika")
+    .min(3, "Nazwa użytkownika musi mieć minimum 3 znaki")
+    .max(50, "Nazwa użytkownika może mieć maksymalnie 50 znaków"),
+});
+
+type AddFriendFormValues = z.infer<typeof addFriendSchema>;
 
 interface AddFriendFormProps {
   onAddFriend: (username: string) => Promise<void>;
@@ -15,39 +35,30 @@ interface AddFriendFormProps {
  * Formularz dodawania znajomego przez nazwę użytkownika
  */
 export const AddFriendForm = ({ onAddFriend }: AddFriendFormProps) => {
-  const [username, setUsername] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const form = useForm<AddFriendFormValues>({
+    resolver: zodResolver(addFriendSchema),
+    defaultValues: {
+      username: "",
+    },
+  });
 
-    // Walidacja
-    if (!username.trim()) {
-      setError("Wprowadź nazwę użytkownika");
-      return;
-    }
+  const isLoading = form.formState.isSubmitting;
 
-    if (username.trim().length < 3) {
-      setError("Nazwa użytkownika musi mieć minimum 3 znaki");
-      return;
-    }
-
+  const onSubmit = async (values: AddFriendFormValues) => {
     setError(null);
     setSuccess(null);
-    setIsLoading(true);
 
     try {
-      await onAddFriend(username.trim());
-      setSuccess(`Dodano znajomego: ${username}`);
-      setUsername("");
+      await onAddFriend(values.username.trim());
+      setSuccess(`Wysłano zaproszenie do: ${values.username}`);
+      form.reset();
     } catch (err) {
       setError(
         err instanceof Error ? err.message : "Nie udało się dodać znajomego"
       );
-    } finally {
-      setIsLoading(false);
     }
   };
 
@@ -60,43 +71,61 @@ export const AddFriendForm = ({ onAddFriend }: AddFriendFormProps) => {
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="flex gap-2">
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-              <Input
-                type="text"
-                placeholder="Wpisz nazwę użytkownika..."
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                className="pl-9"
-                disabled={isLoading}
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+            <div className="flex gap-2">
+              <FormField
+                control={form.control}
+                name="username"
+                render={({ field }) => (
+                  <FormItem className="relative flex-1">
+                    <FormControl>
+                      <div className="relative">
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                        <Input
+                          placeholder="Wpisz nazwę użytkownika..."
+                          className="pl-9"
+                          disabled={isLoading}
+                          {...field}
+                        />
+                      </div>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
               />
+              <Button type="submit" disabled={isLoading}>
+                {isLoading ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Dodawanie...
+                  </>
+                ) : (
+                  "Dodaj"
+                )}
+              </Button>
             </div>
-            <Button type="submit" disabled={isLoading || !username.trim()}>
-              {isLoading ? "Dodawanie..." : "Dodaj"}
-            </Button>
-          </div>
 
-          {error && (
-            <Alert variant="destructive">
-              <XCircle className="h-4 w-4" />
-              <AlertDescription>{error}</AlertDescription>
-            </Alert>
-          )}
+            {error && (
+              <Alert variant="destructive">
+                <XCircle className="h-4 w-4" />
+                <AlertDescription>{error}</AlertDescription>
+              </Alert>
+            )}
 
-          {success && (
-            <Alert className="bg-green-500/10 text-green-500 border-green-500/20">
-              <CheckCircle2 className="h-4 w-4" />
-              <AlertDescription>{success}</AlertDescription>
-            </Alert>
-          )}
+            {success && (
+              <Alert className="bg-green-500/10 text-green-500 border-green-500/20">
+                <CheckCircle2 className="h-4 w-4" />
+                <AlertDescription>{success}</AlertDescription>
+              </Alert>
+            )}
 
-          <p className="text-sm text-muted-foreground">
-            Wprowadź dokładną nazwę użytkownika. Po dodaniu znajomy pojawi się
-            na liście poniżej.
-          </p>
-        </form>
+            <p className="text-sm text-muted-foreground">
+              Wprowadź dokładną nazwę użytkownika. Po dodaniu znajomy pojawi się
+              na liście poniżej.
+            </p>
+          </form>
+        </Form>
       </CardContent>
     </Card>
   );
