@@ -129,10 +129,10 @@ export const qk = {
   // ============================================
   groups: {
     all: ["groups"] as const,
-    list: (filters?: unknown) => ["groups", "list", filters] as const,
+    list: () => ["groups", "list"] as const,
     detail: (groupId: string) => ["groups", "detail", groupId] as const,
-    members: (groupId: string, filters?: unknown) =>
-      ["groups", groupId, "members", filters] as const,
+    members: (groupId: string) =>
+      ["groups", groupId, "members"] as const,
     stats: () => ["groupStats"] as const,
     withStats: () => ["groupStats", "list"] as const,
     dashboard: (groupId: string) =>

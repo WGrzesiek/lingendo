@@ -1,3 +1,4 @@
+import { Languages, Flag, Globe, LucideIcon } from "lucide-react";
 /**
  * Wspólne typy używane w całej aplikacji
  */
@@ -13,7 +14,6 @@ export interface ApiErrorResponse {
 /**
  * Dostępne języki w systemie
  */
-import { Languages, Flag, Globe, LucideIcon } from "lucide-react"; // użyjemy symbolicznych ikon językowych
 
 export const languageValues = [
   "POLISH",
@@ -31,8 +31,8 @@ export const languageConfig: Record<
   {
     label: string;
     icon: LucideIcon;
-    className: string; // Badge colors
-    iconColor: string; // Select colors
+    className: string;
+    iconColor: string;
   }
 > = {
   POLISH: {
@@ -73,7 +73,6 @@ export const languageConfig: Record<
   },
 };
 
-// Select-ready
 export const LANGUAGES = languageValues.map((value) => ({
   value,
   label: languageConfig[value].label,
@@ -89,7 +88,7 @@ export type SessionStatus = "ACTIVE" | "COMPLETED" | "PAUSED" | "ABANDONED" | "I
 /**
  * Typ sesji nauki
  */
-export type SessionType = "LEARNING" | "REVIEW" | "TEST" | "PRACTICE";
+export type SessionType = "LEARNING" | "REVIEW";
 
 export interface PageResponse<T> {
   content: T[];
@@ -101,3 +100,5 @@ export interface PageResponse<T> {
   last: boolean;
   empty: boolean;
 }
+
+
