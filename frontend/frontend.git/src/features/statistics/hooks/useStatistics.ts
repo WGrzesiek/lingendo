@@ -4,13 +4,14 @@ import {
   getStatistics,
 } from "../services/statistics.service";
 import { IPdfExportOptions } from "../types/pdf-export.types";
+import {qk} from "@/lib/queryKeys";
 
 /**
  * Hook do pobierania statystyk użytkownika
  */
 export const useStatistics = () =>
   useQuery({
-    queryKey: ["statistics"],
+    queryKey: qk.statistics.all,
     queryFn: getStatistics,
   });
 
@@ -25,12 +26,11 @@ export const useExportStatisticsToPdf = () => {
       return blob;
     },
     onSuccess: (blob) => {
-      // Automatycznie pobierz plik PDF
+      // Automatycznie pobieranie pliku
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement("a");
       link.href = url;
 
-      // Generuj nazwę pliku z aktualną datą
       const timestamp = new Date()
         .toISOString()
         .slice(0, 19)
@@ -40,7 +40,6 @@ export const useExportStatisticsToPdf = () => {
       document.body.appendChild(link);
       link.click();
 
-      // Cleanup
       document.body.removeChild(link);
       window.URL.revokeObjectURL(url);
     },

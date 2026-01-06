@@ -11,8 +11,7 @@ interface SessionStatisticsProps {
  * Statystyki sesji nauki - odpowiedzi, celność
  */
 export const SessionStatistics = ({ statistics }: SessionStatisticsProps) => {
-  const totalAnswers =
-    statistics.totalCorrectAnswers + statistics.totalIncorrectAnswers;
+  const totalAnswers = statistics.totalCorrectAnswers + statistics.totalIncorrectAnswers;
 
   return (
     <Card>
@@ -72,7 +71,7 @@ export const SessionStatistics = ({ statistics }: SessionStatisticsProps) => {
           </div>
         </div>
 
-        {/* Dodatkowe metryki */}
+        {/* Dodatkowe info */}
         <div className="grid grid-cols-2 gap-4 pt-4 border-t">
           <div className="text-center">
             <div className="flex items-center justify-center w-10 h-10 mx-auto mb-2 rounded-full bg-primary/10">

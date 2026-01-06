@@ -6,14 +6,6 @@ export function time(dateString: string): string {
 
   const seconds = Math.floor((now.getTime() - date.getTime()) / 1000);
 
-  const intervals: [number, Intl.RelativeTimeFormatUnit][] = [
-    [60, "second"],
-    [60 * 60, "minute"],
-    [60 * 60 * 24, "hour"],
-    [60 * 60 * 24 * 30, "day"],
-    [60 * 60 * 24 * 365, "month"],
-  ];
-
   let unit: Intl.RelativeTimeFormatUnit = "second";
   let value = -seconds;
 

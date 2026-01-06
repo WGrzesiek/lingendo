@@ -82,7 +82,6 @@ const StatisticsExportPage = () => {
           </div>
         </div>
 
-        {/* Layout */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Lewa kolumna - opcje */}
           <div className="lg:col-span-2">
@@ -140,12 +139,6 @@ const StatisticsExportPage = () => {
                             <span className="text-sm">Historia aktywności</span>
                           </div>
                         )}
-                        {options.includeDeckStats && (
-                          <div className="flex items-center gap-2">
-                            <CheckCircle className="w-4 h-4 text-green-500" />
-                            <span className="text-sm">Statystyki kursów</span>
-                          </div>
-                        )}
                         {!hasAnyOptionSelected && (
                           <p className="text-sm text-muted-foreground italic">
                             Nie wybrano żadnej sekcji
@@ -163,7 +156,7 @@ const StatisticsExportPage = () => {
                   </div>
                 </div>
 
-                {/* Przyciski akcji */}
+                {/* Przyciski */}
                 <div className="space-y-3">
                   <Button
                     className="w-full"

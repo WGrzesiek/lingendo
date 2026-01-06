@@ -10,9 +10,10 @@ interface PointsChartProps {
 
 /**
  * Wykres punktów w czasie (miesięczne)
- * Prosty wykres słupkowy bez zewnętrznych bibliotek
  */
-export const PointsChart = ({ monthlyPoints }: PointsChartProps) => {
+export const PointsChart = ({
+  monthlyPoints
+}: PointsChartProps) => {
   const data = monthlyPoints;
   const maxPoints = Math.max(...data.map((d) => d.points), 1);
 

@@ -2,17 +2,11 @@
  * Opcje eksportu statystyk do PDF
  */
 export interface IPdfExportOptions {
-  /** Czy dołączyć podstawowe statystyki */
   includeOverview: boolean;
-  /** Czy dołączyć wykres punktów dziennych */
   includeDailyPoints: boolean;
-  /** Czy dołączyć wykres punktów miesięcznych */
   includeMonthlyPoints: boolean;
-  /** Czy dołączyć statystyki sesji */
   includeSessionStats: boolean;
-  /** Czy dołączyć historię aktywności */
   includeActivity: boolean;
-  /** Okres danych do eksportu */
   dateRange:
     | "last-7-days"
     | "last-30-days"

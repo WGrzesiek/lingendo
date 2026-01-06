@@ -1,11 +1,9 @@
 /**
  * Service do pobierania statystyk użytkownika i eksportu do PDF
  */
+
 import apiClient from "@/lib/api/axios";
-import {
-  IStatisticsApiResponse,
-  IUserActivityItem,
-} from "../types/statistics.types";
+import {IStatisticsApiResponse} from "../types/statistics.types";
 import { IPdfExportOptions } from "../types/pdf-export.types";
 
 const BASE_URL = "/v1/stats";
@@ -28,7 +26,7 @@ export const exportStatisticsToPdf = async (
 ): Promise<Blob> => {
   const response = await apiClient.post(`${BASE_URL}/export/pdf`, options, {
     responseType: "blob",
-    timeout: 30000, // 30 sekund na generowanie PDF
+    timeout: 30000,
   });
 
   return response.data;

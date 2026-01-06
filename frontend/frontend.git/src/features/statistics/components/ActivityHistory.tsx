@@ -1,42 +1,17 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { History, Trophy, BookCheck, BookOpen, Flame } from "lucide-react";
-import { IUserActivityItem } from "@/features/statistics/types/statistics.types";
-import { timeAgo } from "@/lib/timeAgo";
+import { History } from "lucide-react";
+import { time } from "@/lib/time";
+import {IUserActivityItem, userActivity} from "@/common/userActivity";
 
 interface ActivityHistoryProps {
   activities: IUserActivityItem[];
 }
 
 /**
- * Historia aktywności użytkownika z tabeli user_activity
+ * Historia aktywności użytkownika
  */
 export const ActivityHistory = ({ activities }: ActivityHistoryProps) => {
-  const getActivityIcon = (type: IUserActivityItem["type"]) => {
-    switch (type) {
-      case "LESSON_COMPLETED":
-        return <BookCheck className="w-4 h-4 text-green-500" />;
-      case "SESSION_STARTED":
-        return <BookOpen className="w-4 h-4 text-blue-500" />;
-      case "SESSION_COMPLETED":
-        return <Trophy className="w-4 h-4 text-yellow-500" />;
-      case "LOGIN":
-        return <Flame className="w-4 h-4 text-orange-500" />;
-    }
-  };
-
-  const getActivityColor = (type: IUserActivityItem["type"]) => {
-    switch (type) {
-      case "LESSON_COMPLETED":
-        return "bg-green-500/10 border-green-500/20";
-      case "SESSION_STARTED":
-        return "bg-blue-500/10 border-blue-500/20";
-      case "SESSION_COMPLETED":
-        return "bg-yellow-500/10 border-yellow-500/20";
-      case "LOGIN":
-        return "bg-orange-500/10 border-orange-500/20";
-    }
-  };
 
   if (activities.length === 0) {
     return (
@@ -74,13 +49,13 @@ export const ActivityHistory = ({ activities }: ActivityHistoryProps) => {
           {activities.map((activity, index) => (
             <div
               key={index}
-              className={`flex items-start gap-3 p-3 rounded-lg border ${getActivityColor(
+              className={`flex items-start gap-3 p-3 rounded-lg border ${userActivity.getActivityColor(
                 activity.type
               )}`}
             >
               {/* Ikona */}
               <div className="flex-shrink-0 mt-1">
-                {getActivityIcon(activity.type)}
+                {userActivity.getActivityIcon(activity.type)}
               </div>
 
               {/* Treść */}
@@ -97,7 +72,7 @@ export const ActivityHistory = ({ activities }: ActivityHistoryProps) => {
                   {activity.subtitle}
                 </p>
                 <p className="text-xs text-muted-foreground mt-1">
-                  {timeAgo(activity.eventTime)}
+                  {time(activity.eventTime)}
                 </p>
               </div>
             </div>
