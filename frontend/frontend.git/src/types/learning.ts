@@ -1,6 +1,17 @@
-import {Brain, Layers, Clock, Shuffle, Pencil, Zap, LucideIcon, Globe, Users, School,Lock} from "lucide-react";
 
 
+
+import {
+  Brain,
+  Layers,
+  Clock,
+  Shuffle,
+  Pencil,
+  Zap,
+  LucideIcon,
+  Globe,
+  Lock,
+} from "lucide-react";
 
 /**
  * Typy kroków w algorytmie nauki
@@ -112,7 +123,8 @@ export const algorithms = [
   {
     id: "LEINER_ALGORITHM",
     name: "System Leitnera",
-    description: "Fiszki przechodzą między pudełkami w zależności od odpowiedzi.",
+    description:
+      "Fiszki przechodzą między pudełkami w zależności od odpowiedzi.",
     icon: Layers,
     color: "text-blue-600",
     bgColor: "bg-blue-500/10",
@@ -147,9 +159,13 @@ export const algorithms = [
   },
 ];
 
-export const reviewSchedulesValue =[ "AUTO", "LIGHT", "NORMAL", "INTENSE"] as const;
+export const reviewSchedulesValue = [
+  "AUTO",
+  "LIGHT",
+  "NORMAL",
+  "INTENSE",
+] as const;
 export type reviewSchedules = (typeof reviewSchedulesValue)[number];
-
 
 export const REVIEW_SCHEDULE_LABELS: Record<reviewSchedules, string> = {
   AUTO: "Automatyczny — 7, 14, 21 dni",
@@ -158,52 +174,50 @@ export const REVIEW_SCHEDULE_LABELS: Record<reviewSchedules, string> = {
   INTENSE: "Intensywny — 1, 3, 7 dni",
 };
 
-export const REVIEW_SCHEDULE = reviewSchedulesValue.map(value => ({
+export const REVIEW_SCHEDULE = reviewSchedulesValue.map((value) => ({
   value,
-    label: REVIEW_SCHEDULE_LABELS[value],
+  label: REVIEW_SCHEDULE_LABELS[value],
 }));
 
-export const VisibilityValue = ["PUBLIC", "PRIVATE", "FRIENDS_ONLY", "STUDENTS_ONLY"] as const;
+/**
+ * Widoczność talii.
+ * - PRIVATE: tylko właściciel (udostępnianie przez DeckShare)
+ * - PUBLIC: każdy może zobaczyć
+ */
+export const VisibilityValue = ["PUBLIC", "PRIVATE"] as const;
 export type Visibility = (typeof VisibilityValue)[number];
 
-export const VISIBILITY_LABELS: Record<Visibility, {
+export const VISIBILITY_LABELS: Record<
+  Visibility,
+  {
     label: string;
-    icon: LucideIcon
+    description: string;
+    icon: LucideIcon;
     className: string;
     iconColor: string;
-}> = {
-    PUBLIC: {
-        label: "Publiczny",
-        icon: Globe,
-        className: "bg-green-100 text-green-700 border-green-200",
-        iconColor: "text-green-700",
-    },
-    PRIVATE: {
-        label: "Prywatny",
-        icon: Lock,
-        className: "bg-gray-100 text-gray-700 border-gray-200",
-        iconColor: "text-gray-700",
-    },
-    FRIENDS_ONLY: {
-        label: "Tylko znajomi",
-        icon: Users,
-        className: "bg-blue-100 text-blue-700 border-blue-200",
-        iconColor: "text-blue-700",
-    },
-    STUDENTS_ONLY: {
-      label: "Tylko uczniowie",
-      icon: School,
-      className: "bg-yellow-100 text-yellow-700 border-yellow-200",
-      iconColor: "text-yellow-700",
-    },
-}
+  }
+> = {
+  PUBLIC: {
+    label: "Publiczny",
+    description: "Każdy może zobaczyć i zapisać się na tę talię.",
+    icon: Globe,
+    className: "bg-green-100 text-green-700 border-green-200",
+    iconColor: "text-green-700",
+  },
+  PRIVATE: {
+    label: "Prywatny",
+    description: "Tylko Ty masz dostęp. Możesz udostępnić przez DeckShare.",
+    icon: Lock,
+    className: "bg-gray-100 text-gray-700 border-gray-200",
+    iconColor: "text-gray-700",
+  },
+};
 
 export const VISIBILITIES = VisibilityValue.map((value) => ({
   value,
   label: VISIBILITY_LABELS[value].label,
+  description: VISIBILITY_LABELS[value].description,
   icon: VISIBILITY_LABELS[value].icon,
   className: VISIBILITY_LABELS[value].className,
   iconColor: VISIBILITY_LABELS[value].iconColor,
-
-
 }));

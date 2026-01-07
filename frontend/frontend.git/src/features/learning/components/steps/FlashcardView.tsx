@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {RotateCcw, Volume2, Sparkles, PlusCircle, Frown} from "lucide-react";
 import type {SentenceDto, WordDto} from "@/types/word";
-import {RememberAnswer} from "@/features/learning/types/learning.types";
+import {RememberAnswer} from "@/features/learning";
 
 
 interface FlashcardViewProps {

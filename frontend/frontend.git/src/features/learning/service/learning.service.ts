@@ -1,15 +1,11 @@
 import {
     FlashcardInteractionResult, LearnHeaderProgress,
     NextFlashcardRecommendation,
-    QuizAnswer,
-    RememberAnswer, SubmitAnswerRequest,
-    TypingAnswer
+    SubmitAnswerRequest,
 } from "@/features/learning/types/learning.types";
 import apiClient from "@/lib/api/axios";
 
 const BASE_URL = "/v1/decks/sessions";
-
-
 
 
 export const getNextFlashcard = async (

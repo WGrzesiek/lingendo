@@ -3,11 +3,11 @@
 import { FlashcardView } from "./FlashcardView";
 import {QuizFrom} from "./QuizStep";
 import {TypingStepBase} from "./WriteLanguageStep";
-import type {InteractionType, SubmitAnswerRequest} from "@/features/learning/types/learning.types";
+import type {InteractionType, SubmitAnswerRequest} from "@/features/learning";
 import type { WordDto } from "@/types/word";
 import {
     RememberCheckBase
-} from "@/features/learning/components/steps/RememberCheckBaseProps";
+} from "@/features/learning/components/steps";
 
 interface StepRendererProps {
   interactionType: InteractionType;

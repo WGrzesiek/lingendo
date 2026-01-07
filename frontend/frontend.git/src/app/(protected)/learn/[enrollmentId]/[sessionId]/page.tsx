@@ -1,8 +1,8 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { StepRenderer } from "@/features/learning/components/steps/StepRenderer";
-import { SessionProgress } from "@/features/learning/components/progress/SessionProgress";
+import { StepRenderer } from "@/features/learning/components/steps";
+import { SessionProgress } from "@/features/learning/components/progress";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ArrowLeft } from "lucide-react";
@@ -12,13 +12,11 @@ import type {
   NextFlashcardRecommendation,
   SubmitAnswerRequest,
   FlashcardInteractionResult,
-} from "@/features/learning/types/learning.types";
+} from "@/features/learning";
 
-import { useNextFlashcardRecommendation } from "@/features/learning/hooks/useNextFlashcardRecommendation";
-import { useSubmitAnswerMutation } from "@/features/learning/hooks/useSubmitAnswer";
-import { useCompleteSession } from "@/features/learning/hooks/useCompleteSession";
+import { useNextFlashcardRecommendation, useSubmitAnswerMutation, useCompleteSession } from "@/features/learning/hooks";
 import { isNoMoreFlashcardsError } from "@/lib/api/error";
-import { SessionCompletedView } from "@/features/learning/components/progress/SessionCompletedView";
+import { SessionCompletedView } from "@/features/learning/components/progress";
 import {useCourseHeader} from "@/features/course/hooks/useCourseHeader";
 import {useCourseSettings} from "@/features/course/hooks/useCourseSettings";
 import {useCourseProgress} from "@/features/course/hooks/useCourseProgress";

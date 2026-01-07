@@ -6,23 +6,19 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { CheckCircle2, XCircle } from "lucide-react";
 import type { WordDto, SentenceDto } from "@/types/word";
-import type { QuizAnswer } from "@/features/learning/types/learning.types";
+import type { QuizAnswer } from "@/features/learning";
 
 type Direction = "FROM" | "TO";
 
 interface QuizBaseProps {
   data: WordDto;
-  options: string[]; // opcje zawsze jako stringi (to co klikamy)
-  direction: Direction; // FROM: pytanie=word, odpowiedź=translation; TO: pytanie=translation, odpowiedź=word
+  options: string[];
+  direction: Direction;
   onComplete: (answer: QuizAnswer) => void;
 }
 
 /**
  * QUIZ step (multi-choice):
- * - pokazuje prompt (zależnie od direction)
- * - user wybiera opcję
- * - pokazuje feedback lokalnie (opcjonalnie)
- * - po chwili wysyła onComplete({type:'choice', selectedOption})
  */
 const QuizStepBase = ({ data, options, direction, onComplete }: QuizBaseProps) => {
   const [selected, setSelected] = useState<string | null>(null);

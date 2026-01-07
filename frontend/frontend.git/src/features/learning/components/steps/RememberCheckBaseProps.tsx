@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Eye, Sparkles } from "lucide-react";
 import type { WordDto } from "@/types/word";
-import type {InteractionType, RememberAnswer} from "@/features/learning/types/learning.types";
+import type {InteractionType, RememberAnswer} from "@/features/learning";
 
 type Direction = "FROM" | "TO";
 
@@ -136,11 +136,3 @@ export const RememberCheckBase = ({ data, interactionType, onComplete }: Remembe
         </Card>
     );
 };
-
-// export const RememberCheckFrom = (props: { data: WordDto; onComplete: (a: RememberAnswer) => void }) => (
-//     <RememberCheckBase {...props} direction="FROM" />
-// );
-//
-// export const RememberCheckTo = (props: { data: WordDto; onComplete: (a: RememberAnswer) => void }) => (
-//     <RememberCheckBase {...props} direction="TO" />
-// );

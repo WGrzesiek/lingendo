@@ -1,5 +1,5 @@
 import { Card } from "@/components/ui/card";
-import {useLearnHeaderProgress} from "@/features/learning/hooks/useLearnHeaderProgress";
+import {useLearnHeaderProgress} from "@/features/learning/hooks";
 
 interface SessionProgressProps {
     sessionId: string;
