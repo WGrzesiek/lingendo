@@ -3,9 +3,6 @@
 
 import type {InteractionType, TypingAnswer} from "@/features/learning/types/learning.types";
 import type { WordDto } from "@/types/word";
-import {
-    RememberCheckBase
-} from "@/features/learning/components/steps/RememberCheckBaseProps";
 import {TypingStepBase} from "@/features/review/components/WriteLanguageStepReview";
 
 interface StepRendererProps {
@@ -18,7 +15,6 @@ interface StepRendererProps {
 
 /**
  * Uniwersalny renderer kroków nauki
- * Wybiera odpowiedni komponent na podstawie typu interakcji z backendu
  */
 export const StepRenderer = ({interactionType, wordContent, onStepComplete
 }: StepRendererProps) => {

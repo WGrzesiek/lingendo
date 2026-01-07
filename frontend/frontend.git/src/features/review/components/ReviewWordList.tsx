@@ -6,13 +6,11 @@ import {
     Loader2,
     Frown,
     PlusCircle,
-    Layers,
-    ArrowRight,
+
 } from "lucide-react";
-import NextLink from "next/link";
 import { ReviewWordCard } from "./ReviewWordCard";
 import {Badge} from "@/components/ui/badge";
-import {useReviewWordsViewInfinite} from "@/features/review/hooks/useReviewWordsViewInfinite";
+import {useReviewWordsViewInfinite} from "../hooks/hooks";
 
 
 const WordListSkeleton = () => (

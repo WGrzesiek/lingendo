@@ -79,7 +79,7 @@ export const ReviewWriteStep = ({ word, onAnswer }: ReviewWriteStepProps) => {
           </div>
         </div>
 
-        {/* Przykładowe zdanie - dodatkowa wskazówka */}
+        {/* Przykładowe zdanie */}
         {exampleSentence && (
           <div className="p-6 border rounded-xl bg-accent/30">
             <p className="text-sm text-muted-foreground mb-3 uppercase tracking-wider flex items-center justify-center gap-2">

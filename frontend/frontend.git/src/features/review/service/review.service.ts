@@ -1,12 +1,11 @@
 import {ReviewHeader} from "@/features/review/types/review.types";
 import apiClient from "@/lib/api/axios";
 import type {PageResponse} from "@/types/common";
-import type {IDeckListItem} from "@/features/deck/types";
 import {CourseContentItem, CourseWord} from "@/features/course/types/words.types";
 import {
     FlashcardInteractionResult,
     NextFlashcardRecommendation,
-    SubmitAnswerRequest, TypingAnswer
+    TypingAnswer
 } from "@/features/learning/types/learning.types";
 
 const BASE_URL = "/v1/enrollments"
@@ -27,6 +26,7 @@ export const getReviewWordsView = async (
         `${BASE_URL2}/${enrollmentId}/review-words-view`,
         { params }
     );
+
     const words: CourseWord[] = (response.data.content || []).map((item) => {
         const flashcard = item.flashcard;
         const progress = item.userFlashcardProgress;

@@ -9,7 +9,6 @@ import { CheckCircle, XCircle, Sparkles } from "lucide-react";
 import type { SentenceDto, WordDto } from "@/types/word";
 import type {InteractionType, TypingAnswer} from "@/features/learning/types/learning.types";
 
-type Direction = "FROM" | "TO";
 
 interface TypingBaseProps {
   data: WordDto;
@@ -17,12 +16,7 @@ interface TypingBaseProps {
   onComplete: (answer: TypingAnswer) => void;
 }
 
-/**
- * TYPING step:
- * - user wpisuje tekst
- * - front może pokazać lokalny feedback (opcjonalnie)
- * - finalnie wysyłamy onComplete({type:'text', text})
- */
+
 export const TypingStepBase = ({ data, interactionType, onComplete }: TypingBaseProps) => {
   const direction: "FROM" | "TO" = interactionType === "TYPING_INPUT_TO" ? "TO" : "FROM";
   console.log(direction);
@@ -79,11 +73,6 @@ export const TypingStepBase = ({ data, interactionType, onComplete }: TypingBase
       <Card className="p-8 md:p-12">
         <div className="space-y-8">
           <div className="text-center space-y-4">
-            {/*<Badge variant="outline" className="text-xs uppercase tracking-wider">*/}
-            {/*  {direction === "FROM"*/}
-            {/*      ? "Wpisz słowo (język docelowy)"*/}
-            {/*      : "Wpisz tłumaczenie"}*/}
-            {/*</Badge>*/}
             <Badge variant="outline" className="text-xs uppercase tracking-wider">
               {direction === "FROM" ? "Wpisz tłumaczenie" : "Wpisz słowo"}
             </Badge>
@@ -92,11 +81,6 @@ export const TypingStepBase = ({ data, interactionType, onComplete }: TypingBase
               {displayText}
             </h2>
 
-            {/*{direction === "TO" && (data.translations?.length ?? 0) > 1 && !showResult && (*/}
-            {/*    <p className="text-sm text-muted-foreground italic">*/}
-            {/*      Wskazówka: to słowo ma {data.translations.length} tłumaczeń*/}
-            {/*    </p>*/}
-            {/*)}*/}
             {direction === "FROM" && (data.translations?.length ?? 0) > 1 && !showResult && (
                 <p className="text-sm text-muted-foreground italic">
                   Wskazówka: to słowo ma {data.translations.length} tłumaczeń
@@ -109,11 +93,6 @@ export const TypingStepBase = ({ data, interactionType, onComplete }: TypingBase
               <form onSubmit={handleSubmit} className="space-y-6">
                 <Input
                     type="text"
-                    // placeholder={
-                    //   direction === "FROM"
-                    //       ? "Wpisz słowo..."
-                    //       : "Wpisz jedno z możliwych tłumaczeń..."
-                    // }
                     placeholder={
                       direction === "FROM"
                           ? "Wpisz jedno z możliwych tłumaczeń..."
