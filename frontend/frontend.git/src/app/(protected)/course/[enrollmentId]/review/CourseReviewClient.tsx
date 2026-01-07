@@ -9,10 +9,11 @@ import {
   Target, CheckCircle2,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import {useReviewHeader} from "@/features/review/hooks/useReviewHeader";
+
 
 import React from "react";
 import {ReviewWordList} from "@/features/review/components/ReviewWordList";
+import {useReviewHeader} from "@/features/review";
 
 export default function CourseReviewClient({ enrollmentId }: { enrollmentId: string }) {
 
@@ -93,14 +94,6 @@ export default function CourseReviewClient({ enrollmentId }: { enrollmentId: str
               </div>
             </div>
           </Card>
-
-          {/*<Card className="p-6">*/}
-          {/*  <div className="flex items-center gap-4">*/}
-          {/*    <div className="p-3 bg-green-500/10 rounded-lg">*/}
-          {/*      <TrendingUp className="w-6 h-6 text-green-600" />*/}
-          {/*    </div>*/}
-          {/*  </div>*/}
-          {/*</Card>*/}
         </div>
 
         {/* Start Button */}
@@ -142,26 +135,6 @@ export default function CourseReviewClient({ enrollmentId }: { enrollmentId: str
         <div className="lg:col-span-2">
           <ReviewWordList enrollmentId={enrollmentId} />
         </div>
-        {/* Words List */}
-        {/*<Card className="p-6">*/}
-        {/*  <div className="mb-6 flex items-center justify-between">*/}
-        {/*    <div>*/}
-        {/*      <h2 className="text-2xl font-bold mb-1">Lista słówek</h2>*/}
-        {/*      <p className="text-muted-foreground">*/}
-        {/*        Wszystkie słówka czekające na powtórkę*/}
-        {/*      </p>*/}
-        {/*    </div>*/}
-        {/*    <Badge variant="secondary" className="text-lg px-4 py-2">*/}
-        {/*      {words.length} słówek*/}
-        {/*    </Badge>*/}
-        {/*  </div>*/}
-
-        {/*  <div className="space-y-4">*/}
-        {/*    {words.map((word) => (*/}
-        {/*      <ReviewWordCard key={word.id} word={word} />*/}
-        {/*    ))}*/}
-        {/*  </div>*/}
-        {/*</Card>*/}
       </div>
     </div>
   );

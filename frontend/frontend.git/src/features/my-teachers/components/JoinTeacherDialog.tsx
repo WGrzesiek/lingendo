@@ -29,7 +29,6 @@ interface JoinTeacherDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onSuccess?: () => void;
-  /** Opcjonalny kod z URL (np. ze strony /join/[code]) */
   initialCode?: string;
 }
 
