@@ -1,6 +1,6 @@
 import type { WordDto } from "@/types/word";
-import {DeckCategory, DeckDifficulty} from "@/features/deck/types/deck.types";
-import {DeckVisibility} from "@/features/deck/types/created-deck.types";
+import { DeckCategory, DeckDifficulty } from "@/features/deck/types/deck.types";
+import { DeckVisibility } from "@/features/deck/types/created-deck.types";
 
 /**
  * Szczegóły decka - uniwersalne dla owner i enrolled
@@ -19,8 +19,8 @@ export interface DeckDetails {
     id: string;
     username: string;
   };
-  /** Czy zalogowany użytkownik jest właścicielem */
   isOwner: boolean;
+  isTeacher: boolean;
 }
 
 /**
@@ -42,6 +42,4 @@ export interface DeckStats {
   totalStudents: number;
   activeStudents: number;
   completedStudents: number;
-  averageProgress: number; // 0-100
-  totalViews: number;
 }

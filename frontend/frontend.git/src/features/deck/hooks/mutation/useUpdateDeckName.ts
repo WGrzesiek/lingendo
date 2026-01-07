@@ -1,6 +1,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { updateDeckName } from "../../services/deck.service";
 import type { UpdateDeckNameRequest } from "../../types";
+import { qk } from "@/lib/queryKeys";
 
 /**
  * Hook do zmiany nazwy talii
@@ -16,8 +17,10 @@ export const useUpdateDeckName = () => {
       data: UpdateDeckNameRequest;
     }) => updateDeckName(deckId, data),
     onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({ queryKey: ["deck", variables.deckId] });
-      queryClient.invalidateQueries({ queryKey: ["decks"] });
+      queryClient.invalidateQueries({
+        queryKey: qk.deck.detail(variables.deckId),
+      });
+      queryClient.invalidateQueries({ queryKey: qk.deck.all });
     },
   });
 };

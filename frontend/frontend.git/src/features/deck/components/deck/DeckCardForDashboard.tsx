@@ -1,10 +1,10 @@
 import { Button } from "@/components/ui/button";
-import { Progress } from "@/components/ui/progress"; // Używamy komponentu UI
+import { Progress } from "@/components/ui/progress";
 import { BookOpen, Clock, PlayCircle } from "lucide-react";
 import { IDeckListItem } from "../../types";
 import { DeckOwnerBadge } from "./DeckOwnerBadge";
 import { DeckDifficultyBadge } from "./DeckDifficultyBadge";
-import { timeAgo } from "@/lib/timeAgo";
+import { time } from "@/lib/time";
 import { DeckCategoryBadge } from "./DeckCategoryBadge";
 import {useRouter} from "next/navigation";
 
@@ -51,7 +51,7 @@ export const DeckCardForDashboard = ({ deck }: DeckCardProps) => {
             {deck.lastAccessed && (
               <span className="flex items-center gap-1.5">
                 <Clock className="w-3.5 h-3.5" />
-                {timeAgo(deck.lastAccessed)}
+                {time(deck.lastAccessed)}
               </span>
             )}
           </div>

@@ -7,15 +7,10 @@ import { X, GripVertical } from "lucide-react";
 import { WordSentence } from "../../types/word.types";
 
 interface SentenceInputProps {
-  /** Zdanie do edycji */
   sentence: WordSentence;
-  /** Index zdania w tablicy */
   index: number;
-  /** Callback wywoływany przy zmianie zdania */
   onChange: (index: number, field: keyof WordSentence, value: string) => void;
-  /** Callback wywoływany przy usunięciu zdania */
   onRemove: (index: number) => void;
-  /** Czy można usunąć (minimum 0) */
   canRemove: boolean;
 }
 

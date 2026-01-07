@@ -1,10 +1,11 @@
-import {useQuery} from "@tanstack/react-query";
-import {getMyDeckStats, getMyDeckStatsBody} from "@/features/deck/services/deck.service";
+import { useQuery } from "@tanstack/react-query";
+import { getMyDeckStats } from "@/features/deck/services/deck.service";
+import { qk } from "@/lib/queryKeys";
 
 export const useMyDeckStats = (deckIds: string[]) => {
-    return useQuery({
-        queryKey: ["my-deck-stats", deckIds],
-        queryFn: () => getMyDeckStats({ deckIds }),
-        enabled: deckIds.length > 0,
-    });
-}
+  return useQuery({
+    queryKey: qk.deck.myDeckStats(deckIds),
+    queryFn: () => getMyDeckStats({ deckIds }),
+    enabled: deckIds.length > 0,
+  });
+};

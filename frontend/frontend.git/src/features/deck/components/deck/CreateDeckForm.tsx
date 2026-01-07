@@ -40,7 +40,7 @@ import {
   Settings2,
   BrainCircuit,
   Layers,
-    Calendar
+  Calendar,
 } from "lucide-react";
 
 import { useCreateDeck } from "../../hooks/mutation/useCreateDeck";
@@ -49,7 +49,7 @@ import { LANGUAGES, languageValues } from "@/types/common";
 import {
   CATEGORIES,
   DeckCategory,
-  DECK_OWNERS,
+  DECK_PURPOSES,
   deckOwnerTypeValues,
   deckDifficultyValues,
   DIFFICULTIES,
@@ -58,11 +58,12 @@ import {
 } from "@/features/deck/types/deck.types";
 import { cn } from "@/lib/utils";
 import {
-    REVIEW_SCHEDULE,
-    REVIEW_SCHEDULE_LABELS,
-    reviewSchedules,
-    reviewSchedulesValue,
-    VISIBILITIES, VisibilityValue
+  REVIEW_SCHEDULE,
+  REVIEW_SCHEDULE_LABELS,
+  reviewSchedules,
+  reviewSchedulesValue,
+  VISIBILITIES,
+  VisibilityValue,
 } from "@/types/learning";
 
 const formSchema = z.object({
@@ -101,7 +102,7 @@ export const CreateDeckForm = () => {
       visibility: "PRIVATE",
       difficulty: "EASY",
       category: "GENERAL",
-      reviewSchedule: "AUTO"
+      reviewSchedule: "AUTO",
     },
   });
 
@@ -409,7 +410,7 @@ export const CreateDeckForm = () => {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel className="flex items-center gap-2">
-                        <Layers className="w-4 h-4" /> Typ Właściciela
+                        <Layers className="w-4 h-4" /> Przeznaczenie
                       </FormLabel>
                       <Select
                         onValueChange={field.onChange}
@@ -421,22 +422,25 @@ export const CreateDeckForm = () => {
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          {DECK_OWNERS.map((owner) => {
-                            const Icon = owner.icon;
-                            const iconColor = owner.iconColor;
+                          {DECK_PURPOSES.map((purpose) => {
+                            const Icon = purpose.icon;
+                            const iconColor = purpose.iconColor;
                             return (
                               <SelectItem
-                                key={owner.value}
-                                value={owner.value}
+                                key={purpose.value}
+                                value={purpose.value}
                                 className="flex items-center gap-2"
                               >
                                 <Icon className={`w-4 h-4 ${iconColor}`} />
-                                {owner.label}
+                                {purpose.label}
                               </SelectItem>
                             );
                           })}
                         </SelectContent>
                       </Select>
+                      <FormDescription>
+                        Wybierz Community aby udostępnić talię innym.
+                      </FormDescription>
                     </FormItem>
                   )}
                 />
@@ -471,89 +475,91 @@ export const CreateDeckForm = () => {
                 )}
               />
 
-                <FormField
-                    control={form.control}
-                    name="visibility"
-                    render={({ field }) => (
-                        <FormItem>
-                            <FormLabel className="flex items-center gap-2">
-                                <Calendar className="w-4 h-4" /> Widoczność kursu
-                            </FormLabel>
+              <FormField
+                control={form.control}
+                name="visibility"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="flex items-center gap-2">
+                      <Calendar className="w-4 h-4" /> Widoczność kursu
+                    </FormLabel>
 
-                            <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                <FormControl>
-                                    <SelectTrigger className="bg-background">
-                                        <SelectValue placeholder="Wybierz widoczność" />
-                                    </SelectTrigger>
-                                </FormControl>
+                    <Select
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                    >
+                      <FormControl>
+                        <SelectTrigger className="bg-background">
+                          <SelectValue placeholder="Wybierz widoczność" />
+                        </SelectTrigger>
+                      </FormControl>
 
-                                <SelectContent>
-                                    {VISIBILITIES.map((vis) => {
-                                        const Icon = vis.icon;
-                                        return (
-                                            <SelectItem
-                                                key={vis.value}
-                                                value={vis.value}
-                                                className="flex items-center gap-2"
-                                            >
-                                                <Icon className={cn("w-4 h-4", vis.iconColor)} />
-                                                {vis.label}
-                                            </SelectItem>
-                                        );
-                                    })}
-                                </SelectContent>
-                            </Select>
+                      <SelectContent>
+                        {VISIBILITIES.map((vis) => {
+                          const Icon = vis.icon;
+                          return (
+                            <SelectItem
+                              key={vis.value}
+                              value={vis.value}
+                              className="flex items-center gap-2"
+                            >
+                              <Icon className={cn("w-4 h-4", vis.iconColor)} />
+                              {vis.label}
+                            </SelectItem>
+                          );
+                        })}
+                      </SelectContent>
+                    </Select>
 
-                            <FormDescription>
-                                Zdecyduj, czy kurs ma być widoczny publicznie, czy tylko dla Ciebie.
-                            </FormDescription>
-                            <FormMessage />
-                        </FormItem>
-                    )}
-                />
+                    <FormDescription>
+                      Zdecyduj, czy kurs ma być widoczny publicznie, czy tylko
+                      dla Ciebie.
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
             </div>
-              <div className="bg-secondary/20 p-6 rounded-xl space-y-6 border border-secondary/40">
-                  <div className="grid sm:grid-cols-2 gap-6">
-                      <FormField
-                          control={form.control}
-                          name="reviewSchedule"
-                          render={({ field }) => (
-                              <FormItem>
-                                  <FormLabel className="flex items-center gap-2">
-                                      <Calendar className="w-4 h-4" /> Harmonogram powtórek
-                                  </FormLabel>
-                                  <Select
-                                      onValueChange={field.onChange}
-                                      defaultValue={field.value}
-                                  >
-                                      <FormControl>
-                                          <SelectTrigger className="bg-background">
-                                              <SelectValue placeholder="Wybierz metodę" />
-                                          </SelectTrigger>
-                                      </FormControl>
-                                      <SelectContent>
-                                          {REVIEW_SCHEDULE.map((rev) => {
-
-
-                                              return (
-                                                  <SelectItem
-                                                      key={rev.value}
-                                                      value={rev.value}
-                                                      className="flex items-center gap-2"
-                                                  >
-                                                      {rev.label}
-                                                  </SelectItem>
-                                              );
-                                          })}
-                                      </SelectContent>
-                                  </Select>
-                                  <FormDescription>
-                                        Wybierz jak często chcesz powtarzać materiał.
-                                  </FormDescription>
-                              </FormItem>
-                          )}
-                      />
-                  </div>
+            <div className="bg-secondary/20 p-6 rounded-xl space-y-6 border border-secondary/40">
+              <div className="grid sm:grid-cols-2 gap-6">
+                <FormField
+                  control={form.control}
+                  name="reviewSchedule"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="flex items-center gap-2">
+                        <Calendar className="w-4 h-4" /> Harmonogram powtórek
+                      </FormLabel>
+                      <Select
+                        onValueChange={field.onChange}
+                        defaultValue={field.value}
+                      >
+                        <FormControl>
+                          <SelectTrigger className="bg-background">
+                            <SelectValue placeholder="Wybierz metodę" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {REVIEW_SCHEDULE.map((rev) => {
+                            return (
+                              <SelectItem
+                                key={rev.value}
+                                value={rev.value}
+                                className="flex items-center gap-2"
+                              >
+                                {rev.label}
+                              </SelectItem>
+                            );
+                          })}
+                        </SelectContent>
+                      </Select>
+                      <FormDescription>
+                        Wybierz jak często chcesz powtarzać materiał.
+                      </FormDescription>
+                    </FormItem>
+                  )}
+                />
+              </div>
             </div>
           </CardContent>
 

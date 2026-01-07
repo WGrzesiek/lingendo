@@ -1,4 +1,9 @@
-import {DeckCategory, DeckDifficulty, DeckOwnerType, UpdateDeckVisibilityRequest} from "./deck.types";
+import {
+  DeckCategory,
+  DeckDifficulty,
+  DeckOwnerType,
+  UpdateDeckVisibilityRequest,
+} from "./deck.types";
 
 /**
  * Statystyki kursu utworzonego przez użytkownika
@@ -10,7 +15,13 @@ export interface CreatedDeckStats {
   completions: number;
 }
 
-export type DeckVisibility = "PUBLIC" | "PRIVATE" | "FRIENDS_ONLY" | "STUDENTS_ONLY"
+/**
+ * Widoczność talii.
+ * - PRIVATE: tylko właściciel (udostępnianie przez DeckShare)
+ * - PUBLIC: każdy może zobaczyć
+ */
+export type DeckVisibility = "PUBLIC" | "PRIVATE";
+
 /**
  * Element listy kursów utworzonych przez użytkownika
  */
@@ -19,11 +30,11 @@ export interface ICreatedDeckListItem {
   name: string;
   deckDescription: string;
   deckDifficulty: DeckDifficulty;
-  deckOwner: DeckOwnerType
+  deckOwner: DeckOwnerType;
   deckCategory: DeckCategory;
   ownerId: string;
   wordCount: number;
-  visibility: DeckVisibility
+  visibility: DeckVisibility;
   createdAt: string;
   updatedAt: string;
 
@@ -44,6 +55,6 @@ export interface DeckStat {
   totalStudents: number;
   completedStudents: number;
 }
-export interface DecksStats{
-    [deckId: string]: DeckStat;
+export interface DecksStats {
+  [deckId: string]: DeckStat;
 }

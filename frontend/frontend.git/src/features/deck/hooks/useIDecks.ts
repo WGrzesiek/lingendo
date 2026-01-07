@@ -1,12 +1,13 @@
 import { useQuery } from "@tanstack/react-query";
 import { getIDecks } from "../services/deck.service";
+import { qk } from "@/lib/queryKeys";
 
 /**
  * Hook do pobierania statystyk talii
  */
-export const useIDecks = (page?: number, size?: number) => {
+export const useIDecks = (page: number = 0, size: number = 20) => {
   return useQuery({
-    queryKey: ["i-decks", page, size],
+    queryKey: qk.deck.iDecks(page, size),
     queryFn: () => getIDecks({ page, size }),
   });
 };

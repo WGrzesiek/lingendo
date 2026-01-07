@@ -1,7 +1,3 @@
-/**
- * Serwis do zarządzania fiszkami (flashcards)
- */
-
 import apiClient from "@/lib/api/axios";
 import type { PageResponse } from "@/types/common";
 

@@ -1,8 +1,3 @@
-/**
- * Serwis do zarządzania taliami fiszek
- * Wszystkie operacje CRUD oraz filtrowanie, walidacja, statystyki
- */
-
 import apiClient from "@/lib/api/axios";
 import type {
   CreateDeckDto,
@@ -28,7 +23,7 @@ import {
 
 const BASE_URL = "/v1/decks";
 const BASE_URL2 = "/v1/decks/enrollments";
-
+const STASTS_URL = "/v1/courses";
 /**
  * Pobiera talie kursów studenta z paginacją
  */
@@ -66,6 +61,28 @@ export const getDecksCreatedByMe = async (params?: {
 
   console.log(
     "[Deck Service] Pobrano talie z filtrami:",
+    response.data.content.length
+  );
+
+  return response.data;
+};
+
+/**
+ * Pobiera wszystkie publiczne talie od wszystkich użytkowników
+ * Używane na stronie społeczności do wyświetlania dostępnych kursów
+ */
+export const getAllPublicDecks = async (params?: {
+  owner?: DeckOwnerType;
+  page?: number;
+  size?: number;
+}): Promise<PageResponse<ICreatedDeckListItem>> => {
+  const response = await apiClient.get<PageResponse<ICreatedDeckListItem>>(
+    `${BASE_URL}/public`,
+    { params }
+  );
+
+  console.log(
+    "[Deck Service] Pobrano publiczne talie:",
     response.data.content.length
   );
 
@@ -118,7 +135,6 @@ export const getDeckDetails = async (
 
 /**
  * Aktualizuje szczegóły talii (pola edytowalne)
- * Pola readonly (id, userId, wordCount, timestamps) są ignorowane
  */
 export const updateDeckDetails = async (
   deckId: string,
@@ -214,7 +230,7 @@ export const updateFlashcardsPerSession = async (
 };
 
 /**
- * Pobiera statystyki talii (learned/unlearned flashcards, progress, sessions)
+ * Pobiera statystyki talii
  */
 export const getDeckStatistics = async (
   deckId: string
@@ -300,7 +316,6 @@ export interface getMyDeckStatsBody {
   deckIds: string[];
 }
 
-const STASTS_URL = "/v1/courses";
 
 export const getMyDeckStats = async (
   body: getMyDeckStatsBody
@@ -315,7 +330,6 @@ export const getMyDeckStats = async (
 
 /**
  * Pobiera szczegółowe informacje o talii (deckdetail)
- * Response zawiera pełne informacje o decku z API
  */
 export interface DeckDetailResponse {
   id: string;

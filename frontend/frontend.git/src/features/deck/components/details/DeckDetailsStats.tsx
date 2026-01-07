@@ -7,7 +7,7 @@ interface DeckDetailsStatsProps {
 }
 
 /**
- * Statystyki decka - tylko dla właściciela
+ * Statystyki decka - tylko dla nauczyciela
  * Pokazuje liczby uczniów, ukończeń, postępu
  */
 export const DeckDetailsStats = ({ stats }: DeckDetailsStatsProps) => {
@@ -61,17 +61,17 @@ export const DeckDetailsStats = ({ stats }: DeckDetailsStatsProps) => {
       {/*  </div>*/}
       {/*</Card>*/}
 
-      <Card className="p-6 border-l-4 border-l-indigo-500">
-        <div className="flex items-center gap-3">
-          <div className="p-3 bg-indigo-500/10 rounded-lg">
-            <Eye className="w-6 h-6 text-indigo-600" />
-          </div>
-          <div>
-            <p className="text-2xl font-bold">{stats.totalViews}</p>
-            <p className="text-sm text-muted-foreground">Wyświetleń</p>
-          </div>
-        </div>
-      </Card>
+      {/*<Card className="p-6 border-l-4 border-l-indigo-500">*/}
+      {/*  <div className="flex items-center gap-3">*/}
+      {/*    <div className="p-3 bg-indigo-500/10 rounded-lg">*/}
+      {/*      <Eye className="w-6 h-6 text-indigo-600" />*/}
+      {/*    </div>*/}
+      {/*    <div>*/}
+      {/*      <p className="text-2xl font-bold">{stats.totalViews}</p>*/}
+      {/*      <p className="text-sm text-muted-foreground">Wyświetleń</p>*/}
+      {/*    </div>*/}
+      {/*  </div>*/}
+      {/*</Card>*/}
     </div>
   );
 };

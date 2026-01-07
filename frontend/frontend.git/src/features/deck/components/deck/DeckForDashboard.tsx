@@ -1,10 +1,9 @@
 import { Button } from "@/components/ui/button";
-import { Skeleton } from "@/components/ui/skeleton"; // Import Skeletona
-import { PlusCircle, Frown } from "lucide-react";
-import { DeckCardForDashboard } from "./DeckCardForDashboard";
-import { useInfiniteIDecks } from "../../hooks/useInfiniteIDecks";
+import { Skeleton } from "@/components/ui/skeleton";
+import {useInfiniteIDecks} from "@/features/deck/hooks/useInfiniteIDecks";
+import {ArrowRight, ChevronDown, Frown, Layers, Loader2, PlusCircle} from "lucide-react";
+import {DeckCardForDashboard} from "@/features/deck/components/deck/DeckCardForDashboard";
 import Link from "next/link";
-import { ChevronDown, ArrowRight, Loader2, Layers } from "lucide-react";
 
 const DeckListSkeleton = () => (
   <div className="space-y-4">

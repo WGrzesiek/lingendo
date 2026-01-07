@@ -1,14 +1,11 @@
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import {
   Edit,
   PlusCircle,
   Star,
   Users,
   CheckCircle,
-  Lock,
-  Globe,
   Calendar,
 } from "lucide-react";
 import {
@@ -17,7 +14,7 @@ import {
 } from "../../../types/created-deck.types";
 import { DeckCategoryBadge } from "../DeckCategoryBadge";
 import { DeckDifficultyBadge } from "../DeckDifficultyBadge";
-import { timeAgo } from "@/lib/timeAgo";
+import { time } from "@/lib/time";
 import { useRouter } from "next/navigation";
 import { DeckVisibilityBadge } from "@/features/deck/components/deck/DeckVisibilityBadge";
 
@@ -97,11 +94,11 @@ export const CreatedDeckCard = ({ deck, deckStat }: CreatedDeckCardProps) => {
           </span>
           <span className="flex items-center gap-1.5">
             <Calendar className="w-3.5 h-3.5" />
-            Utworzono {timeAgo(deck.createdAt)}
+            Utworzono {time(deck.createdAt)}
           </span>
           {deck.updatedAt !== deck.createdAt && (
             <span className="flex items-center gap-1.5">
-              Zaktualizowano {timeAgo(deck.updatedAt)}
+              Zaktualizowano {time(deck.updatedAt)}
             </span>
           )}
         </div>

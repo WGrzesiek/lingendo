@@ -9,7 +9,6 @@ import { FileJson, CheckCircle2, XCircle } from "lucide-react";
 import { WordToAdd } from "../../types/word.types";
 
 interface JsonImportProps {
-  /** Callback wywoływany po pomyślnym zaimportowaniu */
   onImport: (words: WordToAdd[]) => void;
 }
 

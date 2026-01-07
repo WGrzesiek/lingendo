@@ -40,7 +40,7 @@ import { LANGUAGES, languageValues } from "@/types/common";
 import {
   CATEGORIES,
   DeckCategory,
-  DECK_OWNERS,
+  DECK_PURPOSES,
   deckOwnerTypeValues,
   deckDifficultyValues,
   DIFFICULTIES,
@@ -97,7 +97,6 @@ export const EditDeckForm = ({ deckId, initialData }: EditDeckFormProps) => {
     },
   });
 
-  // Update form when initialData changes
   useEffect(() => {
     if (initialData) {
       form.reset({
@@ -430,7 +429,7 @@ export const EditDeckForm = ({ deckId, initialData }: EditDeckFormProps) => {
                   name="owner"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Właściciel</FormLabel>
+                      <FormLabel>Przeznaczenie</FormLabel>
 
                       <Select
                         onValueChange={field.onChange}
@@ -438,18 +437,21 @@ export const EditDeckForm = ({ deckId, initialData }: EditDeckFormProps) => {
                       >
                         <FormControl>
                           <SelectTrigger className="bg-background">
-                            <SelectValue placeholder="Wybierz właściciela" />
+                            <SelectValue placeholder="Wybierz przeznaczenie" />
                           </SelectTrigger>
                         </FormControl>
 
                         <SelectContent>
-                          {DECK_OWNERS.map((owner) => {
-                            const Icon = owner.icon;
+                          {DECK_PURPOSES.map((purpose) => {
+                            const Icon = purpose.icon;
                             return (
-                              <SelectItem key={owner.value} value={owner.value}>
+                              <SelectItem
+                                key={purpose.value}
+                                value={purpose.value}
+                              >
                                 <div className="flex items-center gap-2">
                                   <Icon className="w-4 h-4" />
-                                  {owner.label}
+                                  {purpose.label}
                                 </div>
                               </SelectItem>
                             );
@@ -458,7 +460,7 @@ export const EditDeckForm = ({ deckId, initialData }: EditDeckFormProps) => {
                       </Select>
 
                       <FormDescription>
-                        Określ, kto ma dostęp do edycji i zarządzania kursem.
+                        Wybierz Community aby udostępnić talię społeczności.
                       </FormDescription>
                     </FormItem>
                   )}

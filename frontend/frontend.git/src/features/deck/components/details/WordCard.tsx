@@ -7,7 +7,7 @@ interface SimpleWordCardProps {
 }
 
 /**
- * Prosta karta słówka - tylko słowo, tłumaczenia i zdania
+ * Karta słówka - tylko słowo, tłumaczenia i zdania
  * Bez statusów nauki (nauczone/powtórzone)
  */
 export const WordCard = ({ word }: SimpleWordCardProps) => {

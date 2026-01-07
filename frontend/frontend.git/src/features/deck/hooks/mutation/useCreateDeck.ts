@@ -3,6 +3,7 @@ import { createDeck } from "@/features/deck/services/deck.service";
 import type { CreateDeckDto, ResponseDeckDto } from "../../types";
 import type { ApiErrorResponse } from "@/types/common";
 import type { AxiosError } from "axios";
+import { qk } from "@/lib/queryKeys";
 
 export const useCreateDeck = () => {
   const queryClient = useQueryClient();
@@ -14,8 +15,8 @@ export const useCreateDeck = () => {
   >({
     mutationFn: createDeck,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["decks"] });
-      queryClient.invalidateQueries({ queryKey: ["user-decks"] });
+      queryClient.invalidateQueries({ queryKey: qk.deck.all });
+      queryClient.invalidateQueries({ queryKey: qk.deck.userDecks() });
     },
   });
 };

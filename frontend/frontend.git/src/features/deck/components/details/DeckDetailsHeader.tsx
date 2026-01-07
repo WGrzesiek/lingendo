@@ -1,7 +1,7 @@
 "use client";
 
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import {
   ArrowLeft,
   Edit,
@@ -9,13 +9,17 @@ import {
   BookOpen,
   Calendar,
   User,
+  Loader2,
+  CheckCircle,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { DeckCategoryBadge } from "../deck/DeckCategoryBadge";
 import { DeckDifficultyBadge } from "../deck/DeckDifficultyBadge";
 import { DeckVisibilityBadge } from "../deck/DeckVisibilityBadge";
+import { ShareDeckDialog } from "@/features/deck-share/components/ShareDeckDialog";
+import { useEnrollToDeck } from "@/features/deckEnrollment/hooks/hooks";
 import type { DeckDetails } from "@/features/deck/types/deck-details.types";
-import { timeAgo } from "@/lib/timeAgo";
+import { time } from "@/lib/time";
 
 interface DeckDetailsHeaderProps {
   deck: DeckDetails;
@@ -27,6 +31,19 @@ interface DeckDetailsHeaderProps {
  */
 export const DeckDetailsHeader = ({ deck }: DeckDetailsHeaderProps) => {
   const router = useRouter();
+  const [isEnrolled, setIsEnrolled] = useState(false);
+  const enrollMutation = useEnrollToDeck();
+
+  const handleEnroll = () => {
+    enrollMutation.mutate(
+      { deckId: deck.id },
+      {
+        onSuccess: () => {
+          setIsEnrolled(true);
+        },
+      }
+    );
+  };
 
   return (
     <div className="space-y-6">
@@ -67,11 +84,11 @@ export const DeckDetailsHeader = ({ deck }: DeckDetailsHeaderProps) => {
             </span>
             <span className="flex items-center gap-1.5">
               <Calendar className="w-4 h-4" />
-              Utworzono {timeAgo(deck.createdAt)}
+              Utworzono {time(deck.createdAt)}
             </span>
             {deck.updatedAt !== deck.createdAt && (
               <span className="flex items-center gap-1.5">
-                Zaktualizowano {timeAgo(deck.updatedAt)}
+                Zaktualizowano {time(deck.updatedAt)}
               </span>
             )}
           </div>
@@ -79,6 +96,7 @@ export const DeckDetailsHeader = ({ deck }: DeckDetailsHeaderProps) => {
 
         {deck.isOwner && (
           <div className="flex flex-col gap-3 lg:shrink-0">
+            <ShareDeckDialog deckId={deck.id} deckName={deck.name} />
             <Button
               size="lg"
               variant="outline"
@@ -96,6 +114,47 @@ export const DeckDetailsHeader = ({ deck }: DeckDetailsHeaderProps) => {
               <PlusCircle className="w-5 h-5" />
               Dodaj słówka
             </Button>
+          </div>
+        )}
+
+        {/* Przycisk zapisu - tylko dla studentów (nie-nauczycieli) */}
+        {!deck.isTeacher && (
+          <div className="flex flex-col gap-3 lg:shrink-0">
+            {isEnrolled ? (
+              <>
+                <div className="flex items-center gap-2 text-green-600 p-3 bg-green-50 rounded-lg">
+                  <CheckCircle className="w-5 h-5" />
+                  <span className="font-medium">Zapisano na kurs!</span>
+                </div>
+                <Button
+                  size="lg"
+                  className="gap-2 w-full lg:w-auto"
+                  onClick={() => router.push(`/course/${deck.id}`)}
+                >
+                  <BookOpen className="w-5 h-5" />
+                  Rozpocznij naukę
+                </Button>
+              </>
+            ) : (
+              <Button
+                size="lg"
+                className="gap-2 w-full lg:w-auto"
+                onClick={handleEnroll}
+                disabled={enrollMutation.isPending}
+              >
+                {enrollMutation.isPending ? (
+                  <>
+                    <Loader2 className="w-5 h-5 animate-spin" />
+                    Zapisywanie...
+                  </>
+                ) : (
+                  <>
+                    <PlusCircle className="w-5 h-5" />
+                    Zapisz się na kurs
+                  </>
+                )}
+              </Button>
+            )}
           </div>
         )}
       </div>

@@ -25,13 +25,7 @@ import {
   Leaf,
   Megaphone,
   LayoutGrid,
-  Landmark,
 } from "lucide-react";
-
-/**
- * Typy związane z taliami (decks)
- */
-
 import type { Language } from "@/types/common";
 import { reviewSchedules, Visibility } from "@/types/learning";
 
@@ -227,6 +221,27 @@ export const DECK_OWNERS = deckOwnerTypeValues.map((value) => ({
   icon: deckOwnerConfig[value].icon,
   iconColor: deckOwnerConfig[value].iconColor,
 }));
+
+/**
+ * Przeznaczenie talii (uproszczona wersja dla formularza)
+ * Tylko dwie opcje: Własny (I) i Community (COMMUNITY)
+ */
+export const DECK_PURPOSES = [
+  {
+    value: "I" as DeckOwnerType,
+    label: "Własny",
+    description: "Talia tylko dla Ciebie",
+    icon: User,
+    iconColor: "text-blue-700",
+  },
+  {
+    value: "COMMUNITY" as DeckOwnerType,
+    label: "Community",
+    description: "Udostępnij społeczności",
+    icon: Globe,
+    iconColor: "text-teal-700",
+  },
+] as const;
 
 /**
  * Typy trudności talii
@@ -522,14 +537,11 @@ export const LEARN_ALGORITHMS = learnAlgorithmValues.map((value) => ({
 }));
 
 /**
- * Typy właściciela talii
+ * Widoczność talii
+ * PRIVATE - tylko właściciel (udostępnianie przez DeckShare)
+ * PUBLIC - każdy może zobaczyć
  */
-export const deckVisibilityTypeValues = [
-  "PRIVATE",
-  "PUBLIC",
-  "FRIENDS_ONLY",
-  "STUDENTS_ONLY",
-] as const;
+export const deckVisibilityTypeValues = ["PRIVATE", "PUBLIC"] as const;
 
 export type DeckVisibilityType = (typeof deckVisibilityTypeValues)[number];
 
@@ -537,6 +549,7 @@ export const deckVisibilityConfig: Record<
   DeckVisibilityType,
   {
     label: string;
+    description: string;
     icon: LucideIcon;
     className: string;
     iconColor: string;
@@ -544,33 +557,24 @@ export const deckVisibilityConfig: Record<
 > = {
   PRIVATE: {
     label: "Prywatny",
+    description: "Tylko Ty masz dostęp. Możesz udostępnić przez DeckShare.",
     icon: User,
     className: "bg-blue-500/15 text-blue-700 border-blue-200",
     iconColor: "text-blue-700",
   },
-  STUDENTS_ONLY: {
-    label: "Dla uczniów",
-    icon: GraduationCap,
-    className: "bg-violet-500/15 text-violet-700 border-violet-200",
-    iconColor: "text-violet-700",
-  },
-  FRIENDS_ONLY: {
-    label: "Dla znajomych",
-    icon: Users,
-    className: "bg-pink-500/15 text-pink-700 border-pink-200",
-    iconColor: "text-pink-700",
-  },
   PUBLIC: {
     label: "Publiczny",
+    description: "Każdy może zobaczyć i zapisać się na tę talię.",
     icon: Globe,
     className: "bg-teal-500/15 text-teal-700 border-teal-200",
     iconColor: "text-teal-700",
   },
 };
 
-export const DECK_VISIBILITY = deckOwnerTypeValues.map((value) => ({
+export const DECK_VISIBILITY = deckVisibilityTypeValues.map((value) => ({
   value,
-  label: deckOwnerConfig[value].label,
-  icon: deckOwnerConfig[value].icon,
-  iconColor: deckOwnerConfig[value].iconColor,
+  label: deckVisibilityConfig[value].label,
+  description: deckVisibilityConfig[value].description,
+  icon: deckVisibilityConfig[value].icon,
+  iconColor: deckVisibilityConfig[value].iconColor,
 }));

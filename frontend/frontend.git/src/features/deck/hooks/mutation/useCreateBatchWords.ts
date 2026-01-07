@@ -6,6 +6,7 @@ import {
   CreateBatchResponse,
 } from "../../services/vocabulary.service";
 import type { AxiosError } from "axios";
+import { qk } from "@/lib/queryKeys";
 
 /**
  * Hook do dodawania słówek batch do konkretnego decka
@@ -21,13 +22,13 @@ export const useCreateBatchWordsForDeck = () => {
     mutationFn: ({ deckId, words }) => createBatchWordsForDeck(deckId, words),
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({
-        queryKey: ["deck-detail", variables.deckId],
+        queryKey: qk.deck.detail1(variables.deckId),
       });
       queryClient.invalidateQueries({
-        queryKey: ["deck-flashcards", "infinite", variables.deckId],
+        queryKey: qk.deck.flashcards(variables.deckId),
       });
       queryClient.invalidateQueries({
-        queryKey: ["deck-details", variables.deckId],
+        queryKey: qk.deck.details(variables.deckId),
       });
     },
   });
@@ -42,7 +43,7 @@ export const useCreateBatchWordsForCommunity = () => {
   return useMutation<CreateBatchResponse, AxiosError, VocabularyWord[]>({
     mutationFn: (words) => createBatchWordsForCommunity(words),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["community-words"] });
+      queryClient.invalidateQueries({ queryKey: qk.community.words() });
     },
   });
 };

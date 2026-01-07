@@ -1,8 +1,3 @@
-/**
- * Serwis do zarządzania słówkami (vocabulary)
- * Operacje dodawania słówek do decków i społeczności
- */
-
 import apiClient from "@/lib/api/axios";
 
 const BASE_URL = "/v1/vocabulary";

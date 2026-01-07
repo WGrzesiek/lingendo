@@ -14,7 +14,6 @@ interface WordFormCardProps {
   index: number;
   onChange: (index: number, updatedWord: WordToAdd) => void;
   onRemove: (index: number) => void;
-  /** Czy można usunąć słówko */
   canRemove: boolean;
 }
 

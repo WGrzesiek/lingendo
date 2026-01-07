@@ -6,6 +6,7 @@ import {
   ICreatedDeckListItem,
 } from "@/features/deck/types/created-deck.types";
 import { DeckOwnerType } from "@/features/deck/types";
+import { qk } from "@/lib/queryKeys";
 
 type DecksCreatedByMeFilters = {
   deckVisibility?: DeckVisibility[];
@@ -20,7 +21,7 @@ export const useInfiniteDecksCreatedByMe = (
   pageSize = 20
 ) => {
   return useInfiniteQuery<PageResponse<ICreatedDeckListItem>, Error>({
-    queryKey: ["i-decks-create", "infinite", filters],
+    queryKey: qk.deck.iDecksCreateInfinite(filters),
     queryFn: async ({ pageParam = 0 }) =>
       getDecksCreatedByMe({
         ...filters,

@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { PlusCircle, Frown, BookPlus, ArrowRight } from "lucide-react";
 import { CreatedDeckCard } from "./CreatedDeckCard";
-import {DecksStats, ICreatedDeckListItem} from "../../../types/created-deck.types";
+import {ICreatedDeckListItem} from "../../../types/created-deck.types";
 import Link from "next/link";
 import {useMyDeckStats} from "@/features/deck/hooks/useMyDeckStats";
 

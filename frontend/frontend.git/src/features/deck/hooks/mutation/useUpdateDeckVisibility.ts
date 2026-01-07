@@ -1,6 +1,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { updateDeckVisibility } from "../../services/deck.service";
 import type { UpdateDeckVisibilityRequest } from "../../types";
+import { qk } from "@/lib/queryKeys";
 
 /**
  * Hook do zmiany widoczności talii (publiczna/prywatna)
@@ -16,9 +17,11 @@ export const useUpdateDeckVisibility = () => {
       data: UpdateDeckVisibilityRequest;
     }) => updateDeckVisibility(deckId, data),
     onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({ queryKey: ["deck", variables.deckId] });
-      queryClient.invalidateQueries({ queryKey: ["decks"] });
-      queryClient.invalidateQueries({ queryKey: ["user-decks"] });
+      queryClient.invalidateQueries({
+        queryKey: qk.deck.detail(variables.deckId),
+      });
+      queryClient.invalidateQueries({ queryKey: qk.deck.all });
+      queryClient.invalidateQueries({ queryKey: qk.deck.userDecks() });
     },
   });
 };
