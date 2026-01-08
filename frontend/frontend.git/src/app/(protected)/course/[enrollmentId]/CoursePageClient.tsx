@@ -9,7 +9,6 @@ import React from "react";
 
 /**
  * Strona szczegółów kursu
- * Pokazuje słówka, statystyki, sesje i ustawienia kursu
  */
 export default function CoursePageClient({enrollmentId,}: {enrollmentId: string; }) {
     if (!enrollmentId) {

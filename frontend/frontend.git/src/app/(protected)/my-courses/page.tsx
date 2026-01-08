@@ -3,25 +3,32 @@
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { PlusCircle, BookOpen, Lock, Globe, Plus, Users } from "lucide-react";
+import { PlusCircle, BookOpen, Lock, Globe, Plus, Share2 } from "lucide-react";
 import { CreatedDecksList } from "@/features/deck/components/deck/my-deck/CreatedDecksList";
 import { useRouter } from "next/navigation";
 import { useState, useMemo } from "react";
-import {useInfiniteDecksCreatedByMe} from "@/features/deck/hooks/useInfiniteDecksCreatedByMe";
+import { useInfiniteDecksCreatedByMe } from "@/features/deck/hooks/useInfiniteDecksCreatedByMe";
 
 /**
  * Strona "Moje kursy" - kursy utworzone przez użytkownika
- * Wyświetla listę kursów z możliwością filtrowania na publiczne/prywatne/udostępnione
+ * Wyświetla listę kursów z możliwością filtrowania na publiczne/prywatne
+ * Udostępnianie odbywa się przez DeckShare (osobna funkcjonalność)
  */
 const MyCreatedCoursesPage = () => {
   const router = useRouter();
-  const {data: deck, isLoading, isError, fetchNextPage, hasNextPage, isFetchingNextPage } = useInfiniteDecksCreatedByMe();
-  const decks = deck ? deck.pages.flatMap(page => page.content) : [];
+  const {
+    data: deck,
+    isLoading,
+    isError,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useInfiniteDecksCreatedByMe();
+  const decks = deck ? deck.pages.flatMap((page) => page.content) : [];
   console.log(decks);
-  const [activeTab, setActiveTab] = useState<
-    "all" | "public" | "private" | "shared"
-  >("all");
-
+  const [activeTab, setActiveTab] = useState<"all" | "public" | "private">(
+    "all"
+  );
 
   const filteredDecks = useMemo(() => {
     if (activeTab === "all") return decks;
@@ -29,16 +36,11 @@ const MyCreatedCoursesPage = () => {
       return decks.filter((deck) => deck.visibility === "PUBLIC");
     if (activeTab === "private")
       return decks.filter((deck) => deck.visibility === "PRIVATE");
-    if (activeTab === "shared")
-      return decks.filter((deck) => deck.visibility === "FRIENDS_ONLY" || deck.visibility === "STUDENTS_ONLY");
     return decks;
   }, [activeTab, decks]);
 
   const publicCount = decks.filter((d) => d.visibility === "PUBLIC").length;
   const privateCount = decks.filter((d) => d.visibility === "PRIVATE").length;
-  const sharedCount = decks.filter(
-    (d) => d.visibility === "FRIENDS_ONLY" || d.visibility === "STUDENTS_ONLY"
-  ).length;
 
   const handleCreateCourse = () => {
     router.push("/decks/create");
@@ -66,9 +68,7 @@ const MyCreatedCoursesPage = () => {
                   <BookOpen className="w-6 h-6 text-primary" />
                 </div>
                 <div>
-                  <p className="text-2xl font-bold">
-                    {decks.length}
-                  </p>
+                  <p className="text-2xl font-bold">{decks.length}</p>
                   <p className="text-sm text-muted-foreground">
                     Wszystkie kursy
                   </p>
@@ -152,11 +152,11 @@ const MyCreatedCoursesPage = () => {
               defaultValue="all"
               value={activeTab}
               onValueChange={(value) =>
-                setActiveTab(value as "all" | "public" | "private" | "shared")
+                setActiveTab(value as "all" | "public" | "private")
               }
               className="w-full"
             >
-              <TabsList className="grid w-full grid-cols-4 mb-6">
+              <TabsList className="grid w-full grid-cols-3 mb-6">
                 <TabsTrigger value="all">
                   Wszystkie ({decks.length})
                 </TabsTrigger>
@@ -167,10 +167,6 @@ const MyCreatedCoursesPage = () => {
                 <TabsTrigger value="private">
                   <Lock className="w-4 h-4 mr-2" />
                   Prywatne ({privateCount})
-                </TabsTrigger>
-                <TabsTrigger value="shared">
-                  <Users className="w-4 h-4 mr-2" />
-                  Udostępnione ({sharedCount})
                 </TabsTrigger>
               </TabsList>
 
@@ -183,10 +179,6 @@ const MyCreatedCoursesPage = () => {
               </TabsContent>
 
               <TabsContent value="private" className="mt-0">
-                <CreatedDecksList decks={filteredDecks} />
-              </TabsContent>
-
-              <TabsContent value="shared" className="mt-0">
                 <CreatedDecksList decks={filteredDecks} />
               </TabsContent>
             </Tabs>

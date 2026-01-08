@@ -3,10 +3,6 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
 import {
-  Brain,
-  Layers,
-  Shuffle,
-  BookOpen,
   Calendar,
   Settings as SettingsIcon, PlusCircle, Frown,
 } from "lucide-react";
@@ -24,11 +20,9 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from "@/components/ui/select";
-import {useUpdateFlashcardsPerSession} from "@/features/deckEnrollment/hooks/useUpdateFlashcardsPerSession";
-import {useUpdateLearnAlgorithm} from "@/features/deckEnrollment/hooks/updateLearnAlgorithm";
 import {useCourseSettings} from "@/features/course/hooks/useCourseSettings";
 import {Skeleton} from "@/components/ui/skeleton";
-import {useUpdateReviewSchedule} from "@/features/deckEnrollment/hooks/useUpdateReviewSchedule";
+import {useUpdateReviewSchedule, useUpdateLearnAlgorithm, useUpdateFlashcardsPerSession} from "@/features/deckEnrollment/hooks/hooks";
 
 
 interface CourseSettingsProps {

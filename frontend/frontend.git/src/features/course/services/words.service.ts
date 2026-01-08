@@ -43,7 +43,6 @@ export const getCourseWords = async (
     };
   });
 
-  // Zwracamy PageResponse z odpowiednimi polami paginacji
   return {
     content: words,
     totalElements: response.data.totalElements,

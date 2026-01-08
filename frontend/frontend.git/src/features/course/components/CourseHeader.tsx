@@ -17,7 +17,7 @@ import {
 import { useCourseHeader } from "@/features/course/hooks/useCourseHeader";
 import { Skeleton } from "@/components/ui/skeleton";
 import { CourseStatsModal } from "./CourseStatsModal";
-import {useRouter} from "next/navigation";
+import { useRouter } from "next/navigation";
 
 interface CourseHeaderProps {
   enrollmentId: string;
@@ -58,7 +58,7 @@ const EmptyState = () => (
 
 export const CourseHeader = ({ enrollmentId }: CourseHeaderProps) => {
   const router = useRouter();
-    const [statsModalOpen, setStatsModalOpen] = useState(false);
+  const [statsModalOpen, setStatsModalOpen] = useState(false);
   const { data, isLoading, isError } = useCourseHeader(enrollmentId);
   if (isLoading) return <WordListSkeleton />;
 
@@ -77,9 +77,7 @@ export const CourseHeader = ({ enrollmentId }: CourseHeaderProps) => {
   // }
   return (
     <div className="space-y-4">
-      <Button variant="ghost" className="gap-2"
-      onClick={() => router.back()}
-      >
+      <Button variant="ghost" className="gap-2" onClick={() => router.back()}>
         <ArrowLeft className="w-4 h-4" />
         Powrót do dashboardu
       </Button>
@@ -143,7 +141,11 @@ export const CourseHeader = ({ enrollmentId }: CourseHeaderProps) => {
                 </Button>
               </>
             )}
-            <Button size="sm" className="flex-1 sm:flex-initial">
+            <Button
+              size="sm"
+              className="flex-1 sm:flex-initial"
+              onClick={() => router.push(`/course/${data.deckId}`)}
+            >
               Rozpocznij naukę
             </Button>
           </div>
