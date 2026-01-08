@@ -1,159 +1,143 @@
-import { Card } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { MessageSquare, CheckCircle, AlertCircle, Clock } from "lucide-react";
+"use client";
 
-interface Activity {
-  id: string;
-  type: "question" | "completion" | "issue" | "new_student";
-  title: string;
-  description: string;
-  time: string;
-  studentName?: string;
-  courseName?: string;
-  priority?: "low" | "medium" | "high";
-}
+import { Card } from "@/components/ui/card";
+import { Zap, BookCheck, UserPlus, History, Loader2 } from "lucide-react";
+import { useTeacherActivity } from "../hooks";
+import type { TeacherActivityItem } from "../types";
+import { time } from "@/lib/time";
 
 /**
- * Kanał aktywności wyświetlający ostatnie wydarzenia
- * Pokazuje pytania uczniów, ukończenia kursów i inne wydarzenia
+ * Kanał aktywności wyświetlający ostatnie wydarzenia uczniów
  */
 export const ActivityFeed = () => {
-  const activities: Activity[] = [
-    {
-      id: "1",
-      type: "question",
-      title: "Nowe pytanie od ucznia",
-      description: "Anna Kowalska ma pytanie o lekcję 5",
-      time: "5 minut temu",
-      studentName: "Anna Kowalska",
-      courseName: "Angielski dla początkujących",
-      priority: "high",
-    },
-    {
-      id: "2",
-      type: "completion",
-      title: "Ukończono lekcję",
-      description: "Jan Nowak ukończył lekcję o czasach przeszłych",
-      time: "30 minut temu",
-      studentName: "Jan Nowak",
-      courseName: "Gramatyka angielska",
-      priority: "low",
-    },
-    {
-      id: "3",
-      type: "new_student",
-      title: "Nowy uczeń",
-      description: "Piotr Zieliński dołączył do kursu",
-      time: "1 godzinę temu",
-      studentName: "Piotr Zieliński",
-      courseName: "Konwersacje po angielsku",
-      priority: "medium",
-    },
-    {
-      id: "4",
-      type: "issue",
-      title: "Problem techniczny",
-      description: "Maria Wiśniewska zgłosiła problem z testem",
-      time: "2 godziny temu",
-      studentName: "Maria Wiśniewska",
-      courseName: "Angielski biznesowy",
-      priority: "high",
-    },
-    {
-      id: "5",
-      type: "completion",
-      title: "Ukończono kurs",
-      description: "Katarzyna Dąbrowska ukończyła cały kurs!",
-      time: "3 godziny temu",
-      studentName: "Katarzyna Dąbrowska",
-      courseName: "Angielski dla początkujących",
-      priority: "low",
-    },
-  ];
+  const { data: activities, isLoading, error } = useTeacherActivity(10);
 
-  const getActivityIcon = (type: Activity["type"]) => {
+  const getActivityIcon = (type: string) => {
     switch (type) {
-      case "question":
-        return <MessageSquare className="w-5 h-5 text-info" />;
-      case "completion":
-        return <CheckCircle className="w-5 h-5 text-success" />;
-      case "issue":
-        return <AlertCircle className="w-5 h-5 text-error" />;
-      case "new_student":
-        return <Clock className="w-5 h-5 text-premium" />;
+      case "SESSION_COMPLETED":
+        return <Zap className="w-5 h-5 text-yellow-500" />;
+      case "LESSON_COMPLETED":
+        return <BookCheck className="w-5 h-5 text-green-500" />;
+      case "NEW_STUDENT":
+        return <UserPlus className="w-5 h-5 text-blue-500" />;
+      default:
+        return <Zap className="w-5 h-5 text-gray-500" />;
     }
   };
 
-  const getPriorityBadge = (priority?: Activity["priority"]) => {
-    if (!priority) return null;
-
-    const variants = {
-      low: "outline",
-      medium: "secondary",
-      high: "destructive",
-    } as const;
-
-    const labels = {
-      low: "Niski",
-      medium: "Średni",
-      high: "Wysoki",
-    };
-
-    return <Badge variant={variants[priority]}>{labels[priority]}</Badge>;
+  const getActivityColor = (type: string) => {
+    switch (type) {
+      case "SESSION_COMPLETED":
+        return "bg-yellow-500/10 border-yellow-500/20";
+      case "LESSON_COMPLETED":
+        return "bg-green-500/10 border-green-500/20";
+      case "NEW_STUDENT":
+        return "bg-blue-500/10 border-blue-500/20";
+      default:
+        return "bg-gray-500/10 border-gray-500/20";
+    }
   };
+
+  const getActivityTitle = (activity: TeacherActivityItem) => {
+    switch (activity.activityType) {
+      case "SESSION_COMPLETED":
+        return "Ukończona sesja";
+      case "LESSON_COMPLETED":
+        return "Ukończona lekcja";
+      case "NEW_STUDENT":
+        return "Nowy uczeń";
+      default:
+        return "Aktywność";
+    }
+  };
+
+  const getActivitySubtitle = (activity: TeacherActivityItem) => {
+    switch (activity.activityType) {
+      case "SESSION_COMPLETED":
+      case "LESSON_COMPLETED":
+        return `${activity.studentName} - ${activity.deckName || "Kurs"}`;
+      case "NEW_STUDENT":
+        return `${activity.studentName} dołączył do Twojej grupy`;
+      default:
+        return activity.studentName;
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <Card className="p-6">
+        <div className="flex items-center gap-2 mb-6">
+          <History className="w-5 h-5" />
+          <h2 className="text-2xl font-bold">Ostatnia aktywność</h2>
+        </div>
+        <div className="flex items-center justify-center py-8">
+          <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
+        </div>
+      </Card>
+    );
+  }
+
+  if (error) {
+    return (
+      <Card className="p-6">
+        <div className="flex items-center gap-2 mb-6">
+          <History className="w-5 h-5" />
+          <h2 className="text-2xl font-bold">Ostatnia aktywność</h2>
+        </div>
+        <p className="text-muted-foreground text-center py-8">
+          Nie udało się załadować aktywności
+        </p>
+      </Card>
+    );
+  }
+
+  if (!activities || activities.length === 0) {
+    return (
+      <Card className="p-6">
+        <div className="flex items-center gap-2 mb-6">
+          <History className="w-5 h-5" />
+          <h2 className="text-2xl font-bold">Ostatnia aktywność</h2>
+        </div>
+        <p className="text-muted-foreground text-center py-8">
+          Brak aktywności do wyświetlenia
+        </p>
+      </Card>
+    );
+  }
 
   return (
     <Card className="p-6">
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex items-center gap-2 mb-6">
+        <History className="w-5 h-5" />
         <h2 className="text-2xl font-bold">Ostatnia aktywność</h2>
-        <Button variant="outline" size="sm">
-          Zobacz wszystkie
-        </Button>
       </div>
 
-      <div className="space-y-4">
-        {activities.map((activity) => (
+      <div className="space-y-3">
+        {activities.map((activity, index) => (
           <div
-            key={activity.id}
-            className="p-4 rounded-lg hover:bg-accent/50 transition-colors cursor-pointer border"
+            key={index}
+            className={`flex items-start gap-3 p-3 rounded-lg border ${getActivityColor(
+              activity.activityType
+            )}`}
           >
-            <div className="flex items-start gap-3">
-              {/* Icon */}
-              <div className="p-2 bg-background rounded-lg flex-shrink-0">
-                {getActivityIcon(activity.type)}
+            {/* Ikona */}
+            <div className="flex-shrink-0 mt-1">
+              {getActivityIcon(activity.activityType)}
+            </div>
+
+            {/* Treść */}
+            <div className="flex-1 min-w-0">
+              <div className="flex items-start justify-between gap-2 mb-1">
+                <h4 className="font-semibold text-sm">
+                  {getActivityTitle(activity)}
+                </h4>
               </div>
-
-              {/* Content */}
-              <div className="flex-1 min-w-0">
-                {/* Tytuł + badge (mobile w pionie, desktop w poziomie) */}
-                <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between mb-2">
-                  <h3 className="font-semibold">{activity.title}</h3>
-                  <div className="flex items-center gap-2">
-                    {getPriorityBadge(activity.priority)}
-                    <span className="text-xs text-muted-foreground whitespace-nowrap sm:hidden">
-                      {activity.time}
-                    </span>
-                  </div>
-                </div>
-
-                {/* Opis */}
-                <p className="text-sm text-muted-foreground mb-2">
-                  {activity.description}
-                </p>
-
-                {/* Kurs + czas (desktop) */}
-                <div className="flex items-center justify-between gap-2">
-                  {activity.courseName && (
-                    <p className="text-xs text-muted-foreground">
-                      {activity.courseName}
-                    </p>
-                  )}
-                  <span className="hidden sm:inline text-xs text-muted-foreground whitespace-nowrap ml-auto">
-                    {activity.time}
-                  </span>
-                </div>
-              </div>
+              <p className="text-sm text-muted-foreground line-clamp-2">
+                {getActivitySubtitle(activity)}
+              </p>
+              <p className="text-xs text-muted-foreground mt-1">
+                {time(activity.eventTime)}
+              </p>
             </div>
           </div>
         ))}

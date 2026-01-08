@@ -1,36 +1,18 @@
 "use client";
 
-import { useProtectedRoute } from "@/features/auth/hooks/useProtectedRoute";
+import { useCurrentUser } from "@/features/auth/hooks/useCurrentUser";
 import { StatsGrid } from "@/features/dashboard-teacher/components/StatsGrid";
 import { RecentCourses } from "@/features/dashboard-teacher/components/RecentCourses";
 import { TopStudents } from "@/features/dashboard-teacher/components/TopStudents";
 import { ActivityFeed } from "@/features/dashboard-teacher/components/ActivityFeed";
 import { QuickActions } from "@/features/dashboard-teacher/components/QuickActions";
-import type { User } from "@/features/auth/types";
-
-/**
- * Mock użytkownika dla celów deweloperskich
- */
-const mockUser: User = {
-  userId: "teacher-123",
-  username: "Jan Kowalski",
-  accountType: "TEACHER",
-  userType: "NORMAL",
-  isEnabled: true,
-};
+import { GroupsSummary } from "@/features/dashboard-teacher/components/GroupsSummary";
 
 /**
  * Strona dashboardu dla nauczycieli
- * Dostępna tylko dla użytkowników z accountType = TEACHER
  */
 const DashboardTeacherPage = () => {
-  // const { user, isLoading } = useProtectedRoute({
-  //   requiredAccountType: "TEACHER",
-  //   redirectTo: "/dashboard-teacher",
-  // });
-
-  const user = mockUser;
-  const isLoading = false;
+  const { data: user, isLoading, isError } = useCurrentUser();
 
   if (isLoading) {
     return (
@@ -38,6 +20,19 @@ const DashboardTeacherPage = () => {
         <div className="text-center">
           <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4" />
           <p className="text-muted-foreground">Ładowanie dashboardu...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (isError || !user) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="text-center">
+          <p className="text-red-500">
+            Wystąpił błąd podczas ładowania danych użytkownika. Proszę spróbować
+            ponownie później.
+          </p>
         </div>
       </div>
     );
@@ -61,6 +56,7 @@ const DashboardTeacherPage = () => {
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2 space-y-6">
+            <GroupsSummary />
             <RecentCourses />
             <ActivityFeed />
           </div>

@@ -1,69 +1,63 @@
-import { Card } from "@/components/ui/card";
-import { TrendingUp, TrendingDown } from "lucide-react";
-// import { TrendingUp, TrendingDown } from "lucide-react";
+"use client";
 
-interface Student {
-  id: string;
-  name: string;
-  email: string;
-  progress: number;
-  coursesCompleted: number;
-  lastActive: string;
-  trend: "up" | "down";
-}
+import { Card } from "@/components/ui/card";
+import { Trophy, Loader2 } from "lucide-react";
+import { useTopStudents } from "../hooks";
+import { formatDistanceToNow } from "date-fns";
+import { pl } from "date-fns/locale";
+
+
+const formatLastActive = (lastActive: string | null): string => {
+  if (!lastActive) return "Brak aktywności";
+  try {
+    return formatDistanceToNow(new Date(lastActive), {
+      addSuffix: true,
+      locale: pl,
+    });
+  } catch {
+    return "Nieznana";
+  }
+};
 
 /**
  * Lista najbardziej aktywnych uczniów
- * Wyświetla zmockowane dane o postępach uczniów
+ * Wyświetla uczniów z najwyższą liczbą punktów
  */
 export const TopStudents = () => {
-  const students: Student[] = [
-    {
-      id: "1",
-      name: "Anna Kowalska",
-      email: "anna.kowalska@example.com",
-      progress: 95,
-      coursesCompleted: 3,
-      lastActive: "5 min temu",
-      trend: "up",
-    },
-    {
-      id: "2",
-      name: "Jan Nowak",
-      email: "jan.nowak@example.com",
-      progress: 87,
-      coursesCompleted: 2,
-      lastActive: "1 godzinę temu",
-      trend: "up",
-    },
-    {
-      id: "3",
-      name: "Maria Wiśniewska",
-      email: "maria.wisniewska@example.com",
-      progress: 82,
-      coursesCompleted: 4,
-      lastActive: "2 godziny temu",
-      trend: "down",
-    },
-    {
-      id: "4",
-      name: "Piotr Zieliński",
-      email: "piotr.zielinski@example.com",
-      progress: 78,
-      coursesCompleted: 2,
-      lastActive: "3 godziny temu",
-      trend: "up",
-    },
-    {
-      id: "5",
-      name: "Katarzyna Dąbrowska",
-      email: "katarzyna.dabrowska@example.com",
-      progress: 75,
-      coursesCompleted: 3,
-      lastActive: "5 godzin temu",
-      trend: "up",
-    },
-  ];
+  const { data: students, isLoading, error } = useTopStudents(5);
+
+  if (isLoading) {
+    return (
+      <Card className="p-6">
+        <h2 className="text-2xl font-bold mb-6">Najlepsi uczniowie</h2>
+        <div className="flex items-center justify-center py-8">
+          <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
+        </div>
+      </Card>
+    );
+  }
+
+  if (error) {
+    return (
+      <Card className="p-6">
+        <h2 className="text-2xl font-bold mb-6">Najlepsi uczniowie</h2>
+        <p className="text-muted-foreground text-center py-8">
+          Nie udało się załadować danych
+        </p>
+      </Card>
+    );
+  }
+
+  if (!students || students.length === 0) {
+    return (
+      <Card className="p-6">
+        <h2 className="text-2xl font-bold mb-6">Najlepsi uczniowie</h2>
+        <p className="text-muted-foreground text-center py-8">
+          Brak aktywnych uczniów
+        </p>
+      </Card>
+    );
+  }
 
   return (
     <Card className="p-6">
@@ -72,7 +66,7 @@ export const TopStudents = () => {
       <div className="space-y-4">
         {students.map((student, index) => (
           <div
-            key={student.id}
+            key={student.studentId}
             className="p-3 rounded-lg hover:bg-accent/50 transition-colors cursor-pointer"
           >
             <div className="flex items-start gap-3">
@@ -83,52 +77,64 @@ export const TopStudents = () => {
 
               {/* Avatar */}
               <div className="w-10 h-10 bg-gradient-to-br from-primary to-primary/50 flex items-center justify-center text-primary-foreground font-semibold rounded-full flex-shrink-0">
-                {student.name
+                {student.studentName
                   .split(" ")
                   .map((n) => n[0])
-                  .join("")}
+                  .join("")
+                  .slice(0, 2)
+                  .toUpperCase()}
               </div>
 
               {/* Info studenta */}
               <div className="flex-1 min-w-0">
                 <div className="flex items-start justify-between gap-2 mb-1">
                   <div className="flex-1 min-w-0">
-                    <h3 className="font-semibold truncate">{student.name}</h3>
-                    <p className="text-sm text-muted-foreground truncate hidden sm:block">
-                      {student.email}
-                    </p>
+                    <h3 className="font-semibold truncate">
+                      {student.studentName}
+                    </h3>
                   </div>
 
-                  {/* Trend icon - desktop */}
-                  <div className="hidden sm:block flex-shrink-0">
-                    {student.trend === "up" ? (
-                      <TrendingUp className="w-5 h-5 text-success" />
-                    ) : (
-                      <TrendingDown className="w-5 h-5 text-error" />
-                    )}
-                  </div>
+                  {/* Trophy dla top 3 */}
+                  {index < 3 && (
+                    <div className="hidden sm:block flex-shrink-0">
+                      <Trophy
+                        className={`w-5 h-5 ${
+                          index === 0
+                            ? "text-yellow-500"
+                            : index === 1
+                            ? "text-gray-400"
+                            : "text-amber-600"
+                        }`}
+                      />
+                    </div>
+                  )}
                 </div>
 
                 {/* Statystyki */}
                 <div className="flex items-center justify-between gap-2 mt-2">
                   <div className="flex items-center gap-3 text-sm">
-                    <span className="font-semibold">{student.progress}%</span>
-                    <span className="text-muted-foreground">
-                      {student.coursesCompleted} ukończone
+                    <span className="font-semibold">
+                      {student.totalPoints} pkt
                     </span>
                     <span className="text-muted-foreground text-xs hidden md:inline">
-                      · {student.lastActive}
+                      · {formatLastActive(student.lastActive)}
                     </span>
                   </div>
 
-                  {/* Trend icon - mobile */}
-                  <div className="sm:hidden flex-shrink-0">
-                    {student.trend === "up" ? (
-                      <TrendingUp className="w-5 h-5 text-success" />
-                    ) : (
-                      <TrendingDown className="w-5 h-5 text-error" />
-                    )}
-                  </div>
+                  {/* Trophy - mobile */}
+                  {index < 3 && (
+                    <div className="sm:hidden flex-shrink-0">
+                      <Trophy
+                        className={`w-5 h-5 ${
+                          index === 0
+                            ? "text-yellow-500"
+                            : index === 1
+                            ? "text-gray-400"
+                            : "text-amber-600"
+                        }`}
+                      />
+                    </div>
+                  )}
                 </div>
               </div>
             </div>

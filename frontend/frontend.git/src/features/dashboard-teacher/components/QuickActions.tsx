@@ -1,47 +1,61 @@
+import Link from "next/link";
 import { Card } from "@/components/ui/card";
-import { Plus, BookOpen, Users, FileText, Settings } from "lucide-react";
+import {
+  BookOpen,
+  Users,
+  UsersRound,
+  Link2,
+  Settings,
+  ChevronRight,
+} from "lucide-react";
 
 interface QuickAction {
   title: string;
   description: string;
   icon: typeof BookOpen;
   color: string;
-  action: string;
+  href: string;
 }
 
 /**
  * Sekcja szybkich akcji dla nauczyciela
- * Umożliwia szybki dostęp do najczęstszych operacji
  */
 export const QuickActions = () => {
   const actions: QuickAction[] = [
     {
-      title: "Utwórz nowy kurs",
-      description: "Dodaj nowy kurs dla swoich uczniów",
-      icon: BookOpen,
-      color: "bg-blue-500",
-      action: "create-course",
+      title: "Zarządzaj grupami",
+      description: "Twórz grupy i udostępniaj kursy",
+      icon: UsersRound,
+      color: "bg-indigo-500",
+      href: "/groups",
     },
     {
-      title: "Dodaj uczniów",
-      description: "Zaproś nowych uczniów do kursu",
+      title: "Zarządzaj studentami",
+      description: "Zobacz listę i śledź postępy uczniów",
       icon: Users,
-      color: "bg-green-500",
-      action: "add-students",
+      color: "bg-blue-500",
+      href: "/dashboard-teacher/students",
     },
     {
-      title: "Stwórz test",
-      description: "Przygotuj test lub quiz dla uczniów",
-      icon: FileText,
+      title: "Generuj zaproszenia",
+      description: "Utwórz kody dla nowych studentów",
+      icon: Link2,
+      color: "bg-green-500",
+      href: "/dashboard-teacher/invitations",
+    },
+    {
+      title: "Zarządzaj kursami",
+      description: "Twórz i udostępniaj kursy",
+      icon: BookOpen,
       color: "bg-purple-500",
-      action: "create-test",
+      href: "/my-courses",
     },
     {
       title: "Ustawienia",
-      description: "Zarządzaj swoim kontem i preferencjami",
+      description: "Zarządzaj swoim kontem",
       icon: Settings,
       color: "bg-orange-500",
-      action: "settings",
+      href: "/settings",
     },
   ];
 
@@ -53,8 +67,9 @@ export const QuickActions = () => {
         {actions.map((action) => {
           const Icon = action.icon;
           return (
-            <button
-              key={action.action}
+            <Link
+              key={action.href}
+              href={action.href}
               className="flex items-start gap-4 p-4 rounded-lg border hover:border-primary hover:bg-accent/50 transition-all text-left group"
             >
               <div
@@ -70,8 +85,8 @@ export const QuickActions = () => {
                 </p>
               </div>
 
-              <Plus className="w-5 h-5 text-muted-foreground group-hover:text-primary transition-colors" />
-            </button>
+              <ChevronRight className="w-5 h-5 text-muted-foreground group-hover:text-primary transition-colors" />
+            </Link>
           );
         })}
       </div>

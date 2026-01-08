@@ -1,57 +1,91 @@
-import { Users, BookOpen, GraduationCap, TrendingUp } from "lucide-react";
+"use client";
+
+import { Users, BookOpen, UsersRound, TrendingUp } from "lucide-react";
 import { StatsCard } from "./StatsCard";
+import { useTeacherStats } from "../hooks";
+import { Skeleton } from "@/components/ui/skeleton";
 
 /**
  * Siatka statystyk dla dashboardu nauczyciela
- * Wyświetla zmockowane dane o uczniach, kursach i postępach
  */
 export const StatsGrid = () => {
-  const stats = [
+  const { data: stats, isLoading, error } = useTeacherStats();
+
+  if (isLoading) {
+    return (
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        {[1, 2, 3, 4].map((i) => (
+          <Skeleton key={i} className="h-32 w-full" />
+        ))}
+      </div>
+    );
+  }
+
+  if (error || !stats) {
+    return (
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        {[1, 2, 3, 4].map((i) => (
+          <StatsCard
+            key={i}
+            title="--"
+            value={0}
+            description="Błąd ładowania"
+            icon={Users}
+          />
+        ))}
+      </div>
+    );
+  }
+
+  const totalStudents =
+    stats.activeStudents + stats.invitedStudents + stats.blockedStudents;
+
+  const statsData = [
     {
-      title: "Aktywni uczniowie",
-      value: 124,
-      description: "W tym miesiącu",
+      title: "Wszyscy uczniowie",
+      value: totalStudents,
+      description: "Łącznie przypisanych",
       icon: Users,
-      trend: {
-        value: "+12% od ostatniego miesiąca",
-        isPositive: true,
-      },
+      trend:
+        stats.activeStudents > 0
+          ? { value: `${stats.activeStudents} aktywnych`, isPositive: true }
+          : undefined,
     },
     {
-      title: "Aktywne kursy",
-      value: 8,
-      description: "Prowadzone przez Ciebie",
+      title: "Aktywne zaproszenia",
+      value: stats.activeInvitations,
+      description: "Oczekujące na użycie",
       icon: BookOpen,
-      trend: {
-        value: "+2 nowe kursy",
-        isPositive: true,
-      },
+      trend:
+        stats.totalInvitations > 0
+          ? { value: `${stats.totalInvitations} łącznie`, isPositive: true }
+          : undefined,
     },
     {
-      title: "Ukończone lekcje",
-      value: "2,547",
-      description: "Łącznie przez uczniów",
-      icon: GraduationCap,
-      trend: {
-        value: "+18% od ostatniego miesiąca",
-        isPositive: true,
-      },
+      title: "Zaproszeni",
+      value: stats.invitedStudents,
+      description: "Oczekujący uczniowie",
+      icon: UsersRound,
+      trend: undefined,
     },
     {
-      title: "Średni postęp",
-      value: "78%",
-      description: "Wszystkich uczniów",
+      title: "Zablokowanych",
+      value: stats.blockedStudents,
+      description: "Uczniów zablokowanych",
       icon: TrendingUp,
-      trend: {
-        value: "+5% od ostatniego miesiąca",
-        isPositive: true,
-      },
+      trend:
+        stats.blockedStudents === 0
+          ? { value: "Brak zablokowanych", isPositive: true }
+          : {
+              value: `${stats.blockedStudents} zablokowanych`,
+              isPositive: false,
+            },
     },
   ];
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-      {stats.map((stat, index) => (
+      {statsData.map((stat, index) => (
         <StatsCard key={index} {...stat} />
       ))}
     </div>
