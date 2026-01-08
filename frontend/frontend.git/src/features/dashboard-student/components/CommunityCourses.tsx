@@ -1,85 +1,63 @@
+"use client";
+
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Users, Star, BookOpen } from "lucide-react";
-
-interface CommunityCourse {
-  id: string;
-  title: string;
-  description: string;
-  author: string;
-  studentsCount: number;
-  rating: number;
-  lessonsCount: number;
-  difficulty: "beginner" | "intermediate" | "advanced";
-  category: string;
-}
+import { Users, BookOpen, Loader2 } from "lucide-react";
+import { usePublicDecks } from "@/features/community/hooks/usePublicDecks";
+import { DeckCategoryBadge } from "@/features/deck/components/deck/DeckCategoryBadge";
+import { DeckDifficultyBadge } from "@/features/deck/components/deck/DeckDifficultyBadge";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { useMyDeckStats } from "@/features/deck/hooks/useMyDeckStats";
 
 /**
  * Lista popularnych kursów społeczności
- * Wyświetla zmockowane dane kursów dostępnych dla ucznia
  */
 export const CommunityCourses = () => {
-  const courses: CommunityCourse[] = [
-    {
-      id: "1",
-      title: "Angielski biznesowy w praktyce",
-      description: "Poznaj język biznesu i bądź pewny siebie w rozmowach",
-      author: "Maria Nowak",
-      studentsCount: 1250,
-      rating: 4.8,
-      lessonsCount: 35,
-      difficulty: "intermediate",
-      category: "Biznes",
-    },
-    {
-      id: "2",
-      title: "Hiszpański dla podróżników",
-      description: "Wszystko czego potrzebujesz podczas podróży",
-      author: "Carlos Rodriguez",
-      studentsCount: 890,
-      rating: 4.9,
-      lessonsCount: 28,
-      difficulty: "beginner",
-      category: "Podróże",
-    },
-    {
-      id: "3",
-      title: "Programowanie - terminologia angielska",
-      description: "Słownictwo IT niezbędne w pracy programisty",
-      author: "Jan Kowalski",
-      studentsCount: 2100,
-      rating: 4.7,
-      lessonsCount: 42,
-      difficulty: "advanced",
-      category: "IT",
-    },
-    {
-      id: "4",
-      title: "Niemiecki od podstaw",
-      description: "Kompletny kurs dla początkujących",
-      author: "Anna Schmidt",
-      studentsCount: 650,
-      rating: 4.6,
-      lessonsCount: 50,
-      difficulty: "beginner",
-      category: "Podstawy",
-    },
-  ];
+  const router = useRouter();
+  const { data, isLoading, error } = usePublicDecks({ page: 0, size: 4 });
+  const deckIds = data?.content.map((deck) => deck.id) || [];
+  const { data: statsData } = useMyDeckStats(deckIds);
 
-  const getDifficultyBadge = (difficulty: CommunityCourse["difficulty"]) => {
-    const variants = {
-      beginner: { label: "Podstawowy", variant: "default" as const },
-      intermediate: {
-        label: "Średniozaawansowany",
-        variant: "secondary" as const,
-      },
-      advanced: { label: "Zaawansowany", variant: "outline" as const },
-    };
+  if (isLoading) {
+    return (
+      <Card className="p-6">
+        <div className="flex items-center justify-center h-48">
+          <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
+        </div>
+      </Card>
+    );
+  }
 
-    const { label, variant } = variants[difficulty];
-    return <Badge variant={variant}>{label}</Badge>;
-  };
+  if (error || !data) {
+    return (
+      <Card className="p-6">
+        <div className="text-center text-muted-foreground py-8">
+          Nie udało się załadować kursów społeczności
+        </div>
+      </Card>
+    );
+  }
+
+  const courses = data.content;
+
+  if (courses.length === 0) {
+    return (
+      <Card className="p-6">
+        <div className="sm:flex items-center justify-between mb-6">
+          <div className="pb-4">
+            <h2 className="text-2xl font-bold">Kursy społeczności</h2>
+            <p className="text-sm text-muted-foreground mt-1">
+              Popularne kursy tworzone przez innych użytkowników
+            </p>
+          </div>
+        </div>
+        <div className="text-center text-muted-foreground py-8">
+          Brak dostępnych kursów społeczności
+        </div>
+      </Card>
+    );
+  }
 
   return (
     <Card className="p-6">
@@ -90,52 +68,49 @@ export const CommunityCourses = () => {
             Popularne kursy tworzone przez innych użytkowników
           </p>
         </div>
-        <Button variant="outline">Przeglądaj wszystkie</Button>
+        <Button variant="outline" asChild>
+          <Link href="/community">Przeglądaj wszystkie</Link>
+        </Button>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {courses.map((course) => (
           <div
             key={course.id}
+            onClick={() => router.push(`/my-courses/${course.id}/details`)}
             className="p-4 border rounded-lg hover:border-primary hover:bg-accent/50 transition-all cursor-pointer"
           >
             <div className="flex items-start justify-between mb-3">
               <div className="flex-1">
-                <h3 className="font-semibold text-lg mb-1">{course.title}</h3>
-                <p className="text-sm text-muted-foreground mb-3">
-                  {course.description}
+                <h3 className="font-semibold text-lg mb-1">{course.name}</h3>
+                <p className="text-sm text-muted-foreground mb-3 line-clamp-2">
+                  {course.deckDescription || "Brak opisu"}
                 </p>
 
-                <div className="sm:flex items-center gap-2 mb-3">
-                  <Badge variant="secondary" className="text-xs">
-                    {course.category}
-                  </Badge>
-                  {getDifficultyBadge(course.difficulty)}
+                <div className="flex flex-wrap items-center gap-2 mb-3">
+                  {course.deckCategory && (
+                    <DeckCategoryBadge category={course.deckCategory} />
+                  )}
+                  {course.deckDifficulty && (
+                    <DeckDifficultyBadge difficulty={course.deckDifficulty} />
+                  )}
                 </div>
 
-                <div className="flex items-center gap-4 text-sm text-muted-foreground mb-3">
+                <div className="flex items-center gap-4 text-sm text-muted-foreground">
                   <span className="flex items-center gap-1">
                     <Users className="w-4 h-4" />
-                    {course.studentsCount.toLocaleString()}
-                  </span>
-                  <span className="flex items-center gap-1">
-                    <Star className="w-4 h-4 fill-yellow-500 text-yellow-500" />
-                    {course.rating}
+                    {statsData?.[course.id]?.totalStudents ?? 0} uczniów
                   </span>
                   <span className="flex items-center gap-1">
                     <BookOpen className="w-4 h-4" />
-                    {course.lessonsCount} lekcji
+                    {course.wordCount ?? 0} fiszek
                   </span>
                 </div>
-
-                <p className="text-xs text-muted-foreground">
-                  Autor: {course.author}
-                </p>
               </div>
             </div>
 
             <Button className="w-full" size="sm">
-              Dołącz do kursu
+              Zobacz kurs
             </Button>
           </div>
         ))}

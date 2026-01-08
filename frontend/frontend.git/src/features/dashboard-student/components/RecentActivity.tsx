@@ -1,16 +1,12 @@
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Calendar, Target, BookOpen, Flame } from "lucide-react";
 import { useStudentActivity } from "../hooks/useStudentActivity";
-import {
-  StudentActivityItem,
-  StudentActivityType,
-} from "../types/statistics.type";
 import { formatDistanceToNow, parseISO } from "date-fns";
 import { pl } from "date-fns/locale";
+import {userActivity} from "@/common/userActivity";
+
 /**
  * Historia aktywności ucznia
- * Wyświetla ostatnie osiągnięcia i ukończone lekcje
  */
 export const RecentActivity = () => {
   const { data, isLoading, error } = useStudentActivity();
@@ -27,24 +23,11 @@ export const RecentActivity = () => {
 
   if (error || !data) {
     return (
-      <p className="text-destructive text-sm">
-        Nie udało się pobrać statystyk.
-      </p>
+        <p className="text-destructive text-sm">
+          Nie udało się pobrać statystyk.
+        </p>
     );
   }
-
-  const getActivityIcon = (type: StudentActivityType) => {
-    switch (type) {
-      case "LESSON_COMPLETED":
-        return <BookOpen className="w-5 h-5 text-success" />;
-      case "SESSION_STARTED":
-        return <Target className="w-5 h-5 text-info" />;
-      case "SESSION_COMPLETED":
-        return <Calendar className="w-5 h-5 text-premium" />;
-      case "LOGIN":
-        return <Flame className="w-5 h-5 text-streak" />;
-    }
-  };
 
   return (
     <Card className="p-6">
@@ -57,7 +40,7 @@ export const RecentActivity = () => {
             className="flex items-start gap-4 p-3 rounded-lg hover:bg-accent/50 transition-colors border"
           >
             <div className="p-2 bg-background rounded-lg">
-              {getActivityIcon(activity.type)}
+              {userActivity.getActivityIcon(activity.type)}
             </div>
 
             <div className="flex-1 min-w-0">

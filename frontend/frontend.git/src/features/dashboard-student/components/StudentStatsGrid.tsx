@@ -6,7 +6,6 @@ import { useStudentStatistics } from "../hooks/useStudentStatistics";
 
 /**
  * Siatka statystyk dla dashboardu ucznia
- * Pobiera dane z API przez React Query
  */
 export const StudentStatsGrid = () => {
   const { data, isLoading, error } = useStudentStatistics();

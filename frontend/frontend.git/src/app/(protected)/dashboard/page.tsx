@@ -1,19 +1,16 @@
 "use client";
 
-// import { useProtectedRoute } from "@/features/auth/hooks/useProtectedRoute";
 import { StudentStatsGrid } from "@/features/dashboard-student/components/StudentStatsGrid";
 import { MyCourses } from "@/features/dashboard-student/components/MyCourses";
 import { CommunityCourses } from "@/features/dashboard-student/components/CommunityCourses";
 import { Leaderboard } from "@/features/dashboard-student/components/Leaderboard";
 import { RecentActivity } from "@/features/dashboard-student/components/RecentActivity";
 import { StudentQuickActions } from "@/features/dashboard-student/components/StudentQuickActions";
-import type { User } from "@/features/auth/types";
 import {useCurrentUser} from "@/features/auth/hooks/useCurrentUser";
 
 
 /**
  * Strona dashboardu dla uczniów
- * Dostępna dla wszystkich zalogowanych użytkowników (domyślny dashboard)
  */
 const DashboardPage = () => {
 const {data: user, isLoading, isError} = useCurrentUser();

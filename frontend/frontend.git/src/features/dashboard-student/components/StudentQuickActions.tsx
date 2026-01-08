@@ -1,47 +1,72 @@
 import { Card } from "@/components/ui/card";
-import { Plus, BookOpen, Users, Trophy, Calendar } from "lucide-react";
+import {
+  Plus,
+  BookOpen,
+  Users,
+  Trophy,
+  Calendar,
+  Share2,
+  ChevronRight,
+  GraduationCap,
+} from "lucide-react";
+import { useRouter } from "next/navigation";
 
 interface QuickAction {
   title: string;
   description: string;
   icon: typeof BookOpen;
   color: string;
-  action: string;
+  href: string;
 }
 
 /**
  * Sekcja szybkich akcji dla ucznia
- * Umożliwia szybki dostęp do najczęstszych operacji
  */
 export const StudentQuickActions = () => {
+  const router = useRouter();
+
   const actions: QuickAction[] = [
+    {
+      title: "Dołącz do nauczyciela",
+      description: "Wprowadź kod zaproszenia",
+      icon: GraduationCap,
+      color: "bg-purple-500",
+      href: "/join",
+    },
+    {
+      title: "Udostępnione kursy",
+      description: "Kursy od nauczycieli i znajomych",
+      icon: Share2,
+      color: "bg-primary",
+      href: "/shared-courses",
+    },
     {
       title: "Utwórz własny kurs",
       description: "Stwórz kurs dopasowany do swoich potrzeb",
       icon: BookOpen,
       color: "bg-info",
-      action: "create-course",
+      href: "/decks/create",
     },
     {
       title: "Przeglądaj społeczność",
       description: "Zobacz kursy utworzone przez innych",
       icon: Users,
       color: "bg-success",
-      action: "browse-community",
+      href: "/community",
     },
     {
       title: "Zobacz ranking",
       description: "Sprawdź swoją pozycję w rankingu",
       icon: Trophy,
       color: "bg-premium",
-      action: "view-leaderboard",
+      href: "/leaderboard",
     },
     {
       title: "Dzienna praktyka",
       description: "Powtórz słówka z dzisiaj",
       icon: Calendar,
       color: "bg-streak",
-      action: "daily-practice",
+      href: "/learn/daily",
     },
   ];
 
@@ -54,7 +79,8 @@ export const StudentQuickActions = () => {
           const Icon = action.icon;
           return (
             <button
-              key={action.action}
+              key={action.href}
+              onClick={() => router.push(action.href)}
               className="flex items-start gap-4 p-4 rounded-lg border hover:border-primary hover:bg-accent/50 transition-all text-left group"
             >
               <div
@@ -70,7 +96,7 @@ export const StudentQuickActions = () => {
                 </p>
               </div>
 
-              <Plus className="w-5 h-5 text-muted-foreground group-hover:text-primary transition-colors flex-shrink-0" />
+              <ChevronRight className="w-5 h-5 text-muted-foreground group-hover:text-primary transition-colors flex-shrink-0" />
             </button>
           );
         })}

@@ -6,7 +6,6 @@ import { useRouter } from "next/navigation";
 
 /**
  * Ranking uczniów (leaderboard)
- * Pokazuje jak uczeń wypada na tle innych użytkowników
  */
 export const Leaderboard = () => {
   const router = useRouter();
