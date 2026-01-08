@@ -1,98 +1,115 @@
-import { Card, CardContent } from "@/components/ui/card";
+"use client";
+
+import { useRouter } from "next/navigation";
+import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Users, Star, BookOpen, Calendar, User } from "lucide-react";
+import { BookOpen, Calendar, Users, CheckCircle } from "lucide-react";
 import { ICommunityCourse } from "@/features/community/types/community-course.types";
-import { timeAgo } from "@/lib/timeAgo";
+import { time } from "@/lib/time";
+import { DeckCategoryBadge } from "@/features/deck/components/deck/DeckCategoryBadge";
+import { DeckDifficultyBadge } from "@/features/deck/components/deck/DeckDifficultyBadge";
+import { useCurrentUser } from "@/features/auth/hooks/useCurrentUser";
+import type { DeckStat } from "@/features/deck/types/created-deck.types";
 
 interface CommunityCourseCardProps {
   course: ICommunityCourse;
+  stats?: DeckStat;
   onEnroll?: (courseId: string) => void;
 }
 
 /**
- * Karta kursu społeczności - taki sam styl jak na dashboard
+ * Karta kursu społeczności - taki sam styl jak CreatedDeckCard
  */
 export const CommunityCourseCard = ({
   course,
+  stats,
   onEnroll,
 }: CommunityCourseCardProps) => {
-  const getDifficultyBadge = (difficulty: ICommunityCourse["difficulty"]) => {
-    const variants = {
-      EASY: { label: "Łatwy", variant: "default" as const },
-      MEDIUM: {
-        label: "Średni",
-        variant: "secondary" as const,
-      },
-      HARD: { label: "Trudny", variant: "outline" as const },
-    };
+  const router = useRouter();
+  const { data: currentUser } = useCurrentUser();
+  const isTeacher = currentUser?.accountType === "TEACHER";
 
-    const { label, variant } = variants[difficulty];
-    return <Badge variant={variant}>{label}</Badge>;
+  const handleCardClick = () => {
+    router.push(`/my-courses/${course.id}/details`);
   };
 
-  const handleEnroll = () => {
+  const handleEnroll = (e: React.MouseEvent) => {
+    e.stopPropagation();
     if (onEnroll) {
       onEnroll(course.id);
     }
   };
 
   return (
-    <Card className="hover:shadow-md hover:border-primary/50 transition-all">
-      <CardContent className="p-4">
-        <div className="flex flex-col gap-3">
-          {/* Tytuł i opis */}
-          <div>
-            <h3 className="font-semibold text-lg mb-1 line-clamp-1">
+    <Card
+      className="group p-5 hover:shadow-lg hover:border-primary/50 transition-all cursor-pointer"
+      onClick={handleCardClick}
+    >
+      <div className="space-y-4">
+        {/* Tytuł i badge'y */}
+        <div className="space-y-2">
+          <div className="flex flex-wrap items-center gap-2">
+            <h3 className="font-semibold text-lg tracking-tight group-hover:text-primary transition-colors line-clamp-1">
               {course.title}
             </h3>
-            <p className="text-sm text-muted-foreground line-clamp-2">
-              {course.description}
-            </p>
           </div>
-
-          {/* Badge'y */}
           <div className="flex flex-wrap items-center gap-2">
-            <Badge variant="secondary" className="text-xs">
-              {course.category}
-            </Badge>
-            {getDifficultyBadge(course.difficulty)}
+            <DeckCategoryBadge category={course.category} />
+            <DeckDifficultyBadge difficulty={course.difficulty} />
           </div>
+          <p className="text-sm text-muted-foreground line-clamp-2 leading-relaxed">
+            {course.description || "Brak opisu kursu."}
+          </p>
+        </div>
 
-          {/* Statystyki */}
-          <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
-            <span className="flex items-center gap-1">
-              <Users className="w-4 h-4" />
-              {course.studentsCount.toLocaleString()}
-            </span>
-            <span className="flex items-center gap-1">
-              <Star className="w-4 h-4 fill-yellow-500 text-yellow-500" />
-              {course.rating} ({course.ratingsCount})
-            </span>
-            <span className="flex items-center gap-1">
-              <BookOpen className="w-4 h-4" />
-              {course.lessonsCount} lekcji
-            </span>
+        {/* Statystyki kursu */}
+        <div className="flex flex-wrap gap-4 text-xs text-muted-foreground pt-2 border-t border-border/40">
+          <span className="flex items-center gap-1.5">
+            <BookOpen className="w-3.5 h-3.5" />
+            {course.wordCount} słówek
+          </span>
+          <span className="flex items-center gap-1.5">
+            <Calendar className="w-3.5 h-3.5" />
+            {time(course.createdAt)}
+          </span>
+        </div>
+
+        {/* Statystyki zapisanych użytkowników */}
+        {stats && (
+          <div className="grid grid-cols-2 gap-3 pt-3 border-t border-border/40">
+            <div className="flex items-center gap-2">
+              <div className="p-2 bg-blue-500/10 rounded-lg">
+                <Users className="w-4 h-4 text-blue-600" />
+              </div>
+              <div className="flex flex-col">
+                <span className="text-sm font-semibold">
+                  {stats.totalStudents}
+                </span>
+                <span className="text-xs text-muted-foreground">Uczniów</span>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <div className="p-2 bg-green-500/10 rounded-lg">
+                <CheckCircle className="w-4 h-4 text-green-600" />
+              </div>
+              <div className="flex flex-col">
+                <span className="text-sm font-semibold">
+                  {stats.completedStudents}
+                </span>
+                <span className="text-xs text-muted-foreground">Ukończeń</span>
+              </div>
+            </div>
           </div>
+        )}
 
-          {/* Metadata */}
-          <div className="flex flex-col gap-1 text-xs text-muted-foreground pt-1 border-t">
-            <span className="flex items-center gap-1">
-              <User className="w-3 h-3" />
-              Autor: {course.author}
-            </span>
-            <span className="flex items-center gap-1">
-              <Calendar className="w-3 h-3" />
-              Utworzono: {timeAgo(course.createdAt)}
-            </span>
-          </div>
-
-          {/* Przycisk zapisu */}
-          <Button className="w-full mt-2" size="sm" onClick={handleEnroll}>
+        {/* Przycisk zapisu - tylko dla studentów */}
+        {!isTeacher && (
+          <Button className="w-full" size="sm" onClick={handleEnroll}>
             Dołącz do kursu
           </Button>
-        </div>
-      </CardContent>
+        )}
+      </div>
     </Card>
   );
 };

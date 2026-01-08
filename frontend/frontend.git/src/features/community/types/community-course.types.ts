@@ -1,47 +1,29 @@
+import type { DeckCategory, DeckDifficulty } from "@/features/deck/types/deck.types";
+import type { DeckVisibility } from "@/features/deck/types/created-deck.types";
+
 /**
- * Kurs społeczności na stronie przeglądania
+ * Kurs społeczności - mapowanie z ICreatedDeckListItem
  */
 export interface ICommunityCourse {
-  /** ID kursu */
   id: string;
-  /** Nazwa kursu */
   title: string;
-  /** Opis kursu */
   description: string;
-  /** Autor kursu */
-  author: string;
-  /** Liczba zapisanych uczniów */
-  studentsCount: number;
-  /** Średnia ocena kursu (1-5) */
-  rating: number;
-  /** Liczba ocen */
-  ratingsCount: number;
-  /** Liczba lekcji */
-  lessonsCount: number;
-  /** Poziom trudności */
-  difficulty: "EASY" | "MEDIUM" | "HARD";
-  /** Kategoria kursu */
-  category: string;
-  /** Data utworzenia */
+  wordCount: number;
+  difficulty: DeckDifficulty;
+  category: DeckCategory;
+  visibility: DeckVisibility;
   createdAt: string;
-  /** Data ostatniej aktualizacji */
   updatedAt: string;
-  /** Liczba słówek w kursie */
-  totalWords: number;
 }
 
 /**
  * Filtry dla kursów społeczności
  */
 export interface ICommunityCoursesFilters {
-  /** Wyszukiwanie po tytule */
   search?: string;
-  /** Kategoria kursu */
   category?: string;
-  /** Poziom trudności */
-  difficulty?: "EASY" | "MEDIUM" | "HARD";
-  /** Sortowanie */
-  sortBy?: "popular" | "rating" | "newest" | "oldest";
+  difficulty?: DeckDifficulty;
+  sortBy?: "newest" | "oldest";
 }
 
 /**
@@ -52,4 +34,5 @@ export interface CommunityCoursesResponse {
   totalElements: number;
   totalPages: number;
   currentPage: number;
+  pageSize: number;
 }

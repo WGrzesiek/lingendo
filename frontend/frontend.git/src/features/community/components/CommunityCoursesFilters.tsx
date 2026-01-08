@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/select";
 import { Search, SlidersHorizontal, X } from "lucide-react";
 import { ICommunityCoursesFilters } from "@/features/community/types/community-course.types";
+import { deckCategoryConfig } from "@/features/deck/types/deck.types";
 
 interface CommunityCoursesFiltersProps {
   filters: ICommunityCoursesFilters;
@@ -49,7 +50,7 @@ export const CommunityCoursesFilters = ({
   const handleSortChange = (value: string) => {
     onFiltersChange({
       ...filters,
-      sortBy: value as "popular" | "rating" | "newest" | "oldest",
+      sortBy: value as "newest" | "oldest",
     });
   };
 
@@ -58,7 +59,7 @@ export const CommunityCoursesFilters = ({
       search: "",
       category: undefined,
       difficulty: undefined,
-      sortBy: "popular",
+      sortBy: "newest",
     });
   };
 
@@ -115,13 +116,11 @@ export const CommunityCoursesFilters = ({
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">Wszystkie kategorie</SelectItem>
-              <SelectItem value="BUSINESS">Biznes</SelectItem>
-              <SelectItem value="TOURISM">Podróże</SelectItem>
-              <SelectItem value="TECHNOLOGY">Technologia</SelectItem>
-              <SelectItem value="SCIENCE">Nauka</SelectItem>
-              <SelectItem value="CULTURE">Kultura</SelectItem>
-              <SelectItem value="MEDICINE">Medycyna</SelectItem>
-              <SelectItem value="OTHER">Inne</SelectItem>
+              {Object.entries(deckCategoryConfig).map(([key, config]) => (
+                <SelectItem key={key} value={key}>
+                  {config.label}
+                </SelectItem>
+              ))}
             </SelectContent>
           </Select>
         </div>
@@ -149,15 +148,13 @@ export const CommunityCoursesFilters = ({
         <div className="space-y-2">
           <label className="text-sm font-medium">Sortuj według</label>
           <Select
-            value={filters.sortBy || "popular"}
+            value={filters.sortBy || "newest"}
             onValueChange={handleSortChange}
           >
             <SelectTrigger>
               <SelectValue placeholder="Sortowanie" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="popular">Najpopularniejsze</SelectItem>
-              <SelectItem value="rating">Najwyżej oceniane</SelectItem>
               <SelectItem value="newest">Najnowsze</SelectItem>
               <SelectItem value="oldest">Najstarsze</SelectItem>
             </SelectContent>
