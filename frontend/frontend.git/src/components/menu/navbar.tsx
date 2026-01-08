@@ -48,8 +48,11 @@ export function Navbar() {
     { label: "Moje kursy", href: "/my-courses" },
     { label: "Statystyki", href: "/statistics" },
     { label: "Znajomi", href: "/friends" },
+    // Dla uczniów - lista nauczycieli
+    ...(user?.accountType === "STUDENT"
+      ? [{ label: "Moi nauczyciele", href: "/my-teachers" }]
+      : []),
     { label: "Społeczność", href: "/community" },
-    { label: "Kursy", href: "/courses" },
   ];
 
   const handleLogout = async () => {
