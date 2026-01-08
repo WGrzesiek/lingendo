@@ -19,7 +19,7 @@ export const login = async (data: LoginRequest): Promise<void> => {
  * @returns Promise który rozwiązuje się po udanej rejestracji
  */
 export const signup = async (data: SignupRequest): Promise<void> => {
-  await apiClient.post(`${BASE_URL}/signup`, data);
+  await apiClient.post(`/v1/users/register`, data);
 };
 
 /**

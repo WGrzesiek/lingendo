@@ -7,12 +7,21 @@ export interface LoginRequest {
 }
 
 /**
+ * Typ konta użytkownika
+ */
+export type AccountType = "BASIC" | "PREMIUM" | "STUDENT" | "TEACHER";
+
+/**
  * Dane wymagane do rejestracji nowego użytkownika
  */
 export interface SignupRequest {
+  firstName: string;
+  lastName: string;
+  username: string;
   email: string;
   password: string;
-  name?: string;
+  userType: "NORMAL";
+  accountType: AccountType;
 }
 
 /**
