@@ -85,7 +85,8 @@ public class SecurityConfig {
                 "http://localhost:8081",  // Expo Metro bundler
                 "http://localhost:19006", // Expo Web
                 "http://macbook-air-grzegorz.ibis-tautara.ts.net:3000",
-                "http://100.74.36.70:3000"
+                "http://100.74.36.70:3000",
+                "https://lingendo.app"
         ));
         // expo
         corsConfig.setAllowedOriginPatterns(List.of("*"));
