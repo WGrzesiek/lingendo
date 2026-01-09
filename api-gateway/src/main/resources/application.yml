@@ -84,20 +84,21 @@ spring:
                 - SetPath=/api-docs
           globalcors:
             cors-configurations:
-              '[/**]':
-                          allowedOrigins:
-                            - "http://localhost:8811"
-                            - "http://localhost:3000"
-                            - "http://127.0.0.1:8811"
-                          allowedMethods:
-                            - GET
-                            - POST
-                            - PUT
-                            - DELETE
-                            - OPTIONS
-                          allowedHeaders: "*"
-                          allowCredentials: true
-                          maxAge: 3600
+              "[/**]":
+                allowedOrigins:
+                  - "http://localhost:8811"
+                  - "http://localhost:3000"
+                  - "http://127.0.0.1:8811"
+                  - "https://lingendo.app"
+                allowedMethods:
+                  - GET
+                  - POST
+                  - PUT
+                  - DELETE
+                  - OPTIONS
+                allowedHeaders: "*"
+                allowCredentials: true
+                maxAge: 3600
 server:
   error:
     include-message: always
@@ -140,14 +141,12 @@ management:
     sampling:
       probability: 1
 
-
 jwt:
   private-key-location: classpath:jwt/private_key.pem
   public-key-location: classpath:jwt/public_key.pem
   expire-in: ${JWT_EXPIRE_IN:86400000}
   keys:
     kid: ${KID:gateway-kid}
-
 
 grpc:
   client:
