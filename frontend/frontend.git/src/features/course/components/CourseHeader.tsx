@@ -10,7 +10,6 @@ import {
   Share2,
   Lock,
   Globe,
-  PlusCircle,
   Frown,
   BarChart3,
 } from "lucide-react";
@@ -40,19 +39,6 @@ const WordListSkeleton = () => (
         <Skeleton className="h-2 w-full rounded-full" />
       </div>
     ))}
-  </div>
-);
-
-const EmptyState = () => (
-  <div className="flex flex-col items-center justify-center py-12 text-center border rounded-xl border-dashed bg-muted/20">
-    <div className="bg-muted p-3 rounded-full mb-3">
-      <PlusCircle className="w-6 h-6 text-muted-foreground" />
-    </div>
-    <h3 className="font-semibold text-lg">Brak słówek</h3>
-    <p className="text-sm text-muted-foreground max-w-xs mb-4">
-      Wygląda na to, że ten kurs nie zawiera jeszcze żadnych słówek.
-    </p>
-    <Button variant="outline">Przeglądaj kursy</Button>
   </div>
 );
 

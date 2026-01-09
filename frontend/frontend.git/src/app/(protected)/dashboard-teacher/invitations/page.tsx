@@ -1,14 +1,11 @@
 "use client";
 
 import { InvitationGenerator } from "@/features/dashboard-teacher/components/InvitationGenerator";
-import type { User } from "@/features/auth/types";
-
 
 /**
  * Strona zarządzania zaproszeniami
  */
 const InvitationsPage = () => {
-
   const isLoading = false;
 
   if (isLoading) {

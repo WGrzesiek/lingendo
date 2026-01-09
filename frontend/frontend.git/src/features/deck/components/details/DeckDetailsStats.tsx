@@ -1,5 +1,5 @@
 import { Card } from "@/components/ui/card";
-import { Users, CheckCircle, TrendingUp, Eye } from "lucide-react";
+import { Users, CheckCircle } from "lucide-react";
 import type { DeckStats } from "@/features/deck/types/deck-details.types";
 
 interface DeckDetailsStatsProps {

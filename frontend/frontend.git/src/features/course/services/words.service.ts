@@ -1,7 +1,6 @@
 import apiClient from "@/lib/api/axios";
 import { PageResponse } from "@/types/common";
 import {
-  CourseWordsResponseDto,
   CourseWord,
   CourseContentItem,
 } from "@/features/course/types/words.types";

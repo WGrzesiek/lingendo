@@ -17,48 +17,7 @@ import {
   useUnblockStudent,
   useRemoveStudent,
 } from "../hooks";
-import type { StudentResponse } from "../types";
-import {timee} from "@/lib/time";
-
-/**
- * Komponent karty statystyk
- */
-const StatCard = ({
-  icon: Icon,
-  label,
-  value,
-  subValue,
-  color = "primary",
-}: {
-  icon: React.ElementType;
-  label: string;
-  value: string | number;
-  subValue?: string;
-  color?: "primary" | "yellow" | "blue" | "orange" | "green";
-}) => {
-  const colorClasses = {
-    primary: "bg-primary/10 text-primary",
-    yellow: "bg-yellow-500/10 text-yellow-600",
-    blue: "bg-blue-500/10 text-blue-600",
-    orange: "bg-orange-500/10 text-orange-600",
-    green: "bg-green-500/10 text-green-600",
-  };
-
-  return (
-    <div className="flex items-center gap-3 p-4 bg-muted/50 rounded-lg">
-      <div className={`p-2 rounded-lg ${colorClasses[color]}`}>
-        <Icon className="w-5 h-5" />
-      </div>
-      <div>
-        <p className="text-2xl font-bold">{value}</p>
-        <p className="text-sm text-muted-foreground">{label}</p>
-        {subValue && (
-          <p className="text-xs text-muted-foreground">{subValue}</p>
-        )}
-      </div>
-    </div>
-  );
-};
+import { timee } from "@/lib/time";
 
 interface StudentDetailsProps {
   studentId: string;
@@ -230,7 +189,9 @@ export const StudentDetails = ({ studentId, onBack }: StudentDetailsProps) => {
             </div>
             <div>
               <p className="text-sm text-muted-foreground">Data dołączenia</p>
-              <p className="font-medium">{timee.formatDate(student.joinedAt)}</p>
+              <p className="font-medium">
+                {timee.formatDate(student.joinedAt)}
+              </p>
             </div>
           </div>
         </CardContent>

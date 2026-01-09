@@ -1,9 +1,4 @@
-import {
-  DeckCategory,
-  DeckDifficulty,
-  DeckOwnerType,
-  UpdateDeckVisibilityRequest,
-} from "./deck.types";
+import { DeckCategory, DeckDifficulty, DeckOwnerType } from "./deck.types";
 
 /**
  * Statystyki kursu utworzonego przez użytkownika

@@ -60,7 +60,7 @@ export const WordFormCard = ({
   const handleAddSentence = () => {
     onChange(index, {
       ...word,
-      sentences: [...word.sentences, { ...emptySentence }],
+      sentences: [...(word.sentences ?? []), { ...emptySentence }],
     });
   };
 
@@ -69,7 +69,7 @@ export const WordFormCard = ({
     field: "sentence" | "translation",
     value: string
   ) => {
-    const updatedSentences = [...word.sentences];
+    const updatedSentences = [...(word.sentences ?? [])];
     updatedSentences[sentenceIndex] = {
       ...updatedSentences[sentenceIndex],
       [field]: value,
@@ -80,7 +80,7 @@ export const WordFormCard = ({
   const handleRemoveSentence = (sentenceIndex: number) => {
     onChange(index, {
       ...word,
-      sentences: word.sentences.filter((_, i) => i !== sentenceIndex),
+      sentences: (word.sentences ?? []).filter((_, i) => i !== sentenceIndex),
     });
   };
 
@@ -182,7 +182,7 @@ export const WordFormCard = ({
               variant="outline"
               size="sm"
               onClick={handleAddSentence}
-              disabled={word.sentences.length >= 10}
+              disabled={(word.sentences ?? []).length >= 10}
             >
               <Plus className="w-4 h-4 mr-2" />
               Dodaj zdanie
@@ -190,18 +190,18 @@ export const WordFormCard = ({
           </div>
 
           <div className="space-y-3">
-            {word.sentences.map((sentence, i) => (
+            {(word.sentences ?? []).map((sentence, i) => (
               <SentenceInput
                 key={i}
                 sentence={sentence}
                 index={i}
                 onChange={handleSentenceChange}
                 onRemove={handleRemoveSentence}
-                canRemove={word.sentences.length > 0}
+                canRemove={(word.sentences ?? []).length > 0}
               />
             ))}
 
-            {word.sentences.length === 0 && (
+            {(word.sentences ?? []).length === 0 && (
               <div className="text-center py-8 text-sm text-muted-foreground border border-dashed rounded-lg">
                 Brak zdań przykładowych. Kliknij &quot;Dodaj zdanie&quot; aby
                 dodać.

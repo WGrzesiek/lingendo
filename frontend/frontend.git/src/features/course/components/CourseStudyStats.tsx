@@ -9,8 +9,7 @@ import {
   Timer,
   Zap,
 } from "lucide-react";
-import { ICourseStudyStatistics } from "@/features/course/types/course-statistics.types";
-import {FlashcardAnswersStats} from "@/features/course/types/stats.types";
+import { FlashcardAnswersStats } from "@/features/course/types/stats.types";
 
 interface CourseStudyStatsProps {
   statistics: FlashcardAnswersStats;
@@ -19,8 +18,7 @@ interface CourseStudyStatsProps {
 /**
  * Komponent wyświetlający statystyki nauki dla konkretnego kursu
  */
-export const CourseStudyStats = ({ statistics}: CourseStudyStatsProps) => {
-
+export const CourseStudyStats = ({ statistics }: CourseStudyStatsProps) => {
   const formatDurationMs = (ms: number) => {
     if (!Number.isFinite(ms) || ms <= 0) return "0.0s";
     const seconds = ms / 1000;
@@ -117,7 +115,6 @@ export const CourseStudyStats = ({ statistics}: CourseStudyStatsProps) => {
                 <p className="text-2xl font-bold">
                   {formatDurationMs(statistics.averageResponseTime)}
                 </p>
-
               </div>
             </div>
           </CardContent>
@@ -130,7 +127,9 @@ export const CourseStudyStats = ({ statistics}: CourseStudyStatsProps) => {
                 <TrendingUp className="w-6 h-6 text-purple-500" />
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">Odpowiedzi poniżej 30 sekund</p>
+                <p className="text-sm text-muted-foreground">
+                  Odpowiedzi poniżej 30 sekund
+                </p>
                 <p className="text-2xl font-bold">
                   {statistics.until30SecAnswers}
                 </p>
@@ -157,7 +156,6 @@ export const CourseStudyStats = ({ statistics}: CourseStudyStatsProps) => {
               <p className="text-lg font-bold">
                 {formatDurationMs(statistics.fastestResponse)}
               </p>
-
             </div>
 
             <div className="text-center p-3 rounded-lg bg-muted">
@@ -167,7 +165,6 @@ export const CourseStudyStats = ({ statistics}: CourseStudyStatsProps) => {
               <p className="text-xs text-muted-foreground mb-1">Średnia</p>
               <p className="text-lg font-bold">
                 {formatDurationMs(statistics.averageResponseTime)}
-
               </p>
             </div>
 
@@ -181,7 +178,6 @@ export const CourseStudyStats = ({ statistics}: CourseStudyStatsProps) => {
               <p className="text-lg font-bold">
                 {formatDurationMs(statistics.slowestResponse)}
               </p>
-
             </div>
           </div>
         </CardContent>
@@ -197,7 +193,6 @@ export const CourseStudyStats = ({ statistics}: CourseStudyStatsProps) => {
               <p className="text-xl font-bold">
                 {formatStudyTimeMs(statistics.totalStudyTime)}
               </p>
-
             </div>
             <div>
               <p className="text-sm text-muted-foreground mb-1">

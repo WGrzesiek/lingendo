@@ -6,19 +6,26 @@ import {
   ArrowLeft,
   Clock,
   AlertCircle,
-  Target, CheckCircle2,
+  Target,
+  CheckCircle2,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 
-
 import React from "react";
-import {ReviewWordList} from "@/features/review/components/ReviewWordList";
-import {useReviewHeader} from "@/features/review";
+import { ReviewWordList } from "@/features/review/components/ReviewWordList";
+import { useReviewHeader } from "@/features/review";
 
-export default function CourseReviewClient({ enrollmentId }: { enrollmentId: string }) {
-
+export default function CourseReviewClient({
+  enrollmentId,
+}: {
+  enrollmentId: string;
+}) {
   const router = useRouter();
-  const {data: reviewHeader, isLoading: isLoadingReviewHeader, isError: isErrorLoadingReviewHeader} = useReviewHeader(enrollmentId)
+  const {
+    data: reviewHeader,
+    isLoading: isLoadingReviewHeader,
+    isError: isErrorLoadingReviewHeader,
+  } = useReviewHeader(enrollmentId);
   const handleStartReview = () => {
     router.push(`/review/${enrollmentId}`);
   };
@@ -26,13 +33,14 @@ export default function CourseReviewClient({ enrollmentId }: { enrollmentId: str
   if (isErrorLoadingReviewHeader) {
     return <div>Wystąpił błąd podczas ładowania danych powtórek.</div>;
   }
-  if(isLoadingReviewHeader) {
+  if (isLoadingReviewHeader) {
     return <div>Ładowanie danych powtórek...</div>;
   }
   if (!reviewHeader) {
-  <div>asdadasd</div>
+    return <div>Brak danych powtórek.</div>;
   }
-  const countToReview = reviewHeader.counters.wordsForToday + reviewHeader.counters.overdueWords;
+  const countToReview =
+    reviewHeader.counters.wordsForToday + reviewHeader.counters.overdueWords;
   return (
     <div className="min-h-screen bg-background">
       <div className="container mx-auto p-6 lg:p-8 space-y-6">
@@ -66,7 +74,9 @@ export default function CourseReviewClient({ enrollmentId }: { enrollmentId: str
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">Do powtórki</p>
-                <p className="text-3xl font-bold">{reviewHeader.counters.totalWordsToReview}</p>
+                <p className="text-3xl font-bold">
+                  {reviewHeader.counters.totalWordsToReview}
+                </p>
               </div>
             </div>
           </Card>
@@ -78,7 +88,9 @@ export default function CourseReviewClient({ enrollmentId }: { enrollmentId: str
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">Na dziś</p>
-                <p className="text-3xl font-bold">{reviewHeader.counters.wordsForToday}</p>
+                <p className="text-3xl font-bold">
+                  {reviewHeader.counters.wordsForToday}
+                </p>
               </div>
             </div>
           </Card>
@@ -90,7 +102,9 @@ export default function CourseReviewClient({ enrollmentId }: { enrollmentId: str
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">Zaległe</p>
-                <p className="text-3xl font-bold">{reviewHeader.counters.overdueWords}</p>
+                <p className="text-3xl font-bold">
+                  {reviewHeader.counters.overdueWords}
+                </p>
               </div>
             </div>
           </Card>
@@ -99,38 +113,37 @@ export default function CourseReviewClient({ enrollmentId }: { enrollmentId: str
         {/* Start Button */}
         <Card className="p-6 bg-gradient-to-r from-primary/10 to-primary/5 border-primary/20">
           {countToReview === 0 ? (
-              <div className="flex flex-col md:flex-row items-center justify-between gap-4 p-6 rounded-xl border border-green-500/30 bg-green-500/5">
-                <div className="flex items-center gap-4">
-                  <div className="p-3 rounded-full bg-green-500/10">
-                    <CheckCircle2 className="w-6 h-6 text-green-600" />
-                  </div>
-
-                  <div>
-                    <h3 className="text-xl font-bold mb-1">
-                      Wszystko powtórzone 🎉
-                    </h3>
-                    <p className="text-muted-foreground">
-                      Na dziś nie masz już słówek do powtórki. Świetna robota!
-                    </p>
-                  </div>
+            <div className="flex flex-col md:flex-row items-center justify-between gap-4 p-6 rounded-xl border border-green-500/30 bg-green-500/5">
+              <div className="flex items-center gap-4">
+                <div className="p-3 rounded-full bg-green-500/10">
+                  <CheckCircle2 className="w-6 h-6 text-green-600" />
                 </div>
-              </div>
-          ) : (
-              <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+
                 <div>
-                  <h3 className="text-xl font-bold mb-1">Gotowy do powtórki?</h3>
+                  <h3 className="text-xl font-bold mb-1">
+                    Wszystko powtórzone 🎉
+                  </h3>
                   <p className="text-muted-foreground">
-                    Powtórzysz {countToReview} słówek w trybie pisania
+                    Na dziś nie masz już słówek do powtórki. Świetna robota!
                   </p>
                 </div>
-
-                <Button size="lg" className="gap-2" onClick={handleStartReview}>
-                  <Target className="w-5 h-5" />
-                  Rozpocznij powtórkę
-                </Button>
               </div>
-          )}
+            </div>
+          ) : (
+            <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+              <div>
+                <h3 className="text-xl font-bold mb-1">Gotowy do powtórki?</h3>
+                <p className="text-muted-foreground">
+                  Powtórzysz {countToReview} słówek w trybie pisania
+                </p>
+              </div>
 
+              <Button size="lg" className="gap-2" onClick={handleStartReview}>
+                <Target className="w-5 h-5" />
+                Rozpocznij powtórkę
+              </Button>
+            </div>
+          )}
         </Card>
         <div className="lg:col-span-2">
           <ReviewWordList enrollmentId={enrollmentId} />
@@ -138,5 +151,4 @@ export default function CourseReviewClient({ enrollmentId }: { enrollmentId: str
       </div>
     </div>
   );
-};
-
+}

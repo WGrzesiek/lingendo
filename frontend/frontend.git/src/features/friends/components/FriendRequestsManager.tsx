@@ -20,7 +20,7 @@ import {
   useCancelRequest,
 } from "../hooks/useFriends";
 import type { FriendRequest } from "../types/friend.types";
-import {time, timee} from "@/lib/time";
+import { time } from "@/lib/time";
 
 /**
  * Komponent pojedynczego otrzymanego zaproszenia

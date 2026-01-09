@@ -1,10 +1,20 @@
 "use client";
 
 import { useProtectedRoute } from "@/features/auth/hooks/useProtectedRoute";
-import { ProfileForm, PasswordForm, AccountInfo } from "@/features/settings/components";
+import {
+  ProfileForm,
+  PasswordForm,
+  AccountInfo,
+} from "@/features/settings/components";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Settings, User, Lock, Info, Bell, Palette } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Settings, User, Lock, Info, Bell } from "lucide-react";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 
@@ -46,7 +56,10 @@ export default function SettingsPage() {
             <Lock className="w-4 h-4" />
             <span className="hidden sm:inline">Bezpieczeństwo</span>
           </TabsTrigger>
-          <TabsTrigger value="notifications" className="flex items-center gap-2">
+          <TabsTrigger
+            value="notifications"
+            className="flex items-center gap-2"
+          >
             <Bell className="w-4 h-4" />
             <span className="hidden sm:inline">Powiadomienia</span>
           </TabsTrigger>
@@ -61,16 +74,14 @@ export default function SettingsPage() {
         {/* Zakładka Bezpieczeństwo */}
         <TabsContent value="security" className="space-y-6">
           <PasswordForm />
-          
+
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Info className="w-5 h-5" />
                 Sesje i urządzenia
               </CardTitle>
-              <CardDescription>
-                Zarządzaj aktywnymi sesjami
-              </CardDescription>
+              <CardDescription>Zarządzaj aktywnymi sesjami</CardDescription>
             </CardHeader>
             <CardContent>
               <p className="text-sm text-muted-foreground">
@@ -102,7 +113,7 @@ export default function SettingsPage() {
                 </div>
                 <Switch defaultChecked />
               </div>
-              
+
               <div className="flex items-center justify-between">
                 <div className="space-y-0.5">
                   <Label>Nowi znajomi</Label>

@@ -11,10 +11,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { FileText, Calendar } from "lucide-react";
-import {
-  IPdfExportOptions,
-  defaultPdfExportOptions,
-} from "@/features/statistics/types/pdf-export.types";
+import type { IPdfExportOptions } from "@/features/statistics/types/pdf-export.types";
 
 interface PdfExportOptionsFormProps {
   options: IPdfExportOptions;

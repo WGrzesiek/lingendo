@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { toast } from "sonner";
-import { BookOpen, Share2, Search, Check, X, Loader2 } from "lucide-react";
+import { BookOpen, Share2, Search, Check, Loader2 } from "lucide-react";
 import {
   Dialog,
   DialogContent,

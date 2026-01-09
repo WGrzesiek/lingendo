@@ -227,3 +227,11 @@ export interface GroupMemberApiResponse {
   status: GroupMemberStatus;
   joinedAt: string;
 }
+
+/**
+ * Filtry dla listy członków grupy
+ */
+export interface GroupMemberFilters {
+  search?: string;
+  status?: GroupMemberStatus;
+}

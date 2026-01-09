@@ -1,7 +1,7 @@
 "use client";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { TrendingUp, Trophy, Medal, Award, Loader2 } from "lucide-react";
+import { TrendingUp, Trophy, Loader2 } from "lucide-react";
 
 // TODO: Podpiąć API leaderboard
 // import { useLeaderboard } from "@/features/leaderboard/hooks/useLeaderboard";

@@ -1,34 +1,32 @@
 "use client";
 
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-} from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader } from "@/components/ui/dialog";
 import { CourseStudyStats } from "./CourseStudyStats";
-import {useFlashcardAnswersStats} from "@/features/course/hooks/useFlashcardAnswersStats";
+import { useFlashcardAnswersStats } from "@/features/course/hooks/useFlashcardAnswersStats";
 
 interface CourseStatsModalProps {
   enrollmentId: string;
   open: boolean;
   onOpenChange: (open: boolean) => void;
-    completedSessions: number;
 }
 
 export const CourseStatsModal = ({
   enrollmentId,
   open,
   onOpenChange,
-                                   completedSessions
 }: CourseStatsModalProps) => {
-  const {data: statistics1, isLoading, isError} = useFlashcardAnswersStats(enrollmentId)
+  const {
+    data: statistics1,
+    isLoading,
+    isError,
+  } = useFlashcardAnswersStats(enrollmentId);
 
-  if(isLoading){
-    return <div>Loading...</div>
+  if (isLoading) {
+    return <div>Loading...</div>;
   }
 
-  if(isError || !statistics1){
-    return <div>Error loading statistics</div>
+  if (isError || !statistics1) {
+    return <div>Error loading statistics</div>;
   }
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>

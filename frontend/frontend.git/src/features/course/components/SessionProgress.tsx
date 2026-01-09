@@ -11,8 +11,7 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import { useCourseProgress } from "@/features/course/hooks/useCourseProgress";
 import { useRouter } from "next/navigation";
-import {useInitializeSession} from "@/features/course/hooks/useInitializeSession";
-import {useMemo, useState} from "react";
+import { useInitializeSession } from "@/features/course/hooks/useInitializeSession";
 
 interface SessionProgressProps {
   enrollmentId: string;
@@ -34,18 +33,6 @@ const WordListSkeleton = () => (
   </div>
 );
 
-const EmptyState = () => (
-  <div className="flex flex-col items-center justify-center py-12 text-center border rounded-xl border-dashed bg-muted/20">
-    <div className="bg-muted p-3 rounded-full mb-3">
-      <PlusCircle className="w-6 h-6 text-muted-foreground" />
-    </div>
-    <h3 className="font-semibold text-lg">Brak słówek</h3>
-    <p className="text-sm text-muted-foreground max-w-xs mb-4">
-      Wygląda na to, że ten kurs nie zawiera jeszcze żadnych słówek.
-    </p>
-    <Button variant="outline">Przeglądaj kursy</Button>
-  </div>
-);
 /**
  * Widok postępu sesji nauki
  * Pokazuje ukończone sesje i sesje do zrobienia
@@ -53,7 +40,7 @@ const EmptyState = () => (
 export const SessionProgress = ({ enrollmentId }: SessionProgressProps) => {
   const router = useRouter();
   const { data, isLoading, isError } = useCourseProgress(enrollmentId);
-    const initializeSession = useInitializeSession();
+  const initializeSession = useInitializeSession();
 
   if (isLoading) return <WordListSkeleton />;
 
@@ -67,17 +54,16 @@ export const SessionProgress = ({ enrollmentId }: SessionProgressProps) => {
       </div>
     );
   }
-    const sessionToContinue = data.sessions
-        .filter((s) => s.status === "IN_PROGRESS")
-        .sort((a, b) => a.sessionNumber - b.sessionNumber)[0];
+  const sessionToContinue = data.sessions
+    .filter((s) => s.status === "IN_PROGRESS")
+    .sort((a, b) => a.sessionNumber - b.sessionNumber)[0];
 
-    const sessionIdToContinue = sessionToContinue?.sessionId;
+  const sessionIdToContinue = sessionToContinue?.sessionId;
 
-    const canStartNewSession =
-        !!data &&
-        (data.sessions?.every(s => s.status === "COMPLETED") ?? false) &&
-        data.totalSessions >= data.completedSessions;
-
+  const canStartNewSession =
+    !!data &&
+    (data.sessions?.every((s) => s.status === "COMPLETED") ?? false) &&
+    data.totalSessions >= data.completedSessions;
 
   const sessions = Array.from({ length: data.totalSessions }, (_, i) => ({
     number: i + 1,
@@ -89,85 +75,88 @@ export const SessionProgress = ({ enrollmentId }: SessionProgressProps) => {
     (data.completedSessions / data.totalSessions) * 100
   );
 
-    return (
-        <Card className="p-6">
-            <div className="sm:flex items-center justify-between mb-6">
-                <div>
-                    <h2 className="text-2xl font-bold mb-1">Postęp nauki</h2>
-                    <p className="text-muted-foreground">
-                        Ukończono {data.completedSessions} z {data.totalSessions} sesji ({completionPercentage}%)
-                    </p>
-                </div>
+  return (
+    <Card className="p-6">
+      <div className="sm:flex items-center justify-between mb-6">
+        <div>
+          <h2 className="text-2xl font-bold mb-1">Postęp nauki</h2>
+          <p className="text-muted-foreground">
+            Ukończono {data.completedSessions} z {data.totalSessions} sesji (
+            {completionPercentage}%)
+          </p>
+        </div>
 
-                <div className="grid grid-rows-1 gap-2 pt-4">
-                    {data.wordsToReview > 0 && (
-                        <Button
-                            variant="outline"
-                            className="gap-2"
-                            onClick={() => router.push(`/course/${enrollmentId}/review`)}
-                        >
-                            <RotateCcw className="w-4 h-4" />
-                            Powtórka ({data.wordsToReview})
-                        </Button>
-                    )}
+        <div className="grid grid-rows-1 gap-2 pt-4">
+          {data.wordsToReview > 0 && (
+            <Button
+              variant="outline"
+              className="gap-2"
+              onClick={() => router.push(`/course/${enrollmentId}/review`)}
+            >
+              <RotateCcw className="w-4 h-4" />
+              Powtórka ({data.wordsToReview})
+            </Button>
+          )}
 
-                    <Button
-                        className="gap-2"
-                        disabled={!sessionIdToContinue}
-                        onClick={() => {
-                            if (!sessionIdToContinue) return;
-                            router.push(`/learn/${enrollmentId}/${sessionIdToContinue}`);
-                        }}
-                    >
-                        <PlayCircle className="w-4 h-4" />
-                        Kontynuuj naukę
-                    </Button>
+          <Button
+            className="gap-2"
+            disabled={!sessionIdToContinue}
+            onClick={() => {
+              if (!sessionIdToContinue) return;
+              router.push(`/learn/${enrollmentId}/${sessionIdToContinue}`);
+            }}
+          >
+            <PlayCircle className="w-4 h-4" />
+            Kontynuuj naukę
+          </Button>
 
-                    {canStartNewSession && (
-                        <Button
-                            variant="outline"
-                            className="gap-2"
-                            disabled={initializeSession.isPending}
-                            onClick={() => initializeSession.mutate(enrollmentId )}
-                        >
-                            <PlusCircle className="w-4 h-4" />
-                            Rozpocznij nową sesję
-                        </Button>
-                    )}
-                </div>
+          {canStartNewSession && (
+            <Button
+              variant="outline"
+              className="gap-2"
+              disabled={initializeSession.isPending}
+              onClick={() => initializeSession.mutate(enrollmentId)}
+            >
+              <PlusCircle className="w-4 h-4" />
+              Rozpocznij nową sesję
+            </Button>
+          )}
+        </div>
+      </div>
+
+      <div className="mb-6">
+        <div className="w-full bg-secondary rounded-full h-3">
+          <div
+            className="bg-primary h-3 rounded-full transition-all"
+            style={{ width: `${completionPercentage}%` }}
+          />
+        </div>
+      </div>
+
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-7 gap-3">
+        {sessions.map((s) => (
+          <div
+            key={s.number}
+            className={`p-4 border rounded-lg flex flex-col items-center justify-center gap-2 transition-all ${
+              s.isCompleted
+                ? "bg-green-500/10 border-green-500"
+                : "hover:bg-accent/50"
+            }`}
+          >
+            {s.isCompleted ? (
+              <CheckCircle className="w-6 h-6 text-green-600" />
+            ) : (
+              <Circle className="w-6 h-6 text-muted-foreground" />
+            )}
+            <div className="text-center">
+              <p className="font-semibold text-sm">Sesja {s.number}</p>
+              <p className="text-xs text-muted-foreground">
+                {s.wordsCount} słówek
+              </p>
             </div>
-
-            <div className="mb-6">
-                <div className="w-full bg-secondary rounded-full h-3">
-                    <div
-                        className="bg-primary h-3 rounded-full transition-all"
-                        style={{ width: `${completionPercentage}%` }}
-                    />
-                </div>
-            </div>
-
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-7 gap-3">
-                {sessions.map((s) => (
-                    <div
-                        key={s.number}
-                        className={`p-4 border rounded-lg flex flex-col items-center justify-center gap-2 transition-all ${
-                            s.isCompleted
-                                ? "bg-green-500/10 border-green-500"
-                                : "hover:bg-accent/50"
-                        }`}
-                    >
-                        {s.isCompleted ? (
-                            <CheckCircle className="w-6 h-6 text-green-600" />
-                        ) : (
-                            <Circle className="w-6 h-6 text-muted-foreground" />
-                        )}
-                        <div className="text-center">
-                            <p className="font-semibold text-sm">Sesja {s.number}</p>
-                            <p className="text-xs text-muted-foreground">{s.wordsCount} słówek</p>
-                        </div>
-                    </div>
-                ))}
-            </div>
-        </Card>
-    );
+          </div>
+        ))}
+      </div>
+    </Card>
+  );
 };

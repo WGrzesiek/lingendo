@@ -3,7 +3,7 @@
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { PlusCircle, BookOpen, Lock, Globe, Plus, Share2 } from "lucide-react";
+import { PlusCircle, BookOpen, Lock, Globe, Plus } from "lucide-react";
 import { CreatedDecksList } from "@/features/deck/components/deck/my-deck/CreatedDecksList";
 import { useRouter } from "next/navigation";
 import { useState, useMemo } from "react";
@@ -16,31 +16,30 @@ import { useInfiniteDecksCreatedByMe } from "@/features/deck/hooks/useInfiniteDe
  */
 const MyCreatedCoursesPage = () => {
   const router = useRouter();
-  const {
-    data: deck,
-    isLoading,
-    isError,
-    fetchNextPage,
-    hasNextPage,
-    isFetchingNextPage,
-  } = useInfiniteDecksCreatedByMe();
-  const decks = deck ? deck.pages.flatMap((page) => page.content) : [];
-  console.log(decks);
+  const { data: deck } = useInfiniteDecksCreatedByMe();
+
+  const deckData = useMemo(() => {
+    return deck ? deck.pages.flatMap((page) => page.content) : [];
+  }, [deck]);
+
+  console.log(deckData);
   const [activeTab, setActiveTab] = useState<"all" | "public" | "private">(
     "all"
   );
 
   const filteredDecks = useMemo(() => {
-    if (activeTab === "all") return decks;
+    if (activeTab === "all") return deckData;
     if (activeTab === "public")
-      return decks.filter((deck) => deck.visibility === "PUBLIC");
+      return deckData.filter((d) => d.visibility === "PUBLIC");
     if (activeTab === "private")
-      return decks.filter((deck) => deck.visibility === "PRIVATE");
-    return decks;
-  }, [activeTab, decks]);
+      return deckData.filter((d) => d.visibility === "PRIVATE");
+    return deckData;
+  }, [activeTab, deckData]);
 
-  const publicCount = decks.filter((d) => d.visibility === "PUBLIC").length;
-  const privateCount = decks.filter((d) => d.visibility === "PRIVATE").length;
+  const publicCount = deckData.filter((d) => d.visibility === "PUBLIC").length;
+  const privateCount = deckData.filter(
+    (d) => d.visibility === "PRIVATE"
+  ).length;
 
   const handleCreateCourse = () => {
     router.push("/decks/create");
@@ -68,7 +67,7 @@ const MyCreatedCoursesPage = () => {
                   <BookOpen className="w-6 h-6 text-primary" />
                 </div>
                 <div>
-                  <p className="text-2xl font-bold">{decks.length}</p>
+                  <p className="text-2xl font-bold">{deckData.length}</p>
                   <p className="text-sm text-muted-foreground">
                     Wszystkie kursy
                   </p>
@@ -158,7 +157,7 @@ const MyCreatedCoursesPage = () => {
             >
               <TabsList className="grid w-full grid-cols-3 mb-6">
                 <TabsTrigger value="all">
-                  Wszystkie ({decks.length})
+                  Wszystkie ({deckData.length})
                 </TabsTrigger>
                 <TabsTrigger value="public">
                   <Globe className="w-4 h-4 mr-2" />

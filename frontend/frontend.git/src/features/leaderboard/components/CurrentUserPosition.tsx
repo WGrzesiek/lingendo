@@ -1,7 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Trophy, Target, TrendingUp } from "lucide-react";
 import { ILeaderboardEntry } from "@/features/leaderboard/types/leaderboard.types";
-import { cn } from "@/lib/utils";
 
 interface CurrentUserPositionProps {
   currentUser: ILeaderboardEntry;

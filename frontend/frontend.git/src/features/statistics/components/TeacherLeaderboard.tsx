@@ -3,7 +3,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Trophy } from "lucide-react";
 import type { TopStudent } from "@/features/dashboard-teacher/types";
-import {time, timee} from "@/lib/time";
+import { time } from "@/lib/time";
 
 interface TeacherLeaderboardProps {
   students: TopStudent[];

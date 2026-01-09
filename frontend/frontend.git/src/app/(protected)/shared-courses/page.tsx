@@ -12,7 +12,6 @@ import {
   AlertCircle,
   Languages,
   CheckCircle,
-  Calendar,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useInfiniteSharedWithMe } from "@/features/deck-share/hooks/useDeckShare";
@@ -24,7 +23,7 @@ import type {
   DeckCategory,
   DeckDifficulty,
 } from "@/features/deck/types/deck.types";
-import {useEnrollToDeck} from "@/features/deckEnrollment";
+import { useEnrollToDeck } from "@/features/deckEnrollment";
 
 /**
  * Karta udostępnionego kursu

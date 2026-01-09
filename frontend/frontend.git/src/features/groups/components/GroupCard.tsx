@@ -1,13 +1,6 @@
 "use client";
 
-import {
-  Users,
-  BookOpen,
-  Calendar,
-  MoreVertical,
-  Trash2,
-  Edit,
-} from "lucide-react";
+import { Users, Calendar, MoreVertical, Trash2, Edit } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
@@ -27,7 +20,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
 import type { Group, GroupStatus } from "../types/group.types";
-import {timee} from "@/lib/time";
+import { timee } from "@/lib/time";
 
 interface GroupCardProps {
   group: Group;

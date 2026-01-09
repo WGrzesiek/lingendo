@@ -7,7 +7,6 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Switch } from "@/components/ui/switch";
 import { Slider } from "@/components/ui/slider";
 import {
   Form,
@@ -59,8 +58,6 @@ import {
 import { cn } from "@/lib/utils";
 import {
   REVIEW_SCHEDULE,
-  REVIEW_SCHEDULE_LABELS,
-  reviewSchedules,
   reviewSchedulesValue,
   VISIBILITIES,
   VisibilityValue,

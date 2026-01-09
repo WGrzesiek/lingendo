@@ -85,17 +85,15 @@ export const FriendsList = ({ initialSearchQuery }: FriendsListProps) => {
   const removeFriend = useRemoveFriend();
   const blockUser = useBlockUser();
 
-  // Pobierz listę znajomych z paginacji
-  const friends = friendsData?.content ?? [];
-
   // Łączenie danych znajomych z danymi wzbogaconymi (punkty, ranking)
   const enrichedFriends = useMemo(() => {
-    if (!friends.length) return [];
-    if (!enrichedData) return friends;
+    const friendsList = friendsData?.content ?? [];
+    if (!friendsList.length) return [];
+    if (!enrichedData) return friendsList;
 
     const enrichedMap = new Map(enrichedData.map((e) => [e.friendId, e]));
 
-    return friends.map((friend) => {
+    return friendsList.map((friend) => {
       const enriched = enrichedMap.get(friend.userId);
       if (enriched) {
         return {
@@ -106,7 +104,7 @@ export const FriendsList = ({ initialSearchQuery }: FriendsListProps) => {
       }
       return friend;
     });
-  }, [friends, enrichedData]);
+  }, [friendsData, enrichedData]);
 
   // Filtrowanie po wyszukiwanej frazie
   const filteredFriends = useMemo(() => {

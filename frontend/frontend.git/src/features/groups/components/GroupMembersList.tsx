@@ -47,11 +47,7 @@ import {
   useGroupMembers,
   useRemoveGroupMembersBatch,
 } from "../hooks/useGroupsData";
-import type {
-  GroupMember,
-  GroupMemberStatus,
-  GroupMemberFilters,
-} from "../types/group.types";
+import type { GroupMember, GroupMemberStatus } from "../types/group.types";
 
 interface GroupMembersListProps {
   groupId: string;
@@ -78,7 +74,6 @@ export function GroupMembersList({
   groupId,
   onAddMembers,
 }: GroupMembersListProps) {
-  const [filters, setFilters] = useState<GroupMemberFilters>({});
   const [searchValue, setSearchValue] = useState("");
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [memberToDelete, setMemberToDelete] = useState<GroupMember | null>(
@@ -86,15 +81,11 @@ export function GroupMembersList({
   );
   const [showBatchDeleteDialog, setShowBatchDeleteDialog] = useState(false);
 
-  const { data: members, isLoading } = useGroupMembers(groupId, filters);
+  const { data: members, isLoading } = useGroupMembers(groupId);
   const removeMembersBatch = useRemoveGroupMembersBatch();
 
   const handleSearchChange = (value: string) => {
     setSearchValue(value);
-    const timeoutId = setTimeout(() => {
-      setFilters((prev) => ({ ...prev, search: value || undefined }));
-    }, 300);
-    return () => clearTimeout(timeoutId);
   };
 
   const handleSelectAll = (checked: boolean) => {

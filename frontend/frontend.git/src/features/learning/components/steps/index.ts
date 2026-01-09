@@ -1,5 +1,5 @@
-export { FlashcardView } from './FlashcardView';
-export { QuizStep } from './QuizStep';
-export { RememberCheckBase } from './RememberCheckBaseProps';
-export { StepRenderer } from './StepRenderer';
-export { WriteLanguageStep } from './WriteLanguageStep';
+export { FlashcardView } from "./FlashcardView";
+export { QuizFrom, QuizTo } from "./QuizStep";
+export { RememberCheckBase } from "./RememberCheckBaseProps";
+export { StepRenderer } from "./StepRenderer";
+export { TypingStepBase } from "./WriteLanguageStep";

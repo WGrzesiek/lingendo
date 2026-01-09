@@ -43,8 +43,6 @@ export const CreatedDeckCard = ({ deck, deckStat }: CreatedDeckCardProps) => {
   const handleCardClick = () => {
     router.push(`/my-courses/${deck.id}/details`);
   };
-  const avgRating =
-    (deckStat.completedStudents / (deckStat.totalStudents || 1)) * 100;
   return (
     <Card
       className="group p-5 hover:shadow-lg hover:border-primary/50 transition-all cursor-pointer"

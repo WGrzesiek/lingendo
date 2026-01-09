@@ -87,10 +87,8 @@ export default function DeckDetailsClient({ deckId }: { deckId: string }) {
     const query = searchQuery.toLowerCase();
     return allFlashcards.filter(
       (flashcard) =>
-        flashcard.wordDto.word.toLowerCase().includes(query) ||
-        flashcard.wordDto.translations.some((t) =>
-          t.toLowerCase().includes(query)
-        )
+        flashcard.word.toLowerCase().includes(query) ||
+        flashcard.translations.some((t) => t.toLowerCase().includes(query))
     );
   }, [allFlashcards, searchQuery]);
 
@@ -150,7 +148,7 @@ export default function DeckDetailsClient({ deckId }: { deckId: string }) {
         {/* Header */}
         <DeckDetailsHeader deck={deck} />
 
-        {currentUser.accountType == "TEACHER" && deck.isOwner && stats && (
+        {currentUser?.accountType === "TEACHER" && deck.isOwner && stats && (
           <DeckDetailsStats stats={stats} />
         )}
 
@@ -194,10 +192,7 @@ export default function DeckDetailsClient({ deckId }: { deckId: string }) {
               <>
                 <div className="space-y-3">
                   {filteredWords.map((flashcard) => (
-                    <WordCard
-                      key={flashcard.wordDto.id}
-                      word={flashcard.wordDto}
-                    />
+                    <WordCard key={flashcard.id} word={flashcard} />
                   ))}
                 </div>
 

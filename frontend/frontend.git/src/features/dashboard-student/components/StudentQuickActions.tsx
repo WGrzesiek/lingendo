@@ -1,6 +1,5 @@
 import { Card } from "@/components/ui/card";
 import {
-  Plus,
   BookOpen,
   Users,
   Trophy,

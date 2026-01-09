@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { UsersRound, Plus, ArrowRight, Users, BookOpen } from "lucide-react";
+import { UsersRound, Plus, ArrowRight, Users } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";

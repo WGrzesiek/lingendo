@@ -11,10 +11,6 @@ import {
   Flame,
   Clock,
   Calendar,
-  TrendingUp,
-  TrendingDown,
-  Minus,
-  MessageSquare,
   UserMinus,
   Ban,
   Medal,
@@ -25,7 +21,7 @@ import {
   useRemoveFriend,
   useBlockUser,
 } from "../hooks/useFriends";
-import {time, timee} from "@/lib/time";
+import { time } from "@/lib/time";
 
 /**
  * Komponent karty statystyk
@@ -191,7 +187,7 @@ export const FriendDetails = ({
         <StatCard
           icon={Clock}
           label="Ostatnia aktywność"
-          value={time(userStats.lastActiveAt)}
+          value={time(userStats.lastActiveAt ?? "")}
           color="green"
         />
       </div>

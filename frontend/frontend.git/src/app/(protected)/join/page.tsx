@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { Suspense, useState, useEffect } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import {
   Card,
@@ -20,7 +20,6 @@ import {
   AlertCircle,
   Loader2,
   GraduationCap,
-  Clock,
 } from "lucide-react";
 import {
   useInvitationInfo,
@@ -45,7 +44,7 @@ const statusConfig: Record<
 /**
  * Strona dołączania do nauczyciela za pomocą kodu zaproszenia
  */
-const JoinTeacherPage = () => {
+const JoinTeacherPageContent = () => {
   const searchParams = useSearchParams();
   const router = useRouter();
   const codeFromUrl = searchParams.get("code");
@@ -272,6 +271,20 @@ const JoinTeacherPage = () => {
         </CardContent>
       </Card>
     </div>
+  );
+};
+
+const JoinTeacherPage = () => {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen flex items-center justify-center">
+          <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+        </div>
+      }
+    >
+      <JoinTeacherPageContent />
+    </Suspense>
   );
 };
 

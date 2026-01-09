@@ -9,7 +9,7 @@ import { useProtectedRoute } from "@/features/auth/hooks/useProtectedRoute";
  * Strona zarządzania studentami
  */
 const StudentsPage = () => {
-  const { user, isLoading } = useProtectedRoute({
+  const { isLoading } = useProtectedRoute({
     requiredAccountType: "TEACHER",
   });
 

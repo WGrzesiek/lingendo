@@ -22,7 +22,6 @@ import {
   Link2,
   Clock,
   Users,
-  Trash2,
   AlertCircle,
   RefreshCw,
   XCircle,
@@ -34,8 +33,7 @@ import {
 } from "../hooks";
 import type { InvitationResponse, CreateInvitationRequest } from "../types/api";
 import { cn } from "@/lib/utils";
-import {timee} from "@/lib/time";
-
+import { timee } from "@/lib/time";
 
 const isExpired = (dateString: string): boolean => {
   return new Date(dateString) < new Date();
@@ -181,17 +179,6 @@ export const InvitationGenerator = () => {
     } catch (err) {
       console.error("Nie udało się skopiować kodu:", err);
       toast.error("Nie udało się skopiować kodu");
-    }
-  };
-
-  const handleCopyLink = async (code: string) => {
-    const link = `${window.location.origin}/join?code=${code}`;
-    try {
-      await navigator.clipboard.writeText(link);
-      toast.success("Skopiowano link do schowka!");
-    } catch (err) {
-      console.error("Nie udało się skopiować linku:", err);
-      toast.error("Nie udało się skopiować linku");
     }
   };
 
