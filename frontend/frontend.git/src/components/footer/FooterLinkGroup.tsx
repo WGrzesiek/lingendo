@@ -1,21 +1,23 @@
 "use client";
 
-type Link = { label: string; href: string };
-type Props = { title: string; links: Link[] };
+import Link from "next/link";
+
+type FooterLink = { label: string; href: string };
+type Props = { title: string; links: FooterLink[] };
 
 export function FooterLinkGroup({ title, links }: Props) {
   return (
     <div>
-      <h4 className="text-sm font-semibold text-foreground mb-3">{title}</h4>
-      <ul className="space-y-2 text-sm text-muted-foreground">
+      <h4 className="text-sm font-semibold text-foreground mb-4">{title}</h4>
+      <ul className="space-y-3">
         {links.map((l) => (
           <li key={l.href}>
-            <a
+            <Link
               href={l.href}
-              className="transition-colors hover:text-foreground/80"
+              className="text-sm text-muted-foreground transition-colors hover:text-primary"
             >
               {l.label}
-            </a>
+            </Link>
           </li>
         ))}
       </ul>

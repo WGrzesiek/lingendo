@@ -21,7 +21,7 @@ export default function AccountDisabledPage() {
           </Button>
           <p className="text-sm text-muted-foreground">
             Potrzebujesz pomocy?{" "}
-            <a href="mailto:support@learnwords.com" className="underline">
+            <a href="mailto:support@lingendo.app" className="underline">
               Skontaktuj się z nami
             </a>
           </p>

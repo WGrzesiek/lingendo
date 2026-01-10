@@ -33,10 +33,10 @@ export function Navbar() {
   const { logout } = useAuth();
 
   const publicMenuItems = [
-    { label: "Funkcje", href: "#features" },
-    { label: "Jak to działa", href: "#how" },
-    { label: "Cennik", href: "#pricing" },
-    { label: "FAQ", href: "#faq" },
+    { label: "Funkcje", href: "/#features" },
+    { label: "Jak to działa", href: "/how-it-works" },
+    { label: "Cennik", href: "/pricing" },
+    { label: "FAQ", href: "/faq" },
   ];
 
   const privateMenuItems = [
@@ -63,7 +63,7 @@ export function Navbar() {
     <nav className="fixed top-0 left-0 right-0 bg-background/70 backdrop-blur-md border-b z-50">
       <div className="container mx-auto flex h-16 items-center justify-between px-4">
         <Link href="/" className="text-xl font-semibold">
-          LearnWords
+          Lingendo
         </Link>
 
         <div className="hidden md:flex gap-6 items-center">

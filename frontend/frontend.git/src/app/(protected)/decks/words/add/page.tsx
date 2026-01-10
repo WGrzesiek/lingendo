@@ -168,7 +168,7 @@ const AddWordsToCommunityPage = () => {
           <div className="flex-1">
             <h1 className="text-3xl font-bold">Dodaj słówka do społeczności</h1>
             <p className="text-muted-foreground mt-1">
-              Twoje słówka będą dostępne dla wszystkich użytkowników LearnWords
+              Twoje słówka będą dostępne dla wszystkich użytkowników Lingendo
             </p>
           </div>
         </div>

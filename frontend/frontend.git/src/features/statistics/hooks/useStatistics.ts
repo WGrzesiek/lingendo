@@ -4,7 +4,7 @@ import {
   getStatistics,
 } from "../services/statistics.service";
 import { IPdfExportOptions } from "../types/pdf-export.types";
-import {qk} from "@/lib/queryKeys";
+import { qk } from "@/lib/queryKeys";
 
 /**
  * Hook do pobierania statystyk użytkownika
@@ -35,7 +35,7 @@ export const useExportStatisticsToPdf = () => {
         .toISOString()
         .slice(0, 19)
         .replace(/:/g, "-");
-      link.download = `statystyki_learnwords_${timestamp}.pdf`;
+      link.download = `statystyki_lingendo_${timestamp}.pdf`;
 
       document.body.appendChild(link);
       link.click();
