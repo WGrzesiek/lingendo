@@ -78,6 +78,7 @@ public class Deck {
     @Column(name = "owner", nullable = false)
     private DeckOwner owner;
 
+    @Builder.Default
     @Enumerated(EnumType.STRING)
     @Column(name = "review_schedule", nullable = false)
     private ReviewSchedule reviewSchedule = ReviewSchedule.AUTO;
