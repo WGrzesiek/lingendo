@@ -10,26 +10,27 @@ import { qk } from "@/lib/queryKeys";
 
 type DecksCreatedByMeFilters = {
   deckVisibility?: DeckVisibility[];
-  owner?: DeckOwnerType;
+  owner?: DeckOwnerType[];
 };
 
 export const useInfiniteDecksCreatedByMe = (
-  filters: DecksCreatedByMeFilters = {
-    deckVisibility: ["PRIVATE", "PUBLIC"],
-    owner: "I",
-  },
-  pageSize = 20
+    filters: DecksCreatedByMeFilters = {
+        deckVisibility: ["PRIVATE", "PUBLIC"],
+        owner: ["I", "COMMUNITY"],
+    },
+    pageSize = 20
 ) => {
-  return useInfiniteQuery<PageResponse<ICreatedDeckListItem>, Error>({
-    queryKey: qk.deck.iDecksCreateInfinite(filters),
-    queryFn: async ({ pageParam = 0 }) =>
-      getDecksCreatedByMe({
-        ...filters,
-        page: pageParam as number,
-        size: pageSize,
-      }),
-    initialPageParam: 0,
-    getNextPageParam: (lastPage) =>
-      lastPage.last ? undefined : lastPage.number + 1,
-  });
+    return useInfiniteQuery<PageResponse<ICreatedDeckListItem>, Error>({
+        queryKey: qk.deck.iDecksCreateInfinite({ filters, pageSize }),
+        queryFn: async ({ pageParam = 0 }) =>
+            getDecksCreatedByMe({
+                ...filters,
+                page: pageParam as number,
+                size: pageSize,
+            }),
+        initialPageParam: 0,
+        getNextPageParam: (lastPage) =>
+            lastPage.last ? undefined : lastPage.number + 1,
+    });
 };
+

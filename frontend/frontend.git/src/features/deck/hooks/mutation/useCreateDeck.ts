@@ -14,9 +14,11 @@ export const useCreateDeck = () => {
     CreateDeckDto
   >({
     mutationFn: createDeck,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: qk.deck.all });
-      queryClient.invalidateQueries({ queryKey: qk.deck.userDecks() });
+    onSuccess: async () => {
+      // await queryClient.invalidateQueries({ queryKey: qk.deck.userDecks() });
+      // await queryClient.refetchQueries({ queryKey: qk.deck.userDecks() });
+      await queryClient.invalidateQueries({queryKey: qk.deck.iDecksCreateInfiniteRoot(),});
+      await queryClient.refetchQueries({queryKey: qk.deck.iDecksCreateInfiniteRoot(),});
     },
   });
 };

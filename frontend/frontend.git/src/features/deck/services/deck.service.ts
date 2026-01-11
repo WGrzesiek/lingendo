@@ -50,7 +50,7 @@ export const getIDecks = async (params?: {
  */
 export const getDecksCreatedByMe = async (params?: {
   deckVisibility?: DeckVisibility[];
-  owner?: DeckOwnerType;
+  owner?: DeckOwnerType[];
   page?: number;
   size?: number;
 }): Promise<PageResponse<ICreatedDeckListItem>> => {

@@ -20,16 +20,11 @@ export const useCreateBatchWordsForDeck = () => {
     { deckId: string; words: VocabularyWord[] }
   >({
     mutationFn: ({ deckId, words }) => createBatchWordsForDeck(deckId, words),
-    onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({
-        queryKey: qk.deck.detail1(variables.deckId),
-      });
-      queryClient.invalidateQueries({
-        queryKey: qk.deck.flashcards(variables.deckId),
-      });
-      queryClient.invalidateQueries({
-        queryKey: qk.deck.details(variables.deckId),
-      });
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({queryKey: qk.deck.iDecksCreateInfiniteRoot(),});
+      await queryClient.refetchQueries({queryKey: qk.deck.iDecksCreateInfiniteRoot(),});
+
+
     },
   });
 };
@@ -42,8 +37,9 @@ export const useCreateBatchWordsForCommunity = () => {
 
   return useMutation<CreateBatchResponse, AxiosError, VocabularyWord[]>({
     mutationFn: (words) => createBatchWordsForCommunity(words),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: qk.community.words() });
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: qk.community.words() });
+      await  queryClient.refetchQueries({ queryKey: qk.community.words() });
     },
   });
 };

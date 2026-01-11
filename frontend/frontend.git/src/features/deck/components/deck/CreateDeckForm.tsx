@@ -107,7 +107,7 @@ export const CreateDeckForm = () => {
     const payload = { ...values, category: values.category as DeckCategory };
 
     createDeck(payload, {
-      onSuccess: () => router.push("/dashboard"),
+      onSuccess: () => router.push("/my-courses"),
       onError: (error) => {
         if (error.response?.status === 409) {
           form.setError("deckName", {
@@ -564,7 +564,7 @@ export const CreateDeckForm = () => {
             <Button
               type="button"
               variant="ghost"
-              onClick={() => router.back()}
+              onClick={() => router.push("/my-courses")}
               disabled={isPending}
             >
               Anuluj

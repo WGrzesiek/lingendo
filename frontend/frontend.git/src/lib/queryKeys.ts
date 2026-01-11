@@ -1,3 +1,6 @@
+import {DeckVisibility} from "@/features/dashboard-teacher/types";
+import {DeckOwnerType} from "@/features/deck/types";
+
 export const qk = {
   // ============================================
   // AUTH
@@ -45,8 +48,18 @@ export const qk = {
     userDecks: () => ["user-decks"] as const,
     iDecks: (page: number, size: number) => ["i-decks", page, size] as const,
     iDecksInfinite: () => ["i-decks", "infinite"] as const,
-    iDecksCreateInfinite: (filters?: unknown) =>
-      ["i-decks-create", "infinite", filters] as const,
+    // iDecksCreateInfinite: (filters?: unknown) =>
+    //   ["i-decks-create", "infinite", filters] as const,
+    iDecksCreateInfiniteRoot: () => ["deck", "createdByMe", "infinite"] as const,
+
+    iDecksCreateInfinite: (args: {
+      filters: {
+        deckVisibility?: DeckVisibility[];
+        owner?: DeckOwnerType[];
+      };
+      pageSize: number;
+    }) => [...qk.deck.iDecksCreateInfiniteRoot(), args] as const,
+
     myDeckStats: (deckIds: string[]) => ["my-deck-stats", deckIds] as const,
     publicDecks: (page?: number, size?: number) =>
       ["publicDecks", page, size] as const,
