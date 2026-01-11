@@ -246,4 +246,20 @@ public class DeckEnrollmentController {
         return ResponseEntity.noContent().build();
     }
 
+    /**
+     * Endpoint migracyjny - inicjalizuje progres dla istniejących enrollmentów.
+     * Do użycia jednorazowo
+     */
+    @PostMapping("/enrollments/migrate-progress")
+    public ResponseEntity<String> migrateEnrollmentsProgress() {
+        log.info("Rozpoczynam migrację progressu dla istniejących enrollmentów");
+        
+        int migratedCount = deckEnrollmentService.migrateExistingEnrollments();
+        
+        String message = String.format("Migracja zakończona. Zmigrowano %d enrollmentów.", migratedCount);
+        log.info(message);
+        
+        return ResponseEntity.ok(message);
+    }
+
 }

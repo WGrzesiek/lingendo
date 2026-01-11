@@ -13,6 +13,7 @@ import com.learnwords.deckservice.repository.DeckEnrollmentRepository;
 import com.learnwords.deckservice.repository.DeckRepository;
 import com.learnwords.deckservice.service.DeckEnrollmentService;
 import com.learnwords.deckservice.service.DeckShareService;
+import com.learnwords.deckservice.service.UserProgressService;
 import com.learnwords.deckservice.service.event.GenericEventProducer;
 import com.learnwords.deckservice.service.utils.DeckUtils;
 import jakarta.transaction.Transactional;
@@ -25,6 +26,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
+import java.util.List;
 import java.util.Optional;
 
 @Slf4j
@@ -34,16 +36,19 @@ public class DeckEnrollmentServiceImpl implements DeckEnrollmentService {
     private final DeckEnrollmentRepository deckEnrollmentRepository;
     private final DeckShareService deckShareService;
     private final GenericEventProducer eventProducer;
+    private final UserProgressService userProgressService;
 
 
     public DeckEnrollmentServiceImpl(DeckRepository deckRepository, 
                                      DeckEnrollmentRepository deckEnrollmentRepository, 
                                      @Lazy DeckShareService deckShareService,
-                                     GenericEventProducer eventProducer) {
+                                     GenericEventProducer eventProducer,
+                                     @Lazy UserProgressService userProgressService) {
         this.eventProducer = eventProducer;
         this.deckRepository = deckRepository;
         this.deckEnrollmentRepository = deckEnrollmentRepository;
         this.deckShareService = deckShareService;
+        this.userProgressService = userProgressService;
     }
 
     @Override
@@ -74,6 +79,10 @@ public class DeckEnrollmentServiceImpl implements DeckEnrollmentService {
                 .joinedAt(Instant.now())
                 .build();
         deckEnrollmentRepository.save(deckEnrollment);
+        
+        // Inicjalizacja progressu dla wszystkich fiszek w decku
+        userProgressService.initializeAllFlashcardsProgressForEnrollment(deckEnrollment);
+        
         log.info("Uzytkownik {} zostal przypisany do talii {}", userId, deckId);
         DeckEnrollmentsCreated event = DeckEnrollmentsCreated.builder()
                 .eventTime(deckEnrollment.getJoinedAt())
@@ -236,6 +245,31 @@ public class DeckEnrollmentServiceImpl implements DeckEnrollmentService {
             case ALL_FRIENDS -> 
                 new EnrollmentContext(DeckEnrollmentRole.FRIEND_OWNER, DeckEnrollmentSource.FRIEND_SHARED);
         };
+    }
+
+    @Override
+    @Transactional
+    public int migrateExistingEnrollments() {
+        log.info("Rozpoczynam migrację enrollmentów - inicjalizacja progressu dla wszystkich fiszek");
+        
+        List<DeckEnrollment> allEnrollments = deckEnrollmentRepository.findAll();
+        int migratedCount = 0;
+        
+        for (DeckEnrollment enrollment : allEnrollments) {
+            try {
+                userProgressService.initializeAllFlashcardsProgressForEnrollment(enrollment);
+                migratedCount++;
+                log.debug("Zmigrowano enrollment {} dla użytkownika {}", 
+                        enrollment.getId(), enrollment.getUserId());
+            } catch (Exception e) {
+                log.error("Błąd migracji enrollmentu {} dla użytkownika {}: {}", 
+                        enrollment.getId(), enrollment.getUserId(), e.getMessage());
+            }
+        }
+        
+        log.info("Zakończono migrację. Zmigrowano {} z {} enrollmentów", 
+                migratedCount, allEnrollments.size());
+        return migratedCount;
     }
 
     private record EnrollmentContext(DeckEnrollmentRole role, DeckEnrollmentSource source) {}

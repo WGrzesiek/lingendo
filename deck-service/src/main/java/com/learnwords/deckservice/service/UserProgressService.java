@@ -2,6 +2,7 @@ package com.learnwords.deckservice.service;
 
 import com.learnwords.deckservice.dto.facade.review.ReviewCounters;
 import com.learnwords.deckservice.dto.userFlashcardProgress.UserFlashcardProgressDto;
+import com.learnwords.deckservice.entity.DeckEnrollment;
 import com.learnwords.deckservice.entity.Flashcard;
 import com.learnwords.deckservice.enums.LearningPhase;
 import com.learnwords.deckservice.service.algorithm.state.AlgorithmState;
@@ -21,6 +22,7 @@ public interface UserProgressService {
     void setInitialFlashcardState(String deckId, Flashcard flashcard, String userId);
     void initializeSessionFlashcardsState(String deckId, List<String> flashcardIds, String userId);
     void initializeDeckFlashcardsState(String deckId, String userId);
+    void initializeAllFlashcardsProgressForEnrollment(DeckEnrollment enrollment);
     UserFlashcardProgressDto getFlashcardProgress(String flashcardId, String userId);
     void updateProgress(UserFlashcardProgressDto progressDto, AlgorithmResult result, boolean isCorrect);
     Page<UserFlashcardProgressDto> getProgressForEnrollment(String enrollmentId, String userId, Pageable pageable);

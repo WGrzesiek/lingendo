@@ -75,6 +75,7 @@ public class UserProgressServiceImpl implements UserProgressService {
                 .repetitionCount(0)
                 .userId(enrollment.getUserId())
                 .build();
+        userFlashcardProgressRepository.save(userFlashcardProgress);
         log.debug("Ustawiono początkowy stan algorytmu nauki - flashcardId: '{}', algorithm: '{}'",
                 flashcard.getId(), algorithm);
     }
@@ -226,6 +227,56 @@ public class UserProgressServiceImpl implements UserProgressService {
 
         log.info("Zainicjalizowano stan algorytmu nauki dla fiszek w talii - deckId: '{}', flashcardCount: {}",
                 deckId, flashcards.size());
+    }
+
+    @Override
+    @Transactional
+    public void initializeAllFlashcardsProgressForEnrollment(DeckEnrollment enrollment) {
+        String deckId = enrollment.getDeck().getId();
+        String userId = enrollment.getUserId();
+        String enrollmentId = enrollment.getId();
+        
+        log.info("Inicjalizacja progressu dla wszystkich fiszek - enrollmentId: {}, deckId: {}, userId: {}",
+                enrollmentId, deckId, userId);
+
+        List<UserFlashcardProgress> existingProgresses =
+                userFlashcardProgressRepository.findByEnrollment_Id(enrollmentId);
+
+        Set<String> flashcardIdsWithProgress = existingProgresses.stream()
+                .map(p -> p.getFlashcard().getId())
+                .collect(Collectors.toSet());
+
+        List<Flashcard> allFlashcards = flashcardRepository.findByDeckId(deckId);
+
+        List<Flashcard> flashcardsToInitialize = allFlashcards.stream()
+                .filter(f -> !flashcardIdsWithProgress.contains(f.getId()))
+                .toList();
+
+        if (flashcardsToInitialize.isEmpty()) {
+            log.info("Wszystkie {} fiszek w talii {} mają już progres. Nic nie inicjalizuję.",
+                    allFlashcards.size(), deckId);
+            return;
+        }
+
+        AbstractAlgorithm algorithm = algorithmFactory.get(enrollment.getPreferredAlgorithm());
+
+        List<UserFlashcardProgress> newProgresses = flashcardsToInitialize.stream()
+                .map(flashcard -> UserFlashcardProgress.builder()
+                        .flashcard(flashcard)
+                        .enrollment(enrollment)
+                        .algorithmState(algorithm.initialize().serialize())
+                        .isLearned(false)
+                        .isSkipped(false)
+                        .phase(LearningPhase.NEW)
+                        .repetitionCount(0)
+                        .userId(userId)
+                        .build())
+                .toList();
+
+        userFlashcardProgressRepository.saveAll(newProgresses);
+
+        log.info("Zainicjalizowano progres dla {} fiszek w enrollmentId {} (deckId: {}, userId: {})",
+                newProgresses.size(), enrollmentId, deckId, userId);
     }
 
     /**

@@ -15,6 +15,7 @@ public interface DeckEnrollmentService {
     void updateHowManyFlashcardsForOneSession(String enrollmentId, String userId, int limit);
     Page<StudentMyCourseListItemDto> getStudentEnrollments(String userId, int page, int size);
     DeckEnrollmentDto getEnrollment(String userId, String deckId);
-    void updateReviewSchedule(String enrollmentId, String userId, ReviewSchedule schedule) ;
+    void updateReviewSchedule(String enrollmentId, String userId, ReviewSchedule schedule);
+    int migrateExistingEnrollments();
 
 }
