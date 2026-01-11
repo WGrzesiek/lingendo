@@ -16,6 +16,7 @@ import { useRouter } from "next/navigation";
 import { DeckCategoryBadge } from "../deck/DeckCategoryBadge";
 import { DeckDifficultyBadge } from "../deck/DeckDifficultyBadge";
 import { DeckVisibilityBadge } from "../deck/DeckVisibilityBadge";
+import { LanguageBadge } from "../deck/LanguageBadge";
 import { ShareDeckDialog } from "@/features/deck-share/components/ShareDeckDialog";
 import { useEnrollToDeck } from "@/features/deckEnrollment/hooks/hooks";
 import type { DeckDetails } from "@/features/deck/types/deck-details.types";
@@ -65,6 +66,12 @@ export const DeckDetailsHeader = ({ deck }: DeckDetailsHeaderProps) => {
               <DeckCategoryBadge category={deck.category} />
               <DeckDifficultyBadge difficulty={deck.difficulty} />
               <DeckVisibilityBadge visibility={deck.visibility} />
+              {deck.languageFrom && deck.languageTo && (
+                <LanguageBadge
+                  languageFrom={deck.languageFrom}
+                  languageTo={deck.languageTo}
+                />
+              )}
             </div>
           </div>
 

@@ -14,7 +14,6 @@ import { usePublicDecks } from "@/features/community/hooks/usePublicDecks";
 import { useMyDeckStats } from "@/features/deck/hooks/useMyDeckStats";
 import type { ICreatedDeckListItem } from "@/features/deck/types/created-deck.types";
 
-
 const mapDeckToCommunityCourse = (
   deck: ICreatedDeckListItem
 ): ICommunityCourse => ({
@@ -25,6 +24,8 @@ const mapDeckToCommunityCourse = (
   difficulty: deck.deckDifficulty,
   category: deck.deckCategory,
   visibility: deck.visibility,
+  languageFrom: deck.languageFrom,
+  languageTo: deck.languageTo,
   createdAt: deck.createdAt,
   updatedAt: deck.updatedAt,
 });
@@ -67,18 +68,15 @@ const CommunityCoursesPage = () => {
       );
     }
 
-
     if (filters.category) {
       result = result.filter((course) => course.category === filters.category);
     }
-
 
     if (filters.difficulty) {
       result = result.filter(
         (course) => course.difficulty === filters.difficulty
       );
     }
-
 
     switch (filters.sortBy) {
       case "newest":

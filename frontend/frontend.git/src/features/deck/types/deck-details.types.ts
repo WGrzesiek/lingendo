@@ -1,5 +1,9 @@
 import type { WordDto } from "@/types/word";
-import { DeckCategory, DeckDifficulty } from "@/features/deck/types/deck.types";
+import {
+  DeckCategory,
+  DeckDifficulty,
+  Language,
+} from "@/features/deck/types/deck.types";
 import { DeckVisibility } from "@/features/deck/types/created-deck.types";
 
 /**
@@ -12,6 +16,8 @@ export interface DeckDetails {
   category: DeckCategory;
   difficulty: DeckDifficulty;
   visibility: DeckVisibility;
+  languageFrom?: Language;
+  languageTo?: Language;
   wordCount: number;
   createdAt: string;
   updatedAt: string;

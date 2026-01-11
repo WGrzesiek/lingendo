@@ -1,4 +1,8 @@
-import type { DeckCategory, DeckDifficulty } from "@/features/deck/types/deck.types";
+import type {
+  DeckCategory,
+  DeckDifficulty,
+  Language,
+} from "@/features/deck/types/deck.types";
 import type { DeckVisibility } from "@/features/deck/types/created-deck.types";
 
 /**
@@ -12,6 +16,8 @@ export interface ICommunityCourse {
   difficulty: DeckDifficulty;
   category: DeckCategory;
   visibility: DeckVisibility;
+  languageFrom?: Language;
+  languageTo?: Language;
   createdAt: string;
   updatedAt: string;
 }

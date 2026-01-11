@@ -1,4 +1,9 @@
-import { DeckCategory, DeckDifficulty, DeckOwnerType } from "./deck.types";
+import {
+  DeckCategory,
+  DeckDifficulty,
+  DeckOwnerType,
+  Language,
+} from "./deck.types";
 
 /**
  * Statystyki kursu utworzonego przez użytkownika
@@ -30,6 +35,8 @@ export interface ICreatedDeckListItem {
   ownerId: string;
   wordCount: number;
   visibility: DeckVisibility;
+  languageFrom: Language;
+  languageTo: Language;
   createdAt: string;
   updatedAt: string;
 

@@ -100,6 +100,8 @@ export default function DeckDetailsClient({ deckId }: { deckId: string }) {
         category: deckDetail.deckCategory as DeckCategory,
         difficulty: deckDetail.deckDifficulty as DeckDifficulty,
         visibility: deckDetail.visibility as DeckVisibility,
+        languageFrom: deckDetail.languageFrom,
+        languageTo: deckDetail.languageTo,
         wordCount: deckDetail.wordCount,
         createdAt: deckDetail.createdAt,
         updatedAt: deckDetail.updatedAt,

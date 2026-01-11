@@ -27,6 +27,8 @@ import {
   LayoutGrid,
 } from "lucide-react";
 import type { Language } from "@/types/common";
+export type { Language } from "@/types/common";
+export { languageConfig, LANGUAGES } from "@/types/common";
 import { reviewSchedules, Visibility } from "@/types/learning";
 
 /**

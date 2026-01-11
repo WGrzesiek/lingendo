@@ -13,6 +13,7 @@ import type {
   UserDeckCountDto,
   IDeckListItem,
   DeckOwnerType,
+  Language,
 } from "../types";
 import type { PageResponse } from "@/types/common";
 import {
@@ -316,7 +317,6 @@ export interface getMyDeckStatsBody {
   deckIds: string[];
 }
 
-
 export const getMyDeckStats = async (
   body: getMyDeckStatsBody
 ): Promise<DecksStats> => {
@@ -341,6 +341,8 @@ export interface DeckDetailResponse {
   ownerId: string;
   wordCount: number;
   visibility: string;
+  languageFrom?: Language;
+  languageTo?: Language;
   createdAt: string;
   updatedAt: string;
   username: string;

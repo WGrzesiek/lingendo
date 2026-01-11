@@ -15,6 +15,7 @@ import {
 import { DeckCategoryBadge } from "../DeckCategoryBadge";
 import { DeckDifficultyBadge } from "../DeckDifficultyBadge";
 import { DeckOwnerBadge } from "../DeckOwnerBadge";
+import { LanguageBadge } from "../LanguageBadge";
 import { time } from "@/lib/time";
 import { useRouter } from "next/navigation";
 import { DeckVisibilityBadge } from "@/features/deck/components/deck/DeckVisibilityBadge";
@@ -57,6 +58,12 @@ export const CreatedDeckCard = ({ deck, deckStat }: CreatedDeckCardProps) => {
               <h3 className="font-semibold text-lg tracking-tight group-hover:text-primary transition-colors">
                 {deck.name}
               </h3>
+              {deck.languageFrom && deck.languageTo && (
+                <LanguageBadge
+                  languageFrom={deck.languageFrom}
+                  languageTo={deck.languageTo}
+                />
+              )}
               <DeckOwnerBadge owner={deck.deckOwner} />
               <DeckCategoryBadge category={deck.deckCategory} />
               <DeckDifficultyBadge difficulty={deck.deckDifficulty} />
