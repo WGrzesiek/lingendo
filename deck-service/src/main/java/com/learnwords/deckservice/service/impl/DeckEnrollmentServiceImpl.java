@@ -76,6 +76,7 @@ public class DeckEnrollmentServiceImpl implements DeckEnrollmentService {
                 .source(context.source())
                 .howManyFlashcardsForOneSession(flashcardsPerSession)
                 .preferredAlgorithm(algorithm)
+                .preferredReviewSchedule(deck.getReviewSchedule())
                 .joinedAt(Instant.now())
                 .build();
         deckEnrollmentRepository.save(deckEnrollment);

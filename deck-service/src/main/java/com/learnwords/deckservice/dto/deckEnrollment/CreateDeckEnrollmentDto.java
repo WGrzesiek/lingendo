@@ -1,6 +1,7 @@
 package com.learnwords.deckservice.dto.deckEnrollment;
 
 import com.learnwords.deckservice.enums.LearnAlgorithm;
+import com.learnwords.deckservice.enums.ReviewSchedule;
 import jakarta.validation.constraints.Positive;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -19,4 +20,5 @@ public class CreateDeckEnrollmentDto {
     private LearnAlgorithm preferredAlgorithm;
     @Positive(message = "Ilość słówek musi być większa od zera")
     private Long howManyFlashcardsForOneSession;
+    private ReviewSchedule preferredReviewSchedule;
 }
