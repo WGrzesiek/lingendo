@@ -32,7 +32,7 @@ export interface DeckWord {
   translations: string[];
   sentences: WordDto["sentences"];
   sentencesAI: WordDto["sentencesAI"];
-  createdAt: string;
+  createdAt?: string;
 }
 
 /**
