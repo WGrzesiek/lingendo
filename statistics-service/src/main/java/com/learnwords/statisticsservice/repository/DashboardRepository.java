@@ -177,11 +177,28 @@ public class DashboardRepository {
         LeaderboardEntryDto myPosition = entries.stream()
                 .filter(e -> e.userId().equals(userId))
                 .findFirst()
-                .orElse(null);
+                .orElse(
+                        new LeaderboardEntryDto(
+                                userId,
+                                -1,
+                                "You",
+                                0L,
+                                0
+                        )
+                );
         LeaderboardEntryDto aboveYou = entries.stream()
                 .filter(e -> e.rank() == myPosition.rank() - 1)
                 .findFirst()
-                .orElse(null);
+                .orElse(
+                        new LeaderboardEntryDto(
+                                "",
+                                -1,
+                                "No one above you",
+                                0L,
+                                0
+                        )
+                );
+
 
         return new LeaderboardOverviewDto(top3, myPosition, aboveYou);
     }
