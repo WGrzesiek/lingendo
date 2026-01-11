@@ -122,7 +122,7 @@ public class CourseViewFacade {
         Deck deck = deckService.getDeckById(deckId);
 
         int totalWords = deck.getWordCount();
-        long wordsPerSession = deck.getHowManyFlashcardsForOneSession();
+        long wordsPerSession = enrollment.getCardsPerSessionLimit();
         int totalSessions = (int) Math.ceil((double) totalWords / wordsPerSession);
         int completedSessions = sessionService.getCompletedSessionsCount(enrollmentId, userId);
         int wordsToReview = userProgressService.countWordsToReview(enrollmentId, userId);
