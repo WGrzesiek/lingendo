@@ -3,7 +3,7 @@
  */
 export type LearnAlgorithm =
   | "GRZESIEK_ALGORITHM"
-  | "LEINER_ALGORITHM"
+  | "LEITNER_ALGORITHM"
   | "TEST_ALGORITHM";
 
 /**

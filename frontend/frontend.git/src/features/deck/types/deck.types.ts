@@ -498,7 +498,7 @@ export const CATEGORIES = deckCategoryValues.map((value) => ({
  */
 export const learnAlgorithmValues = [
   "GRZESIEK_ALGORITHM",
-  "LEINER_ALGORITHM",
+  "LEITNER_ALGORITHM",
   "TEST_ALGORITHM",
 ] as const;
 
@@ -519,7 +519,7 @@ export const learnAlgorithmConfig: Record<
     className: "bg-blue-50 text-blue-700 border-blue-200",
     iconColor: "text-blue-700",
   },
-  LEINER_ALGORITHM: {
+  LEITNER_ALGORITHM: {
     label: "System Leitnera (Pudełka)",
     icon: Boxes,
     className: "bg-amber-50 text-amber-700 border-amber-200",

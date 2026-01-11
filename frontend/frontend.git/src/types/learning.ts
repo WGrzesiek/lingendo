@@ -1,6 +1,3 @@
-
-
-
 import {
   Brain,
   Layers,
@@ -121,7 +118,7 @@ export const algorithms = [
     inDevelopment: true,
   },
   {
-    id: "LEINER_ALGORITHM",
+    id: "LEITNER_ALGORITHM",
     name: "System Leitnera",
     description:
       "Fiszki przechodzą między pudełkami w zależności od odpowiedzi.",
