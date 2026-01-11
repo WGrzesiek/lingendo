@@ -4,6 +4,7 @@ import com.learnwords.deckservice.enums.DeckCategory;
 import com.learnwords.deckservice.enums.DeckDifficulty;
 import com.learnwords.deckservice.enums.DeckOwner;
 import com.learnwords.deckservice.enums.DeckVisibility;
+import com.learnwords.deckservice.enums.Language;
 import lombok.Builder;
 
 import java.time.Instant;
@@ -18,6 +19,8 @@ public record DeckDto(String id,
                       String ownerId,
                       int wordCount,
                       DeckVisibility visibility,
+                      Language languageFrom,
+                      Language languageTo,
                       Instant createdAt,
                       Instant updatedAt,
                       String username) {

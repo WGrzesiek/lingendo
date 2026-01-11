@@ -368,6 +368,8 @@ public class DeckServiceImpl implements DeckService {
                 .ownerId(deck.getOwnerId())
                 .wordCount(deck.getWordCount())
                 .visibility(deck.getVisibility())
+                .languageFrom(deck.getLanguageFrom())
+                .languageTo(deck.getLanguageTo())
                 .createdAt(deck.getCreatedAt())
                 .updatedAt(deck.getUpdatedAt())
                 .username(includeUsername ? userResponse.getUsername() : null)
