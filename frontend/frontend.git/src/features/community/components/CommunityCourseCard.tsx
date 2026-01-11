@@ -18,7 +18,6 @@ import { useEffect } from "react";
 interface CommunityCourseCardProps {
   course: ICommunityCourse;
   stats?: DeckStat;
-  onEnroll?: (courseId: string) => void;
 }
 
 /**
@@ -27,7 +26,6 @@ interface CommunityCourseCardProps {
 export const CommunityCourseCard = ({
   course,
   stats,
-  onEnroll,
 }: CommunityCourseCardProps) => {
   const router = useRouter();
   const { data: currentUser } = useCurrentUser();

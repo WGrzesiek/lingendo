@@ -10,7 +10,6 @@ import {
   Target,
   Repeat,
   Sparkles,
-  CheckCircle,
   Users,
   Trophy,
 } from "lucide-react";

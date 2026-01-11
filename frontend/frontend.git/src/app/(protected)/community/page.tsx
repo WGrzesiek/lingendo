@@ -184,7 +184,6 @@ const CommunityCoursesPage = () => {
                         key={course.id}
                         course={course}
                         stats={statsData?.[course.id]}
-                        onEnroll={handleEnroll}
                       />
                     ))}
                   </div>
