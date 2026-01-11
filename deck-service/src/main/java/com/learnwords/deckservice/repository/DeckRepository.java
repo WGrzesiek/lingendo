@@ -20,12 +20,12 @@ public interface DeckRepository extends JpaRepository<Deck, String> {
             SELECT d FROM Deck d WHERE
             d.ownerId = :userId
             AND (:visibility IS NULL OR d.visibility IN :visibility)
-            AND (:owner IS NULL OR d.owner = :owner)
+            AND (:owner IS NULL OR d.owner IN :owner)
            """)
     Page<Deck> findOwnedDecksWithFilters(
             @Param("userId") String userId,
             @Param("visibility") List<DeckVisibility> visibility,
-            @Param("owner") DeckOwner owner,
+            @Param("owner") List<DeckOwner> owner,
             Pageable pageable);
 
 Page<Deck> findByIdIn(List<String> ids, Pageable pageable);

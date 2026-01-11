@@ -242,7 +242,7 @@ public class DeckServiceImpl implements DeckService {
      * @return Strona DeckDto spełniających kryteria
      */
     @Override
-    public Page<DeckDto> getDecksByFilter(String userId, List<DeckVisibility> visibility, DeckOwner owner, int page, int size) {
+    public Page<DeckDto> getDecksByFilter(String userId, List<DeckVisibility> visibility, List<DeckOwner> owner, int page, int size) {
         log.info("Filtrowanie talii użytkownika: userId={}, visibility={}, owner={}",
                 userId, visibility, owner);
         if(userId == null || userId.isBlank()) {

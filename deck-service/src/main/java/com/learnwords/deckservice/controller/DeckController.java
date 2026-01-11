@@ -228,7 +228,7 @@ public class DeckController {
             @Parameter(description = "Ty widocznosci", schema = @Schema(implementation = DeckVisibility.class))
             @RequestParam(required = false) List<DeckVisibility> deckVisibility,
             @Parameter(description = "Typ właściciela talii", schema = @Schema(implementation = DeckOwner.class))
-            @RequestParam(required = false) DeckOwner owner,
+            @RequestParam(required = false) List<DeckOwner> owner,
             @Parameter(description = "Numer strony (0-based)", example = "0")
             @RequestParam(defaultValue = "0") int page,
             @Parameter(description = "Rozmiar strony", example = "10")

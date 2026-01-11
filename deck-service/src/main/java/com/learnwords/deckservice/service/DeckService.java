@@ -60,7 +60,7 @@ public interface DeckService {
     DeckDto getDeckById(String deckId, String userId);
     Deck getDeckById(String deckId);
 
-    Page<DeckDto> getDecksByFilter(String userId, List<DeckVisibility> visibility, DeckOwner owner, int page, int size);
+    Page<DeckDto> getDecksByFilter(String userId, List<DeckVisibility> visibility, List<DeckOwner> owner, int page, int size);
     Page<DeckDto> getPublicDecks(DeckOwner owner, int page, int size);
     DeckDetailsDto getDeckDetailsById(String deckId, String userId); // Szczegóły statyczne (opis, ilość słów)
     DeckDetailsDto editDeckDetails(String deckId, DeckDetailsDto deckDetailsDto, String userId);
