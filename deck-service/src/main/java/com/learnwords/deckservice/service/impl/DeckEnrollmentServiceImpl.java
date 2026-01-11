@@ -153,7 +153,9 @@ public class DeckEnrollmentServiceImpl implements DeckEnrollmentService {
                     enrollment.getLastAccessedAt(),
                     deck.getDifficulty(),
                     deck.getOwner(),
-                    deck.getCategory()
+                    deck.getCategory(),
+                    deck.getLanguageFrom(),
+                    deck.getLanguageTo()
             );
         });
 
