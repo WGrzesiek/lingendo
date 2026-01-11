@@ -2,7 +2,7 @@ import apiClient from "@/lib/api/axios";
 import type { PageResponse } from "@/types/common";
 
 /**
- * Interfejs dla pojedynczej fiszki/słówka
+ * Interfejs dla pojedynczej fiszki/słówka (zmapowany z API)
  */
 export interface DeckFlashcard {
   id: string;
@@ -18,7 +18,29 @@ export interface DeckFlashcard {
     sentence: string;
     translation: string;
   }>;
-  createdAt: string;
+  createdAt?: string;
+}
+
+/**
+ * Odpowioedz z api
+ */
+interface ApiFlashcardItem {
+  id: string;
+  wordDto: {
+    id: string;
+    word: string;
+    translations: string[];
+    sentences: Array<{
+      id: string;
+      sentence: string;
+      translation: string;
+    }>;
+    sentencesAI: Array<{
+      id: string;
+      sentence: string;
+      translation: string;
+    }>;
+  };
 }
 
 /**
@@ -32,7 +54,7 @@ export const getDeckFlashcardsPage = async (params: {
 }): Promise<PageResponse<DeckFlashcard>> => {
   const { deckId, page = 0, size = 10 } = params;
 
-  const response = await apiClient.get<PageResponse<DeckFlashcard>>(
+  const response = await apiClient.get<PageResponse<ApiFlashcardItem>>(
     `/v1/decks/${deckId}/flashcards/page`,
     {
       params: { page, size },
@@ -44,5 +66,18 @@ export const getDeckFlashcardsPage = async (params: {
     response.data.content.length
   );
 
-  return response.data;
+  const mappedContent: DeckFlashcard[] = (response.data.content ?? []).map(
+    (item) => ({
+      id: item.wordDto.id,
+      word: item.wordDto.word,
+      translations: item.wordDto.translations ?? [],
+      sentences: item.wordDto.sentences ?? [],
+      sentencesAI: item.wordDto.sentencesAI ?? [],
+    })
+  );
+
+  return {
+    ...response.data,
+    content: mappedContent,
+  };
 };

@@ -3,13 +3,17 @@
 import { useRouter } from "next/navigation";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { BookOpen, Calendar, Users, CheckCircle } from "lucide-react";
+import {BookOpen, Calendar, Users, CheckCircle, Loader2, AlertCircle} from "lucide-react";
 import { ICommunityCourse } from "@/features/community/types/community-course.types";
 import { time } from "@/lib/time";
 import { DeckCategoryBadge } from "@/features/deck/components/deck/DeckCategoryBadge";
 import { DeckDifficultyBadge } from "@/features/deck/components/deck/DeckDifficultyBadge";
 import { useCurrentUser } from "@/features/auth/hooks/useCurrentUser";
 import type { DeckStat } from "@/features/deck/types/created-deck.types";
+import {useState} from "react";
+import {useEnrollToDeck} from "@/features/deckEnrollment";
+import { useEffect } from "react";
+
 
 interface CommunityCourseCardProps {
   course: ICommunityCourse;
@@ -33,12 +37,31 @@ export const CommunityCourseCard = ({
     router.push(`/my-courses/${course.id}/details`);
   };
 
+  const [isEnrolled, setIsEnrolled] = useState(false);
+
+  const enrollMutation = useEnrollToDeck();
+
   const handleEnroll = (e: React.MouseEvent) => {
     e.stopPropagation();
-    if (onEnroll) {
-      onEnroll(course.id);
-    }
+    enrollMutation.mutate(
+        { deckId: course.id },
+        {
+          onSuccess: () => {
+            setIsEnrolled(true);
+          },
+        }
+    );
   };
+
+  useEffect(() => {
+    if (!isEnrolled) return;
+
+    const timeout = setTimeout(() => {
+      router.push("/dashboard");
+    }, 2000);
+
+    return () => clearTimeout(timeout);
+  }, [isEnrolled, router]);
 
   return (
     <Card
@@ -105,10 +128,39 @@ export const CommunityCourseCard = ({
 
         {/* Przycisk zapisu - tylko dla studentów */}
         {!isTeacher && (
-          <Button className="w-full" size="sm" onClick={handleEnroll}>
-            Dołącz do kursu
-          </Button>
+          // <Button className="w-full" size="sm" onClick={handleEnroll}>
+          //   Dołącz do kursu
+          // </Button>
+            isEnrolled ? (
+                <div className="flex items-center gap-2 text-sm text-green-600">
+                  <CheckCircle className="w-4 h-4" />
+                  <span>Zapisano na kurs! Przekierowanie...</span>
+                </div>
+            ) : (
+                <Button
+                    className="w-full"
+                    size="sm"
+                    onClick={handleEnroll}
+                    disabled={enrollMutation.isPending}
+                >
+                  {enrollMutation.isPending ? (
+                      <>
+                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                        Zapisywanie...
+                      </>
+                  ) : (
+                      "Zapisz się na kurs"
+                  )}
+                </Button>
+            )
         )}
+        {        enrollMutation.isError && (
+            <div className="flex items-center gap-2 text-sm text-destructive">
+              <AlertCircle className="w-4 h-4" />
+              <span>Błąd podczas zapisywania. Spróbuj ponownie.</span>
+            </div>
+        )}
+
       </div>
     </Card>
   );

@@ -297,7 +297,7 @@
 //       {filteredWords.length > 0 && (
 //         <div className="text-center text-xs text-muted-foreground pt-4 border-t">
 //           <Users className="w-4 h-4 inline-block mr-1" />
-//           Słówka pochodzą z biblioteki społeczności LearnWords
+//           Słówka pochodzą z biblioteki społeczności Lingendo
 //         </div>
 //       )}
 //     </div>

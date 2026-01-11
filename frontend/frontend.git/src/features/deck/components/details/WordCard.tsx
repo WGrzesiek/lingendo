@@ -11,7 +11,6 @@ interface SimpleWordCardProps {
  * Bez statusów nauki (nauczone/powtórzone)
  */
 export const WordCard = ({ word }: SimpleWordCardProps) => {
-
   return (
     <div className="p-4 border rounded-lg hover:bg-accent/50 transition-colors">
       {/* MOBILE LAYOUT */}
@@ -19,26 +18,31 @@ export const WordCard = ({ word }: SimpleWordCardProps) => {
         <div className="flex items-center gap-2 mb-2">
           <h3 className="font-semibold text-lg">{word.word}</h3>
           <span className="text-muted-foreground">→</span>
-          <span className="text-lg">{word.translations.join(", ")}</span>
+          <span className="text-lg">
+            {(word.translations ?? []).join(", ")}
+          </span>
         </div>
-        {word.sentences.length > 0 || word.sentencesAI.length > 0 ? (
-            <div className="space-y-2 mt-3">
-              {[...word.sentences, ...word.sentencesAI].map((sentence) => (
-                  <div key={sentence.id} className="space-y-1">
-                    <p className="text-sm italic text-muted-foreground">
-                      &ldquo;{sentence.sentence}&rdquo;
-                    </p>
-                    <p className="text-sm italic text-muted-foreground">
-                      &ldquo;{sentence.translation}&rdquo;
-                    </p>
-                  </div>
-              ))}
-            </div>
+        {(word.sentences ?? []).length > 0 ||
+        (word.sentencesAI ?? []).length > 0 ? (
+          <div className="space-y-2 mt-3">
+            {[...(word.sentences ?? []), ...(word.sentencesAI ?? [])].map(
+              (sentence) => (
+                <div key={sentence.id} className="space-y-1">
+                  <p className="text-sm italic text-muted-foreground">
+                    &ldquo;{sentence.sentence}&rdquo;
+                  </p>
+                  <p className="text-sm italic text-muted-foreground">
+                    &ldquo;{sentence.translation}&rdquo;
+                  </p>
+                </div>
+              )
+            )}
+          </div>
         ) : (
-            <div className="flex items-center gap-2 text-sm text-muted-foreground mt-3">
-              <Sparkles className="w-4 h-4" />
-              Brak przykładowego zdania
-            </div>
+          <div className="flex items-center gap-2 text-sm text-muted-foreground mt-3">
+            <Sparkles className="w-4 h-4" />
+            Brak przykładowego zdania
+          </div>
         )}
       </div>
 
@@ -49,7 +53,7 @@ export const WordCard = ({ word }: SimpleWordCardProps) => {
             <h3 className="font-semibold text-lg">{word.word}</h3>
             <span className="text-muted-foreground">→</span>
             <div className="flex flex-wrap gap-2">
-              {word.translations.map((trans, index) => (
+              {(word.translations ?? []).map((trans, index) => (
                 <Badge
                   key={index}
                   variant={index === 0 ? "default" : "secondary"}
@@ -60,26 +64,28 @@ export const WordCard = ({ word }: SimpleWordCardProps) => {
               ))}
             </div>
           </div>
-          {word.sentences.length > 0 || word.sentencesAI.length > 0 ? (
-              <div className="space-y-2">
-                {[...word.sentences, ...word.sentencesAI].map((sentence) => (
-                    <div key={sentence.id} className="space-y-1">
-                      <p className="text-sm italic text-muted-foreground">
-                        &ldquo;{sentence.sentence}&rdquo;
-                      </p>
-                      <p className="text-sm italic text-muted-foreground">
-                        &ldquo;{sentence.translation}&rdquo;
-                      </p>
-                    </div>
-                ))}
-              </div>
+          {(word.sentences ?? []).length > 0 ||
+          (word.sentencesAI ?? []).length > 0 ? (
+            <div className="space-y-2">
+              {[...(word.sentences ?? []), ...(word.sentencesAI ?? [])].map(
+                (sentence) => (
+                  <div key={sentence.id} className="space-y-1">
+                    <p className="text-sm italic text-muted-foreground">
+                      &ldquo;{sentence.sentence}&rdquo;
+                    </p>
+                    <p className="text-sm italic text-muted-foreground">
+                      &ldquo;{sentence.translation}&rdquo;
+                    </p>
+                  </div>
+                )
+              )}
+            </div>
           ) : (
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <Sparkles className="w-4 h-4" />
-                Brak przykładowego zdania
-              </div>
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <Sparkles className="w-4 h-4" />
+              Brak przykładowego zdania
+            </div>
           )}
-
         </div>
       </div>
     </div>

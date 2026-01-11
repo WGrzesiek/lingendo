@@ -127,13 +127,13 @@ export const CourseHeader = ({ enrollmentId }: CourseHeaderProps) => {
                 </Button>
               </>
             )}
-            <Button
-              size="sm"
-              className="flex-1 sm:flex-initial"
-              onClick={() => router.push(`/course/${data.deckId}`)}
-            >
-              Rozpocznij naukę
-            </Button>
+            {/*<Button*/}
+            {/*  size="sm"*/}
+            {/*  className="flex-1 sm:flex-initial"*/}
+            {/*  onClick={() => router.push(`/course/${data.deckId}`)}*/}
+            {/*>*/}
+            {/*  Rozpocznij naukę*/}
+            {/*</Button>*/}
           </div>
         </div>
       </Card>

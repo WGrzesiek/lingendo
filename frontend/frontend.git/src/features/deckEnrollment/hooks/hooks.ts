@@ -15,7 +15,6 @@ import type {
 
 /**
  * Hook do zapisywania się na talię (enrollment).
- * Jeśli nie podano data, backend użyje wartości domyślnych z talii.
  */
 export const useEnrollToDeck = () => {
   const queryClient = useQueryClient();

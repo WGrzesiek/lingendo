@@ -24,6 +24,7 @@ import type {
   DeckDifficulty,
 } from "@/features/deck/types/deck.types";
 import { useEnrollToDeck } from "@/features/deckEnrollment";
+import { useEffect } from "react";
 
 /**
  * Karta udostępnionego kursu
@@ -49,6 +50,16 @@ function SharedDeckCard({ deck }: { deck: SharedDeckDto }) {
   const handleCardClick = () => {
     router.push(`/my-courses/${deck.deckId}/details`);
   };
+
+  useEffect(() => {
+    if (!isEnrolled) return;
+
+    const timeout = setTimeout(() => {
+      router.push("/dashboard");
+    }, 2000);
+
+    return () => clearTimeout(timeout);
+  }, [isEnrolled, router]);
 
   return (
     <Card
@@ -101,55 +112,43 @@ function SharedDeckCard({ deck }: { deck: SharedDeckDto }) {
           )}
         </div>
 
-        {/* Wiadomość od nauczyciela */}
-        {deck.message && (
-          <div className="text-sm italic text-muted-foreground border-l-2 border-primary/30 pl-3">
-            &quot;{deck.message}&quot;
-          </div>
-        )}
+        {/*/!* Wiadomość od nauczyciela *!/*/}
+        {/*{deck.message && (*/}
+        {/*  <div className="text-sm italic text-muted-foreground border-l-2 border-primary/30 pl-3">*/}
+        {/*    &quot;{deck.message}&quot;*/}
+        {/*  </div>*/}
+        {/*)}*/}
 
         {/* Przycisk zapisu */}
         {isEnrolled ? (
-          <>
             <div className="flex items-center gap-2 text-sm text-green-600">
               <CheckCircle className="w-4 h-4" />
-              <span>Zapisano na kurs!</span>
+              <span>Zapisano na kurs! Przekierowanie...</span>
             </div>
-            <Button
-              className="w-full"
-              size="sm"
-              onClick={(e) => {
-                e.stopPropagation();
-                router.push(`/course/${deck.deckId}`);
-              }}
-            >
-              Rozpocznij naukę
-            </Button>
-          </>
         ) : (
-          <Button
-            className="w-full"
-            size="sm"
-            onClick={handleEnroll}
-            disabled={enrollMutation.isPending}
-          >
-            {enrollMutation.isPending ? (
-              <>
-                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                Zapisywanie...
-              </>
-            ) : (
-              "Zapisz się na kurs"
-            )}
-          </Button>
+            <Button
+                className="w-full"
+                size="sm"
+                onClick={handleEnroll}
+                disabled={enrollMutation.isPending}
+            >
+              {enrollMutation.isPending ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Zapisywanie...
+                  </>
+              ) : (
+                  "Zapisz się na kurs"
+              )}
+            </Button>
         )}
 
         {/* Komunikat o błędzie */}
         {enrollMutation.isError && (
-          <div className="flex items-center gap-2 text-sm text-destructive">
-            <AlertCircle className="w-4 h-4" />
-            <span>Błąd podczas zapisywania. Spróbuj ponownie.</span>
-          </div>
+            <div className="flex items-center gap-2 text-sm text-destructive">
+              <AlertCircle className="w-4 h-4" />
+              <span>Błąd podczas zapisywania. Spróbuj ponownie.</span>
+            </div>
         )}
       </div>
     </Card>

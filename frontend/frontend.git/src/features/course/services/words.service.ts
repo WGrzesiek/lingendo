@@ -19,19 +19,24 @@ export const getCourseWords = async (
     { params }
   );
 
+  console.log("[Course Words Service] Raw API response:", response.data);
+
   // Mapowanie elementów content[] na CourseWord
   const words: CourseWord[] = (response.data.content || []).map((item) => {
     const flashcard = item.flashcard;
     const progress = item.userFlashcardProgress;
     const session = item.sessionNumber ?? 0;
 
+    // Null-safe access do wordDto
+    const wordDto = flashcard?.wordDto;
+
     return {
-      id: flashcard.wordDto.id,
-      flashcardId: flashcard.id,
-      word: flashcard.wordDto.word,
-      translations: flashcard.wordDto.translations,
-      sentences: flashcard.wordDto.sentences,
-      sentencesAI: flashcard.wordDto.sentencesAI,
+      id: wordDto?.id ?? flashcard?.id ?? "",
+      flashcardId: flashcard?.id ?? "",
+      word: wordDto?.word ?? "",
+      translations: wordDto?.translations ?? [],
+      sentences: wordDto?.sentences ?? [],
+      sentencesAI: wordDto?.sentencesAI ?? [],
       phase: progress?.phase || "NEW",
       isLearned: progress?.isLearned || false,
       isSkipped: progress?.isSkipped || false,

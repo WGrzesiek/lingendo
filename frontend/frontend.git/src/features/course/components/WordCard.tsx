@@ -37,21 +37,26 @@ export const WordCard = ({ word }: WordCardProps) => {
         <div className="flex items-center gap-2 mb-2">
           <h3 className="font-semibold text-lg">{word.word}</h3>
           <span className="text-muted-foreground">→</span>
-          <span className="text-lg">{word.translations.join(", ")}</span>
+          <span className="text-lg">
+            {(word.translations ?? []).join(", ")}
+          </span>
         </div>
 
-        {word.sentences.length > 0 || word.sentencesAI.length > 0 ? (
+        {(word.sentences ?? []).length > 0 ||
+        (word.sentencesAI ?? []).length > 0 ? (
           <div className="space-y-2 mt-3">
-            {[...word.sentences, ...word.sentencesAI].map((sentence) => (
-              <div key={sentence.id} className="space-y-1">
-                <p className="text-sm italic text-muted-foreground">
-                  &ldquo;{sentence.sentence}&rdquo;
-                </p>
-                <p className="text-sm italic text-muted-foreground">
-                  &ldquo;{sentence.translation}&rdquo;
-                </p>
-              </div>
-            ))}
+            {[...(word.sentences ?? []), ...(word.sentencesAI ?? [])].map(
+              (sentence) => (
+                <div key={sentence.id} className="space-y-1">
+                  <p className="text-sm italic text-muted-foreground">
+                    &ldquo;{sentence.sentence}&rdquo;
+                  </p>
+                  <p className="text-sm italic text-muted-foreground">
+                    &ldquo;{sentence.translation}&rdquo;
+                  </p>
+                </div>
+              )
+            )}
           </div>
         ) : (
           <div className="flex items-center gap-2 text-sm text-muted-foreground mt-3">
@@ -66,7 +71,9 @@ export const WordCard = ({ word }: WordCardProps) => {
           <div className="flex items-center gap-2 mb-2">
             <h3 className="font-semibold text-lg">{word.word}</h3>
             <span className="text-muted-foreground">→</span>
-            <span className="text-lg">{word.translations.join(", ")}</span>
+            <span className="text-lg">
+              {(word.translations ?? []).join(", ")}
+            </span>
             <Badge variant="outline" className="text-xs">
               Powtórzeń: {word.repetitionCount}
             </Badge>
@@ -91,18 +98,21 @@ export const WordCard = ({ word }: WordCardProps) => {
             )}
           </div>
 
-          {word.sentences.length > 0 || word.sentencesAI.length > 0 ? (
+          {(word.sentences ?? []).length > 0 ||
+          (word.sentencesAI ?? []).length > 0 ? (
             <div className="space-y-2">
-              {[...word.sentences, ...word.sentencesAI].map((sentence) => (
-                <div key={sentence.id} className="space-y-1">
-                  <p className="text-sm italic text-muted-foreground">
-                    &ldquo;{sentence.sentence}&rdquo;
-                  </p>
-                  <p className="text-sm italic text-muted-foreground">
-                    &ldquo;{sentence.translation}&rdquo;
-                  </p>
-                </div>
-              ))}
+              {[...(word.sentences ?? []), ...(word.sentencesAI ?? [])].map(
+                (sentence) => (
+                  <div key={sentence.id} className="space-y-1">
+                    <p className="text-sm italic text-muted-foreground">
+                      &ldquo;{sentence.sentence}&rdquo;
+                    </p>
+                    <p className="text-sm italic text-muted-foreground">
+                      &ldquo;{sentence.translation}&rdquo;
+                    </p>
+                  </div>
+                )
+              )}
             </div>
           ) : (
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
