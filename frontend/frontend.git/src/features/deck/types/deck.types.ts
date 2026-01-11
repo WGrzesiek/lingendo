@@ -164,6 +164,8 @@ export interface IDeckListItem {
   deckDifficulty: DeckDifficulty;
   deckOwner: DeckOwnerType;
   deckCategory: DeckCategory;
+  languageFrom?: Language;
+  languageTo?: Language;
 }
 
 //============================================================================================

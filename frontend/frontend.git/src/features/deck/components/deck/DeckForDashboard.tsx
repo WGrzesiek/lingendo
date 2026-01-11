@@ -1,8 +1,15 @@
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import {useInfiniteIDecks} from "@/features/deck/hooks/useInfiniteIDecks";
-import {ArrowRight, ChevronDown, Frown, Layers, Loader2, PlusCircle} from "lucide-react";
-import {DeckCardForDashboard} from "@/features/deck/components/deck/DeckCardForDashboard";
+import { useInfiniteIDecks } from "@/features/deck/hooks/useInfiniteIDecks";
+import {
+  ArrowRight,
+  ChevronDown,
+  Frown,
+  Layers,
+  Loader2,
+  PlusCircle,
+} from "lucide-react";
+import { DeckCardForDashboard } from "@/features/deck/components/deck/DeckCardForDashboard";
 import Link from "next/link";
 
 const DeckListSkeleton = () => (
@@ -91,7 +98,7 @@ export const DecksForDashboard = () => {
           <Link href="/decks">
             {" "}
             <Layers className="w-4 h-4 mr-2" />
-            Przejdź do wszystkich kursów
+            Wszystkie zapisane kursy
             <ArrowRight className="w-4 h-4 ml-2 opacity-50" />
           </Link>
         </Button>

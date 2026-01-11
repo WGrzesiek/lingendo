@@ -6,6 +6,7 @@ import { Users, BookOpen, Loader2 } from "lucide-react";
 import { usePublicDecks } from "@/features/community/hooks/usePublicDecks";
 import { DeckCategoryBadge } from "@/features/deck/components/deck/DeckCategoryBadge";
 import { DeckDifficultyBadge } from "@/features/deck/components/deck/DeckDifficultyBadge";
+import { LanguageBadge } from "@/features/deck/components/deck/LanguageBadge";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useMyDeckStats } from "@/features/deck/hooks/useMyDeckStats";
@@ -88,6 +89,12 @@ export const CommunityCourses = () => {
                 </p>
 
                 <div className="flex flex-wrap items-center gap-2 mb-3">
+                  {course.languageFrom && course.languageTo && (
+                    <LanguageBadge
+                      languageFrom={course.languageFrom}
+                      languageTo={course.languageTo}
+                    />
+                  )}
                   {course.deckCategory && (
                     <DeckCategoryBadge category={course.deckCategory} />
                   )}

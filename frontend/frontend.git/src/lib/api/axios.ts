@@ -6,9 +6,9 @@ import axios from "axios";
  * Obsługuje automatyczne odświeżanie tokenów przy błędzie 401
  */
 const apiClient = axios.create({
-  // baseURL: "http://staging.ibis-tautara.ts.net:8811/api",
-  baseURL: "/api",
-  timeout: 10000,
+  baseURL: "http://staging.ibis-tautara.ts.net:8811/api",
+  // baseURL: "/api",
+  timeout: 3000,
   headers: {
     "Content-Type": "application/json",
     Accept: "application/json",

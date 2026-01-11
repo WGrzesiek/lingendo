@@ -4,9 +4,10 @@ import { BookOpen, Clock, PlayCircle } from "lucide-react";
 import { IDeckListItem } from "../../types";
 import { DeckOwnerBadge } from "./DeckOwnerBadge";
 import { DeckDifficultyBadge } from "./DeckDifficultyBadge";
+import { LanguageBadge } from "./LanguageBadge";
 import { time } from "@/lib/time";
 import { DeckCategoryBadge } from "./DeckCategoryBadge";
-import {useRouter} from "next/navigation";
+import { useRouter } from "next/navigation";
 
 interface DeckCardProps {
   deck: IDeckListItem;
@@ -32,6 +33,12 @@ export const DeckCardForDashboard = ({ deck }: DeckCardProps) => {
             <h3 className="font-semibold text-lg tracking-tight group-hover:text-primary transition-colors">
               {deck.deckName}
             </h3>
+            {deck.languageFrom && deck.languageTo && (
+              <LanguageBadge
+                languageFrom={deck.languageFrom}
+                languageTo={deck.languageTo}
+              />
+            )}
             {deck.deckCategory && (
               <DeckCategoryBadge category={deck.deckCategory} />
             )}
