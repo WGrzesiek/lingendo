@@ -255,7 +255,7 @@ class DeckServiceIntegrationTest {
                 .description("Nowy opis")
                 .visibility(DeckVisibility.PUBLIC)
                 .owner(DeckOwner.COMMUNITY)
-                .learnAlgorithm(LearnAlgorithm.LEINER_ALGORITHM)
+                .learnAlgorithm(LearnAlgorithm.LEITNER_ALGORITHM)
                 .howManyFlashcardsForOneSession(30L)
                 .languageFrom(Language.POLISH)
                 .languageTo(Language.ENGLISH)
@@ -270,7 +270,7 @@ class DeckServiceIntegrationTest {
         assertThat(updated.getDescription()).isEqualTo("Nowy opis");
         assertThat(updated.getVisibility()).isEqualTo(DeckVisibility.PUBLIC);
         assertThat(updated.getOwner()).isEqualTo(DeckOwner.COMMUNITY);
-        assertThat(updated.getLearnAlgorithm()).isEqualTo(LearnAlgorithm.LEINER_ALGORITHM);
+        assertThat(updated.getLearnAlgorithm()).isEqualTo(LearnAlgorithm.LEITNER_ALGORITHM);
         assertThat(updated.getHowManyFlashcardsForOneSession()).isEqualTo(30L);
         assertThat(updated.getLanguageFrom()).isEqualTo(Language.POLISH);
         assertThat(updated.getLanguageTo()).isEqualTo(Language.ENGLISH);

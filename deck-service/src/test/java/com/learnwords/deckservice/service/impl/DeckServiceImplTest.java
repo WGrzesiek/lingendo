@@ -311,7 +311,7 @@ class DeckServiceImplTest {
 //                .ownerId(USER_ID)
 //                .visibility(DeckVisibility.PUBLIC)
 //                .owner(DeckOwner.COMMUNITY)
-//                .learnAlgorithm(LearnAlgorithm.LEINER_ALGORITHM)
+//                .learnAlgorithm(LearnAlgorithm.LEITNER_ALGORITHM)
 //                .languageFrom(Language.POLISH)
 //                .languageTo(Language.ENGLISH)
 //                .category(DeckCategory.SCIENCE)
@@ -372,7 +372,7 @@ class DeckServiceImplTest {
                 .description("Updated description")
                 .visibility(DeckVisibility.PUBLIC)
                 .owner(DeckOwner.TEACHER)
-                .learnAlgorithm(LearnAlgorithm.LEINER_ALGORITHM)
+                .learnAlgorithm(LearnAlgorithm.LEITNER_ALGORITHM)
                 .howManyFlashcardsForOneSession(30L)
                 .languageFrom(Language.POLISH)
                 .languageTo(Language.ENGLISH)
@@ -389,7 +389,7 @@ class DeckServiceImplTest {
         assertThat(deck.getDescription()).isEqualTo("Updated description");
         assertThat(deck.getVisibility()).isEqualTo(DeckVisibility.PUBLIC);
         assertThat(deck.getOwner()).isEqualTo(DeckOwner.TEACHER);
-        assertThat(deck.getLearnAlgorithm()).isEqualTo(LearnAlgorithm.LEINER_ALGORITHM);
+        assertThat(deck.getLearnAlgorithm()).isEqualTo(LearnAlgorithm.LEITNER_ALGORITHM);
         assertThat(deck.getHowManyFlashcardsForOneSession()).isEqualTo(30L);
         assertThat(deck.getLanguageFrom()).isEqualTo(Language.POLISH);
         assertThat(deck.getLanguageTo()).isEqualTo(Language.ENGLISH);
