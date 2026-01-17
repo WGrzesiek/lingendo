@@ -9,14 +9,11 @@ import {
   ScrollView,
   ActivityIndicator,
 } from 'react-native';
-import { useAuth } from '@/features/auth/hooks/useAuth';
+
 import type { AccountType } from '@/features/auth/types';
 import { router } from 'expo-router';
+import { useAuth } from '@/features/auth';
 
-interface SignupScreenProps {
-  onSignupSuccess: () => void;
-  onNavigateToLogin: () => void;
-}
 
 /**
  * Opcje typu konta

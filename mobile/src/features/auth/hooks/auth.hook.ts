@@ -34,10 +34,17 @@ export const useAuth = () => {
 
   const loginMutation = useMutation<void, AxiosError<ApiErrorResponse>, LoginRequest>({
     mutationFn: AuthService.login,
-    onSuccess: () => {
-      console.log('[useAuth] Login success, redirecting to dashboard...');
-      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.USER });
-      router.replace('/(dashboard)/student');
+    onSuccess: async () => {
+      console.log('[useAuth] Login udany, pobieranie usera...');
+      try {
+        const user = await AuthService.getCurrentUser();
+        queryClient.setQueryData(QUERY_KEYS.USER, user);
+        console.log('[useAuth] Pobieranie usera po logowaniu udane, przekierowanie...');
+        router.replace('/(dashboard)/student');
+      } catch (e) {
+        console.error('[useAuth] Nie udało się pobrać usera po logowaniu');
+        router.replace('/(auth)/login');
+      }
     },
     onError: (error) => {
       console.error('[useAuth] Błąd logowania:', error.message);
@@ -47,7 +54,7 @@ export const useAuth = () => {
   const signupMutation = useMutation<void, AxiosError<ApiErrorResponse>, SignupRequest>({
     mutationFn: AuthService.signup,
     onSuccess: () => {
-      console.log('[useAuth] Signup success, redirecting to login...');
+      console.log('[useAuth] Rejestracja udana, przekierowanie do logowania...');
       router.replace('/(auth)/login');
     },
     onError: (error) => {
@@ -58,7 +65,7 @@ export const useAuth = () => {
   const logoutMutation = useMutation<void, AxiosError<ApiErrorResponse>, void>({
     mutationFn: AuthService.logout,
     onSuccess: () => {
-      console.log('[useAuth] Logout success, clearing cache...');
+      console.log('[useAuth] Wylogowano, czyszczenie danych i przekierowanie do logowania...');
       INVALIDATION_GROUPS.ON_LOGOUT.forEach((key) => {
         queryClient.removeQueries({ queryKey: key });
       });

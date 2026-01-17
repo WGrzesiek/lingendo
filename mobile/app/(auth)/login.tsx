@@ -9,8 +9,8 @@ import {
   ScrollView,
   ActivityIndicator,
 } from 'react-native';
-import { useAuth } from '@/features/auth/hooks/useAuth';
 import { router } from 'expo-router';
+import { useAuth } from '@/features/auth';
 
 /**
  * Ekran logowania

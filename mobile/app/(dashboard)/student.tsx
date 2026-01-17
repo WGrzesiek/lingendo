@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, Alert, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
@@ -22,6 +22,12 @@ import {
 function StudentDashboard() {
   const { user, isUserLoading, logout, isLogoutLoading } = useAuth();
 
+  useEffect(() => {
+    if (!isUserLoading && !user) {
+      router.replace('/(auth)/login');
+    }
+  }, [user, isUserLoading]);
+
   if (isUserLoading) {
     return (
       <SafeAreaView className="flex-1 items-center justify-center bg-background">
@@ -32,8 +38,11 @@ function StudentDashboard() {
   }
 
   if (!user) {
-    router.replace('/(auth)/login');
-    return null;
+    return (
+      <SafeAreaView className="flex-1 items-center justify-center bg-background">
+        <ActivityIndicator size="large" color="#22c55e" />
+      </SafeAreaView>
+    );
   }
 
   const handleDeckPress = (deck: Deck) => {
