@@ -1,78 +1,97 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { QUERY_KEYS, INVALIDATION_GROUPS } from '@/constants';
-import { enrollmentService } from '../services/enrollment.service';
-import type {
-  CreateEnrollmentRequest,
-  UpdateFlashcardsPerSessionRequest,
-  UpdateLearnAlgorithmRequest,
-  UpdateReviewScheduleRequest,
-} from '../types';
+import { enrollmentService } from '../services';
+import type { LearnAlgorithm, ReviewSchedule } from '@/features/deck/types';
 
 export const useEnrollment = () => {
   const queryClient = useQueryClient();
+
+  /**
+   * Invaliduje wszystkie klucze z grupy
+   */
+  const invalidateGroup = (group: readonly string[]) => {
+    group.forEach((key) => {
+      queryClient.invalidateQueries({ queryKey: [key] });
+    });
+  };
 
   // =====================
   // MUTATIONS - Modyfikacje danych
   // =====================
 
+  /**
+   * Zapisuje użytkownika do talii
+   */
   const useEnrollToDeck = () =>
     useMutation({
-      mutationFn: ({ deckId, data }: { deckId: string; data?: CreateEnrollmentRequest }) =>
-        enrollmentService.enrollToDeck(deckId, data),
+      mutationFn: (deckId: string) => enrollmentService.enrollToDeck(deckId),
       onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: INVALIDATION_GROUPS.AFTER_DECK_MUTATION });
-        queryClient.invalidateQueries({ queryKey: QUERY_KEYS.DASHBOARD });
+        invalidateGroup(INVALIDATION_GROUPS.AFTER_ENROLLMENT);
       },
     });
 
+  /**
+   * Wypisuje użytkownika z talii
+   */
   const useUnenrollFromDeck = () =>
     useMutation({
-      mutationFn: (enrollmentId: string) => enrollmentService.unenrollFromDeck(enrollmentId),
+      mutationFn: (deckId: string) => enrollmentService.unenrollFromDeck(deckId),
       onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: INVALIDATION_GROUPS.AFTER_DECK_MUTATION });
-        queryClient.invalidateQueries({ queryKey: QUERY_KEYS.DASHBOARD });
+        invalidateGroup(INVALIDATION_GROUPS.AFTER_ENROLLMENT);
       },
     });
 
+  /**
+   * Aktualizuje algorytm nauki dla zapisu
+   */
   const useUpdateLearnAlgorithm = () =>
     useMutation({
       mutationFn: ({
         enrollmentId,
-        data,
+        algorithm,
       }: {
         enrollmentId: string;
-        data: UpdateLearnAlgorithmRequest;
-      }) => enrollmentService.updateLearnAlgorithm(enrollmentId, data),
+        algorithm: LearnAlgorithm;
+      }) => enrollmentService.updateLearnAlgorithm(enrollmentId, algorithm),
       onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: QUERY_KEYS.DECKS });
+        queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.ENROLLMENTS] });
+        queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.DECKS] });
       },
     });
 
+  /**
+   * Aktualizuje liczbę fiszek na sesję dla zapisu
+   */
   const useUpdateFlashcardsPerSession = () =>
     useMutation({
       mutationFn: ({
         enrollmentId,
-        data,
+        flashcardsPerSession,
       }: {
         enrollmentId: string;
-        data: UpdateFlashcardsPerSessionRequest;
-      }) => enrollmentService.updateFlashcardsPerSession(enrollmentId, data),
+        flashcardsPerSession: number;
+      }) => enrollmentService.updateFlashcardsPerSession(enrollmentId, flashcardsPerSession),
       onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: QUERY_KEYS.DECKS });
+        queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.ENROLLMENTS] });
+        queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.DECKS] });
       },
     });
 
+  /**
+   * Aktualizuje harmonogram powtórek dla zapisu
+   */
   const useUpdateReviewSchedule = () =>
     useMutation({
       mutationFn: ({
         enrollmentId,
-        data,
+        reviewSchedule,
       }: {
         enrollmentId: string;
-        data: UpdateReviewScheduleRequest;
-      }) => enrollmentService.updateReviewSchedule(enrollmentId, data),
+        reviewSchedule: ReviewSchedule;
+      }) => enrollmentService.updateReviewSchedule(enrollmentId, reviewSchedule),
       onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: QUERY_KEYS.DECKS });
+        queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.ENROLLMENTS] });
+        queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.DECKS] });
       },
     });
 

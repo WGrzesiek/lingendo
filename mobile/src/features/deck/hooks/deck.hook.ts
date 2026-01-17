@@ -1,60 +1,101 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { QUERY_KEYS, INVALIDATION_GROUPS } from '@/constants';
-import { deckService } from '@/features/deck';
-import { flashcardService } from '@/features/deck';
+import { deckService, flashcardService } from '../services';
 import type {
   CreateDeckRequest,
+  UpdateDeckRequest,
   DeckOwnerType,
   DeckVisibility,
-  UpdateDeckNameRequest,
-  UpdateDeckVisibilityRequest,
-  UpdateDeckOwnerRequest,
-  UpdateLearnAlgorithmRequest,
-  UpdateFlashcardsPerSessionRequest,
-  DeckDetailsDto,
+  LearnAlgorithm,
+  DeckFilters,
   WordToAdd,
 } from '../types';
 
 export const useDeck = () => {
   const queryClient = useQueryClient();
 
-  const useMyEnrolledDecks = (params?: { page?: number; size?: number }) =>
+  /**
+   * Invaliduje wszystkie klucze z grupy
+   */
+  const invalidateGroup = (group: readonly string[]) => {
+    group.forEach((key) => {
+      queryClient.invalidateQueries({ queryKey: [key] });
+    });
+  };
+
+  // =====================
+  // QUERIES - Pobieranie danych
+  // =====================
+
+  /**
+   * Pobiera zapisane talie użytkownika
+   */
+  const useMyEnrolledDecks = () =>
     useQuery({
-      queryKey: [QUERY_KEYS.DECKS, 'enrolled', params],
-      queryFn: () => deckService.getMyEnrolledDecks(params),
+      queryKey: [QUERY_KEYS.ENROLLMENTS, 'my'],
+      queryFn: () => deckService.getMyEnrolledDecks(),
     });
 
-  const useDecksCreatedByMe = (params?: {
-    deckVisibility?: DeckVisibility[];
-    owner?: DeckOwnerType[];
-    page?: number;
-    size?: number;
-  }) =>
+  /**
+   * Pobiera publiczne talie z paginacją
+   */
+  const usePublicDecks = (page?: number, size?: number, filters?: DeckFilters) =>
     useQuery({
-      queryKey: [QUERY_KEYS.DECKS, 'created', params],
-      queryFn: () => deckService.getDecksCreatedByMe(params),
+      queryKey: [QUERY_KEYS.DECKS, 'public', { page, size, ...filters }],
+      queryFn: () => deckService.getPublicDecks(page, size, filters),
     });
 
-  const useAllPublicDecks = (params?: { owner?: DeckOwnerType; page?: number; size?: number }) =>
+  /**
+   * Pobiera talie użytkownika z paginacją
+   */
+  const useUserDecks = (page?: number, size?: number, filters?: DeckFilters) =>
     useQuery({
-      queryKey: [QUERY_KEYS.DECKS, 'public', params],
-      queryFn: () => deckService.getAllPublicDecks(params),
+      queryKey: [QUERY_KEYS.DECKS, 'user', { page, size, ...filters }],
+      queryFn: () => deckService.getUserDecks(page, size, filters),
     });
 
+  /**
+   * Pobiera talie użytkownika filtrowane po typie właściciela
+   */
+  const useUserDecksFiltered = (ownerType: DeckOwnerType) =>
+    useQuery({
+      queryKey: [QUERY_KEYS.DECKS, 'filtered', ownerType],
+      queryFn: () => deckService.getUserDecksFiltered(ownerType),
+      enabled: !!ownerType,
+    });
+
+  /**
+   * Pobiera liczbę talii użytkownika
+   */
+  const useUserDecksCount = () =>
+    useQuery({
+      queryKey: [QUERY_KEYS.DECKS, 'count'],
+      queryFn: () => deckService.getUserDecksCount(),
+    });
+
+  /**
+   * Pobiera szczegóły talii z danymi zapisu
+   */
+  const useDeckWithEnrollment = (deckId: string) =>
+    useQuery({
+      queryKey: [QUERY_KEYS.DECKS, 'details', deckId],
+      queryFn: () => deckService.getDeckWithEnrollment(deckId),
+      enabled: !!deckId,
+    });
+
+  /**
+   * Pobiera talię po ID
+   */
   const useDeckById = (deckId: string) =>
     useQuery({
-      queryKey: [QUERY_KEYS.DECKS, 'detail', deckId],
+      queryKey: [QUERY_KEYS.DECKS, deckId],
       queryFn: () => deckService.getDeckById(deckId),
       enabled: !!deckId,
     });
 
-  const useDeckDetails = (deckId: string) =>
-    useQuery({
-      queryKey: [QUERY_KEYS.DECKS, 'details', deckId],
-      queryFn: () => deckService.getDeckDetails(deckId),
-      enabled: !!deckId,
-    });
-
+  /**
+   * Pobiera statystyki talii
+   */
   const useDeckStatistics = (deckId: string) =>
     useQuery({
       queryKey: [QUERY_KEYS.DECKS, 'statistics', deckId],
@@ -62,133 +103,160 @@ export const useDeck = () => {
       enabled: !!deckId,
     });
 
-  const useUserDeckCount = () =>
+  /**
+   * Pobiera fiszki talii z paginacją
+   */
+  const useDeckFlashcards = (deckId: string, page?: number, size?: number) =>
     useQuery({
-      queryKey: [QUERY_KEYS.DECKS, 'count'],
-      queryFn: () => deckService.getUserDeckCount(),
-    });
-
-  const useDeckFlashcards = (params: { deckId: string; page?: number; size?: number }) =>
-    useQuery({
-      queryKey: [QUERY_KEYS.CARDS, 'page', params],
-      queryFn: () => flashcardService.getDeckFlashcardsPage(params),
-      enabled: !!params.deckId,
+      queryKey: [QUERY_KEYS.FLASHCARDS, deckId, { page, size }],
+      queryFn: () => flashcardService.getDeckFlashcardsPage(deckId, page, size),
+      enabled: !!deckId,
     });
 
   // =====================
   // MUTATIONS - Modyfikacje danych
   // =====================
 
+  /**
+   * Tworzy nową talię
+   */
   const useCreateDeck = () =>
     useMutation({
       mutationFn: (data: CreateDeckRequest) => deckService.createDeck(data),
       onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: INVALIDATION_GROUPS.AFTER_DECK_MUTATION });
+        invalidateGroup(INVALIDATION_GROUPS.AFTER_DECK_MUTATION);
       },
     });
 
+  /**
+   * Aktualizuje talię
+   */
+  const useUpdateDeck = () =>
+    useMutation({
+      mutationFn: ({ deckId, data }: { deckId: string; data: UpdateDeckRequest }) =>
+        deckService.updateDeck(deckId, data),
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.DECKS] });
+      },
+    });
+
+  /**
+   * Usuwa talię
+   */
   const useDeleteDeck = () =>
     useMutation({
       mutationFn: (deckId: string) => deckService.deleteDeck(deckId),
       onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: INVALIDATION_GROUPS.AFTER_DECK_MUTATION });
+        invalidateGroup(INVALIDATION_GROUPS.AFTER_DECK_MUTATION);
       },
     });
 
-  const useUpdateDeckDetails = () =>
+  /**
+   * Aktualizuje widoczność talii
+   */
+  const useUpdateVisibility = () =>
     useMutation({
-      mutationFn: ({ deckId, data }: { deckId: string; data: DeckDetailsDto }) =>
-        deckService.updateDeckDetails(deckId, data),
+      mutationFn: ({ deckId, visibility }: { deckId: string; visibility: DeckVisibility }) =>
+        deckService.updateVisibility(deckId, visibility),
       onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: QUERY_KEYS.DECKS });
+        queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.DECKS] });
       },
     });
 
-  const useUpdateDeckVisibility = () =>
+  /**
+   * Aktualizuje właściciela talii
+   */
+  const useUpdateOwner = () =>
     useMutation({
-      mutationFn: ({ deckId, data }: { deckId: string; data: UpdateDeckVisibilityRequest }) =>
-        deckService.updateDeckVisibility(deckId, data),
+      mutationFn: ({ deckId, ownerType }: { deckId: string; ownerType: DeckOwnerType }) =>
+        deckService.updateOwner(deckId, ownerType),
       onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: QUERY_KEYS.DECKS });
+        queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.DECKS] });
       },
     });
 
-  const useUpdateDeckOwner = () =>
+  /**
+   * Aktualizuje nazwę talii
+   */
+  const useUpdateName = () =>
     useMutation({
-      mutationFn: ({ deckId, data }: { deckId: string; data: UpdateDeckOwnerRequest }) =>
-        deckService.updateDeckOwner(deckId, data),
+      mutationFn: ({ deckId, name }: { deckId: string; name: string }) =>
+        deckService.updateName(deckId, name),
       onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: QUERY_KEYS.DECKS });
+        queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.DECKS] });
       },
     });
 
-  const useUpdateDeckName = () =>
+  /**
+   * Aktualizuje algorytm nauki
+   */
+  const useUpdateAlgorithm = () =>
     useMutation({
-      mutationFn: ({ deckId, data }: { deckId: string; data: UpdateDeckNameRequest }) =>
-        deckService.updateDeckName(deckId, data),
+      mutationFn: ({ deckId, algorithm }: { deckId: string; algorithm: LearnAlgorithm }) =>
+        deckService.updateAlgorithm(deckId, algorithm),
       onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: QUERY_KEYS.DECKS });
+        queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.DECKS] });
       },
     });
 
-  const useUpdateLearnAlgorithm = () =>
-    useMutation({
-      mutationFn: ({ deckId, data }: { deckId: string; data: UpdateLearnAlgorithmRequest }) =>
-        deckService.updateLearnAlgorithm(deckId, data),
-      onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: QUERY_KEYS.DECKS });
-      },
-    });
-
+  /**
+   * Aktualizuje liczbę fiszek na sesję
+   */
   const useUpdateFlashcardsPerSession = () =>
     useMutation({
-      mutationFn: ({ deckId, data }: { deckId: string; data: UpdateFlashcardsPerSessionRequest }) =>
-        deckService.updateFlashcardsPerSession(deckId, data),
+      mutationFn: ({
+        deckId,
+        flashcardsPerSession,
+      }: {
+        deckId: string;
+        flashcardsPerSession: number;
+      }) => deckService.updateFlashcardsPerSession(deckId, flashcardsPerSession),
       onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: QUERY_KEYS.DECKS });
+        queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.DECKS] });
       },
     });
 
+  /**
+   * Dodaje słowa do talii
+   */
   const useAddWordsTooDeck = () =>
     useMutation({
       mutationFn: ({ deckId, words }: { deckId: string; words: WordToAdd[] }) =>
         flashcardService.createBatchWordsForDeck(deckId, words),
       onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: INVALIDATION_GROUPS.AFTER_DECK_MUTATION });
+        invalidateGroup(INVALIDATION_GROUPS.AFTER_DECK_MUTATION);
       },
     });
 
-  const useAddWordsToCommunity = () =>
-    useMutation({
-      mutationFn: (words: WordToAdd[]) => flashcardService.createBatchWordsForCommunity(words),
-    });
-
+  /**
+   * Waliduje nazwę talii
+   */
   const useValidateDeckName = () =>
     useMutation({
-      mutationFn: (deckName: string) => deckService.validateDeckName(deckName),
+      mutationFn: (name: string) => deckService.validateDeckName(name),
     });
 
   return {
     // Queries
     useMyEnrolledDecks,
-    useDecksCreatedByMe,
-    useAllPublicDecks,
+    usePublicDecks,
+    useUserDecks,
+    useUserDecksFiltered,
+    useUserDecksCount,
+    useDeckWithEnrollment,
     useDeckById,
-    useDeckDetails,
     useDeckStatistics,
-    useUserDeckCount,
     useDeckFlashcards,
     // Mutations
     useCreateDeck,
+    useUpdateDeck,
     useDeleteDeck,
-    useUpdateDeckDetails,
-    useUpdateDeckVisibility,
-    useUpdateDeckOwner,
-    useUpdateDeckName,
-    useUpdateLearnAlgorithm,
+    useUpdateVisibility,
+    useUpdateOwner,
+    useUpdateName,
+    useUpdateAlgorithm,
     useUpdateFlashcardsPerSession,
     useAddWordsTooDeck,
-    useAddWordsToCommunity,
     useValidateDeckName,
   };
 };

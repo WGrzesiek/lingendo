@@ -1,62 +1,74 @@
 import apiClient from '@/lib/api/axios';
-import type {
-  CreateEnrollmentRequest,
-  UpdateFlashcardsPerSessionRequest,
-  UpdateLearnAlgorithmRequest,
-  UpdateReviewScheduleRequest,
-} from '../types';
-
-const BASE_URL = '/v1/decks/enrollments';
-const DECKS_URL = '/v1/decks';
+import { ENDPOINTS } from '@/constants';
+import type { EnrollmentDto, UpdateEnrollmentSettingsRequest } from '../types';
+import type { LearnAlgorithm, ReviewSchedule } from '@/features/deck/types';
 
 export const enrollmentService = {
   /**
-   * Zapisuje użytkownika na talię (kurs)
-   * Body jest opcjonalne - jeśli nie podano, backend użyje wartości domyślnych z talii.
+   * Zapisuje użytkownika do talii
    */
-  enrollToDeck: async (deckId: string, data: CreateEnrollmentRequest = {}): Promise<void> => {
-    await apiClient.post(`${DECKS_URL}/${deckId}/enrollments`, data);
-    console.log('[Enrollment Service] Zapisano na talię:', deckId);
+  enrollToDeck: async (deckId: string): Promise<EnrollmentDto> => {
+    const { data } = await apiClient.post<EnrollmentDto>(ENDPOINTS.ENROLLMENT.ENROLL(deckId));
+    return data;
   },
 
   /**
-   * Wypisuje użytkownika z talii (kursu)
+   * Wypisuje użytkownika z talii
    */
-  unenrollFromDeck: async (enrollmentId: string): Promise<void> => {
-    await apiClient.delete(`${BASE_URL}/${enrollmentId}`);
-    console.log('[Enrollment Service] Wypisano z enrollment:', enrollmentId);
+  unenrollFromDeck: async (deckId: string): Promise<void> => {
+    await apiClient.delete(ENDPOINTS.ENROLLMENT.UNENROLL(deckId));
   },
 
   /**
-   * Zmienia algorytm nauki dla enrollmentu
+   * Aktualizuje algorytm nauki dla zapisu
    */
   updateLearnAlgorithm: async (
     enrollmentId: string,
-    data: UpdateLearnAlgorithmRequest
-  ): Promise<void> => {
-    await apiClient.put(`${BASE_URL}/${enrollmentId}/algorithm?algorithm=${data.learnAlgorithm}`);
-    console.log('[Enrollment Service] Zmieniono algorytm nauki:', data.learnAlgorithm);
+    algorithm: LearnAlgorithm
+  ): Promise<EnrollmentDto> => {
+    const { data } = await apiClient.patch<EnrollmentDto>(
+      ENDPOINTS.ENROLLMENT.ALGORITHM(enrollmentId),
+      { algorithm }
+    );
+    return data;
   },
 
   /**
-   * Zmienia liczbę fiszek na sesję (1-100)
+   * Aktualizuje liczbę fiszek na sesję dla zapisu
    */
   updateFlashcardsPerSession: async (
     enrollmentId: string,
-    data: UpdateFlashcardsPerSessionRequest
-  ): Promise<void> => {
-    await apiClient.put(`${BASE_URL}/${enrollmentId}/session-limit?limit=${data.limit}`);
-    console.log('[Enrollment Service] Zmieniono limit fiszek:', data.limit);
+    flashcardsPerSession: number
+  ): Promise<EnrollmentDto> => {
+    const { data } = await apiClient.patch<EnrollmentDto>(
+      ENDPOINTS.ENROLLMENT.SESSION_LIMIT(enrollmentId),
+      { flashcardsPerSession }
+    );
+    return data;
   },
 
   /**
-   * Zmienia harmonogram powtórek
+   * Aktualizuje harmonogram powtórek dla zapisu
    */
   updateReviewSchedule: async (
     enrollmentId: string,
-    data: UpdateReviewScheduleRequest
-  ): Promise<void> => {
-    await apiClient.put(`${BASE_URL}/${enrollmentId}/review-schedule?mode=${data.reviewSchedule}`);
-    console.log('[Enrollment Service] Zmieniono harmonogram powtórek:', data.reviewSchedule);
+    reviewSchedule: ReviewSchedule
+  ): Promise<EnrollmentDto> => {
+    const { data } = await apiClient.patch<EnrollmentDto>(
+      ENDPOINTS.ENROLLMENT.REVIEW_SCHEDULE(enrollmentId),
+      { reviewSchedule }
+    );
+    return data;
+  },
+
+  /**
+   * Aktualizuje wszystkie ustawienia zapisu naraz
+   */
+  updateEnrollmentSettings: async (
+    enrollmentId: string,
+    settings: UpdateEnrollmentSettingsRequest
+  ): Promise<EnrollmentDto> => {
+    const { data } = await apiClient.patch<EnrollmentDto>(`/enrollments/${enrollmentId}`, settings);
+    return data;
   },
 };

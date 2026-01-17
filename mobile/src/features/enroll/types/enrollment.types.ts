@@ -1,4 +1,4 @@
-import type { LearnAlgorithm, ReviewSchedule } from "@/features/deck/types/deck.types";
+import type { LearnAlgorithm, ReviewSchedule } from '@/features/deck/types/deck.types';
 
 /**
  * Request do zapisu na talię (enrollment).
@@ -42,4 +42,13 @@ export interface EnrollmentDto {
   reviewSchedule: ReviewSchedule;
   createdAt: string;
   updatedAt: string;
+}
+
+/**
+ * Request do aktualizacji wszystkich ustawień zapisu
+ */
+export interface UpdateEnrollmentSettingsRequest {
+  learnAlgorithm?: LearnAlgorithm;
+  howManyFlashcardsForOneSession?: number;
+  reviewSchedule?: ReviewSchedule;
 }

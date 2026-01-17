@@ -25,31 +25,44 @@ export const ENDPOINTS = {
   },
   DECKS: {
     LIST: '/v1/decks',
-    CREATE: '/v1/decks',
-    DETAILS: (id: string) => `/v1/decks/${id}`,
-    UPDATE: (id: string) => `/v1/decks/${id}`,
-    DELETE: (id: string) => `/v1/decks/${id}`,
-    CARDS: (deckId: string) => `/v1/decks/${deckId}/cards`,
+    PUBLIC: '/v1/decks/public',
+    USER: '/v1/decks/user',
+    USER_FILTER: '/v1/decks/user/filter',
+    USER_COUNT: '/v1/decks/user/count',
+    VALIDATE_NAME: '/v1/decks/validate-name',
+    BY_ID: (id: string) => `/v1/decks/${id}`,
+    DETAILS: (id: string) => `/v1/decks/${id}/details`,
+    VISIBILITY: (id: string) => `/v1/decks/${id}/visibility`,
+    OWNER: (id: string) => `/v1/decks/${id}/owner`,
+    NAME: (id: string) => `/v1/decks/${id}/name`,
+    ALGORITHM: (id: string) => `/v1/decks/${id}/learnAlgorithm`,
+    FLASHCARDS_PER_SESSION: (id: string) => `/v1/decks/${id}/flashcardsPerSession`,
+    STATISTICS: (id: string) => `/v1/decks/${id}/statistics`,
+    FLASHCARDS_PAGE: (deckId: string) => `/v1/decks/${deckId}/flashcards/page`,
   },
-  DECK_ENROLLMENT: {
+  ENROLLMENT: {
+    MY: '/v1/decks/enrollments/my',
     ENROLL: (deckId: string) => `/v1/decks/${deckId}/enrollments`,
-    GET_MY_ENROLLMENTS: '/v1/decks/enrollments/my',
-
+    UNENROLL: (enrollmentId: string) => `/v1/decks/enrollments/${enrollmentId}`,
+    ALGORITHM: (enrollmentId: string) => `/v1/decks/enrollments/${enrollmentId}/algorithm`,
+    SESSION_LIMIT: (enrollmentId: string) => `/v1/decks/enrollments/${enrollmentId}/session-limit`,
+    REVIEW_SCHEDULE: (enrollmentId: string) =>
+      `/v1/decks/enrollments/${enrollmentId}/review-schedule`,
   },
-  CARDS: {
-    CREATE: '/v1/cards',
-    UPDATE: (id: string) => `/v1/cards/${id}`,
-    DELETE: (id: string) => `/v1/cards/${id}`,
+  VOCABULARY: {
+    CREATE_BATCH: '/v1/vocabulary/create-batch',
+    CREATE_BATCH_FOR_DECK: (deckId: string) => `/v1/vocabulary/deck/${deckId}/create-batch`,
+  },
+  COURSES: {
+    MY_STATS: '/v1/courses/my-course/stats',
+    LIST: '/v1/courses',
+    DETAILS: (id: string) => `/v1/courses/${id}`,
+    ENROLL: (id: string) => `/v1/courses/${id}/enroll`,
   },
   LEARNING: {
     SESSION: '/v1/learning/session',
     SUBMIT: '/v1/learning/submit',
     PROGRESS: '/v1/learning/progress',
-  },
-  COURSES: {
-    LIST: '/v1/courses',
-    DETAILS: (id: string) => `/v1/courses/${id}`,
-    ENROLL: (id: string) => `/v1/courses/${id}/enroll`,
   },
 } as const;
 

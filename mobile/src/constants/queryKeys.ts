@@ -5,17 +5,16 @@
  * Przy mutacjach invalidujemy całe grupy zamiast pojedynczych query.
  */
 export const QUERY_KEYS = {
-  USER: ['user'] as const,
-  DASHBOARD: ['dashboard'] as const,
-  DECKS: ['decks'] as const,
-  CARDS: ['cards'] as const,
-  LEARNING: ['learning'] as const,
-  COURSES: ['courses'] as const,
-  LEADERBOARD: ['leaderboard'] as const,
-  SETTINGS: ['settings'] as const,
+  USER: 'user',
+  DASHBOARD: 'dashboard',
+  DECKS: 'decks',
+  FLASHCARDS: 'flashcards',
+  ENROLLMENTS: 'enrollments',
+  LEARNING: 'learning',
+  COURSES: 'courses',
+  LEADERBOARD: 'leaderboard',
+  SETTINGS: 'settings',
 } as const;
-
-
 
 /**
  * Grupy kluczy do masowej invalidacji
@@ -23,15 +22,16 @@ export const QUERY_KEYS = {
  */
 export const INVALIDATION_GROUPS = {
   AFTER_LEARNING: [QUERY_KEYS.DASHBOARD, QUERY_KEYS.LEARNING, QUERY_KEYS.LEADERBOARD] as const,
-  AFTER_DECK_MUTATION: [QUERY_KEYS.DECKS, QUERY_KEYS.CARDS] as const,
+  AFTER_DECK_MUTATION: [QUERY_KEYS.DECKS, QUERY_KEYS.FLASHCARDS, QUERY_KEYS.ENROLLMENTS] as const,
   AFTER_USER_UPDATE: [QUERY_KEYS.USER, QUERY_KEYS.DASHBOARD] as const,
-
+  AFTER_ENROLLMENT: [QUERY_KEYS.ENROLLMENTS, QUERY_KEYS.DECKS, QUERY_KEYS.DASHBOARD] as const,
 
   ON_LOGOUT: [
     QUERY_KEYS.USER,
     QUERY_KEYS.DASHBOARD,
     QUERY_KEYS.DECKS,
-    QUERY_KEYS.CARDS,
+    QUERY_KEYS.FLASHCARDS,
+    QUERY_KEYS.ENROLLMENTS,
     QUERY_KEYS.LEARNING,
     QUERY_KEYS.COURSES,
     QUERY_KEYS.LEADERBOARD,

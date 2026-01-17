@@ -60,7 +60,6 @@ export const deckVisibilityValues = ['PRIVATE', 'PUBLIC'] as const;
  */
 export const reviewScheduleValues = ['AUTO', 'LIGHT', 'NORMAL', 'INTENSE'] as const;
 
-
 export type DeckOwnerType = (typeof deckOwnerTypeValues)[number];
 export type DeckDifficulty = (typeof deckDifficultyValues)[number];
 export type DeckCategory = (typeof deckCategoryValues)[number];
@@ -326,7 +325,6 @@ export interface DecksStats {
   [deckId: string]: DeckStat;
 }
 
-
 export interface UpdateDeckVisibilityRequest {
   isPublic: boolean;
 }
@@ -349,3 +347,46 @@ export interface UpdateFlashcardsPerSessionRequest {
 
 export type DeckListResponse = PageResponse<DeckListItem>;
 export type CreatedDeckListResponse = PageResponse<CreatedDeckListItem>;
+
+/**
+ * Request do aktualizacji talii
+ */
+export interface UpdateDeckRequest {
+  name?: string;
+  description?: string;
+  learnAlgorithm?: LearnAlgorithm;
+  howManyFlashcardsForOneSession?: number;
+  visibility?: DeckVisibility;
+  category?: DeckCategory;
+  difficulty?: DeckDifficulty;
+  owner?: DeckOwnerType;
+}
+
+/**
+ * Filtry do wyszukiwania talii
+ */
+export interface DeckFilters {
+  category?: DeckCategory;
+  sourceLanguage?: Language;
+  targetLanguage?: Language;
+  sortBy?: 'newest' | 'oldest' | 'name' | 'popularity';
+  searchTerm?: string;
+}
+
+/**
+ * Szczegóły talii z informacją o zapisie
+ */
+export interface DeckEnrollmentDetails {
+  deck: DeckDetailResponse;
+  enrollment: {
+    enrollmentId: string;
+    learnAlgorithm: LearnAlgorithm;
+    flashcardsPerSession: number;
+    reviewSchedule: ReviewSchedule;
+    enrolledAt: string;
+    progressPercentage: number;
+    totalSessions: number;
+    completedSessions: number;
+  } | null;
+  isEnrolled: boolean;
+}
