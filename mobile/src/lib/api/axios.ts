@@ -1,19 +1,14 @@
 import axios, { AxiosError, InternalAxiosRequestConfig } from 'axios';
 import { storage } from '../storage';
-
-/**
- * Bazowy URL API
- * W produkcji zmień na właściwy adres
- */
-const API_BASE_URL = 'http://staging.ibis-tautara.ts.net:8811/api';
+import { API_CONFIG, ENDPOINTS } from '@/constants';
 
 /**
  * Skonfigurowana instancja klienta Axios do komunikacji z API
  * Automatycznie dołącza Bearer token z SecureStore
  */
 const apiClient = axios.create({
-  baseURL: API_BASE_URL,
-  timeout: 10000,
+  baseURL: API_CONFIG.BASE_URL,
+  timeout: API_CONFIG.TIMEOUT,
   headers: {
     'Content-Type': 'application/json',
     Accept: 'application/json',
@@ -59,7 +54,7 @@ async function refreshAccessToken(): Promise<boolean> {
       console.log('[Axios] Próba odświeżenia tokenu...');
 
       const response = await axios.post(
-        `${API_BASE_URL}/v1/gateway/refresh`,
+        `${API_CONFIG.BASE_URL}${ENDPOINTS.AUTH.REFRESH}`,
         {},
         {
           headers: {

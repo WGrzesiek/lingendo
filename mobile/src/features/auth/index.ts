@@ -10,13 +10,7 @@ export type {
 } from './types';
 
 // Hooks
-export { useAuth } from './hooks/useAuth';
-export { useCurrentUser, useIsAuthenticated, CURRENT_USER_KEY } from './hooks/useCurrentUser';
+export { useAuth } from './hooks/auth.hook';
 
 // Services
-export {
-  login,
-  signup,
-  logout,
-  getCurrentUser
-} from './services/auth';
+export { AuthService } from './services/auth.service';

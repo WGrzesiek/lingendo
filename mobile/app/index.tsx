@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, ActivityIndicator } from 'react-native';
 import { router } from 'expo-router';
 
-import { getCurrentUser } from '@/features/auth';
+import { AuthService } from '@/features/auth';
 
 export default function Index() {
   const [isChecking, setIsChecking] = useState(true);
@@ -10,7 +10,7 @@ export default function Index() {
   useEffect(() => {
     const run = async () => {
       try {
-        const user = await getCurrentUser();
+        const user = await AuthService.getCurrentUser();
 
         if (user) {
           router.replace('/(dashboard)/student');

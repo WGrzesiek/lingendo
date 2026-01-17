@@ -1,17 +1,10 @@
 import * as SecureStore from 'expo-secure-store';
-
-/**
- * Klucze do przechowywania danych w SecureStore
- */
-const STORAGE_KEYS = {
-  ACCESS_TOKEN: 'learnwords_access_token',
-  REFRESH_TOKEN: 'learnwords_refresh_token',
-  USER: 'learnwords_user',
-} as const;
+import { STORAGE_KEYS } from '@/constants';
 
 /**
  * Serwis do bezpiecznego przechowywania danych na urządzeniu
  * Używa expo-secure-store (Keychain na iOS, Keystore na Android)
+ * Object Literal Module Pattern
  */
 export const storage = {
   /**
@@ -93,4 +86,4 @@ export const storage = {
       SecureStore.deleteItemAsync(STORAGE_KEYS.USER),
     ]);
   },
-};
+} as const;

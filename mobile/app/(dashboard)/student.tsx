@@ -2,7 +2,7 @@ import React from 'react';
 import { View, Text, ScrollView, TouchableOpacity, Alert, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
-import { useAuth, useCurrentUser } from '@/features/auth';
+import { useAuth } from '@/features/auth';
 import type { Deck } from '@/types/dashboard';
 import { StudentStatsGrid } from '@/components/dashboard/StudentStatsGrid';
 import { MyCourses } from '@/components/dashboard/MyCourses';
@@ -20,10 +20,8 @@ import {
  * Dashboard dla ucznia
  */
 function StudentDashboard() {
-  const { data: user, isLoading: isUserLoading } = useCurrentUser();
-  const { logout, isLogoutLoading } = useAuth();
+  const { user, isUserLoading, logout, isLogoutLoading } = useAuth();
 
-  // Jeśli ładowanie użytkownika
   if (isUserLoading) {
     return (
       <SafeAreaView className="flex-1 items-center justify-center bg-background">
@@ -33,7 +31,6 @@ function StudentDashboard() {
     );
   }
 
-  // Jeśli brak użytkownika - przekieruj na login
   if (!user) {
     router.replace('/(auth)/login');
     return null;
