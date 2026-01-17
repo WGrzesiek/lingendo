@@ -70,6 +70,11 @@ export const ENDPOINTS = {
     SESSION: '/v1/learning/session',
     SUBMIT: '/v1/learning/submit',
     PROGRESS: '/v1/learning/progress',
+    NEXT_FLASHCARD: (sessionId: string) => `/v1/decks/sessions/${sessionId}/next`,
+    SUBMIT_ANSWER: (sessionId: string, flashcardId: string) =>
+      `/v1/decks/sessions/${sessionId}/flashcards/${flashcardId}/answer`,
+    HEADER_PROGRESS: (sessionId: string) => `/v1/decks/sessions/${sessionId}/learn-header`,
+    COMPLETE_SESSION: (sessionId: string) => `/v1/decks/sessions/${sessionId}/complete`,
   },
 } as const;
 
