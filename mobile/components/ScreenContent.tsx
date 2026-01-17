@@ -2,7 +2,7 @@ import React from 'react';
 import { Text, View } from 'react-native';
 
 import { EditScreenInfo } from './EditScreenInfo';
-import { Button } from './nativewindui/Button';
+
 
 type ScreenContentProps = {
   title: string;
@@ -14,9 +14,7 @@ export const ScreenContent = ({ title, path, children }: ScreenContentProps) => 
   return (
     <View className={styles.container}>
       <Text className={styles.title}>{title}</Text>
-      <Button>
-        <Text>Click me</Text>
-      </Button>
+
       <View className={styles.separator} />
       <EditScreenInfo path={path} />
       {children}
