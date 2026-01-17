@@ -9,11 +9,12 @@ import {
   ScrollView,
   ActivityIndicator,
 } from 'react-native';
-import { mockSignup } from '../../mocks/auth';
-import type { AccountType, User } from '../../types/auth';
+import { useAuth } from '@/features/auth/hooks/useAuth';
+import type { AccountType } from '@/features/auth/types';
+import { router } from 'expo-router';
 
 interface SignupScreenProps {
-  onSignupSuccess: (user: User) => void;
+  onSignupSuccess: () => void;
   onNavigateToLogin: () => void;
 }
 
@@ -50,7 +51,7 @@ const ACCOUNT_TYPE_OPTIONS: {
 /**
  * Ekran rejestracji
  */
-export const SignupScreen = ({ onSignupSuccess, onNavigateToLogin }: SignupScreenProps) => {
+export const Signup = () => {
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [username, setUsername] = useState('');
@@ -58,105 +59,110 @@ export const SignupScreen = ({ onSignupSuccess, onNavigateToLogin }: SignupScree
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [accountType, setAccountType] = useState<AccountType>('BASIC');
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [localError, setLocalError] = useState<string | null>(null);
+
+  const { signupAsync, isSignupLoading, signupError, resetSignupError } = useAuth();
 
   const handleSignup = async () => {
     // Walidacja
-    if (!firstName.trim() || !lastName.trim() || !username.trim() || !email.trim() || !password.trim()) {
-      setError('Wypełnij wszystkie pola');
+    if (
+      !firstName.trim() ||
+      !lastName.trim() ||
+      !username.trim() ||
+      !email.trim() ||
+      !password.trim()
+    ) {
+      setLocalError('Wypełnij wszystkie pola');
       return;
     }
 
     if (password.length < 8) {
-      setError('Hasło musi mieć minimum 8 znaków');
+      setLocalError('Hasło musi mieć minimum 8 znaków');
       return;
     }
 
     if (password !== confirmPassword) {
-      setError('Hasła nie są identyczne');
+      setLocalError('Hasła nie są identyczne');
       return;
     }
 
     if (!email.includes('@')) {
-      setError('Podaj prawidłowy adres email');
+      setLocalError('Podaj prawidłowy adres email');
       return;
     }
 
-    setError(null);
-    setIsLoading(true);
+    setLocalError(null);
+    resetSignupError();
 
     try {
-      const user = await mockSignup({
+      await signupAsync({
         firstName,
         lastName,
         username,
         email,
         password,
         accountType,
+        userType: 'NORMAL',
       });
-      onSignupSuccess(user);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Wystąpił błąd podczas rejestracji');
-    } finally {
-      setIsLoading(false);
+      // Błąd jest obsługiwany przez useAuth hook
+      console.log('[Signup] Błąd rejestracji');
     }
   };
+
+  const errorMessage =
+    localError ||
+    signupError?.response?.data?.message ||
+    (signupError ? 'Wystąpił błąd podczas rejestracji' : null);
 
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      className="flex-1 bg-background"
-    >
-      <ScrollView
-        contentContainerStyle={{ flexGrow: 1 }}
-        keyboardShouldPersistTaps="handled"
-      >
+      className="flex-1 bg-background">
+      <ScrollView contentContainerStyle={{ flexGrow: 1 }} keyboardShouldPersistTaps="handled">
         <View className="flex-1 px-6 py-8">
           {/* Header */}
-          <View className="items-center mb-6">
-            <View className="w-16 h-16 bg-primary rounded-2xl items-center justify-center mb-3">
-              <Text className="text-3xl text-white font-bold">L</Text>
+          <View className="mb-6 items-center">
+            <View className="mb-3 h-16 w-16 items-center justify-center rounded-2xl bg-primary">
+              <Text className="text-3xl font-bold text-white">L</Text>
             </View>
             <Text className="text-2xl font-bold text-foreground">Utwórz konto</Text>
-            <Text className="text-muted-foreground mt-1">Dołącz do LearnWords</Text>
+            <Text className="mt-1 text-muted-foreground">Dołącz do LearnWords</Text>
           </View>
 
           {/* Formularz */}
-          <View className="bg-card rounded-2xl p-6 shadow-sm border border-border">
+          <View className="rounded-2xl border border-border bg-card p-6 shadow-sm">
             {/* Imię i Nazwisko */}
-            <View className="flex-row gap-3 mb-4">
+            <View className="mb-4 flex-row gap-3">
               <View className="flex-1">
-                <Text className="text-sm font-medium mb-2 text-foreground">Imię</Text>
+                <Text className="mb-2 text-sm font-medium text-foreground">Imię</Text>
                 <TextInput
                   value={firstName}
                   onChangeText={setFirstName}
                   placeholder="Jan"
                   placeholderTextColor="#71717a"
                   autoCapitalize="words"
-                  editable={!isLoading}
-                  className="w-full px-4 py-3 bg-secondary border border-input rounded-lg text-foreground"
+                  editable={!isSignupLoading}
+                  className="w-full rounded-lg border border-input bg-secondary px-4 py-3 text-foreground"
                 />
               </View>
               <View className="flex-1">
-                <Text className="text-sm font-medium mb-2 text-foreground">Nazwisko</Text>
+                <Text className="mb-2 text-sm font-medium text-foreground">Nazwisko</Text>
                 <TextInput
                   value={lastName}
                   onChangeText={setLastName}
                   placeholder="Kowalski"
                   placeholderTextColor="#71717a"
                   autoCapitalize="words"
-                  editable={!isLoading}
-                  className="w-full px-4 py-3 bg-secondary border border-input rounded-lg text-foreground"
+                  editable={!isSignupLoading}
+                  className="w-full rounded-lg border border-input bg-secondary px-4 py-3 text-foreground"
                 />
               </View>
             </View>
 
             {/* Username */}
             <View className="mb-4">
-              <Text className="text-sm font-medium mb-2 text-foreground">
-                Nazwa użytkownika
-              </Text>
+              <Text className="mb-2 text-sm font-medium text-foreground">Nazwa użytkownika</Text>
               <TextInput
                 value={username}
                 onChangeText={setUsername}
@@ -164,14 +170,14 @@ export const SignupScreen = ({ onSignupSuccess, onNavigateToLogin }: SignupScree
                 placeholderTextColor="#71717a"
                 autoCapitalize="none"
                 autoCorrect={false}
-                editable={!isLoading}
-                className="w-full px-4 py-3 bg-secondary border border-input rounded-lg text-foreground"
+                editable={!isSignupLoading}
+                className="w-full rounded-lg border border-input bg-secondary px-4 py-3 text-foreground"
               />
             </View>
 
             {/* Email */}
             <View className="mb-4">
-              <Text className="text-sm font-medium mb-2 text-foreground">Email</Text>
+              <Text className="mb-2 text-sm font-medium text-foreground">Email</Text>
               <TextInput
                 value={email}
                 onChangeText={setEmail}
@@ -180,101 +186,94 @@ export const SignupScreen = ({ onSignupSuccess, onNavigateToLogin }: SignupScree
                 keyboardType="email-address"
                 autoCapitalize="none"
                 autoCorrect={false}
-                editable={!isLoading}
-                className="w-full px-4 py-3 bg-secondary border border-input rounded-lg text-foreground"
+                editable={!isSignupLoading}
+                className="w-full rounded-lg border border-input bg-secondary px-4 py-3 text-foreground"
               />
             </View>
 
             {/* Password */}
             <View className="mb-4">
-              <Text className="text-sm font-medium mb-2 text-foreground">Hasło</Text>
+              <Text className="mb-2 text-sm font-medium text-foreground">Hasło</Text>
               <TextInput
                 value={password}
                 onChangeText={setPassword}
                 placeholder="Minimum 8 znaków"
                 placeholderTextColor="#71717a"
                 secureTextEntry
-                editable={!isLoading}
-                className="w-full px-4 py-3 bg-secondary border border-input rounded-lg text-foreground"
+                editable={!isSignupLoading}
+                className="w-full rounded-lg border border-input bg-secondary px-4 py-3 text-foreground"
               />
             </View>
 
             {/* Confirm Password */}
             <View className="mb-4">
-              <Text className="text-sm font-medium mb-2 text-foreground">
-                Potwierdź hasło
-              </Text>
+              <Text className="mb-2 text-sm font-medium text-foreground">Potwierdź hasło</Text>
               <TextInput
                 value={confirmPassword}
                 onChangeText={setConfirmPassword}
                 placeholder="Powtórz hasło"
                 placeholderTextColor="#71717a"
                 secureTextEntry
-                editable={!isLoading}
-                className="w-full px-4 py-3 bg-secondary border border-input rounded-lg text-foreground"
+                editable={!isSignupLoading}
+                className="w-full rounded-lg border border-input bg-secondary px-4 py-3 text-foreground"
               />
             </View>
 
             {/* Account Type */}
             <View className="mb-4">
-              <Text className="text-sm font-medium mb-3 text-foreground">Typ konta</Text>
+              <Text className="mb-3 text-sm font-medium text-foreground">Typ konta</Text>
               <View className="flex-row flex-wrap gap-2">
                 {ACCOUNT_TYPE_OPTIONS.map((option) => (
                   <TouchableOpacity
                     key={option.value}
                     onPress={() => setAccountType(option.value)}
-                    disabled={isLoading}
-                    className={`flex-1 min-w-[45%] p-3 rounded-lg border ${
+                    disabled={isSignupLoading}
+                    className={`min-w-[45%] flex-1 rounded-lg border p-3 ${
                       accountType === option.value
                         ? 'border-primary bg-primary-light'
                         : 'border-input bg-secondary'
-                    }`}
-                  >
+                    }`}>
                     <Text
-                      className={`font-medium text-sm ${
+                      className={`text-sm font-medium ${
                         accountType === option.value ? 'text-primary-dark' : 'text-foreground'
-                      }`}
-                    >
+                      }`}>
                       {option.label}
                     </Text>
-                    <Text className="text-xs text-muted-foreground mt-1">
-                      {option.description}
-                    </Text>
+                    <Text className="mt-1 text-xs text-muted-foreground">{option.description}</Text>
                   </TouchableOpacity>
                 ))}
               </View>
             </View>
 
             {/* Error */}
-            {error && (
-              <View className="mb-4 p-3 bg-error-light rounded-lg border border-error/20">
-                <Text className="text-destructive text-sm">{error}</Text>
+            {errorMessage && (
+              <View className="mb-4 rounded-lg border border-error/20 bg-error-light p-3">
+                <Text className="text-sm text-destructive">{errorMessage}</Text>
               </View>
             )}
 
             {/* Submit Button */}
             <TouchableOpacity
               onPress={handleSignup}
-              disabled={isLoading}
-              className={`w-full py-4 rounded-lg items-center ${
-                isLoading ? 'bg-primary/50' : 'bg-primary'
-              }`}
-            >
-              {isLoading ? (
+              disabled={isSignupLoading}
+              className={`w-full items-center rounded-lg py-4 ${
+                isSignupLoading ? 'bg-primary/50' : 'bg-primary'
+              }`}>
+              {isSignupLoading ? (
                 <ActivityIndicator color="#ffffff" />
               ) : (
-                <Text className="text-white font-semibold text-base">
-                  Zarejestruj się
-                </Text>
+                <Text className="text-base font-semibold text-white">Zarejestruj się</Text>
               )}
             </TouchableOpacity>
           </View>
 
           {/* Login link */}
-          <View className="flex-row justify-center mt-6">
+          <View className="mt-6 flex-row justify-center">
             <Text className="text-muted-foreground">Masz już konto? </Text>
-            <TouchableOpacity onPress={onNavigateToLogin}>
-              <Text className="text-primary font-semibold">Zaloguj się</Text>
+            <TouchableOpacity
+              onPress={() => router.push('/(auth)/login')}
+              disabled={isSignupLoading}>
+              <Text className="font-semibold text-primary">Zaloguj się</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -282,3 +281,5 @@ export const SignupScreen = ({ onSignupSuccess, onNavigateToLogin }: SignupScree
     </KeyboardAvoidingView>
   );
 };
+
+export default Signup;

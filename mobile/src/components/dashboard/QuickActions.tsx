@@ -43,9 +43,8 @@ interface QuickActionItemProps {
 const QuickActionItem = ({ action, onPress }: QuickActionItemProps) => (
   <TouchableOpacity
     onPress={onPress}
-    className="flex-row items-center p-3 bg-card rounded-lg border border-border mb-2"
-  >
-    <View className={`p-2 ${action.color} rounded-lg mr-3`}>
+    className="mb-2 flex-row items-center rounded-lg border border-border bg-card p-3">
+    <View className={`p-2 ${action.color} mr-3 rounded-lg`}>
       <Text className="text-lg">{action.icon}</Text>
     </View>
     <View className="flex-1">
@@ -65,14 +64,10 @@ interface QuickActionsProps {
  */
 export const QuickActions = ({ onActionPress }: QuickActionsProps) => {
   return (
-    <View className="bg-card rounded-xl p-4 border border-border">
-      <Text className="text-lg font-bold text-foreground mb-3">Szybkie akcje</Text>
+    <View className="rounded-xl border border-border bg-card p-4">
+      <Text className="mb-3 text-lg font-bold text-foreground">Szybkie akcje</Text>
       {QUICK_ACTIONS.map((action, index) => (
-        <QuickActionItem
-          key={index}
-          action={action}
-          onPress={() => onActionPress(action)}
-        />
+        <QuickActionItem key={index} action={action} onPress={() => onActionPress(action)} />
       ))}
     </View>
   );

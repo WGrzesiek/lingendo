@@ -13,16 +13,14 @@ interface StatsCardProps {
  * Pojedyncza karta statystyk
  */
 const StatsCard = ({ title, value, description, icon }: StatsCardProps) => (
-  <View className="flex-1 bg-card rounded-xl p-4 border border-border min-w-[45%]">
+  <View className="min-w-[45%] flex-1 rounded-xl border border-border bg-card p-4">
     <View className="flex-row items-start justify-between">
       <View className="flex-1">
-        <Text className="text-sm font-medium text-muted-foreground mb-1">
-          {title}
-        </Text>
-        <Text className="text-2xl font-bold text-foreground mb-1">{value}</Text>
+        <Text className="mb-1 text-sm font-medium text-muted-foreground">{title}</Text>
+        <Text className="mb-1 text-2xl font-bold text-foreground">{value}</Text>
         <Text className="text-xs text-muted-foreground">{description}</Text>
       </View>
-      <View className="p-2 bg-primary-light rounded-lg">
+      <View className="rounded-lg bg-primary-light p-2">
         <Text className="text-xl">{icon}</Text>
       </View>
     </View>

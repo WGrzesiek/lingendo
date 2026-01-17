@@ -52,26 +52,23 @@ const formatDate = (timestamp: string): string => {
  */
 export const RecentActivity = ({ activities }: RecentActivityProps) => {
   return (
-    <View className="bg-card rounded-xl p-4 border border-border">
-      <Text className="text-lg font-bold text-foreground mb-3">Ostatnia aktywność</Text>
+    <View className="rounded-xl border border-border bg-card p-4">
+      <Text className="mb-3 text-lg font-bold text-foreground">Ostatnia aktywność</Text>
 
       {activities.length === 0 ? (
-        <View className="py-4 items-center">
-          <Text className="text-muted-foreground text-center">
-            Brak aktywności do wyświetlenia
-          </Text>
+        <View className="items-center py-4">
+          <Text className="text-center text-muted-foreground">Brak aktywności do wyświetlenia</Text>
         </View>
       ) : (
         activities.map((activity) => (
           <View
             key={activity.id}
-            className="flex-row items-start py-2 border-b border-border last:border-b-0"
-          >
-            <Text className="text-xl mr-3">{getActivityIcon(activity.type)}</Text>
+            className="flex-row items-start border-b border-border py-2 last:border-b-0">
+            <Text className="mr-3 text-xl">{getActivityIcon(activity.type)}</Text>
             <View className="flex-1">
               <Text className="font-medium text-foreground">{activity.title}</Text>
               <Text className="text-sm text-muted-foreground">{activity.description}</Text>
-              <Text className="text-xs text-muted-foreground mt-1">
+              <Text className="mt-1 text-xs text-muted-foreground">
                 {formatDate(activity.timestamp)}
               </Text>
             </View>
