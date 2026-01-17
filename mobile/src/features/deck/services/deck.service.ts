@@ -17,8 +17,8 @@ export const deckService = {
   /**
    * Pobiera listę talii użytkownika z zapisami
    */
-  getMyEnrolledDecks: async (): Promise<DeckListItem[]> => {
-    const { data } = await apiClient.get<DeckListItem[]>(ENDPOINTS.ENROLLMENT.MY);
+  getMyEnrolledDecks: async (): Promise<PageResponse<DeckListItem>> => {
+    const { data } = await apiClient.get<PageResponse<DeckListItem>>(ENDPOINTS.ENROLLMENT.MY);
     return data;
   },
 

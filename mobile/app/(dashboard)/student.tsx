@@ -3,18 +3,14 @@ import { View, Text, ScrollView, TouchableOpacity, Alert, ActivityIndicator } fr
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 import { useAuth } from '@/features/auth';
-import type { Deck } from '@/types/dashboard';
+import { useDashboard } from '@/features/dashboard';
+import { useDeck, type DeckListItem } from '@/features/deck';
 import { StudentStatsGrid } from '@/components/dashboard/StudentStatsGrid';
 import { MyCourses } from '@/components/dashboard/MyCourses';
 import { QuickActions } from '@/components/dashboard/QuickActions';
 import { Leaderboard } from '@/components/dashboard/Leaderboard';
 import { RecentActivity } from '@/components/dashboard/RecentActivity';
-import {
-  MOCK_STATISTICS,
-  MOCK_DECKS,
-  MOCK_LEADERBOARD,
-  MOCK_RECENT_ACTIVITY,
-} from '@/mocks/dashboard';
+import { MOCK_LEADERBOARD, MOCK_RECENT_ACTIVITY } from '@/mocks/dashboard';
 
 /**
  * Dashboard dla ucznia
@@ -22,17 +18,49 @@ import {
 function StudentDashboard() {
   const { user, isUserLoading, logout, isLogoutLoading } = useAuth();
 
+  const { useStudentStatistics, useStudentActivity } = useDashboard();
+  const { useMyEnrolledDecks } = useDeck();
+
+  const {
+    data: statistics,
+    isLoading: isStatsLoading,
+    isError: isStatsError,
+  } = useStudentStatistics();
+  const {
+    data: activityData,
+    isLoading: isActivityLoading,
+    isError: isActivityError,
+  } = useStudentActivity();
+  const {
+    data: enrolledDecksResponse,
+    isLoading: isDecksLoading,
+    isError: isDecksError,
+  } = useMyEnrolledDecks();
+
   useEffect(() => {
     if (!isUserLoading && !user) {
       router.replace('/(auth)/login');
     }
   }, [user, isUserLoading]);
 
-  if (isUserLoading) {
+  const isLoading = isUserLoading || isStatsLoading || isDecksLoading || isActivityLoading;
+  const isError = isStatsError || isDecksError || isActivityError;
+
+  if (isLoading) {
     return (
       <SafeAreaView className="flex-1 items-center justify-center bg-background">
         <ActivityIndicator size="large" color="#22c55e" />
         <Text className="mt-4 text-muted-foreground">Ładowanie...</Text>
+      </SafeAreaView>
+    );
+  }
+
+  if (isError) {
+    return (
+      <SafeAreaView className="flex-1 items-center justify-center bg-background p-4">
+        <Text className="mb-4 text-center text-foreground">
+          Wystąpił błąd podczas ładowania danych. Spróbuj ponownie później.
+        </Text>
       </SafeAreaView>
     );
   }
@@ -45,8 +73,24 @@ function StudentDashboard() {
     );
   }
 
-  const handleDeckPress = (deck: Deck) => {
-    Alert.alert('Kurs', `Otwieranie kursu: ${deck.name}`);
+  const decks = enrolledDecksResponse?.content ?? [];
+
+  const recentActivity =
+    activityData?.map((item, index) => ({
+      id: index + 1,
+      type: item.type.toLowerCase().replace('_', '_') as
+        | 'lesson_completed'
+        | 'deck_started'
+        | 'achievement_earned'
+        | 'streak_reached',
+      title: item.title,
+      description: item.subtitle,
+      timestamp: item.eventTime,
+    })) || MOCK_RECENT_ACTIVITY;
+
+  const handleDeckPress = (deck: DeckListItem) => {
+    // TODO: Nawigacja do ekranu kursu
+    Alert.alert('Kurs', `Otwieranie kursu: ${deck.deckName}`);
   };
 
   const handleQuickAction = (action: { title: string }) => {
@@ -90,12 +134,16 @@ function StudentDashboard() {
 
           {/* Statystyki */}
           <View className="mb-6">
-            <StudentStatsGrid statistics={MOCK_STATISTICS} />
+            <StudentStatsGrid
+              statistics={statistics}
+              isLoading={isStatsLoading}
+              isError={isStatsError}
+            />
           </View>
 
           {/* Moje kursy */}
           <View className="mb-6">
-            <MyCourses decks={MOCK_DECKS} onDeckPress={handleDeckPress} />
+            <MyCourses decks={decks} onDeckPress={handleDeckPress} />
           </View>
 
           {/* Szybkie akcje */}
@@ -103,14 +151,14 @@ function StudentDashboard() {
             <QuickActions onActionPress={handleQuickAction} />
           </View>
 
-          {/* Ranking */}
+          {/* Ranking - na razie mock, do podłączenia */}
           <View className="mb-6">
             <Leaderboard entries={MOCK_LEADERBOARD} />
           </View>
 
           {/* Ostatnia aktywność */}
           <View className="mb-6">
-            <RecentActivity activities={MOCK_RECENT_ACTIVITY} />
+            <RecentActivity activities={recentActivity} />
           </View>
 
           {/* Info o użytkowniku */}

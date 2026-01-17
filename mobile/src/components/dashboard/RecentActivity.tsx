@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Text } from 'react-native';
-import type { RecentActivityItem } from '../../types/dashboard';
+import type { RecentActivityItem } from '@/features/dashboard';
 
 interface RecentActivityProps {
   activities: RecentActivityItem[];

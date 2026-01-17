@@ -3,7 +3,7 @@ import { router } from 'expo-router';
 import type { AxiosError } from 'axios';
 
 import { QUERY_KEYS, INVALIDATION_GROUPS } from '@/constants';
-import { AuthService } from '../services/auth.service';
+import { AuthService } from '@/features/auth';
 import type { LoginRequest, SignupRequest, User, ApiErrorResponse } from '../types';
 
 /**

@@ -3,7 +3,7 @@ import type {
   Deck,
   LeaderboardEntry,
   RecentActivityItem,
-} from '../types/dashboard';
+} from '@/features/dashboard';
 
 /**
  * Zamockowane statystyki ucznia
@@ -21,7 +21,8 @@ export const MOCK_STATISTICS: StudentStatistics = {
  */
 export const MOCK_DECKS: Deck[] = [
   {
-    id: 1,
+    id: '1',
+    enrollmentId: 'enroll-1',
     name: 'Deutsch Basics A1',
     description: 'Podstawowe słownictwo niemieckie',
     totalCards: 100,
@@ -30,7 +31,8 @@ export const MOCK_DECKS: Deck[] = [
     lastStudied: '2025-01-17T10:30:00Z',
   },
   {
-    id: 2,
+    id: '2',
+    enrollmentId: 'enroll-2',
     name: 'English Business',
     description: 'Słownictwo biznesowe',
     totalCards: 80,
@@ -39,7 +41,8 @@ export const MOCK_DECKS: Deck[] = [
     lastStudied: '2025-01-16T14:00:00Z',
   },
   {
-    id: 3,
+    id: '3',
+    enrollmentId: 'enroll-3',
     name: 'Hiszpański dla początkujących',
     description: 'Frazy i zwroty codzienne',
     totalCards: 60,

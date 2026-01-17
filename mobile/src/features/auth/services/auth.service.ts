@@ -13,19 +13,19 @@ export const AuthService = {
    * Zapisuje tokeny do SecureStore
    */
   async login(data: LoginRequest): Promise<void> {
+    await storage.clearAll();
     console.log('[AuthService] Próba logowania:', data.username);
 
     const response = await apiClient.post<LoginResponse>(ENDPOINTS.AUTH.LOGIN, data);
     const { accessToken, refreshToken } = response.data;
 
-    if (accessToken) {
+    if (accessToken && refreshToken) {
       await storage.setAccessToken(accessToken);
-      console.log('[AuthService] Access token zapisany');
-    }
-
-    if (refreshToken) {
       await storage.setRefreshToken(refreshToken);
       console.log('[AuthService] Refresh token zapisany');
+      console.log('[AuthService] Access token zapisany');
+    } else {
+      throw new Error('Brak tokenów w odpowiedzi serwera');
     }
   },
 

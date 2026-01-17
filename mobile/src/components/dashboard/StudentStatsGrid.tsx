@@ -1,6 +1,6 @@
 import React from 'react';
-import { View, Text } from 'react-native';
-import type { StudentStatistics } from '../../types/dashboard';
+import { View, Text, ActivityIndicator } from 'react-native';
+import type { StudentStatistics } from '@/features/dashboard';
 
 interface StatsCardProps {
   title: string;
@@ -28,13 +28,32 @@ const StatsCard = ({ title, value, description, icon }: StatsCardProps) => (
 );
 
 interface StudentStatsGridProps {
-  statistics: StudentStatistics;
+  statistics: StudentStatistics | undefined;
+  isLoading: boolean;
+  isError: boolean;
 }
 
 /**
  * Siatka statystyk ucznia
  */
-export const StudentStatsGrid = ({ statistics }: StudentStatsGridProps) => {
+export const StudentStatsGrid = ({ statistics, isLoading, isError }: StudentStatsGridProps) => {
+  if (isLoading) {
+    return (
+      <View className="flex-row items-center justify-center rounded-xl border border-border bg-card p-8">
+        <ActivityIndicator size="large" color="#22c55e" />
+        <Text className="ml-3 text-muted-foreground">Ładowanie statystyk...</Text>
+      </View>
+    );
+  }
+
+  if (isError || !statistics) {
+    return (
+      <View className="rounded-xl border border-border bg-card p-4">
+        <Text className="text-center text-muted-foreground">Nie udało się załadować statystyk</Text>
+      </View>
+    );
+  }
+
   const stats = [
     {
       title: 'Aktywne kursy',

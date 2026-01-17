@@ -1,9 +1,9 @@
 import React from 'react';
-import { View, Text, TouchableOpacity } from 'react-native';
-import type { Deck } from '../../types/dashboard';
+import { View, Text, TouchableOpacity, Button, ActivityIndicator } from 'react-native';
+import type { DeckListItem } from '@/features/deck';
 
 interface CourseCardProps {
-  deck: Deck;
+  deck: DeckListItem;
   onPress: () => void;
 }
 
@@ -11,7 +11,8 @@ interface CourseCardProps {
  * Karta pojedynczego kursu
  */
 const CourseCard = ({ deck, onPress }: CourseCardProps) => {
-  const progressColor = deck.progress === 100 ? 'bg-success' : 'bg-primary';
+  const progress = deck.progressPercentage ?? 0;
+  const progressColor = progress === 100 ? 'bg-success' : 'bg-primary';
 
   return (
     <TouchableOpacity
@@ -19,13 +20,13 @@ const CourseCard = ({ deck, onPress }: CourseCardProps) => {
       className="mb-3 rounded-xl border border-border bg-card p-4">
       <View className="mb-2 flex-row items-start justify-between">
         <View className="mr-3 flex-1">
-          <Text className="mb-1 text-base font-semibold text-foreground">{deck.name}</Text>
+          <Text className="mb-1 text-base font-semibold text-foreground">{deck.deckName}</Text>
           <Text className="text-sm text-muted-foreground" numberOfLines={1}>
-            {deck.description}
+            {deck.deckDescription}
           </Text>
         </View>
         <View className="rounded bg-primary-light px-2 py-1">
-          <Text className="text-xs font-medium text-primary-dark">{deck.progress}%</Text>
+          <Text className="text-xs font-medium text-primary-dark">{progress}%</Text>
         </View>
       </View>
 
@@ -33,17 +34,17 @@ const CourseCard = ({ deck, onPress }: CourseCardProps) => {
       <View className="mt-2 h-2 overflow-hidden rounded-full bg-muted">
         <View
           className={`h-full ${progressColor} rounded-full`}
-          style={{ width: `${deck.progress}%` }}
+          style={{ width: `${progress}%` }}
         />
       </View>
 
       <View className="mt-3 flex-row justify-between">
         <Text className="text-xs text-muted-foreground">
-          {deck.learnedCards} / {deck.totalCards} kart
+          {deck.learnedSession} / {deck.totalSession} sesji nauki
         </Text>
-        {deck.lastStudied && (
+        {deck.lastAccessed && (
           <Text className="text-xs text-muted-foreground">
-            Ostatnio: {new Date(deck.lastStudied).toLocaleDateString('pl-PL')}
+            Ostatnio: {new Date(deck.lastAccessed).toLocaleDateString('pl-PL')}
           </Text>
         )}
       </View>
@@ -52,14 +53,14 @@ const CourseCard = ({ deck, onPress }: CourseCardProps) => {
 };
 
 interface MyCoursesProps {
-  decks: Deck[];
-  onDeckPress: (deck: Deck) => void;
+  decks?: DeckListItem[];
+  onDeckPress: (deck: DeckListItem) => void;
 }
 
 /**
  * Lista kursów użytkownika
  */
-export const MyCourses = ({ decks, onDeckPress }: MyCoursesProps) => {
+export const MyCourses = ({ decks = [], onDeckPress }: MyCoursesProps) => {
   return (
     <View className="rounded-xl border border-border bg-card p-4">
       <View className="mb-4">
@@ -77,9 +78,14 @@ export const MyCourses = ({ decks, onDeckPress }: MyCoursesProps) => {
           </Text>
         </View>
       ) : (
-        decks.map((deck) => (
-          <CourseCard key={deck.id} deck={deck} onPress={() => onDeckPress(deck)} />
-        ))
+        <View>
+          {decks.map((deck) => (
+            <CourseCard key={deck.enrollmentId} deck={deck} onPress={() => onDeckPress(deck)} />
+          ))}
+          <View>
+            <Button title="Zobacz wszystkie kursy" onPress={() => {}} />
+          </View>
+        </View>
       )}
     </View>
   );

@@ -23,7 +23,7 @@ export default function Index() {
   return (
     <View className="flex-1 items-center justify-center bg-background">
       <View className="mb-4 h-20 w-20 items-center justify-center rounded-2xl bg-primary">
-        <Text className="text-4xl font-bold text-white">L</Text>
+        <Text className="text-4xl font-bold text-white"></Text>
       </View>
       <ActivityIndicator size="large" color="#22c55e" />
       <Text className="mt-4 text-muted-foreground">Ładowanie...</Text>
