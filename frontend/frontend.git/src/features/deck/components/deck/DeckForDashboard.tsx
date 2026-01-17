@@ -38,7 +38,9 @@ const EmptyState = () => (
     <p className="text-sm text-muted-foreground max-w-xs mb-4">
       Wygląda na to, że nie zapisałeś się jeszcze do żadnego kursu.
     </p>
-    <Button variant="outline">Przeglądaj katalog</Button>
+    <Button variant="outline" asChild>
+      <Link href="/community">Przeglądaj katalog</Link>
+    </Button>
   </div>
 );
 
