@@ -64,7 +64,7 @@ public class AuthController {
             return store.save(session, refreshTtl).map(ok -> {
                 setCookie("access_token",rsp, access, accessTtl); //15 min
                 setCookie("refresh_token",rsp, refresh, refreshTtl); // 30d
-                return ResponseEntity.ok(new TokenRes(access));
+                return ResponseEntity.ok(new TokenRes(access, refresh));
             });
         });
     }
@@ -81,7 +81,7 @@ public class AuthController {
                 if (!ok) return ResponseEntity.status(401).build();
                 setCookie("access_token",rsp, newAccess, accessTtl); //15 min
                 setCookie("refresh_token",rsp, newRefresh, refreshTtl); // 30d
-                return ResponseEntity.ok(new TokenRes(newAccess));
+                return ResponseEntity.ok(new TokenRes(newAccess, newRefresh));
             });
         });
     }
