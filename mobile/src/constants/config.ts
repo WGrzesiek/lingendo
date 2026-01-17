@@ -58,6 +58,13 @@ export const ENDPOINTS = {
     LIST: '/v1/courses',
     DETAILS: (id: string) => `/v1/courses/${id}`,
     ENROLL: (id: string) => `/v1/courses/${id}/enroll`,
+    HEADER: (enrollmentId: string) => `/v1/decks/${enrollmentId}/course-header`,
+    PROGRESS: (enrollmentId: string) => `/v1/decks/sessions/${enrollmentId}/session-progres`,
+    SETTINGS: (enrollmentId: string) => `/v1/decks/enrollment/${enrollmentId}/settings`,
+    WORDS: (enrollmentId: string) => `/v1/decks/enrollments/${enrollmentId}/course-view`,
+    FLASHCARD_STATS: (enrollmentId: string) => `/v1/courses/${enrollmentId}/flashcards/stats`,
+    INITIALIZE_SESSION: (enrollmentId: string) =>
+      `/v1/decks/${enrollmentId}/sessions?flashcardFetchStrategy=ALPHABETICAL&type=LEARNING`,
   },
   LEARNING: {
     SESSION: '/v1/learning/session',
