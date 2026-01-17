@@ -31,6 +31,11 @@ export const ENDPOINTS = {
     DELETE: (id: string) => `/v1/decks/${id}`,
     CARDS: (deckId: string) => `/v1/decks/${deckId}/cards`,
   },
+  DECK_ENROLLMENT: {
+    ENROLL: (deckId: string) => `/v1/decks/${deckId}/enrollments`,
+    GET_MY_ENROLLMENTS: '/v1/decks/enrollments/my',
+
+  },
   CARDS: {
     CREATE: '/v1/cards',
     UPDATE: (id: string) => `/v1/cards/${id}`,
