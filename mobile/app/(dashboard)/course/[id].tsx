@@ -1,8 +1,8 @@
-import React from 'react';
+import React, { useState, useCallback } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router, useLocalSearchParams } from 'expo-router';
-import { useCourse } from '@/features/course';
+import { useCourse, type CourseWord } from '@/features/course';
 import { deckOwnerConfig } from '@/features/deck/types/deck.types';
 
 /**
@@ -16,10 +16,22 @@ function CourseScreen() {
   const { data: headerData, isLoading: isHeaderLoading } = useCourseHeader(enrollmentId);
   const { data: courseProgress, isLoading: isProgressLoading } = useCourseProgress(enrollmentId);
   const { data: settingsData, isLoading: isSettingsLoading } = useCourseSettings(enrollmentId);
-  const { data: wordsData, isLoading: isWordsLoading } = useInfiniteCourseWords(enrollmentId, 10);
+  const {
+    data: wordsData,
+    isLoading: isWordsLoading,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useInfiniteCourseWords(enrollmentId, 10);
 
   const allWords = wordsData?.pages.flatMap((page) => page.content) ?? [];
   const totalWords = wordsData?.pages[0]?.totalElements ?? 0;
+
+  const handleLoadMoreWords = useCallback(() => {
+    if (hasNextPage && !isFetchingNextPage) {
+      fetchNextPage();
+    }
+  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
   const isLoading = isHeaderLoading || isProgressLoading || isSettingsLoading;
 
@@ -169,19 +181,28 @@ function CourseScreen() {
               <ActivityIndicator size="small" color="#22c55e" />
             ) : allWords.length > 0 ? (
               <View>
-                {allWords.slice(0, 5).map((word) => (
-                  <View
-                    key={word.flashcardId}
-                    className="mb-2 rounded-lg border border-border bg-background p-3">
-                    <Text className="font-semibold text-foreground">{word.word}</Text>
-                    <Text className="text-sm text-muted-foreground">
-                      {word.translations.join(', ')}
-                    </Text>
-                  </View>
+                {allWords.map((word) => (
+                  <WordCard key={word.flashcardId} word={word} />
                 ))}
-                {totalWords > 5 && (
-                  <Text className="mt-2 text-center text-sm text-muted-foreground">
-                    ...i {totalWords - 5} więcej
+
+                {/* Przycisk "Załaduj więcej" */}
+                {hasNextPage && (
+                  <TouchableOpacity
+                    onPress={handleLoadMoreWords}
+                    disabled={isFetchingNextPage}
+                    className="mt-3 items-center rounded-lg border border-border py-3">
+                    {isFetchingNextPage ? (
+                      <ActivityIndicator size="small" color="#22c55e" />
+                    ) : (
+                      <Text className="font-medium text-primary">Załaduj więcej słówek</Text>
+                    )}
+                  </TouchableOpacity>
+                )}
+
+                {/* Informacja o załadowaniu wszystkich */}
+                {!hasNextPage && allWords.length > 0 && (
+                  <Text className="mt-3 text-center text-sm text-muted-foreground">
+                    Załadowano wszystkie słówka ({allWords.length})
                   </Text>
                 )}
               </View>
@@ -211,6 +232,109 @@ function CourseScreen() {
         </View>
       </ScrollView>
     </SafeAreaView>
+  );
+}
+
+/**
+ * Konfiguracja kolorów dla faz fiszek
+ */
+const phaseConfig = {
+  NEW: { label: 'Nowe', bgColor: 'bg-muted', textColor: 'text-muted-foreground' },
+  LEARNING: { label: 'W nauce', bgColor: 'bg-warning/20', textColor: 'text-warning' },
+  REVIEW: { label: 'Do powtórki', bgColor: 'bg-primary/20', textColor: 'text-primary' },
+  RELEARNING: { label: 'Powtórka', bgColor: 'bg-orange-100', textColor: 'text-orange-600' },
+} as const;
+
+interface WordCardProps {
+  word: CourseWord;
+}
+
+/**
+ * Karta pojedynczego słówka z pełnymi informacjami
+ */
+function WordCard({ word }: WordCardProps) {
+  const [expanded, setExpanded] = useState(false);
+  const phase = phaseConfig[word.phase] ?? phaseConfig.NEW;
+  const allSentences = [...(word.sentences ?? []), ...(word.sentencesAI ?? [])];
+
+  return (
+    <TouchableOpacity
+      onPress={() => setExpanded(!expanded)}
+      activeOpacity={0.7}
+      className={`mb-3 rounded-lg border p-3 ${
+        word.isLearned ? 'border-success/30 bg-success/5' : 'border-border bg-background'
+      }`}>
+      {/* Nagłówek z słówkiem i tłumaczeniem */}
+      <View className="mb-2 flex-row items-center justify-between">
+        <View className="flex-1 flex-row flex-wrap items-center gap-1">
+          <Text className="text-lg font-semibold text-foreground">{word.word}</Text>
+          <Text className="mx-1 text-muted-foreground">→</Text>
+          <Text className="text-foreground">{(word.translations ?? []).join(', ')}</Text>
+        </View>
+        <Text className="ml-2 text-lg text-muted-foreground">{expanded ? '▲' : '▼'}</Text>
+      </View>
+
+      {/* Tagi statusu */}
+      <View className="mb-2 flex-row flex-wrap gap-2">
+        {/* Faza */}
+        <View className={`rounded-full px-2 py-0.5 ${phase.bgColor}`}>
+          <Text className={`text-xs ${phase.textColor}`}>{phase.label}</Text>
+        </View>
+
+        {/* Nauczone */}
+        {word.isLearned && (
+          <View className="rounded-full bg-success/10 px-2 py-0.5">
+            <Text className="text-xs text-success">✓ Nauczone</Text>
+          </View>
+        )}
+
+        {/* Powtórzenia */}
+        {word.repetitionCount > 0 && (
+          <View className="rounded-full bg-muted px-2 py-0.5">
+            <Text className="text-xs text-muted-foreground">Powtórzeń: {word.repetitionCount}</Text>
+          </View>
+        )}
+
+        {/* Sesja */}
+        {word.sessionNumber > 0 && (
+          <View className="rounded-full bg-muted px-2 py-0.5">
+            <Text className="text-xs text-muted-foreground">Sesja: {word.sessionNumber}</Text>
+          </View>
+        )}
+
+        {/* Data powtórki */}
+        {word.nextReviewAt && (
+          <View className="rounded-full bg-muted px-2 py-0.5">
+            <Text className="text-xs text-muted-foreground">
+              Powtórka: {new Date(word.nextReviewAt).toLocaleDateString('pl-PL')}
+            </Text>
+          </View>
+        )}
+      </View>
+
+      {/* Rozwinięte - zdania przykładowe */}
+      {expanded && (
+        <View className="mt-2 border-t border-border pt-2">
+          {allSentences.length > 0 ? (
+            <View className="gap-3">
+              {allSentences.map((sentence) => (
+                <View key={sentence.id} className="gap-1">
+                  <Text className="text-sm italic text-foreground">"{sentence.sentence}"</Text>
+                  <Text className="text-sm italic text-muted-foreground">
+                    {sentence.translation}
+                  </Text>
+                </View>
+              ))}
+            </View>
+          ) : (
+            <View className="flex-row items-center gap-2">
+              <Text className="text-muted-foreground">✨</Text>
+              <Text className="text-sm text-muted-foreground">Brak przykładowych zdań</Text>
+            </View>
+          )}
+        </View>
+      )}
+    </TouchableOpacity>
   );
 }
 
