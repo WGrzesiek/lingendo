@@ -2,6 +2,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { QUERY_KEYS, INVALIDATION_GROUPS } from '@/constants';
 import { enrollmentService } from '../services';
 import type { LearnAlgorithm, ReviewSchedule } from '@/features/deck/types';
+import { CreateEnrollmentRequest } from '@/features/enroll';
 
 export const useEnrollment = () => {
   const queryClient = useQueryClient();
@@ -24,7 +25,8 @@ export const useEnrollment = () => {
    */
   const useEnrollToDeck = () =>
     useMutation({
-      mutationFn: (deckId: string) => enrollmentService.enrollToDeck(deckId),
+      mutationFn: ({ deckId, data = {} }: { deckId: string; data?: CreateEnrollmentRequest }) =>
+        enrollmentService.enrollToDeck(deckId, data),
       onSuccess: () => {
         invalidateGroup(INVALIDATION_GROUPS.AFTER_ENROLLMENT);
       },

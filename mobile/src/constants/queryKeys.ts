@@ -15,6 +15,7 @@ export const QUERY_KEYS = {
   LEADERBOARD: 'leaderboard',
   SETTINGS: 'settings',
   REVIEW: 'review',
+  COMMUNITY: 'community',
 } as const;
 
 /**

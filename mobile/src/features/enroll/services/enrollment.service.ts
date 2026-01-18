@@ -1,14 +1,18 @@
 import apiClient from '@/lib/api/axios';
 import { ENDPOINTS } from '@/constants';
-import type { EnrollmentDto, UpdateEnrollmentSettingsRequest } from '../types';
+import type {
+  CreateEnrollmentRequest,
+  EnrollmentDto,
+  UpdateEnrollmentSettingsRequest,
+} from '../types';
 import type { LearnAlgorithm, ReviewSchedule } from '@/features/deck/types';
 
 export const enrollmentService = {
   /**
    * Zapisuje użytkownika do talii
    */
-  enrollToDeck: async (deckId: string): Promise<EnrollmentDto> => {
-    const { data } = await apiClient.post<EnrollmentDto>(ENDPOINTS.ENROLLMENT.ENROLL(deckId));
+  enrollToDeck: async (deckId: string,  body: CreateEnrollmentRequest = {}): Promise<EnrollmentDto> => {
+    const { data } = await apiClient.post<EnrollmentDto>(ENDPOINTS.ENROLLMENT.ENROLL(deckId),body);
     return data;
   },
 
