@@ -28,12 +28,12 @@ export const useDeck = () => {
   // =====================
 
   /**
-   * Pobiera zapisane talie użytkownika
+   * Pobiera zapisane talie użytkownika z paginacją
    */
-  const useMyEnrolledDecks = () =>
+  const useMyEnrolledDecks = (page: number = 0, size: number = 20) =>
     useQuery({
-      queryKey: [QUERY_KEYS.ENROLLMENTS, 'my'],
-      queryFn: () => deckService.getMyEnrolledDecks(),
+      queryKey: [QUERY_KEYS.ENROLLMENTS, 'my', { page, size }],
+      queryFn: () => deckService.getMyEnrolledDecks({ page, size }),
     });
 
   /**

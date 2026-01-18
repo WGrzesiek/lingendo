@@ -15,10 +15,15 @@ import type {
 
 export const deckService = {
   /**
-   * Pobiera listę talii użytkownika z zapisami
+   * Pobiera listę talii użytkownika z zapisami z paginacją
    */
-  getMyEnrolledDecks: async (): Promise<PageResponse<DeckListItem>> => {
-    const { data } = await apiClient.get<PageResponse<DeckListItem>>(ENDPOINTS.ENROLLMENT.MY);
+  getMyEnrolledDecks: async (params?: {
+    page?: number;
+    size?: number;
+  }): Promise<PageResponse<DeckListItem>> => {
+    const { data } = await apiClient.get<PageResponse<DeckListItem>>(ENDPOINTS.ENROLLMENT.MY, {
+      params,
+    });
     return data;
   },
 

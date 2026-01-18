@@ -35,7 +35,7 @@ function StudentDashboard() {
     data: enrolledDecksResponse,
     isLoading: isDecksLoading,
     isError: isDecksError,
-  } = useMyEnrolledDecks();
+  } = useMyEnrolledDecks(0, 5);
 
   useEffect(() => {
     if (!isUserLoading && !user) {

@@ -1,5 +1,6 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, Button, ActivityIndicator } from 'react-native';
+import { router } from 'expo-router';
 import type { DeckListItem } from '@/features/deck';
 
 interface CourseCardProps {
@@ -82,9 +83,11 @@ export const MyCourses = ({ decks = [], onDeckPress }: MyCoursesProps) => {
           {decks.map((deck) => (
             <CourseCard key={deck.enrollmentId} deck={deck} onPress={() => onDeckPress(deck)} />
           ))}
-          <View>
-            <Button title="Zobacz wszystkie kursy" onPress={() => {}} />
-          </View>
+          <TouchableOpacity
+            onPress={() => router.push('/(dashboard)/courses')}
+            className="mt-2 items-center rounded-lg bg-muted py-3">
+            <Text className="font-medium text-foreground">Zobacz wszystkie kursy</Text>
+          </TouchableOpacity>
         </View>
       )}
     </View>
