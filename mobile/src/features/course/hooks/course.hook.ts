@@ -98,13 +98,12 @@ export const useCourse = () => {
     useMutation({
       mutationFn: (enrollmentId: string) => courseService.initializeSession(enrollmentId),
       onSuccess: (_, enrollmentId) => {
-        queryClient.invalidateQueries({
-          queryKey: [QUERY_KEYS.COURSES, 'progress', enrollmentId],
-        });
-        queryClient.invalidateQueries({
-          queryKey: [QUERY_KEYS.COURSES, 'settings', enrollmentId],
-        });
-        invalidateGroup(INVALIDATION_GROUPS.AFTER_LEARNING);
+        // queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.COURSES, 'progress', enrollmentId], });
+        // queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.COURSES, 'settings', enrollmentId], });
+        // invalidateGroup(INVALIDATION_GROUPS.AFTER_LEARNING);
+        // queryClient.refetchQueries({ queryKey: [QUERY_KEYS.COURSES] });
+        queryClient.refetchQueries({ queryKey: [QUERY_KEYS.COURSES, 'progress', enrollmentId] });
+
       },
     });
 

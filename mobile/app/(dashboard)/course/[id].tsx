@@ -29,8 +29,13 @@ function CourseScreen() {
   const { id: enrollmentId } = useLocalSearchParams<{ id: string }>();
   const [settingsModalVisible, setSettingsModalVisible] = useState(false);
 
-  const { useCourseHeader, useCourseSettings, useCourseProgress, useInfiniteCourseWords } =
-    useCourse();
+  const {
+    useCourseHeader,
+    useCourseSettings,
+    useCourseProgress,
+    useInfiniteCourseWords,
+    useInitializeSession,
+  } = useCourse();
   const { data: headerData, isLoading: isHeaderLoading } = useCourseHeader(enrollmentId);
   const { data: courseProgress, isLoading: isProgressLoading } = useCourseProgress(enrollmentId);
   const { data: settingsData, isLoading: isSettingsLoading } = useCourseSettings(enrollmentId);
@@ -41,6 +46,7 @@ function CourseScreen() {
     hasNextPage,
     isFetchingNextPage,
   } = useInfiniteCourseWords(enrollmentId, 10);
+  const initializeSession = useInitializeSession();
 
   const allWords = wordsData?.pages.flatMap((page) => page.content) ?? [];
   const totalWords = wordsData?.pages[0]?.totalElements ?? 0;
@@ -84,10 +90,16 @@ function CourseScreen() {
     .sort((a, b) => a.sessionNumber - b.sessionNumber)[0];
 
   const sessionIdToContinue = sessionToContinue?.sessionId;
+
   const handleStartLesson = () => {
-    if (enrollmentId) {
+    if (enrollmentId && sessionIdToContinue) {
       router.push(`/(dashboard)/learn/${enrollmentId}/${sessionIdToContinue}`);
     }
+  };
+
+  const handleStartNewSession = () => {
+    if (!enrollmentId) return;
+    initializeSession.mutate(enrollmentId)
   };
 
   const handleBack = () => {
@@ -149,13 +161,24 @@ function CourseScreen() {
             </View>
 
             {/* Przycisk rozpoczęcia nauki */}
-            <TouchableOpacity
-              onPress={handleStartLesson}
-              className="items-center rounded-xl bg-primary py-4">
-              <Text className="text-lg font-bold text-white">
-                {progress > 0 ? 'Kontynuuj naukę' : 'Rozpocznij naukę'}
-              </Text>
-            </TouchableOpacity>
+            {sessionIdToContinue ? (
+              <TouchableOpacity
+                onPress={handleStartLesson}
+                className="items-center rounded-xl bg-primary py-4">
+                <Text className="text-lg font-bold text-white">Kontynuuj naukę</Text>
+              </TouchableOpacity>
+            ) : (
+              <TouchableOpacity
+                onPress={handleStartNewSession}
+                disabled={initializeSession.isPending}
+                className={`items-center rounded-xl py-4 ${initializeSession.isPending ? 'bg-muted' : 'bg-primary'}`}>
+                {initializeSession.isPending ? (
+                  <ActivityIndicator color="white" />
+                ) : (
+                  <Text className="text-lg font-bold text-white">Rozpocznij nową sesję</Text>
+                )}
+              </TouchableOpacity>
+            )}
           </View>
 
           {/* Statystyki kursu */}
@@ -350,9 +373,7 @@ function SettingsModal({
         promises.push(updateAlgorithmMutation.mutateAsync({ enrollmentId, algorithm }));
       }
       if (wordsPerSession !== currentWordsPerSession) {
-        promises.push(
-          updateWordsMutation.mutateAsync({ enrollmentId, limit: wordsPerSession })
-        );
+        promises.push(updateWordsMutation.mutateAsync({ enrollmentId, limit: wordsPerSession }));
       }
       if (reviewSchedule !== currentReviewSchedule) {
         promises.push(updateScheduleMutation.mutateAsync({ enrollmentId, mode: reviewSchedule }));

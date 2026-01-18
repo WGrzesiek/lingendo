@@ -65,8 +65,7 @@ export const ENDPOINTS = {
     SETTINGS: (enrollmentId: string) => `/v1/decks/enrollment/${enrollmentId}/settings`,
     WORDS: (enrollmentId: string) => `/v1/decks/enrollments/${enrollmentId}/course-view`,
     FLASHCARD_STATS: (enrollmentId: string) => `/v1/courses/${enrollmentId}/flashcards/stats`,
-    INITIALIZE_SESSION: (enrollmentId: string) =>
-      `/v1/decks/${enrollmentId}/sessions?flashcardFetchStrategy=ALPHABETICAL&type=LEARNING`,
+    INITIALIZE_SESSION: (enrollmentId: string) => `/v1/decks/${enrollmentId}/sessions?flashcardFetchStrategy=ALPHABETICAL&type=LEARNING`,
   },
   LEARNING: {
     SESSION: '/v1/learning/session',

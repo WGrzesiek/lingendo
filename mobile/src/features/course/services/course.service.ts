@@ -1,7 +1,11 @@
 import apiClient from '@/lib/api/axios';
 import { ENDPOINTS } from '@/constants';
-import type { CourseHeader, CourseProgress, CourseSettings } from '../types';
-
+import type {
+  CourseHeader,
+  CourseProgress,
+  CourseSettings,
+  InitializeSessionResponse,
+} from '../types';
 
 export const courseService = {
   /**
@@ -31,8 +35,11 @@ export const courseService = {
   /**
    * Inicjalizuje nową sesję nauki
    */
-  initializeSession: async (enrollmentId: string): Promise<void> => {
-    await apiClient.post(ENDPOINTS.COURSES.INITIALIZE_SESSION(enrollmentId));
-    console.log('[courseService] Zainicjalizowano sesję');
+  initializeSession: async (enrollmentId: string): Promise<InitializeSessionResponse> => {
+    const { data } = await apiClient.post<InitializeSessionResponse>(
+      ENDPOINTS.COURSES.INITIALIZE_SESSION(enrollmentId)
+    );
+    console.log('[courseService] Zainicjalizowano sesję:', data.sessionId);
+    return data;
   },
 };

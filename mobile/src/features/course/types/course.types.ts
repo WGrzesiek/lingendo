@@ -1,7 +1,6 @@
 import type { Language } from '@/types/common';
 import type { DeckOwnerType, ReviewSchedule } from '@/features/deck/types';
 
-
 export type Visibility = 'PUBLIC' | 'PRIVATE';
 
 export const sessionStatusValues = ['NEW', 'IN_PROGRESS', 'COMPLETED', 'SKIPPED'] as const;
@@ -52,4 +51,11 @@ export interface CourseSettings {
   algorithm: string;
   wordsPerSession: number;
   reviewSchedule: ReviewSchedule;
+}
+
+/**
+ * Odpowiedź inicjalizacji sesji
+ */
+export interface InitializeSessionResponse {
+  sessionId: string;
 }
