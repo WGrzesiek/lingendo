@@ -89,7 +89,7 @@ function StudentDashboard() {
     })) || MOCK_RECENT_ACTIVITY;
 
   const handleDeckPress = (deck: DeckListItem) => {
-    router.push(`/(dashboard)/course/${deck.deckId}`);
+    router.push(`/(dashboard)/course/${deck.enrollmentId}`);
   };
 
   const handleQuickAction = (action: { title: string }) => {
