@@ -79,10 +79,14 @@ function CourseScreen() {
     courseProgress.totalSessions > 0
       ? Math.round((courseProgress.completedSessions / courseProgress.totalSessions) * 100)
       : 0;
+  const sessionToContinue = courseProgress.sessions
+    .filter((s) => s.status === 'IN_PROGRESS')
+    .sort((a, b) => a.sessionNumber - b.sessionNumber)[0];
 
+  const sessionIdToContinue = sessionToContinue?.sessionId;
   const handleStartLesson = () => {
     if (enrollmentId) {
-      router.push(`/(dashboard)/learn/${enrollmentId}`);
+      router.push(`/(dashboard)/learn/${enrollmentId}/${sessionIdToContinue}`);
     }
   };
 
