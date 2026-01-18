@@ -13,6 +13,7 @@ export type StudentActivityType =
   | 'LOGIN';
 
 export interface StudentActivityItem {
+
   type: StudentActivityType;
   title: string;
   subtitle: string;
@@ -59,22 +60,3 @@ export interface Deck {
   lastStudied?: string;
 }
 
-/**
- * Typ aktywności (UI)
- */
-export type RecentActivityType =
-  | 'lesson_completed'
-  | 'deck_started'
-  | 'achievement_earned'
-  | 'streak_reached';
-
-/**
- * Element ostatniej aktywności (UI)
- */
-export interface RecentActivityItem {
-  id: number;
-  type: RecentActivityType;
-  title: string;
-  description: string;
-  timestamp: string;
-}

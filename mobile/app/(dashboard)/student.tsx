@@ -21,11 +21,7 @@ function StudentDashboard() {
   const { useStudentStatistics, useStudentActivity } = useDashboard();
   const { useMyEnrolledDecks } = useDeck();
 
-  const {
-    data: statistics,
-    isLoading: isStatsLoading,
-    isError: isStatsError,
-  } = useStudentStatistics();
+  const { data: statistics, isLoading: isStatsLoading, isError: isStatsError, } = useStudentStatistics();
   const {
     data: activityData,
     isLoading: isActivityLoading,
@@ -75,18 +71,6 @@ function StudentDashboard() {
 
   const decks = enrolledDecksResponse?.content ?? [];
 
-  const recentActivity =
-    activityData?.map((item, index) => ({
-      id: index + 1,
-      type: item.type.toLowerCase().replace('_', '_') as
-        | 'lesson_completed'
-        | 'deck_started'
-        | 'achievement_earned'
-        | 'streak_reached',
-      title: item.title,
-      description: item.subtitle,
-      timestamp: item.eventTime,
-    })) || MOCK_RECENT_ACTIVITY;
 
   const handleDeckPress = (deck: DeckListItem) => {
     router.push(`/(dashboard)/course/${deck.enrollmentId}`);
@@ -157,7 +141,7 @@ function StudentDashboard() {
 
           {/* Ostatnia aktywność */}
           <View className="mb-6">
-            <RecentActivity activities={recentActivity} />
+            <RecentActivity activities={activityData} isLoading={isActivityLoading} isError={isActivityError} />
           </View>
 
           {/* Info o użytkowniku */}
