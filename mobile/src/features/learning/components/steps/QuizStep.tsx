@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { View, Text, TouchableOpacity, ScrollView } from 'react-native';
+import { View, Text, TouchableOpacity } from 'react-native';
 import { CheckCircle2, XCircle } from 'lucide-react-native';
 import type { WordDto, SentenceDto } from '@/features/course/types';
 import type { QuizAnswer } from '../../types';
@@ -63,7 +63,7 @@ const QuizStepBase = ({ data, options, direction, onComplete }: QuizBaseProps) =
   const isCorrect = selected != null && selected === correct;
 
   return (
-    <ScrollView className="flex-1 p-4">
+    <View className="flex-1 p-4">
       <View className="rounded-2xl border border-border bg-card p-6">
         {/* Nagłówek */}
         <View className="mb-6 items-center">
@@ -128,7 +128,7 @@ const QuizStepBase = ({ data, options, direction, onComplete }: QuizBaseProps) =
           </View>
         )}
       </View>
-    </ScrollView>
+    </View>
   );
 };
 

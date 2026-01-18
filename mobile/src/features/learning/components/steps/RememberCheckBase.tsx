@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { View, Text, TouchableOpacity, ScrollView } from 'react-native';
+import { View, Text, TouchableOpacity } from 'react-native';
 import { Eye, Sparkles } from 'lucide-react-native';
 import type { WordDto } from '@/features/course/types';
 import type { InteractionType, RememberAnswer } from '../../types';
@@ -37,7 +37,7 @@ export const RememberCheckBase = ({
   };
 
   return (
-    <ScrollView className="flex-1 p-4">
+    <View className="flex-1 p-4">
       <View className="rounded-2xl border border-border bg-card p-6">
         {/* Nagłówek z pytaniem */}
         <View className="mb-6 items-center">
@@ -138,6 +138,6 @@ export const RememberCheckBase = ({
           </View>
         )}
       </View>
-    </ScrollView>
+    </View>
   );
 };

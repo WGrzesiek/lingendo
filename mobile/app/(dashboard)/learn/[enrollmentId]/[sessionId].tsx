@@ -1,8 +1,22 @@
 import { useEffect, useRef } from 'react';
-import { View, Text, TouchableOpacity, ActivityIndicator, ScrollView } from 'react-native';
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  ActivityIndicator,
+  ScrollView,
+  KeyboardAvoidingView,
+  Platform,
+} from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocalSearchParams, router } from 'expo-router';
 import { ArrowLeft } from 'lucide-react-native';
-import { useLearning, SessionCompletedView, StepRenderer, SessionProgress } from '@/features/learning';
+import {
+  useLearning,
+  SessionCompletedView,
+  StepRenderer,
+  SessionProgress,
+} from '@/features/learning';
 import { useCourse } from '@/features/course';
 import { isNoMoreFlashcardsError } from '../../../../lib/api';
 import type { SubmitAnswerRequest, NextFlashcardRecommendation } from '@/features/learning';
@@ -11,7 +25,10 @@ import type { SubmitAnswerRequest, NextFlashcardRecommendation } from '@/feature
  * Ekran sesji nauki - wyświetla fiszki jedna po drugiej
  */
 export default function LearnSessionScreen() {
-  const { enrollmentId, sessionId } = useLocalSearchParams<{ enrollmentId: string; sessionId: string }>();
+  const { enrollmentId, sessionId } = useLocalSearchParams<{
+    enrollmentId: string;
+    sessionId: string;
+  }>();
 
   const { useCourseHeader, useCourseProgress, useCourseSettings } = useCourse();
   const { useNextFlashcard, useSubmitAnswer, useCompleteSession } = useLearning();
@@ -57,25 +74,33 @@ export default function LearnSessionScreen() {
 
   if (isLoading || isHeaderLoading) {
     return (
-      <View className="flex-1 bg-background justify-center items-center">
+      <SafeAreaView className="flex-1 items-center justify-center bg-background" edges={['top']}>
         <ActivityIndicator size="large" className="text-primary" />
-        <Text className="text-muted-foreground mt-4">Ładowanie fiszki...</Text>
-      </View>
+        <Text className="mt-4 text-muted-foreground">Ładowanie fiszki...</Text>
+      </SafeAreaView>
     );
   }
 
   if (noMore) {
-    return <SessionCompletedView courseId={enrollmentId} />;
+    return (
+      <SafeAreaView className="flex-1 bg-background" edges={['top']}>
+        <SessionCompletedView courseId={enrollmentId} />
+      </SafeAreaView>
+    );
   }
 
   if (isError) {
     return (
-      <View className="flex-1 bg-background justify-center items-center p-6">
-        <Text className="text-destructive font-semibold text-lg mb-4">Nie udało się pobrać fiszki</Text>
-        <TouchableOpacity className="bg-primary px-6 py-3 rounded-xl" onPress={() => refetch()}>
-          <Text className="text-primary-foreground font-semibold">Spróbuj ponownie</Text>
+      <SafeAreaView
+        className="flex-1 items-center justify-center bg-background p-6"
+        edges={['top']}>
+        <Text className="mb-4 text-lg font-semibold text-destructive">
+          Nie udało się pobrać fiszki
+        </Text>
+        <TouchableOpacity className="rounded-xl bg-primary px-6 py-3" onPress={() => refetch()}>
+          <Text className="font-semibold text-primary-foreground">Spróbuj ponownie</Text>
         </TouchableOpacity>
-      </View>
+      </SafeAreaView>
     );
   }
 
@@ -86,56 +111,61 @@ export default function LearnSessionScreen() {
 
   if (!currentFlashcard) {
     return (
-      <View className="flex-1 bg-background justify-center items-center">
+      <SafeAreaView className="flex-1 items-center justify-center bg-background" edges={['top']}>
         <Text className="text-muted-foreground">Brak danych fiszki.</Text>
-      </View>
+      </SafeAreaView>
     );
   }
 
   const currentSession = courseProgress.sessions.find((s) => s.status === 'IN_PROGRESS');
 
   return (
-    <View className="flex-1 bg-background">
-      <ScrollView className="flex-1">
-        {/* Header */}
-        <View className="p-4">
-          <View className="flex-row items-center justify-between mb-4">
-            <TouchableOpacity
-              className="flex-row items-center gap-2 py-2"
-              onPress={() => router.back()}
-              disabled={submitAnswer.isPending}
-            >
-              <ArrowLeft size={20} className="text-foreground" />
-              <Text className="text-foreground font-medium">Zakończ sesję</Text>
-            </TouchableOpacity>
+    <SafeAreaView className="flex-1 bg-background" edges={['top']}>
+      <KeyboardAvoidingView
+        className="flex-1"
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        keyboardVerticalOffset={0}>
+        <ScrollView
+          className="flex-1"
+          contentContainerStyle={{ flexGrow: 1 }}
+          keyboardShouldPersistTaps="handled">
+          {/* Header */}
+          <View className="p-4">
+            <View className="mb-4 flex-row items-center justify-between">
+              <TouchableOpacity
+                className="flex-row items-center gap-2 py-2"
+                onPress={() => router.back()}
+                disabled={submitAnswer.isPending}>
+                <ArrowLeft size={20} className="text-foreground" />
+                <Text className="font-medium text-foreground">Zakończ sesję</Text>
+              </TouchableOpacity>
 
-            <View className="items-end">
-              <Text className="text-sm text-muted-foreground">
-                {courseHeader.name}
-              </Text>
-              {currentSession && (
-                <Text className="text-xs text-muted-foreground">
-                  Sesja {currentSession.sessionNumber}
-                </Text>
-              )}
+              <View className="items-end">
+                <Text className="text-sm text-muted-foreground">{courseHeader.name}</Text>
+                {currentSession && (
+                  <Text className="text-xs text-muted-foreground">
+                    Sesja {currentSession.sessionNumber}
+                  </Text>
+                )}
+              </View>
             </View>
           </View>
-        </View>
 
-        {/* Pasek postępu */}
-        {sessionId && <SessionProgress sessionId={sessionId} />}
+          {/* Pasek postępu */}
+          {sessionId && <SessionProgress sessionId={sessionId} />}
 
-        {/* Krok nauki */}
-        <View className="mt-4">
-          <StepRenderer
-            interactionType={currentFlashcard.interactionType}
-            flashcardId={currentFlashcard.flashcardId}
-            wordContent={currentFlashcard.content}
-            quizOptions={currentFlashcard.quizOptions}
-            onStepComplete={handleStepComplete}
-          />
-        </View>
-      </ScrollView>
-    </View>
+          {/* Krok nauki */}
+          <View className="mt-4 flex-1">
+            <StepRenderer
+              interactionType={currentFlashcard.interactionType}
+              flashcardId={currentFlashcard.flashcardId}
+              wordContent={currentFlashcard.content}
+              quizOptions={currentFlashcard.quizOptions}
+              onStepComplete={handleStepComplete}
+            />
+          </View>
+        </ScrollView>
+      </KeyboardAvoidingView>
+    </SafeAreaView>
   );
 }

@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { View, Text, TouchableOpacity, TextInput, ScrollView } from 'react-native';
+import { View, Text, TouchableOpacity, TextInput } from 'react-native';
 import { CheckCircle, XCircle, Sparkles } from 'lucide-react-native';
 import type { WordDto, SentenceDto } from '@/features/course/types';
 import type { InteractionType, TypingAnswer } from '../../types';
@@ -55,7 +55,7 @@ export const TypingStepBase = ({ data, interactionType, onComplete }: TypingBase
   };
 
   return (
-    <ScrollView className="flex-1 p-4">
+    <View className="flex-1 p-4">
       <View className="rounded-2xl border border-border bg-card p-6">
         {/* Nagłówek */}
         <View className="mb-6 items-center">
@@ -160,6 +160,6 @@ export const TypingStepBase = ({ data, interactionType, onComplete }: TypingBase
           </View>
         )}
       </View>
-    </ScrollView>
+    </View>
   );
 };
