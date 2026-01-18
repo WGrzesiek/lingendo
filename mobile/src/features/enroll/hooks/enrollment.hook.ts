@@ -53,9 +53,10 @@ export const useEnrollment = () => {
         enrollmentId: string;
         algorithm: LearnAlgorithm;
       }) => enrollmentService.updateLearnAlgorithm(enrollmentId, algorithm),
-      onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.ENROLLMENTS] });
-        queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.DECKS] });
+      onSuccess: async () => {
+        await queryClient.refetchQueries({ queryKey: [QUERY_KEYS.COURSES] });
+
+
       },
     });
 
@@ -66,14 +67,13 @@ export const useEnrollment = () => {
     useMutation({
       mutationFn: ({
         enrollmentId,
-        flashcardsPerSession,
+        limit,
       }: {
         enrollmentId: string;
-        flashcardsPerSession: number;
-      }) => enrollmentService.updateFlashcardsPerSession(enrollmentId, flashcardsPerSession),
-      onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.ENROLLMENTS] });
-        queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.DECKS] });
+        limit: number;
+      }) => enrollmentService.updateFlashcardsPerSession(enrollmentId, limit),
+      onSuccess: async () => {
+        await queryClient.refetchQueries({ queryKey: [QUERY_KEYS.COURSES] });
       },
     });
 
@@ -84,14 +84,13 @@ export const useEnrollment = () => {
     useMutation({
       mutationFn: ({
         enrollmentId,
-        reviewSchedule,
+        mode,
       }: {
         enrollmentId: string;
-        reviewSchedule: ReviewSchedule;
-      }) => enrollmentService.updateReviewSchedule(enrollmentId, reviewSchedule),
-      onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.ENROLLMENTS] });
-        queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.DECKS] });
+        mode: ReviewSchedule;
+      }) => enrollmentService.updateReviewSchedule(enrollmentId, mode),
+      onSuccess: async () => {
+        await queryClient.refetchQueries({ queryKey: [QUERY_KEYS.COURSES] });
       },
     });
 

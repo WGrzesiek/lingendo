@@ -1,15 +1,33 @@
 import React, { useState, useCallback } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator } from 'react-native';
+import {
+  View,
+  Text,
+  ScrollView,
+  TouchableOpacity,
+  ActivityIndicator,
+  Modal,
+  Pressable,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useCourse, type CourseWord } from '@/features/course';
-import { deckOwnerConfig } from '@/features/deck/types/deck.types';
+import { useEnrollment } from '@/features/enroll';
+import {
+  deckOwnerConfig,
+  learnAlgorithmConfig,
+  reviewScheduleConfig,
+  learnAlgorithmValues,
+  reviewScheduleValues,
+  type LearnAlgorithm,
+  type ReviewSchedule,
+} from '@/features/deck/types/deck.types';
 
 /**
  * Ekran szczegółów kursu
  */
 function CourseScreen() {
   const { id: enrollmentId } = useLocalSearchParams<{ id: string }>();
+  const [settingsModalVisible, setSettingsModalVisible] = useState(false);
 
   const { useCourseHeader, useCourseSettings, useCourseProgress, useInfiniteCourseWords } =
     useCourse();
@@ -214,11 +232,20 @@ function CourseScreen() {
           </View>
 
           {/* Ustawienia kursu */}
-          <View className="mb-6 rounded-xl border border-border bg-card p-4">
-            <Text className="mb-4 text-lg font-bold text-foreground">Ustawienia nauki</Text>
+          <TouchableOpacity
+            onPress={() => setSettingsModalVisible(true)}
+            activeOpacity={0.7}
+            className="mb-6 rounded-xl border border-border bg-card p-4">
+            <View className="mb-4 flex-row items-center justify-between">
+              <Text className="text-lg font-bold text-foreground">Ustawienia nauki</Text>
+              <Text className="font-medium text-primary">Zmień ⚙️</Text>
+            </View>
             <View className="flex-row justify-between">
               <Text className="text-muted-foreground">Algorytm</Text>
-              <Text className="font-medium text-foreground">{settingsData.algorithm}</Text>
+              <Text className="font-medium text-foreground">
+                {learnAlgorithmConfig[settingsData.algorithm as LearnAlgorithm]?.label ??
+                  settingsData.algorithm}
+              </Text>
             </View>
             <View className="mt-2 flex-row justify-between">
               <Text className="text-muted-foreground">Słówek na sesję</Text>
@@ -226,11 +253,24 @@ function CourseScreen() {
             </View>
             <View className="mt-2 flex-row justify-between">
               <Text className="text-muted-foreground">Harmonogram powtórek</Text>
-              <Text className="font-medium text-foreground">{settingsData.reviewSchedule}</Text>
+              <Text className="font-medium text-foreground">
+                {reviewScheduleConfig[settingsData.reviewSchedule as ReviewSchedule]?.label ??
+                  settingsData.reviewSchedule}
+              </Text>
             </View>
-          </View>
+          </TouchableOpacity>
         </View>
       </ScrollView>
+
+      {/* Modal ustawień */}
+      <SettingsModal
+        visible={settingsModalVisible}
+        onClose={() => setSettingsModalVisible(false)}
+        enrollmentId={enrollmentId ?? ''}
+        currentAlgorithm={settingsData.algorithm as LearnAlgorithm}
+        currentWordsPerSession={settingsData.wordsPerSession}
+        currentReviewSchedule={settingsData.reviewSchedule as ReviewSchedule}
+      />
     </SafeAreaView>
   );
 }
@@ -244,6 +284,239 @@ const phaseConfig = {
   REVIEW: { label: 'Do powtórki', bgColor: 'bg-primary/20', textColor: 'text-primary' },
   RELEARNING: { label: 'Powtórka', bgColor: 'bg-orange-100', textColor: 'text-orange-600' },
 } as const;
+
+// =====================
+// SETTINGS MODAL
+// =====================
+
+interface SettingsModalProps {
+  visible: boolean;
+  onClose: () => void;
+  enrollmentId: string;
+  currentAlgorithm: LearnAlgorithm;
+  currentWordsPerSession: number;
+  currentReviewSchedule: ReviewSchedule;
+}
+
+const WORDS_PER_SESSION_OPTIONS = [5, 10, 15, 20, 25, 30, 40, 50];
+
+/**
+ * Modal do zmiany ustawień kursu
+ */
+function SettingsModal({
+  visible,
+  onClose,
+  enrollmentId,
+  currentAlgorithm,
+  currentWordsPerSession,
+  currentReviewSchedule,
+}: SettingsModalProps) {
+  const [algorithm, setAlgorithm] = useState<LearnAlgorithm>(currentAlgorithm);
+  const [wordsPerSession, setWordsPerSession] = useState(currentWordsPerSession);
+  const [reviewSchedule, setReviewSchedule] = useState<ReviewSchedule>(currentReviewSchedule);
+  const [activeSection, setActiveSection] = useState<'algorithm' | 'words' | 'schedule' | null>(
+    null
+  );
+
+  const { useUpdateLearnAlgorithm, useUpdateFlashcardsPerSession, useUpdateReviewSchedule } =
+    useEnrollment();
+  const updateAlgorithmMutation = useUpdateLearnAlgorithm();
+  const updateWordsMutation = useUpdateFlashcardsPerSession();
+  const updateScheduleMutation = useUpdateReviewSchedule();
+
+  const isSaving =
+    updateAlgorithmMutation.isPending ||
+    updateWordsMutation.isPending ||
+    updateScheduleMutation.isPending;
+
+  React.useEffect(() => {
+    if (visible) {
+      setAlgorithm(currentAlgorithm);
+      setWordsPerSession(currentWordsPerSession);
+      setReviewSchedule(currentReviewSchedule);
+      setActiveSection(null);
+    }
+  }, [visible, currentAlgorithm, currentWordsPerSession, currentReviewSchedule]);
+
+  const handleSave = async () => {
+    try {
+      const promises: Promise<unknown>[] = [];
+
+      if (algorithm !== currentAlgorithm) {
+        promises.push(updateAlgorithmMutation.mutateAsync({ enrollmentId, algorithm }));
+      }
+      if (wordsPerSession !== currentWordsPerSession) {
+        promises.push(
+          updateWordsMutation.mutateAsync({ enrollmentId, limit: wordsPerSession })
+        );
+      }
+      if (reviewSchedule !== currentReviewSchedule) {
+        promises.push(updateScheduleMutation.mutateAsync({ enrollmentId, mode: reviewSchedule }));
+      }
+
+      await Promise.all(promises);
+      onClose();
+    } catch (error) {
+      console.error('Błąd podczas zapisywania ustawień:', error);
+    }
+  };
+
+  const hasChanges =
+    algorithm !== currentAlgorithm ||
+    wordsPerSession !== currentWordsPerSession ||
+    reviewSchedule !== currentReviewSchedule;
+
+  return (
+    <Modal visible={visible} animationType="slide" transparent={true} onRequestClose={onClose}>
+      <View className="flex-1 justify-end bg-black/50">
+        <Pressable className="flex-1" onPress={onClose} />
+        <View className="max-h-[85%] rounded-t-3xl border-t border-border bg-card">
+          {/* Header */}
+          <View className="flex-row items-center justify-between border-b border-border p-4">
+            <TouchableOpacity onPress={onClose}>
+              <Text className="text-base text-muted-foreground">Anuluj</Text>
+            </TouchableOpacity>
+            <Text className="text-lg font-bold text-foreground">Ustawienia nauki</Text>
+            <TouchableOpacity onPress={handleSave} disabled={!hasChanges || isSaving}>
+              {isSaving ? (
+                <ActivityIndicator size="small" color="#22c55e" />
+              ) : (
+                <Text
+                  className={`text-base font-semibold ${hasChanges ? 'text-primary' : 'text-muted-foreground'}`}>
+                  Zapisz
+                </Text>
+              )}
+            </TouchableOpacity>
+          </View>
+
+          <ScrollView className="p-4" showsVerticalScrollIndicator={false}>
+            {/* Algorytm nauki */}
+            <View className="mb-6">
+              <TouchableOpacity
+                onPress={() => setActiveSection(activeSection === 'algorithm' ? null : 'algorithm')}
+                className="mb-2 flex-row items-center justify-between">
+                <Text className="text-base font-semibold text-foreground">Algorytm nauki</Text>
+                <Text className="text-muted-foreground">
+                  {activeSection === 'algorithm' ? '▲' : '▼'}
+                </Text>
+              </TouchableOpacity>
+
+              <Text className="mb-3 text-sm text-muted-foreground">
+                {learnAlgorithmConfig[algorithm]?.label ?? algorithm}
+              </Text>
+
+              {activeSection === 'algorithm' && (
+                <View className="gap-2">
+                  {learnAlgorithmValues.map((alg) => (
+                    <TouchableOpacity
+                      key={alg}
+                      onPress={() => {
+                        setAlgorithm(alg);
+                        setActiveSection(null);
+                      }}
+                      className={`rounded-lg border p-3 ${
+                        algorithm === alg
+                          ? 'border-primary bg-primary/10'
+                          : 'border-border bg-background'
+                      }`}>
+                      <Text
+                        className={`font-medium ${algorithm === alg ? 'text-primary' : 'text-foreground'}`}>
+                        {learnAlgorithmConfig[alg]?.label ?? alg}
+                      </Text>
+                    </TouchableOpacity>
+                  ))}
+                </View>
+              )}
+            </View>
+
+            {/* Słówka na sesję */}
+            <View className="mb-6">
+              <TouchableOpacity
+                onPress={() => setActiveSection(activeSection === 'words' ? null : 'words')}
+                className="mb-2 flex-row items-center justify-between">
+                <Text className="text-base font-semibold text-foreground">Słówek na sesję</Text>
+                <Text className="text-muted-foreground">
+                  {activeSection === 'words' ? '▲' : '▼'}
+                </Text>
+              </TouchableOpacity>
+
+              <Text className="mb-3 text-sm text-muted-foreground">
+                Obecnie: {wordsPerSession} słówek
+              </Text>
+
+              {activeSection === 'words' && (
+                <View className="flex-row flex-wrap gap-2">
+                  {WORDS_PER_SESSION_OPTIONS.map((num) => (
+                    <TouchableOpacity
+                      key={num}
+                      onPress={() => {
+                        setWordsPerSession(num);
+                        setActiveSection(null);
+                      }}
+                      className={`rounded-lg border px-4 py-2 ${
+                        wordsPerSession === num
+                          ? 'border-primary bg-primary/10'
+                          : 'border-border bg-background'
+                      }`}>
+                      <Text
+                        className={`font-medium ${wordsPerSession === num ? 'text-primary' : 'text-foreground'}`}>
+                        {num}
+                      </Text>
+                    </TouchableOpacity>
+                  ))}
+                </View>
+              )}
+            </View>
+
+            {/* Harmonogram powtórek */}
+            <View className="mb-6">
+              <TouchableOpacity
+                onPress={() => setActiveSection(activeSection === 'schedule' ? null : 'schedule')}
+                className="mb-2 flex-row items-center justify-between">
+                <Text className="text-base font-semibold text-foreground">
+                  Harmonogram powtórek
+                </Text>
+                <Text className="text-muted-foreground">
+                  {activeSection === 'schedule' ? '▲' : '▼'}
+                </Text>
+              </TouchableOpacity>
+
+              <Text className="mb-3 text-sm text-muted-foreground">
+                {reviewScheduleConfig[reviewSchedule]?.label ?? reviewSchedule}
+              </Text>
+
+              {activeSection === 'schedule' && (
+                <View className="gap-2">
+                  {reviewScheduleValues.map((sched) => (
+                    <TouchableOpacity
+                      key={sched}
+                      onPress={() => {
+                        setReviewSchedule(sched);
+                        setActiveSection(null);
+                      }}
+                      className={`rounded-lg border p-3 ${
+                        reviewSchedule === sched
+                          ? 'border-primary bg-primary/10'
+                          : 'border-border bg-background'
+                      }`}>
+                      <Text
+                        className={`font-medium ${reviewSchedule === sched ? 'text-primary' : 'text-foreground'}`}>
+                        {reviewScheduleConfig[sched]?.label ?? sched}
+                      </Text>
+                    </TouchableOpacity>
+                  ))}
+                </View>
+              )}
+            </View>
+
+            {/* Spacer na dole */}
+            <View className="h-8" />
+          </ScrollView>
+        </View>
+      </View>
+    </Modal>
+  );
+}
 
 interface WordCardProps {
   word: CourseWord;
@@ -319,7 +592,7 @@ function WordCard({ word }: WordCardProps) {
             <View className="gap-3">
               {allSentences.map((sentence) => (
                 <View key={sentence.id} className="gap-1">
-                  <Text className="text-sm italic text-foreground">"{sentence.sentence}"</Text>
+                  <Text className="text-sm italic text-foreground">{sentence.sentence}</Text>
                   <Text className="text-sm italic text-muted-foreground">
                     {sentence.translation}
                   </Text>

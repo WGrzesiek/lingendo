@@ -44,10 +44,12 @@ export const ENDPOINTS = {
     MY: '/v1/decks/enrollments/my',
     ENROLL: (deckId: string) => `/v1/decks/${deckId}/enrollments`,
     UNENROLL: (enrollmentId: string) => `/v1/decks/enrollments/${enrollmentId}`,
-    ALGORITHM: (enrollmentId: string) => `/v1/decks/enrollments/${enrollmentId}/algorithm`,
-    SESSION_LIMIT: (enrollmentId: string) => `/v1/decks/enrollments/${enrollmentId}/session-limit`,
-    REVIEW_SCHEDULE: (enrollmentId: string) =>
-      `/v1/decks/enrollments/${enrollmentId}/review-schedule`,
+    ALGORITHM: (enrollmentId: string, algorithm: string) =>
+      `/v1/decks/enrollments/${enrollmentId}/algorithm?algorithm=${algorithm}`,
+    SESSION_LIMIT: (enrollmentId: string, limit: number) =>
+      `/v1/decks/enrollments/${enrollmentId}/session-limit?limit=${limit}`,
+    REVIEW_SCHEDULE: (enrollmentId: string, mode: string) =>
+      `/v1/decks/enrollments/${enrollmentId}/review-schedule?mode=${mode}`,
   },
   VOCABULARY: {
     CREATE_BATCH: '/v1/vocabulary/create-batch',

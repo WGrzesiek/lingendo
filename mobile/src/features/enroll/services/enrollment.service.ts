@@ -26,9 +26,8 @@ export const enrollmentService = {
     enrollmentId: string,
     algorithm: LearnAlgorithm
   ): Promise<EnrollmentDto> => {
-    const { data } = await apiClient.patch<EnrollmentDto>(
-      ENDPOINTS.ENROLLMENT.ALGORITHM(enrollmentId),
-      { algorithm }
+    const { data } = await apiClient.put<EnrollmentDto>(
+      ENDPOINTS.ENROLLMENT.ALGORITHM(enrollmentId, algorithm)
     );
     return data;
   },
@@ -38,11 +37,10 @@ export const enrollmentService = {
    */
   updateFlashcardsPerSession: async (
     enrollmentId: string,
-    flashcardsPerSession: number
+    limit: number
   ): Promise<EnrollmentDto> => {
-    const { data } = await apiClient.patch<EnrollmentDto>(
-      ENDPOINTS.ENROLLMENT.SESSION_LIMIT(enrollmentId),
-      { flashcardsPerSession }
+    const { data } = await apiClient.put<EnrollmentDto>(
+      ENDPOINTS.ENROLLMENT.SESSION_LIMIT(enrollmentId, limit),
     );
     return data;
   },
@@ -52,23 +50,11 @@ export const enrollmentService = {
    */
   updateReviewSchedule: async (
     enrollmentId: string,
-    reviewSchedule: ReviewSchedule
+    mode: ReviewSchedule
   ): Promise<EnrollmentDto> => {
-    const { data } = await apiClient.patch<EnrollmentDto>(
-      ENDPOINTS.ENROLLMENT.REVIEW_SCHEDULE(enrollmentId),
-      { reviewSchedule }
+    const { data } = await apiClient.put<EnrollmentDto>(
+      ENDPOINTS.ENROLLMENT.REVIEW_SCHEDULE(enrollmentId, mode),
     );
-    return data;
-  },
-
-  /**
-   * Aktualizuje wszystkie ustawienia zapisu naraz
-   */
-  updateEnrollmentSettings: async (
-    enrollmentId: string,
-    settings: UpdateEnrollmentSettingsRequest
-  ): Promise<EnrollmentDto> => {
-    const { data } = await apiClient.patch<EnrollmentDto>(`/enrollments/${enrollmentId}`, settings);
     return data;
   },
 };
