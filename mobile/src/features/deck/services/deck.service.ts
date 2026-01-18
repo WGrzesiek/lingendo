@@ -4,6 +4,7 @@ import type { PageResponse } from '@/types/common';
 import type {
   DeckDto,
   DeckListItem,
+  CreatedDeckListItem,
   DeckFilters,
   DeckEnrollmentDetails,
   CreateDeckRequest,
@@ -199,6 +200,21 @@ export const deckService = {
    */
   getDeckStatistics: async (deckId: string) => {
     const { data } = await apiClient.get(ENDPOINTS.DECKS.STATISTICS(deckId));
+    return data;
+  },
+
+  /**
+   * Pobiera talie utworzone przez użytkownika (moje kursy)
+   */
+  getDecksCreatedByMe: async (params?: {
+    deckVisibility?: DeckVisibility[];
+    owner?: DeckOwnerType[];
+    page?: number;
+    size?: number;
+  }): Promise<PageResponse<CreatedDeckListItem>> => {
+    const { data } = await apiClient.get<PageResponse<CreatedDeckListItem>>(ENDPOINTS.DECKS.LIST, {
+      params,
+    });
     return data;
   },
 };

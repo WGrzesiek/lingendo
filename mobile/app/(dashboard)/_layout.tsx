@@ -38,14 +38,20 @@ export default function DashboardLayout() {
         }}
       />
       <Tabs.Screen
-        name="courses"
+        name="my-courses"
         options={{
           title: 'Moje kursy',
           tabBarIcon: ({ color, size }) => <BookOpen size={size} color={color} />,
         }}
       />
 
-      {/* Ukryte ekrany - */}
+      {/* Ukryte ekrany */}
+      <Tabs.Screen
+        name="courses"
+        options={{
+          href: null,
+        }}
+      />
       <Tabs.Screen
         name="course/[id]"
         options={{

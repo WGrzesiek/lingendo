@@ -104,6 +104,21 @@ export const useDeck = () => {
     });
 
   /**
+   * Pobiera talie utworzone przez użytkownika (moje kursy)
+   */
+  const useDecksCreatedByMe = (page: number = 0, size: number = 20) =>
+    useQuery({
+      queryKey: [QUERY_KEYS.DECKS, 'created-by-me', { page, size }],
+      queryFn: () =>
+        deckService.getDecksCreatedByMe({
+          deckVisibility: ['PRIVATE', 'PUBLIC'],
+          owner: ['I', 'COMMUNITY'],
+          page,
+          size,
+        }),
+    });
+
+  /**
    * Pobiera fiszki talii z paginacją
    */
   const useDeckFlashcards = (deckId: string, page?: number, size?: number) =>
@@ -188,7 +203,7 @@ export const useDeck = () => {
     });
 
   /**
-   * Aktualizuje algorytm nauki
+   * Aktualizuje algorytm nauki talii
    */
   const useUpdateAlgorithm = () =>
     useMutation({
@@ -246,6 +261,7 @@ export const useDeck = () => {
     useDeckWithEnrollment,
     useDeckById,
     useDeckStatistics,
+    useDecksCreatedByMe,
     useDeckFlashcards,
     // Mutations
     useCreateDeck,
