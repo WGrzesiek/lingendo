@@ -17,3 +17,13 @@ export function isNoMoreFlashcardsError(error: unknown): boolean {
     e?.response?.data?.message === 'Brak dostępnych fiszek do nauki w tej sesji'
   );
 }
+
+/**
+ * Sprawdza czy błąd to "brak więcej fiszek"
+ */
+export function isNoMoreFlashcardsToReviewError(error: unknown): boolean {
+  const e = error as AxiosError<ApiErrorResponse>;
+
+    return e.response?.status === 404;
+
+}

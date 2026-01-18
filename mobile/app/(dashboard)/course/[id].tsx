@@ -99,7 +99,7 @@ function CourseScreen() {
 
   const handleStartNewSession = () => {
     if (!enrollmentId) return;
-    initializeSession.mutate(enrollmentId)
+    initializeSession.mutate(enrollmentId);
   };
 
   const handleBack = () => {
@@ -177,6 +177,17 @@ function CourseScreen() {
                 ) : (
                   <Text className="text-lg font-bold text-white">Rozpocznij nową sesję</Text>
                 )}
+              </TouchableOpacity>
+            )}
+
+            {/* Przycisk powtórki */}
+            {courseProgress.wordsToReview > 0 && (
+              <TouchableOpacity
+                onPress={() => router.push(`/(dashboard)/review/${enrollmentId}`)}
+                className="mt-3 items-center rounded-xl border-2 border-orange-500 bg-orange-500/10 py-4">
+                <Text className="text-lg font-bold text-orange-600">
+                  Powtórka ({courseProgress.wordsToReview} słówek)
+                </Text>
               </TouchableOpacity>
             )}
           </View>

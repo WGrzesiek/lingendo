@@ -65,7 +65,8 @@ export const ENDPOINTS = {
     SETTINGS: (enrollmentId: string) => `/v1/decks/enrollment/${enrollmentId}/settings`,
     WORDS: (enrollmentId: string) => `/v1/decks/enrollments/${enrollmentId}/course-view`,
     FLASHCARD_STATS: (enrollmentId: string) => `/v1/courses/${enrollmentId}/flashcards/stats`,
-    INITIALIZE_SESSION: (enrollmentId: string) => `/v1/decks/${enrollmentId}/sessions?flashcardFetchStrategy=ALPHABETICAL&type=LEARNING`,
+    INITIALIZE_SESSION: (enrollmentId: string) =>
+      `/v1/decks/${enrollmentId}/sessions?flashcardFetchStrategy=ALPHABETICAL&type=LEARNING`,
   },
   LEARNING: {
     SESSION: '/v1/learning/session',
@@ -76,6 +77,12 @@ export const ENDPOINTS = {
       `/v1/decks/sessions/${sessionId}/flashcards/${flashcardId}/answer`,
     HEADER_PROGRESS: (sessionId: string) => `/v1/decks/sessions/${sessionId}/learn-header`,
     COMPLETE_SESSION: (sessionId: string) => `/v1/decks/sessions/${sessionId}/complete`,
+  },
+  REVIEW: {
+    HEADER: (enrollmentId: string) => `/v1/enrollments/${enrollmentId}/review-header`,
+    WORDS: (enrollmentId: string) => `/v1/decks/enrollments/${enrollmentId}/review-words-view`,
+    NEXT_FLASHCARD: (enrollmentId: string) => `/v1/decks/reviews/enrollments/${enrollmentId}/next`,
+    SUBMIT_ANSWER: (flashcardId: string) => `/v1/decks/reviews/flashcards/${flashcardId}/answer`,
   },
 } as const;
 
