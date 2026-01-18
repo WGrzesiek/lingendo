@@ -89,8 +89,7 @@ function StudentDashboard() {
     })) || MOCK_RECENT_ACTIVITY;
 
   const handleDeckPress = (deck: DeckListItem) => {
-    // TODO: Nawigacja do ekranu kursu
-    Alert.alert('Kurs', `Otwieranie kursu: ${deck.deckName}`);
+    router.push(`/(dashboard)/course/${deck.deckId}`);
   };
 
   const handleQuickAction = (action: { title: string }) => {
