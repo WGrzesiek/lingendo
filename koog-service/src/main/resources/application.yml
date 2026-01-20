@@ -21,7 +21,9 @@ spring:
       bootstrap-servers: 192.168.23.9:9094
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
-      retries: 3 #
+      retries: 3
+      properties:
+        spring.json.add.type.headers: false
 
     consumer:
       bootstrap-servers: 192.168.23.9:9094
@@ -31,6 +33,7 @@ spring:
       properties:
         spring.deserializer.value.delegate.class: org.springframework.kafka.support.serializer.JsonDeserializer
         spring.json.trusted.packages: "*"
+
 server:
   port: 7777
 
@@ -48,11 +51,20 @@ management:
     export:
       zipkin:
         endpoint: http://192.168.23.9:9411/api/v2/spans
+
 springdoc:
   api-docs:
     path: /api-docs
   swagger-ui:
-    enabled: false
+    enabled: true
+    path: /swagger-ui.html
 
+# Konfiguracja OpenAI
 openai:
-  api-key: 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
+    api-key:
+# Konfiguracja AI
+ai:
+  sentence:
+    model: gpt-5-mini
+    temperature: 0.7
+    prompt-version: 1
