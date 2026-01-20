@@ -10,9 +10,13 @@ import ai.koog.prompt.executor.llms.all.simpleOpenAIExecutor
 import ai.koog.prompt.executor.clients.openai.OpenAIModels
 import ai.koog.prompt.structure.StructureFixingParser
 import ai.koog.prompt.structure.executeStructured
+import com.learnwords.koogservice.application.dto.SentenceStructuredResult
 import com.learnwords.koogservice.config.AI_CONFIG
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
+import java.math.BigDecimal
+import java.math.RoundingMode
+import java.util.Objects
 
 @Component
 class AiClient(
@@ -61,7 +65,7 @@ class AiClient(
      */
     suspend fun generateSentenceStructured(
         userPrompt: String,
-    ): SentenceSchema {
+    ): SentenceStructuredResult{
         val result = promptExecutor.executeStructured<SentenceSchema>(
 //            prompt = Prompt(userPrompt),
             prompt = prompt("Generate Sentences") {
@@ -79,6 +83,28 @@ class AiClient(
         )
 
         val structured = result.getOrElse { throw it }
-        return structured.data
+        // gpt-5-mini	$0.25	$0.025	$2.00
+
+        val inputTokens = structured.message.metaInfo.inputTokensCount ?: 0
+        val outputTokens = structured.message.metaInfo.outputTokensCount ?: 0
+
+        val inputCost = BigDecimal.valueOf(inputTokens.toLong())
+            .multiply(BigDecimal("0.25"))
+            .divide(BigDecimal("1000000"), 8, RoundingMode.HALF_UP)
+
+        val outputCost = BigDecimal.valueOf(outputTokens.toLong())
+            .multiply(BigDecimal("2.00"))
+            .divide(BigDecimal("1000000"), 8, RoundingMode.HALF_UP)
+
+        val totalCost = inputCost.add(outputCost)
+        return SentenceStructuredResult(
+            json = structured.data,
+            metadata = structured.message.metaInfo.metadata,
+            inputTokensCount = inputTokens,
+            outputTokensCount = outputTokens,
+            totalTokensCount = structured.message.metaInfo.totalTokensCount,
+            cost = totalCost
+
+        )
     }
 }

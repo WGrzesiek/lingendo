@@ -4,6 +4,7 @@ import com.learnwords.koogservice.enums.EventStatus
 import jakarta.persistence.*
 import org.hibernate.annotations.JdbcTypeCode
 import org.hibernate.type.SqlTypes
+import java.math.BigDecimal
 import java.time.Instant
 
 /**
@@ -62,7 +63,16 @@ class SentenceGenerationItem(
     var errorMessage: String? = null,
 
     @Column(name = "cost_estimate")
-    var costEstimate: Double? = null,
+    var costEstimate: BigDecimal? = null,
+
+    @Column(name = "input_tokens_count")
+    var inputTokensCount: Int? = null,
+
+    @Column(name = "output_tokens_count")
+    var outputTokensCount: Int? = null,
+
+    @Column(name = "total_tokens_count")
+    var totalTokensCount: Int? = null,
 
     @Column(name = "created_at", nullable = false)
     val createdAt: Instant = Instant.now(),

@@ -1,5 +1,6 @@
 package com.learnwords.koogservice.application
 
+import aws.smithy.kotlin.runtime.util.type
 import com.learnwords.koogservice.ai.AiClient
 import com.learnwords.koogservice.ai.SentencePrompt
 import com.learnwords.koogservice.enums.EventStatus
@@ -184,11 +185,19 @@ class SentenceGenerationServiceImpl(
 
 
         val response = runBlocking { aiClient.generateSentenceStructured(prompt)}
-        val resultJsonString: String = json.encodeToString(response)
+        val resultJsonString: String = json.encodeToString(response.json)
 
-        itemRepository.updateItemResult(item.itemId , EventStatus.SUCCESS, resultJsonString)
 
-        log.debug("Wygenerowano {} zdań dla słówka: {}", response.sentences.size, word.word)
+
+
+        itemRepository.updateItemResult(item.itemId , EventStatus.SUCCESS, resultJsonString,
+            response.inputTokensCount,
+            response.outputTokensCount,
+            response.totalTokensCount,
+            response.cost
+        )
+
+        log.debug("Wygenerowano {} zdań dla słówka: {}", response.json.sentences.size, word.word)
     }
     private val json = Json {
         encodeDefaults = true
