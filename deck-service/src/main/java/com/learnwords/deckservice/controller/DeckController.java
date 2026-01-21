@@ -4,6 +4,7 @@ import com.learnwords.deckservice.dto.*;
 import com.learnwords.deckservice.dto.deck.CreateDeckDto;
 import com.learnwords.deckservice.dto.deck.DeckDetailsDto;
 import com.learnwords.deckservice.dto.deck.DeckDto;
+import com.learnwords.deckservice.dto.deck.GenerateSentencesResponse;
 import com.learnwords.deckservice.enums.DeckOwner;
 import com.learnwords.deckservice.enums.DeckVisibility;
 import com.learnwords.deckservice.exception.exceptions.DeckNotFoundException;
@@ -148,46 +149,7 @@ public class DeckController {
         this.deckService = deckService;
     }
 
-//    /**
-//     * Pobiera paginowaną listę talii kursów studenta.
-//     *
-//     * <p>Endpoint zwraca talie przypisane do użytkownika z nagłówka x-client-id.
-//     * Wyniki są paginowane według podanych parametrów page i size.
-//     *
-//     * @param userId ID użytkownika z nagłówka x-client-id
-//     * @param page numer strony (domyślnie 0)
-//     * @param size rozmiar strony (domyślnie 4)
-//     * @return strona talii kursów studenta
-//     */
-//    @Operation(
-//        summary = "Pobierz talie kursów studenta",
-//        description = "Pobiera paginowaną listę talii kursów przypisanych do użytkownika."
-//    )
-//    @ApiResponses(value = {
-//        @ApiResponse(
-//            responseCode = "200",
-//            description = "Lista talii kursów pobrana pomyślnie",
-//            content = @Content(schema = @Schema(implementation = StudentMyCourseListItemDto.class))
-//        ),
-//        @ApiResponse(
-//            responseCode = "400",
-//            description = "Błędne parametry zapytania",
-//            content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))
-//        )
-//    })
-//    @GetMapping("/student-my-decks")
-//    public ResponseEntity<Page<StudentMyCourseListItemDto>> getStudentMyCourseListItemDto(
-//            @Parameter(description = "ID użytkownika z nagłówka", required = true, example = "user-123") @RequestHeader(USER_ID_HEADER) String userId,
-//            @RequestParam(defaultValue = "0") int page,
-//            @RequestParam(defaultValue = "4") int size
-//    ) {
-//
-//        log.debug("Pobieranie talii kursów studenta - userId: {}, page: {}, size: {}", userId, page, size);
-//        Page<StudentMyCourseListItemDto> decks = deckService.getStudentMyCourseDecks(userId, page, size);
-//        log.info("Znaleziono {} talii kursów dla użytkownika {}", decks.getTotalElements(), userId);
-//        return ResponseEntity.ok(decks);
-//
-//    }
+
 
     /**
      * Pobiera listę talii z opcjonalnymi filtrami.
@@ -1134,5 +1096,48 @@ public class DeckController {
         boolean isAvailable = !isTaken;
         log.info("Nazwa talii '{}' dla użytkownika {} jest dostępna: {}", deckName, userId, isAvailable);
         return ResponseEntity.ok(isAvailable);
+    }
+
+    /**
+     * Generuje przykładowe zdania dla wszystkich słówek w talii.
+     * 
+     * <p>Wysyła asynchroniczne żądanie do serwisu AI o wygenerowanie zdań.
+     * Rezultat będzie dostępny po przetworzeniu przez serwis koog-service.
+     * 
+     * @param deckId ID talii dla której generować zdania
+     * @param userId ID użytkownika z nagłówka x-client-id
+     * @return informacje o wysłanym żądaniu (correlationId, liczba słówek)
+     * @throws IllegalArgumentException jeśli deckId lub userId jest pusty
+     * @throws DeckNotFoundException jeśli talia o podanym ID nie istnieje
+     */
+    @Operation(
+        summary = "Generuj zdania dla talii",
+        description = "Wysyła asynchroniczne żądanie generowania przykładowych zdań dla wszystkich słówek w talii."
+    )
+    @ApiResponses(value = {
+        @ApiResponse(
+            responseCode = "202",
+            description = "Żądanie generowania zdań przyjęte do przetworzenia",
+            content = @Content(schema = @Schema(implementation = GenerateSentencesResponse.class))
+        ),
+        @ApiResponse(
+            responseCode = "400",
+            description = "Brak wymaganego nagłówka lub nieprawidłowe ID talii",
+            content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))
+        ),
+        @ApiResponse(
+            responseCode = "404",
+            description = "Talia nie znaleziona",
+            content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))
+        )
+    })
+    @PostMapping("/{deckId}/generate-sentences")
+    public ResponseEntity<GenerateSentencesResponse> generateSentences(
+            @Parameter(description = "ID talii", required = true, example = "deck-123") @PathVariable String deckId,
+            @Parameter(description = "ID użytkownika z nagłówka", required = true, example = "user-123") @RequestHeader(USER_ID_HEADER) String userId) {
+        log.debug("Żądanie generowania zdań dla talii {} przez użytkownika {}", deckId, userId);
+        GenerateSentencesResponse response = deckService.generateSentences(deckId, userId);
+        log.info("Żądanie generowania zdań wysłane dla talii {} - {} słówek", deckId, response.wordsCount());
+        return ResponseEntity.status(HttpStatus.ACCEPTED).body(response);
     }
 }

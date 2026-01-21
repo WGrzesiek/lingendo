@@ -2,10 +2,10 @@ package com.learnwords.deckservice.service.impl;
 
 import com.learnwords.auth.v1.GetUserNameByIdResponse;
 import com.learnwords.common.KafkaTopic;
+import com.learnwords.common.dto.WordItemDto;
 import com.learnwords.common.events.DeckCreatedEvent;
-import com.learnwords.deckservice.dto.deck.CreateDeckDto;
-import com.learnwords.deckservice.dto.deck.DeckDetailsDto;
-import com.learnwords.deckservice.dto.deck.DeckDto;
+import com.learnwords.deckservice.dto.deck.*;
+import com.learnwords.deckservice.dto.flashcard.FlashcardDto;
 import com.learnwords.deckservice.entity.Deck;
 import com.learnwords.deckservice.enums.*;
 import com.learnwords.deckservice.exception.exceptions.DeckNotFoundException;
@@ -15,6 +15,7 @@ import com.learnwords.deckservice.repository.DeckRepository;
 import com.learnwords.deckservice.service.DeckAccessService;
 import com.learnwords.deckservice.service.DeckEnrollmentService;
 import com.learnwords.deckservice.service.DeckService;
+import com.learnwords.deckservice.service.FlashcardService;
 import com.learnwords.deckservice.service.event.GenericEventProducer;
 import com.learnwords.deckservice.service.grpcClient.UserGrcpClient;
 import jakarta.transaction.Transactional;
@@ -62,16 +63,22 @@ public class DeckServiceImpl implements DeckService {
     private final GenericEventProducer eventProducer;
     private final UserGrcpClient userGrcpClient;
     private final DeckAccessService deckAccessService;
+    private final KafkaTemplate<String, Object> kafkaTemplate;
+    private final FlashcardService flashcardService;
 
     public DeckServiceImpl(
             DeckRepository deckRepository,
             GenericEventProducer eventProducer, 
             UserGrcpClient userGrcpClient,
-            DeckAccessService deckAccessService) {
+            DeckAccessService deckAccessService,
+            KafkaTemplate<String, Object> kafkaTemplate,
+            FlashcardService flashcardService){
         this.deckRepository = deckRepository;
         this.eventProducer = eventProducer;
         this.userGrcpClient = userGrcpClient;
         this.deckAccessService = deckAccessService;
+        this.kafkaTemplate = kafkaTemplate;
+        this.flashcardService = flashcardService;
     }
 
     /**
@@ -341,6 +348,38 @@ public class DeckServiceImpl implements DeckService {
         }
 
         return isTaken;
+    }
+
+    @Override
+    public GenerateSentencesResponse generateSentences(String deckId, String userId) {
+        if (userId == null || userId.isBlank() || deckId == null || deckId.isBlank()) {
+            log.error("userId lub deckName nie może być pusty");
+            throw new IllegalArgumentException("userId lub deckName nie może być pusty");
+        }
+        DeckDetailsDto deckDetails = getDeckDetailsById(deckId, userId);
+        List<FlashcardDto> flashcards = flashcardService.getAllFlashcardsFromDeck(deckId, userId);
+        SentenceGenerationRequestDto requestDto = SentenceGenerationRequestDto.builder()
+                .id(deckId)
+                .requestedByUserId(userId)
+                .words(flashcards.stream().map(word -> WordItemDto.builder()
+                                        .wordId(word.wordDto().id())
+                                        .word(word.wordDto().word())
+                                        .translations(word.wordDto().translations())
+                                .build())
+                                .toList()
+                                )
+                .level(deckDetails.getDifficulty().name())
+                .category(deckDetails.getCategory().name())
+                .languageFrom(deckDetails.getLanguageFrom().name())
+                .languageTo(deckDetails.getLanguageTo().name())
+                .build();
+        log.info("Wysyłanie żądania generowania zdań dla talii o ID: {}", deckId);
+        kafkaTemplate.send("ai.sentence.request", requestDto);
+        return GenerateSentencesResponse.builder()
+                .message("Żądanie generowania zdań zostało wysłane")
+                .correlationId(deckId)
+                .wordsCount(flashcards.size())
+                .build();
     }
 
     /**

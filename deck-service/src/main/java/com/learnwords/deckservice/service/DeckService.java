@@ -1,9 +1,7 @@
 package com.learnwords.deckservice.service;
 
 import com.learnwords.deckservice.dto.*;
-import com.learnwords.deckservice.dto.deck.CreateDeckDto;
-import com.learnwords.deckservice.dto.deck.DeckDetailsDto;
-import com.learnwords.deckservice.dto.deck.DeckDto;
+import com.learnwords.deckservice.dto.deck.*;
 import com.learnwords.deckservice.entity.Deck;
 import com.learnwords.deckservice.enums.DeckOwner;
 import com.learnwords.deckservice.enums.DeckVisibility;
@@ -66,5 +64,6 @@ public interface DeckService {
     DeckDetailsDto editDeckDetails(String deckId, DeckDetailsDto deckDetailsDto, String userId);
     long getTotalFlashcardsCount(String deckId, String userId);
     boolean isDeckNameTaken(String userId, String deckName);
+    GenerateSentencesResponse generateSentences(String userId, String deckId);
 
 }
