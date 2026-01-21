@@ -42,7 +42,7 @@ class AiClient(
             llmModel = when (aiModelType.lowercase()) {
                 "gpt-4o-mini" -> OpenAIModels.Chat.GPT4oMini
                 "gpt-5-mini" -> OpenAIModels.Chat.GPT5Mini
-                "gtp-5-nano" -> OpenAIModels.Chat.GPT5Nano
+                "gpt-5-nano" -> OpenAIModels.Chat.GPT5Nano
                 else -> OpenAIModels.Chat.GPT4oMini
             },
             strategy = functionalStrategy { input ->

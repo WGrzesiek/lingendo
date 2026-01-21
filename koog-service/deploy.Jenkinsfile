@@ -48,16 +48,25 @@ pipeline {
             }
         }
 
-        stage('Uruchom Docker Compose') {
-            when { expression { params.ACTION == 'up' } }
-            steps {
-                sh """
-                    docker compose -f docker-compose.koog.yml down
-                    IMAGE_NAME=${IMAGE_NAME} IMAGE_TAG=${params.IMAGE_TAG} SPRING_PROFILES_ACTIVE=${params.SPRING_PROFILES_ACTIVE} docker compose -f docker-compose.koog.yml up -d
-                """
-            }
-        }
+stage('Uruchom Docker Compose') {
+  when { expression { params.ACTION == 'up' } }
+  steps {
+    withCredentials([string(credentialsId: 'openai-api-key-dev', variable: 'OPENAI_API_KEY')]) {
+      sh """
+        docker compose -f docker-compose.koog.yml down
+        IMAGE_NAME=${IMAGE_NAME} \
+        IMAGE_TAG=${params.IMAGE_TAG} \
+        SPRING_PROFILES_ACTIVE=${params.SPRING_PROFILES_ACTIVE} \
+        OPENAI_API_KEY=$OPENAI_API_KEY \
+        docker compose -f docker-compose.koog.yml up -d
+      """
+      sh """
+        docker exec -i koog-service sh -lc 'echo "OPENAI_API_KEY length=\${#OPENAI_API_KEY}"'
+      """
+
     }
+  }
+}
 
     post {
         always {
