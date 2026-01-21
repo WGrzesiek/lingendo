@@ -3,7 +3,7 @@ package com.learnwords.deckservice.service.algorithm.state;
 
 import com.learnwords.deckservice.service.algorithm.step.Step;
 
-public sealed interface AlgorithmState permits AbstractState, GrzesiekState {
+public sealed interface AlgorithmState permits AbstractState, GrzesiekState, LeitnerState {
     String serialize();
     AlgorithmState next();
     AlgorithmState previous();

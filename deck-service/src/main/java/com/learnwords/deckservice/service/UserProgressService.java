@@ -4,6 +4,7 @@ import com.learnwords.deckservice.dto.facade.review.ReviewCounters;
 import com.learnwords.deckservice.dto.userFlashcardProgress.UserFlashcardProgressDto;
 import com.learnwords.deckservice.entity.DeckEnrollment;
 import com.learnwords.deckservice.entity.Flashcard;
+import com.learnwords.deckservice.enums.LearnAlgorithm;
 import com.learnwords.deckservice.enums.LearningPhase;
 import com.learnwords.deckservice.service.algorithm.state.AlgorithmState;
 import com.learnwords.deckservice.service.evaluationService.responseResult.AlgorithmResult;
@@ -15,6 +16,7 @@ import java.util.List;
 
 public interface UserProgressService {
     void resetFlashcardProgress(String flashcardId, String userId);
+    void resetAllProgressForEnrollment(DeckEnrollment enrollment, LearnAlgorithm newAlgorithm);
     void markAsLearned(String flashcardId, boolean learned, String userId);
     void markAsSkipped(String flashcardId, boolean skipped, String userId);
     List<UserFlashcardProgressDto> getProgressForDeck(String deckId, String userId);

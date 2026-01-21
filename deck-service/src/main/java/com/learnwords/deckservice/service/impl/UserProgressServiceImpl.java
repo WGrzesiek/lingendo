@@ -5,6 +5,7 @@ import com.learnwords.deckservice.dto.userFlashcardProgress.UserFlashcardProgres
 import com.learnwords.deckservice.entity.DeckEnrollment;
 import com.learnwords.deckservice.entity.Flashcard;
 import com.learnwords.deckservice.entity.UserFlashcardProgress;
+import com.learnwords.deckservice.enums.DeckStatus;
 import com.learnwords.deckservice.enums.LearnAlgorithm;
 import com.learnwords.deckservice.enums.LearningPhase;
 import com.learnwords.deckservice.repository.DeckEnrollmentRepository;
@@ -41,19 +42,15 @@ import static com.learnwords.deckservice.service.utils.DeckUtils.getDeckEnrollme
 @Slf4j
 @Service
 public class UserProgressServiceImpl implements UserProgressService {
-    private final DeckRepository deckRepository;
     private final DeckEnrollmentRepository deckEnrollmentRepository;
     private final FlashcardRepository flashcardRepository;
     private final UserFlashcardProgressRepository userFlashcardProgressRepository;
-    private final Algorithm algorithm;
     private final AlgorithmFactory algorithmFactory;
 
-    public UserProgressServiceImpl(DeckRepository deckRepository, DeckEnrollmentRepository deckEnrollmentRepository, FlashcardRepository flashcardRepository, UserFlashcardProgressRepository userFlashcardProgressRepository, Algorithm algorithm, AlgorithmFactory algorithmFactory) {
-        this.deckRepository = deckRepository;
+    public UserProgressServiceImpl(DeckEnrollmentRepository deckEnrollmentRepository, FlashcardRepository flashcardRepository, UserFlashcardProgressRepository userFlashcardProgressRepository, AlgorithmFactory algorithmFactory) {
         this.deckEnrollmentRepository = deckEnrollmentRepository;
         this.flashcardRepository = flashcardRepository;
         this.userFlashcardProgressRepository = userFlashcardProgressRepository;
-        this.algorithm = algorithm;
         this.algorithmFactory = algorithmFactory;
     }
 
@@ -78,6 +75,48 @@ public class UserProgressServiceImpl implements UserProgressService {
         userFlashcardProgressRepository.save(userFlashcardProgress);
         log.debug("Ustawiono początkowy stan algorytmu nauki - flashcardId: '{}', algorithm: '{}'",
                 flashcard.getId(), algorithm);
+    }
+
+    /**
+     * Resetuje postęp nauki dla wszystkich fiszek w danym enrollmencie.
+     * Używane przy zmianie algorytmu nauki.
+     * Resetuje również statystyki enrollment (sesje, czas nauki, nauczone fiszki).
+     *
+     * @param enrollment enrollment do zresetowania
+     * @param newAlgorithm nowy algorytm, którego stan początkowy zostanie ustawiony
+     */
+    @Override
+    @Transactional
+    public void resetAllProgressForEnrollment(DeckEnrollment enrollment, LearnAlgorithm newAlgorithm) {
+        log.info("Resetowanie postępu nauki dla enrollmentId: {}, nowy algorytm: {}", 
+                enrollment.getId(), newAlgorithm);
+        
+        AbstractAlgorithm algorithm = algorithmFactory.get(newAlgorithm);
+        AlgorithmState initialState = algorithm.initialize();
+        String initialStateJson = initialState.serialize();
+        
+        List<UserFlashcardProgress> progressList = userFlashcardProgressRepository.findByEnrollment_Id(enrollment.getId());
+        
+        for (UserFlashcardProgress progress : progressList) {
+            progress.setAlgorithmState(initialStateJson);
+            progress.setLearned(false);
+            progress.setSkipped(false);
+            progress.setRepetitionCount(0);
+            progress.setPhase(LearningPhase.LEARNING);
+            progress.setNextReviewAt(null);
+        }
+        
+        userFlashcardProgressRepository.saveAll(progressList);
+        
+        // Reset statystyk enrollment
+        enrollment.setCompletedSessionsCount(0);
+        enrollment.setTotalLearningTimeSeconds(0);
+        enrollment.setLearnedFlashcardsCount(0);
+        enrollment.setStatus(DeckStatus.NOT_STARTED);
+        deckEnrollmentRepository.save(enrollment);
+        
+        log.info("Zresetowano postęp nauki dla {} fiszek oraz statystyki enrollment: {}", 
+                progressList.size(), enrollment.getId());
     }
 
     /**

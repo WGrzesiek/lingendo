@@ -8,7 +8,7 @@ import com.learnwords.deckservice.service.evaluationService.responseResult.MaxLe
 import com.learnwords.deckservice.service.evaluationService.responseResult.Success;
 
 
-public abstract sealed class AbstractAlgorithm implements Algorithm<AlgorithmState> permits GrzesiekAlgorithm {
+public abstract sealed class AbstractAlgorithm implements Algorithm<AlgorithmState> permits GrzesiekAlgorithm, LeitnerAlgorithm {
 
     @Override
     public AlgorithmState initialize() {

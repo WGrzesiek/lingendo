@@ -105,9 +105,18 @@ public class DeckEnrollmentServiceImpl implements DeckEnrollmentService {
     }
 
     @Override
+    @Transactional
     public void updateLearnAlgorithm(String enrollmentId, String userId, LearnAlgorithm algorithm) {
         log.info("Aktualizacja algorytmu nauki dla enrollmentId {} na {}", enrollmentId, algorithm);
         DeckEnrollment deckEnrollment = DeckUtils.getDeckEnrollmentIfUserHasPermissions(deckEnrollmentRepository, enrollmentId, userId);
+        
+        LearnAlgorithm previousAlgorithm = deckEnrollment.getPreferredAlgorithm();
+        if (previousAlgorithm != algorithm) {
+            log.info("Zmiana algorytmu z {} na {} - resetowanie postępu nauki dla wszystkich fiszek", 
+                    previousAlgorithm, algorithm);
+            userProgressService.resetAllProgressForEnrollment(deckEnrollment, algorithm);
+        }
+        
         deckEnrollment.setPreferredAlgorithm(algorithm);
         deckEnrollmentRepository.save(deckEnrollment);
         log.info("Zaktualizowano algorytm nauki dla enrollmentId {} na {}", enrollmentId, algorithm);
