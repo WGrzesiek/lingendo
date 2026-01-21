@@ -128,3 +128,4 @@ stage('Build Docker image') {
         }
     }
 }
+}
