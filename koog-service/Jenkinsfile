@@ -1,131 +1,134 @@
 pipeline {
-	agent { label 'builder' }
+  agent { label 'builder' }
 
   tools {
-		jdk 'JDK24'
-    	maven 'Maven'
+    jdk 'JDK24'
+    maven 'Maven'
   }
 
-    options { timestamps() }
+  options { timestamps() }
 
-    parameters {
-        booleanParam(name: 'SKIP_TESTS', defaultValue: true, description: 'Pominąć testy?')
-        string(name: 'REGISTRY', defaultValue: 'localhost:5000', description: 'Local Docker registry')
-        string(name: 'IMAGE_NAME', defaultValue: 'learnwords/koog-service', description: 'Nazwa obrazu')
-        string(name: 'TAG', defaultValue: 'dev-1', description: 'Tag obrazu')
-        credentials(name: 'OPENAI_API_KEY_CRED', defaultValue: 'openai-api-key-dev', description: 'OpenAI API Key (Secret text)', credentialType: 'org.jenkinsci.plugins.plaincredentials.impl.StringCredentialsImpl')
+  parameters {
+    booleanParam(name: 'SKIP_TESTS', defaultValue: true, description: 'Pominąć testy?')
+    string(name: 'REGISTRY', defaultValue: 'localhost:5000', description: 'Local Docker registry')
+    string(name: 'IMAGE_NAME', defaultValue: 'learnwords/koog-service', description: 'Nazwa obrazu')
+    string(name: 'TAG', defaultValue: 'dev-1', description: 'Tag obrazu')
+    credentials(
+      name: 'OPENAI_API_KEY_CRED',
+      defaultValue: 'openai-api-key-dev',
+      description: 'OpenAI API Key (Secret text)',
+      credentialType: 'org.jenkinsci.plugins.plaincredentials.impl.StringCredentialsImpl'
+    )
+  }
 
+  environment {
+    CREDS_ID = 'bitbucket'
+    GRADLE_OPTS = '-Dorg.gradle.daemon=false'
+  }
+
+  stages {
+    stage('Checkout koog-service') {
+      steps {
+        dir('koog-service') {
+          checkout scm
+        }
+      }
     }
 
-    environment {
-        CREDS_ID = 'bitbucket'
-        GRADLE_OPTS = '-Dorg.gradle.daemon=false'
+    stage('Build & Install koog-service') {
+      steps {
+        dir('koog-service') {
+          script {
+            def gradleFlags = params.SKIP_TESTS ? "-x test" : ""
+            sh "chmod +x gradlew"
+            sh "./gradlew clean build ${gradleFlags}"
+          }
+        }
+      }
     }
 
-    stages {
-        stage('Checkout koog-service') {
-            steps {
-                dir('koog-service') {
-                    checkout scm
-                }
+    stage('Code Stats') {
+      steps {
+        dir('koog-service') {
+          sh 'scc --format json --output scc.json .'
+          archiveArtifacts artifacts: 'scc.json', fingerprint: true
+        }
+      }
+    }
+
+    stage('Test & Coverage') {
+      when { expression { !params.SKIP_TESTS } }
+      steps {
+        dir('koog-service') {
+          sh './gradlew test jacocoTestReport'
+          junit 'build/test-results/test/*.xml'
+        }
+
+        discoverReferenceBuild()
+
+        recordCoverage(
+          tools: [[parser: 'JACOCO']],
+          id: 'jacoco',
+          name: 'JaCoCo Coverage',
+          sourceCodeRetention: 'EVERY_BUILD',
+          sourceDirectories: [[path: 'koog-service/src/main/kotlin']],
+          qualityGates: [
+            [threshold: 60.0, metric: 'LINE',   baseline: 'PROJECT', unstable: true],
+            [threshold: 60.0, metric: 'BRANCH', baseline: 'PROJECT', unstable: true]
+          ]
+        )
+      }
+    }
+
+    stage('Allure report') {
+      when { expression { !params.SKIP_TESTS } }
+      steps {
+        dir('koog-service') {
+          allure([
+            includeProperties: false,
+            jdk: '',
+            results: [[path: 'build/allure-results']]
+          ])
+        }
+      }
+    }
+
+    stage('Build Docker image') {
+      steps {
+        dir('koog-service') {
+          script {
+            def tag = params.TAG?.trim() ? params.TAG.trim() : "${env.BUILD_NUMBER}"
+            def image = "${params.REGISTRY}/${params.IMAGE_NAME}:${tag}"
+
+            withCredentials([string(credentialsId: params.OPENAI_API_KEY_CRED, variable: 'OPENAI_API_KEY')]) {
+              sh """
+                set -euo pipefail
+                export DOCKER_BUILDKIT=1
+
+                docker build \
+                  --secret id=openai_key,env=OPENAI_API_KEY \
+                  -t '${image}' .
+
+                docker push '${image}'
+              """
             }
+
+            echo "Pushed Docker image: ${image}"
+          }
         }
-
-        stage('Build & Install koog-service') {
-            steps {
-                dir('koog-service') {
-                    script {
-                        def gradleFlags = params.SKIP_TESTS ? "-x test" : ""
-                        sh "chmod +x gradlew"
-                        sh "./gradlew clean build ${gradleFlags}"
-                    }
-                }
-            }
-        }
-
-        stage('Code Stats') {
-            steps {
-                dir('koog-service') {
-                    sh 'scc --format json --output scc.json .'
-                    archiveArtifacts artifacts: 'scc.json', fingerprint: true
-                }
-            }
-        }
-
-        stage('Test & Coverage') {
-            when { expression { !params.SKIP_TESTS } }
-            steps {
-                dir('koog-service') {
-                    sh './gradlew test jacocoTestReport'
-                    junit 'build/test-results/test/*.xml'
-                }
-
-                discoverReferenceBuild()
-
-                recordCoverage(
-                    tools: [[parser: 'JACOCO']],
-                    id: 'jacoco',
-                    name: 'JaCoCo Coverage',
-                    sourceCodeRetention: 'EVERY_BUILD',
-                    sourceDirectories: [[path: 'koog-service/src/main/kotlin']],
-                    qualityGates: [
-                        [threshold: 60.0, metric: 'LINE',   baseline: 'PROJECT', unstable: true],
-                        [threshold: 60.0, metric: 'BRANCH', baseline: 'PROJECT', unstable: true]
-                    ]
-                )
-            }
-        }
-
-        stage('Allure report') {
-            when { expression { !params.SKIP_TESTS } }
-            steps {
-                dir('koog-service') {
-                    allure([
-                        includeProperties: false,
-                        jdk: '',
-                        results: [[path: 'build/allure-results']]
-                    ])
-                }
-            }
-        }
-
-stage('Build Docker image') {
-  steps {
-    dir('koog-service') {
-      script {
-        def tag = params.TAG?.trim() ? params.TAG.trim() : "${env.BUILD_NUMBER}"
-        def image = "${params.REGISTRY}/${params.IMAGE_NAME}:${tag}"
-
-        withCredentials([string(credentialsId: params.OPENAI_API_KEY_CRED, variable: 'OPENAI_API_KEY')]) {
-          sh '''
-            set -euo pipefail
-            export DOCKER_BUILDKIT=1
-
-            # build: secret id=openai_key będzie dostępny w Dockerfile jako /run/secrets/openai_key
-            docker build \
-              --secret id=openai_key,env=OPENAI_API_KEY \
-              -t '"${image}"' .
-
-            docker push '"${image}"'
-          '''
-        }
-
-        echo "Pushed Docker image: ${image}"
       }
     }
   }
-}
 
-    post {
-        always {
-            echo "========always========"
-        }
-        success {
-            echo "========pipeline executed successfully ========"
-        }
-        failure {
-            echo "========pipeline execution failed========"
-        }
+  post {
+    always {
+      echo "========always========"
     }
-}
+    success {
+      echo "========pipeline executed successfully ========"
+    }
+    failure {
+      echo "========pipeline execution failed========"
+    }
+  }
 }
