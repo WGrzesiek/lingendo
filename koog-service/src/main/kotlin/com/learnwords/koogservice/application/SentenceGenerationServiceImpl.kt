@@ -63,17 +63,6 @@ class SentenceGenerationServiceImpl(
 
         jobRepository.updateJobStarted(job.jobId, EventStatus.PROCESSING, Instant.now())
 
-//        // 4. Publikuj event startu
-//        outboxPublisher.publishJobStatus(
-//            JobStatusEventDto(
-//                eventId = UUID.randomUUID().toString(),
-//                jobId = job.jobId ,
-//                correlationId = request.correlationId,
-//                status = EventStatus.PROCESSING.name,
-//                itemsTotal = items.size
-//            )
-//        )
-
         var successCount = 0
         var failCount = 0
 
@@ -101,17 +90,6 @@ class SentenceGenerationServiceImpl(
             Instant.now()
         )
 
-//        outboxPublisher.publishJobStatus(
-//            JobStatusEventDto(
-//                eventId = UUID.randomUUID().toString(),
-//                jobId = job.jobId ,
-//                correlationId = request.correlationId,
-//                status = finalStatus.name,
-//                itemsTotal = items.size,
-//                itemsSucceeded = successCount,
-//                itemsFailed = failCount
-//            )
-//        )
 
         log.info(
             "Zakończono Job {} - status: {}, sukces: {}, błędy: {}",
