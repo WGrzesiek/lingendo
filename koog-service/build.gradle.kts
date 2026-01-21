@@ -42,6 +42,8 @@ dependencies {
     implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:3.0.1")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.9.0")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-reactor:1.9.0")
+    implementation("net.logstash.logback:logstash-logback-encoder:8.0")
+    implementation("co.elastic.logging:logback-ecs-encoder:1.6.0")
     runtimeOnly("org.postgresql:postgresql")
     runtimeOnly("io.micrometer:micrometer-registry-prometheus")
     runtimeOnly("org.postgresql:postgresql")
