@@ -3,7 +3,6 @@ pipeline {
 
   tools {
     jdk 'JDK24'
-    maven 'Maven'
   }
 
   options { timestamps() }
@@ -99,21 +98,10 @@ pipeline {
           script {
             def tag = params.TAG?.trim() ? params.TAG.trim() : "${env.BUILD_NUMBER}"
             def image = "${params.REGISTRY}/${params.IMAGE_NAME}:${tag}"
-
             withCredentials([string(credentialsId: params.OPENAI_API_KEY_CRED, variable: 'OPENAI_API_KEY')]) {
-              withEnv(["IMAGE=${image}", "DOCKER_BUILDKIT=1"]) {
-                sh '''#!/usr/bin/env bash
-                  set -euo pipefail
-
-                  docker build \
-                    --secret id=openai_key,env=OPENAI_API_KEY \
-                    -t "$IMAGE" .
-
-                  docker push "$IMAGE"
-                '''
-              }
+              sh "docker build --build-arg OPENAI_API_KEY=${OPENAI_API_KEY} -t ${image} ."
             }
-
+            sh "docker push ${image}"
             echo "Pushed Docker image: ${image}"
           }
         }
