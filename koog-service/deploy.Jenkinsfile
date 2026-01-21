@@ -51,7 +51,7 @@ pipeline {
     stage('Uruchom Docker Compose') {
       when { expression { params.ACTION == 'up' } }
       steps {
-        withCredentials([string(credentialsId: 'openai-api-key-dev', variable: 'OPENAI_API_KEY')]) {
+        withCredentials([string(credentialsId: 'OPENAI_API_KEY_CRED', variable: 'OPENAI_API_KEY')]) {
           sh """
             docker compose -f docker-compose.koog.yml down
             IMAGE_NAME=${IMAGE_NAME} \
