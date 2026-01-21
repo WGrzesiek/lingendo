@@ -1,11 +1,13 @@
 package com.learnwords.koogservice.application
 
-import aws.smithy.kotlin.runtime.util.type
 import com.learnwords.koogservice.ai.AiClient
 import com.learnwords.koogservice.ai.SentencePrompt
 import com.learnwords.koogservice.enums.EventStatus
 import com.learnwords.koogservice.messaging.OutboxPublisher
 import com.learnwords.koogservice.messaging.dto.*
+import com.learnwords.koogservice.messaging.dto.generated.GeneratedSentenceDto
+import com.learnwords.koogservice.messaging.dto.generated.GenerationMetadataDto
+import com.learnwords.koogservice.messaging.dto.generated.SentenceGeneratedEventDto
 import com.learnwords.koogservice.persistence.entity.SentenceGenerationItem
 import com.learnwords.koogservice.persistence.entity.SentenceGenerationJob
 import com.learnwords.koogservice.persistence.repository.SentenceGenerationItemRepository
@@ -17,7 +19,6 @@ import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.Instant
 import java.util.*
-import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 /**
  * Implementacja serwisu generowania zdań.
@@ -173,6 +174,33 @@ class SentenceGenerationServiceImpl(
             response.outputTokensCount,
             response.totalTokensCount,
             response.cost
+        )
+        
+        val generatedSentences = response.json.sentences.map { sentence ->
+            GeneratedSentenceDto(
+                sentence = sentence.text,
+                translation = sentence.translation
+            )
+        }
+        
+        val metadata = GenerationMetadataDto(
+            model = aiModel,
+            promptVersion = promptVersion,
+            level = request.level,
+            category = request.category,
+            languageFrom = request.languageFrom,
+            languageTo = request.languageTo
+        )
+        
+        outboxPublisher.publishGeneratedSentences(
+            SentenceGeneratedEventDto(
+                eventId = UUID.randomUUID().toString(),
+                correlationId = request.id,
+                jobId = item.job.jobId,
+                wordId = item.wordId,
+                sentences = generatedSentences,
+                metadata = metadata
+            )
         )
 
         log.debug("Wygenerowano {} zdań dla słówka: {}", response.json.sentences.size, word.word)
