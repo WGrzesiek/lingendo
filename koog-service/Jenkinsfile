@@ -101,16 +101,17 @@ pipeline {
             def image = "${params.REGISTRY}/${params.IMAGE_NAME}:${tag}"
 
             withCredentials([string(credentialsId: params.OPENAI_API_KEY_CRED, variable: 'OPENAI_API_KEY')]) {
-              sh """
-                set -euo pipefail
-                export DOCKER_BUILDKIT=1
+              withEnv(["IMAGE=${image}", "DOCKER_BUILDKIT=1"]) {
+                sh '''#!/usr/bin/env bash
+                  set -euo pipefail
 
-                docker build \
-                  --secret id=openai_key,env=OPENAI_API_KEY \
-                  -t '${image}' .
+                  docker build \
+                    --secret id=openai_key,env=OPENAI_API_KEY \
+                    -t "$IMAGE" .
 
-                docker push '${image}'
-              """
+                  docker push "$IMAGE"
+                '''
+              }
             }
 
             echo "Pushed Docker image: ${image}"
