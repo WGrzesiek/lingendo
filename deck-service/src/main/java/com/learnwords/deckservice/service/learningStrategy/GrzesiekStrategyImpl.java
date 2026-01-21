@@ -18,6 +18,7 @@ import com.learnwords.deckservice.service.algorithm.state.GrzesiekState;
 import com.learnwords.deckservice.service.algorithm.step.GrzesiekStep;
 import com.learnwords.deckservice.service.grpcClient.VocabularyGrpcClient;
 import com.learnwords.vocabulary.v1.Word;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
@@ -31,7 +32,7 @@ public final class GrzesiekStrategyImpl extends AbstractStrategyRecommender impl
     private static final double THRESHOLD = 0.2;
     private static final int QUIZ_OPTION_COUNT = 4;
 
-    public GrzesiekStrategyImpl(UserProgressService userProgressService, VocabularyGrpcClient vocabularyGrpcClient, AbstractAlgorithm algorithm, GrzesiekAlgorithm grzesiekAlgorithm) {
+    public GrzesiekStrategyImpl(UserProgressService userProgressService, VocabularyGrpcClient vocabularyGrpcClient, @Qualifier("grzesiekAlgorithm") AbstractAlgorithm algorithm, GrzesiekAlgorithm grzesiekAlgorithm) {
         super(userProgressService, vocabularyGrpcClient, algorithm);
         this.grzesiekAlgorithm = grzesiekAlgorithm;
     }
