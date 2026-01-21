@@ -83,7 +83,7 @@ import java.util.List;
 @Tag(name = "Vocabulary Management", description = "API do zarządzania słownictwem")
 public class VocabularyController {
     private final VocabularyService vocabularyService;
-
+//NOTE dorobic isPublic bo do spolecznosci nie ma jak oznaczac
     public VocabularyController(VocabularyService vocabularyService){
         this.vocabularyService = vocabularyService;
     }

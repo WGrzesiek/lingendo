@@ -1,0 +1,1320 @@
+[
+  {
+    "word": "implement",
+    "translations": ["wdrażać", "implementować"],
+    "sentences": [
+      {
+        "sentence": "We decided to implement a new security policy.",
+        "translation": "Zdecydowaliśmy się wdrożyć nową politykę bezpieczeństwa."
+      },
+      {
+        "sentence": "The team is working hard to implement all the changes.",
+        "translation": "Zespół ciężko pracuje, aby wdrożyć wszystkie zmiany."
+      }
+    ]
+  },
+  {
+    "word": "overwhelmed",
+    "translations": ["przytłoczony", "oszołomiony"],
+    "sentences": [
+      {
+        "sentence": "She felt overwhelmed by the amount of work she had to do.",
+        "translation": "Czuła się przytłoczona ilością pracy, którą musiała wykonać."
+      },
+      {
+        "sentence": "I was overwhelmed by their kindness.",
+        "translation": "Byłem oszołomiony ich życzliwością."
+      }
+    ]
+  },
+  {
+    "word": "efficient",
+    "translations": ["wydajny", "efektywny"],
+    "sentences": [
+      {
+        "sentence": "This new engine is much more efficient.",
+        "translation": "Ten nowy silnik jest znacznie bardziej wydajny."
+      },
+      {
+        "sentence": "We need an efficient way to manage our tasks.",
+        "translation": "Potrzebujemy efektywnego sposobu zarządzania zadaniami."
+      }
+    ]
+  },
+  {
+    "word": "maintain",
+    "translations": ["utrzymywać", "zachowywać"],
+    "sentences": [
+      {
+        "sentence": "It's important to maintain a healthy lifestyle.",
+        "translation": "Ważne jest, aby utrzymywać zdrowy styl życia."
+      },
+      {
+        "sentence": "They struggled to maintain the old building.",
+        "translation": "Zmagali się z utrzymaniem starego budynku."
+      }
+    ]
+  },
+  {
+    "word": "consider",
+    "translations": ["rozważać", "brać pod uwagę"],
+    "sentences": [
+      {
+        "sentence": "We need to consider all possible outcomes.",
+        "translation": "Musimy rozważyć wszystkie możliwe rezultaty."
+      },
+      {
+        "sentence": "Have you considered applying for that job?",
+        "translation": "Czy rozważałeś aplikowanie na to stanowisko?"
+      }
+    ]
+  },
+  {
+    "word": "expand",
+    "translations": ["rozszerzać", "powiększać"],
+    "sentences": [
+      {
+        "sentence": "The company plans to expand into new markets.",
+        "translation": "Firma planuje rozszerzyć działalność na nowe rynki."
+      },
+      {
+        "sentence": "They expanded the building by adding new offices.",
+        "translation": "Powierzchnia budynku została powiększona poprzez dodanie nowych biur."
+      }
+    ]
+  },
+  {
+    "word": "reliable",
+    "translations": ["niezawodny", "godny zaufania"],
+    "sentences": [
+      {
+        "sentence": "He is one of the most reliable workers we have.",
+        "translation": "On jest jednym z najbardziej niezawodnych pracowników, jakich mamy."
+      },
+      {
+        "sentence": "This car is very reliable.",
+        "translation": "Ten samochód jest bardzo niezawodny."
+      }
+    ]
+  },
+  {
+    "word": "affordable",
+    "translations": ["przystępny cenowo", "niedrogi"],
+    "sentences": [
+      {
+        "sentence": "They offer affordable housing for students.",
+        "translation": "Oferują przystępne cenowo mieszkania dla studentów."
+      },
+      {
+        "sentence": "The new model is more affordable than the previous one.",
+        "translation": "Nowy model jest tańszy niż poprzedni."
+      }
+    ]
+  },
+  {
+    "word": "require",
+    "translations": ["wymagać", "potrzebować"],
+    "sentences": [
+      {
+        "sentence": "This job requires excellent communication skills.",
+        "translation": "Ta praca wymaga świetnych umiejętności komunikacyjnych."
+      },
+      {
+        "sentence": "You are required to submit the form by Friday.",
+        "translation": "Musisz złożyć formularz do piątku."
+      }
+    ]
+  },
+  {
+    "word": "establish",
+    "translations": ["ustanowić", "założyć"],
+    "sentences": [
+      {
+        "sentence": "The company was established in 1998.",
+        "translation": "Firma została założona w 1998 roku."
+      },
+      {
+        "sentence": "We need to establish clear rules.",
+        "translation": "Musimy ustanowić jasne zasady."
+      }
+    ]
+  },
+
+  {
+    "word": "accurate",
+    "translations": ["dokładny", "precyzyjny"],
+    "sentences": [
+      {
+        "sentence": "The information you provided is not entirely accurate.",
+        "translation": "Informacje, które podałeś, nie są całkowicie dokładne."
+      },
+      {
+        "sentence": "We need accurate measurements for this project.",
+        "translation": "Potrzebujemy dokładnych pomiarów do tego projektu."
+      }
+    ]
+  },
+  {
+    "word": "determine",
+    "translations": ["określać", "ustalać"],
+    "sentences": [
+      {
+        "sentence": "The test will determine your level of English.",
+        "translation": "Test określi Twój poziom angielskiego."
+      },
+      {
+        "sentence": "We must determine the cause of the problem.",
+        "translation": "Musimy ustalić przyczynę problemu."
+      }
+    ]
+  },
+  {
+    "word": "persuade",
+    "translations": ["przekonywać", "namawiać"],
+    "sentences": [
+      {
+        "sentence": "I tried to persuade him to join us.",
+        "translation": "Próbowałem przekonać go, aby do nas dołączył."
+      },
+      {
+        "sentence": "She persuaded her parents to let her travel alone.",
+        "translation": "Przekonała rodziców, by pozwolili jej podróżować samotnie."
+      }
+    ]
+  },
+  {
+    "word": "deliberately",
+    "translations": ["celowo", "rozmyślnie"],
+    "sentences": [
+      {
+        "sentence": "He deliberately ignored my message.",
+        "translation": "On celowo zignorował moją wiadomość."
+      },
+      {
+        "sentence": "They acted deliberately to avoid mistakes.",
+        "translation": "Działali rozmyślnie, by uniknąć błędów."
+      }
+    ]
+  },
+  {
+    "word": "shortage",
+    "translations": ["niedobór", "brak"],
+    "sentences": [
+      {
+        "sentence": "There is a shortage of skilled workers.",
+        "translation": "Brakuje wykwalifikowanych pracowników."
+      },
+      {
+        "sentence": "The city is suffering from a water shortage.",
+        "translation": "Miasto cierpi z powodu niedoboru wody."
+      }
+    ]
+  },
+  {
+    "word": "decline",
+    "translations": ["spadać", "odmawiać"],
+    "sentences": [
+      {
+        "sentence": "Sales have declined significantly this year.",
+        "translation": "Sprzedaż znacząco spadła w tym roku."
+      },
+      {
+        "sentence": "She politely declined the invitation.",
+        "translation": "Uprzejmie odmówiła zaproszenia."
+      }
+    ]
+  },
+  {
+    "word": "approve",
+    "translations": ["zatwierdzać", "akceptować"],
+    "sentences": [
+      {
+        "sentence": "The manager approved my request.",
+        "translation": "Kierownik zatwierdził moją prośbę."
+      },
+      {
+        "sentence": "They approved the new design.",
+        "translation": "Zatwierdzili nowy projekt."
+      }
+    ]
+  },
+  {
+    "word": "restore",
+    "translations": ["przywracać", "odnawiać"],
+    "sentences": [
+      {
+        "sentence": "The museum restored the old painting.",
+        "translation": "Muzeum odnowiło stary obraz."
+      },
+      {
+        "sentence": "We need to restore order in the office.",
+        "translation": "Musimy przywrócić porządek w biurze."
+      }
+    ]
+  },
+
+  {
+    "word": "predict",
+    "translations": ["przewidywać", "prognozować"],
+    "sentences": [
+      {
+        "sentence": "Experts predict a rise in temperatures.",
+        "translation": "Eksperci przewidują wzrost temperatur."
+      },
+      {
+        "sentence": "It's hard to predict the future.",
+        "translation": "Trudno przewidzieć przyszłość."
+      }
+    ]
+  },
+
+  {
+    "word": "requirement",
+    "translations": ["wymóg", "potrzeba"],
+    "sentences": [
+      {
+        "sentence": "This course has no formal requirements.",
+        "translation": "Ten kurs nie ma formalnych wymogów."
+      },
+      {
+        "sentence": "Meeting the deadline is a strict requirement.",
+        "translation": "Dotrzymanie terminu jest surowym wymogiem."
+      }
+    ]
+  },
+
+  {
+    "word": "significant",
+    "translations": ["znaczący", "istotny"],
+    "sentences": [
+      {
+        "sentence": "There has been a significant improvement.",
+        "translation": "Nastąpiła znacząca poprawa."
+      },
+      {
+        "sentence": "This decision had a significant impact on the market.",
+        "translation": "Ta decyzja miała istotny wpływ na rynek."
+      }
+    ]
+  },
+
+  {
+    "word": "conduct",
+    "translations": ["przeprowadzać", "zachowanie"],
+    "sentences": [
+      {
+        "sentence": "They will conduct an investigation.",
+        "translation": "Przeprowadzą dochodzenie."
+      },
+      {
+        "sentence": "His conduct at the meeting was unacceptable.",
+        "translation": "Jego zachowanie na spotkaniu było nieakceptowalne."
+      }
+    ]
+  },
+
+  {
+    "word": "threaten",
+    "translations": ["grozić", "zagrażać"],
+    "sentences": [
+      {
+        "sentence": "He threatened to quit his job.",
+        "translation": "Zagroził, że odejdzie z pracy."
+      },
+      {
+        "sentence": "Climate change threatens wildlife.",
+        "translation": "Zmiany klimatu zagrażają dzikiej przyrodzie."
+      }
+    ]
+  },
+
+  {
+    "word": "arrange",
+    "translations": ["organizować", "ustalać"],
+    "sentences": [
+      {
+        "sentence": "I will arrange a meeting for tomorrow.",
+        "translation": "Zorganizuję spotkanie na jutro."
+      },
+      {
+        "sentence": "They arranged the furniture in the living room.",
+        "translation": "Ustawili meble w salonie."
+      }
+    ]
+  },
+
+  {
+    "word": "essential",
+    "translations": ["niezbędny", "kluczowy"],
+    "sentences": [
+      {
+        "sentence": "Water is essential for life.",
+        "translation": "Woda jest niezbędna do życia."
+      },
+      {
+        "sentence": "It's essential to follow the instructions carefully.",
+        "translation": "Niezbędne jest dokładne przestrzeganie instrukcji."
+      }
+    ]
+  },
+
+  {
+    "word": "benefit",
+    "translations": ["korzyść", "zysk"],
+    "sentences": [
+      {
+        "sentence": "Regular exercise has many health benefits.",
+        "translation": "Regularna aktywność fizyczna ma wiele korzyści zdrowotnych."
+      },
+      {
+        "sentence": "This agreement benefits both parties.",
+        "translation": "Ta umowa przynosi korzyści obu stronom."
+      }
+    ]
+  },
+
+  {
+    "word": "convince",
+    "translations": ["przekonać", "namówić"],
+    "sentences": [
+      {
+        "sentence": "He convinced me to try it.",
+        "translation": "On przekonał mnie, żeby to wypróbować."
+      },
+      {
+        "sentence": "She convinced her team to support the idea.",
+        "translation": "Przekonała swój zespół, aby poparł pomysł."
+      }
+    ]
+  },
+
+  {
+    "word": "participate",
+    "translations": ["uczestniczyć", "brać udział"],
+    "sentences": [
+      {
+        "sentence": "Many people participated in the event.",
+        "translation": "Wiele osób uczestniczyło w wydarzeniu."
+      },
+      {
+        "sentence": "You must participate actively in class.",
+        "translation": "Musisz aktywnie uczestniczyć na zajęciach."
+      }
+    ]
+  },
+
+  {
+    "word": "avoid",
+    "translations": ["unikać"],
+    "sentences": [
+      {
+        "sentence": "You should avoid eating too much sugar.",
+        "translation": "Powinieneś unikać jedzenia zbyt dużej ilości cukru."
+      },
+      {
+        "sentence": "He tried to avoid answering the question.",
+        "translation": "Próbował uniknąć odpowiedzi na pytanie."
+      }
+    ]
+  },
+
+  {
+    "word": "reflect",
+    "translations": ["odzwierciedlać", "rozmyślać"],
+    "sentences": [
+      {
+        "sentence": "The numbers reflect the company's growth.",
+        "translation": "Liczby odzwierciedlają wzrost firmy."
+      },
+      {
+        "sentence": "He often reflects on his past decisions.",
+        "translation": "Często rozmyśla nad swoimi przeszłymi decyzjami."
+      }
+    ]
+  },
+
+  {
+    "word": "suitable",
+    "translations": ["odpowiedni", "stosowny"],
+    "sentences": [
+      {
+        "sentence": "This movie is not suitable for children.",
+        "translation": "Ten film nie jest odpowiedni dla dzieci."
+      },
+      {
+        "sentence": "Is this time suitable for you?",
+        "translation": "Czy ta godzina Ci odpowiada?"
+      }
+    ]
+  },
+
+  {
+    "word": "regret",
+    "translations": ["żałować"],
+    "sentences": [
+      {
+        "sentence": "I regret not studying harder.",
+        "translation": "Żałuję, że nie uczyłem się bardziej intensywnie."
+      },
+      {
+        "sentence": "She regretted her decision immediately.",
+        "translation": "Natychmiast pożałowała swojej decyzji."
+      }
+    ]
+  },
+
+  {
+    "word": "challenge",
+    "translations": ["wyzwanie"],
+    "sentences": [
+      {
+        "sentence": "Learning a new language is a big challenge.",
+        "translation": "Nauka nowego języka to duże wyzwanie."
+      },
+      {
+        "sentence": "He accepted the challenge.",
+        "translation": "Przyjął wyzwanie."
+      }
+    ]
+  },
+
+  {
+    "word": "replace",
+    "translations": ["zastępować", "wymieniać"],
+    "sentences": [
+      {
+        "sentence": "We need to replace the old equipment.",
+        "translation": "Musimy wymienić stary sprzęt."
+      },
+      {
+        "sentence": "No one can replace her.",
+        "translation": "Nikt nie może jej zastąpić."
+      }
+    ]
+  },
+
+  {
+    "word": "demand",
+    "translations": ["popyt", "żądanie"],
+    "sentences": [
+      {
+        "sentence": "There is a high demand for skilled workers.",
+        "translation": "Jest duży popyt na wykwalifikowanych pracowników."
+      },
+      {
+        "sentence": "The customers demanded a refund.",
+        "translation": "Klienci zażądali zwrotu pieniędzy."
+      }
+    ]
+  },
+
+  {
+    "word": "assume",
+    "translations": ["zakładać", "przypuszczać"],
+    "sentences": [
+      {
+        "sentence": "I assume you know what you're doing.",
+        "translation": "Zakładam, że wiesz, co robisz."
+      },
+      {
+        "sentence": "Don't assume anything without checking.",
+        "translation": "Nie zakładaj niczego bez sprawdzenia."
+      }
+    ]
+  },
+
+  {
+    "word": "commute",
+    "translations": ["dojeżdżać do pracy"],
+    "sentences": [
+      {
+        "sentence": "She commutes two hours every day.",
+        "translation": "Dojeżdża codziennie dwie godziny."
+      },
+      {
+        "sentence": "Many people commute by train.",
+        "translation": "Wiele osób dojeżdża pociągiem."
+      }
+    ]
+  },
+
+  {
+    "word": "hesitate",
+    "translations": ["wahać się"],
+    "sentences": [
+      {
+        "sentence": "Don't hesitate to ask for help.",
+        "translation": "Nie wahaj się poprosić o pomoc."
+      },
+      {
+        "sentence": "He hesitated before answering.",
+        "translation": "Wahał się przed odpowiedzią."
+      }
+    ]
+  },
+
+  {
+    "word": "compare",
+    "translations": ["porównywać"],
+    "sentences": [
+      {
+        "sentence": "You can't compare these two products.",
+        "translation": "Nie możesz porównywać tych dwóch produktów."
+      },
+      {
+        "sentence": "She compared the prices before buying.",
+        "translation": "Porównała ceny przed zakupem."
+      }
+    ]
+  },
+
+  {
+    "word": "achieve",
+    "translations": ["osiągać"],
+    "sentences": [
+      {
+        "sentence": "He achieved all his goals.",
+        "translation": "Osiągnął wszystkie swoje cele."
+      },
+      {
+        "sentence": "Hard work helps you achieve success.",
+        "translation": "Ciężka praca pomaga osiągnąć sukces."
+      }
+    ]
+  },
+
+  {
+    "word": "reduce",
+    "translations": ["zmniejszać", "redukować"],
+    "sentences": [
+      {
+        "sentence": "We need to reduce our expenses.",
+        "translation": "Musimy zmniejszyć nasze wydatki."
+      },
+      {
+        "sentence": "The medicine reduces pain.",
+        "translation": "Lek redukuje ból."
+      }
+    ]
+  },
+
+  {
+    "word": "confirm",
+    "translations": ["potwierdzić"],
+    "sentences": [
+      {
+        "sentence": "Please confirm your attendance.",
+        "translation": "Proszę potwierdzić swoją obecność."
+      },
+      {
+        "sentence": "The results confirmed our hypothesis.",
+        "translation": "Wyniki potwierdziły naszą hipotezę."
+      }
+    ]
+  },
+
+  {
+    "word": "contribute",
+    "translations": ["przyczyniać się", "wnosić wkład"],
+    "sentences": [
+      {
+        "sentence": "Many factors contribute to climate change.",
+        "translation": "Wiele czynników przyczynia się do zmian klimatu."
+      },
+      {
+        "sentence": "Everyone contributed to the project.",
+        "translation": "Wszyscy wnieśli wkład w projekt."
+      }
+    ]
+  },
+
+  {
+    "word": "depend",
+    "translations": ["zależeć"],
+    "sentences": [
+      {
+        "sentence": "It depends on the weather.",
+        "translation": "To zależy od pogody."
+      },
+      {
+        "sentence": "Success depends on hard work.",
+        "translation": "Sukces zależy od ciężkiej pracy."
+      }
+    ]
+  },
+
+  {
+    "word": "announce",
+    "translations": ["ogłaszać"],
+    "sentences": [
+      {
+        "sentence": "They announced the winner of the competition.",
+        "translation": "Ogłosili zwycięzcę konkursu."
+      },
+      {
+        "sentence": "The company announced a new product.",
+        "translation": "Firma ogłosiła nowy produkt."
+      }
+    ]
+  },
+
+  {
+    "word": "estimation",
+    "translations": ["oszacowanie"],
+    "sentences": [
+      {
+        "sentence": "The estimation was lower than expected.",
+        "translation": "Oszacowanie było niższe niż oczekiwano."
+      },
+      {
+        "sentence": "We need an estimation of the costs.",
+        "translation": "Potrzebujemy oszacowania kosztów."
+      }
+    ]
+  },
+
+  {
+    "word": "recover",
+    "translations": ["odzyskiwać", "wracać do zdrowia"],
+    "sentences": [
+      {
+        "sentence": "She is recovering from the flu.",
+        "translation": "Wraca do zdrowia po grypie."
+      },
+      {
+        "sentence": "They managed to recover the lost data.",
+        "translation": "Udało im się odzyskać utracone dane."
+      }
+    ]
+  },
+
+  {
+    "word": "focus",
+    "translations": ["skupiać się", "koncentrować"],
+    "sentences": [
+      {
+        "sentence": "You need to focus on your studies.",
+        "translation": "Musisz skupić się na nauce."
+      },
+      {
+        "sentence": "The camera is out of focus.",
+        "translation": "Aparat jest nieostry."
+      }
+    ]
+  },
+
+  {
+    "word": "increase",
+    "translations": ["zwiększać"],
+    "sentences": [
+      {
+        "sentence": "Prices have increased again.",
+        "translation": "Ceny znowu wzrosły."
+      },
+      {
+        "sentence": "The population is increasing rapidly.",
+        "translation": "Populacja szybko rośnie."
+      }
+    ]
+  },
+
+  {
+    "word": "handle",
+    "translations": ["radzić sobie", "obsługiwać"],
+    "sentences": [
+      {
+        "sentence": "He can't handle stress well.",
+        "translation": "On nie radzi sobie dobrze ze stresem."
+      },
+      {
+        "sentence": "Can you handle this machine?",
+        "translation": "Czy potrafisz obsługiwać tę maszynę?"
+      }
+    ]
+  },
+
+  {
+    "word": "convert",
+    "translations": ["przekształcać", "konwertować"],
+    "sentences": [
+      {
+        "sentence": "They converted the old factory into a museum.",
+        "translation": "Przekształcili starą fabrykę w muzeum."
+      },
+      {
+        "sentence": "You can convert PDF files to Word.",
+        "translation": "Możesz konwertować pliki PDF na Word."
+      }
+    ]
+  },
+
+  {
+    "word": "expose",
+    "translations": ["ujawniać", "narażać"],
+    "sentences": [
+      {
+        "sentence": "The investigation exposed corruption.",
+        "translation": "Śledztwo ujawniło korupcję."
+      },
+      {
+        "sentence": "Too much sun exposure can damage your skin.",
+        "translation": "Zbyt duża ekspozycja na słońce może uszkodzić skórę."
+      }
+    ]
+  },
+
+  {
+    "word": "establish",
+    "translations": ["ustanowić", "założyć"],
+    "sentences": [
+      {
+        "sentence": "They established a new school in the area.",
+        "translation": "Założyli nową szkołę w okolicy."
+      },
+      {
+        "sentence": "We need to establish good communication.",
+        "translation": "Musimy ustanowić dobrą komunikację."
+      }
+    ]
+  },
+
+  {
+    "word": "interrupt",
+    "translations": ["przerywać"],
+    "sentences": [
+      {
+        "sentence": "Please don’t interrupt me while I’m talking.",
+        "translation": "Proszę, nie przerywaj mi, gdy mówię."
+      },
+      {
+        "sentence": "The meeting was interrupted by a fire alarm.",
+        "translation": "Spotkanie zostało przerwane przez alarm pożarowy."
+      }
+    ]
+  },
+
+  {
+    "word": "purchase",
+    "translations": ["zakup"],
+    "sentences": [
+      {
+        "sentence": "He made a large purchase yesterday.",
+        "translation": "Zrobił duży zakup wczoraj."
+      },
+      {
+        "sentence": "You can track your purchase online.",
+        "translation": "Możesz śledzić swój zakup online."
+      }
+    ]
+  },
+
+  {
+    "word": "inspire",
+    "translations": ["inspirować"],
+    "sentences": [
+      {
+        "sentence": "Her speech inspired many young people.",
+        "translation": "Jej przemówienie zainspirowało wielu młodych ludzi."
+      },
+      {
+        "sentence": "Nature inspires artists.",
+        "translation": "Natura inspiruje artystów."
+      }
+    ]
+  },
+
+  {
+    "word": "criticize",
+    "translations": ["krytykować"],
+    "sentences": [
+      {
+        "sentence": "She was criticized for her decision.",
+        "translation": "Była krytykowana za swoją decyzję."
+      },
+      {
+        "sentence": "Don’t criticize others too quickly.",
+        "translation": "Nie krytykuj innych zbyt szybko."
+      }
+    ]
+  },
+
+  {
+    "word": "remind",
+    "translations": ["przypominać"],
+    "sentences": [
+      {
+        "sentence": "Please remind me to call her tomorrow.",
+        "translation": "Przypomnij mi proszę, aby jutro do niej zadzwonić."
+      },
+      {
+        "sentence": "This song reminds me of my childhood.",
+        "translation": "Ta piosenka przypomina mi dzieciństwo."
+      }
+    ]
+  },
+
+  {
+    "word": "discuss",
+    "translations": ["dyskutować", "omawiać"],
+    "sentences": [
+      {
+        "sentence": "We need to discuss your proposal.",
+        "translation": "Musimy omówić Twoją propozycję."
+      },
+      {
+        "sentence": "They discussed the plan for hours.",
+        "translation": "Dyskutowali o planie przez wiele godzin."
+      }
+    ]
+  },
+
+  {
+    "word": "strengthen",
+    "translations": ["wzmacniać"],
+    "sentences": [
+      {
+        "sentence": "We must strengthen our cooperation.",
+        "translation": "Musimy wzmocnić naszą współpracę."
+      },
+      {
+        "sentence": "Exercise helps strengthen your muscles.",
+        "translation": "Ćwiczenia pomagają wzmocnić mięśnie."
+      }
+    ]
+  },
+
+  {
+    "word": "guarantee",
+    "translations": ["gwarantować", "gwarancja"],
+    "sentences": [
+      {
+        "sentence": "This product comes with a two-year guarantee.",
+        "translation": "Ten produkt posiada dwuletnią gwarancję."
+      },
+      {
+        "sentence": "I can't guarantee success, but I will try.",
+        "translation": "Nie mogę zagwarantować sukcesu, ale spróbuję."
+      }
+    ]
+  },
+
+  {
+    "word": "handle",
+    "translations": ["radzić sobie"],
+    "sentences": [
+      {
+        "sentence": "Can you handle this task?",
+        "translation": "Czy poradzisz sobie z tym zadaniem?"
+      },
+      {
+        "sentence": "He handled the situation well.",
+        "translation": "Dobrze poradził sobie z sytuacją."
+      }
+    ]
+  },
+
+  {
+    "word": "warn",
+    "translations": ["ostrzegać"],
+    "sentences": [
+      {
+        "sentence": "They warned us about the danger.",
+        "translation": "Ostrzegli nas przed niebezpieczeństwem."
+      },
+      {
+        "sentence": "I tried to warn him, but he didn’t listen.",
+        "translation": "Próbowałem go ostrzec, ale nie słuchał."
+      }
+    ]
+  },
+
+  {
+    "word": "adapt",
+    "translations": ["dostosować", "przystosować się"],
+    "sentences": [
+      {
+        "sentence": "You must adapt to new conditions.",
+        "translation": "Musisz dostosować się do nowych warunków."
+      },
+      {
+        "sentence": "The film was adapted from a book.",
+        "translation": "Film został zaadaptowany na podstawie książki."
+      }
+    ]
+  },
+
+  {
+    "word": "affect",
+    "translations": ["wpływać", "oddziaływać"],
+    "sentences": [
+      {
+        "sentence": "The weather affects my mood.",
+        "translation": "Pogoda wpływa na mój nastrój."
+      },
+      {
+        "sentence": "The crisis affected many companies.",
+        "translation": "Kryzys dotknął wiele firm."
+      }
+    ]
+  },
+
+  {
+    "word": "mention",
+    "translations": ["wspominać"],
+    "sentences": [
+      {
+        "sentence": "Did he mention the deadline?",
+        "translation": "Czy wspomniał o terminie?"
+      },
+      {
+        "sentence": "She didn't mention her trip at all.",
+        "translation": "W ogóle nie wspomniała o swojej podróży."
+      }
+    ]
+  },
+
+  {
+    "word": "consideration",
+    "translations": ["rozwaga", "rozpatrzenie"],
+    "sentences": [
+      {
+        "sentence": "Take everything into consideration.",
+        "translation": "Weź wszystko pod uwagę."
+      },
+      {
+        "sentence": "Your application is under consideration.",
+        "translation": "Twoja aplikacja jest rozpatrywana."
+      }
+    ]
+  },
+
+  {
+    "word": "expand",
+    "translations": ["rozszerzać"],
+    "sentences": [
+      {
+        "sentence": "The company expanded its services.",
+        "translation": "Firma rozszerzyła swoje usługi."
+      },
+      {
+        "sentence": "They expanded the team last year.",
+        "translation": "Rozszerzyli zespół w zeszłym roku."
+      }
+    ]
+  },
+
+  {
+    "word": "confirm",
+    "translations": ["potwierdzać"],
+    "sentences": [
+      {
+        "sentence": "We must confirm the reservation.",
+        "translation": "Musimy potwierdzić rezerwację."
+      },
+      {
+        "sentence": "The theory has been confirmed scientifically.",
+        "translation": "Teoria została potwierdzona naukowo."
+      }
+    ]
+  },
+
+  {
+    "word": "discover",
+    "translations": ["odkrywać"],
+    "sentences": [
+      {
+        "sentence": "He discovered a new species of plant.",
+        "translation": "Odkrył nowy gatunek rośliny."
+      },
+      {
+        "sentence": "I discovered that he was right.",
+        "translation": "Odkryłem, że miał rację."
+      }
+    ]
+  },
+
+  {
+    "word": "critic",
+    "translations": ["krytyk"],
+    "sentences": [
+      {
+        "sentence": "The critic gave the film a positive review.",
+        "translation": "Krytyk wystawił filmowi pozytywną recenzję."
+      },
+      {
+        "sentence": "She is a well-known art critic.",
+        "translation": "Jest znaną krytyczką sztuki."
+      }
+    ]
+  },
+
+  {
+    "word": "submit",
+    "translations": ["składać", "przesyłać"],
+    "sentences": [
+      {
+        "sentence": "You must submit your report by Monday.",
+        "translation": "Musisz złożyć raport do poniedziałku."
+      },
+      {
+        "sentence": "She submitted her application online.",
+        "translation": "Złożyła wniosek online."
+      }
+    ]
+  },
+
+  {
+    "word": "respond",
+    "translations": ["odpowiadać", "reagować"],
+    "sentences": [
+      {
+        "sentence": "He didn’t respond to my message.",
+        "translation": "Nie odpowiedział na moją wiadomość."
+      },
+      {
+        "sentence": "The system responds quickly.",
+        "translation": "System szybko reaguje."
+      }
+    ]
+  },
+
+  {
+    "word": "balance",
+    "translations": ["równowaga", "balans"],
+    "sentences": [
+      {
+        "sentence": "You need a balance between work and rest.",
+        "translation": "Potrzebujesz równowagi między pracą a odpoczynkiem."
+      },
+      {
+        "sentence": "She struggled to maintain balance.",
+        "translation": "Miała trudności z utrzymaniem równowagi."
+      }
+    ]
+  },
+
+  {
+    "word": "maintain",
+    "translations": ["utrzymywać"],
+    "sentences": [
+      {
+        "sentence": "We must maintain peace and order.",
+        "translation": "Musimy utrzymać pokój i porządek."
+      },
+      {
+        "sentence": "He maintains a healthy diet.",
+        "translation": "Utrzymuje zdrową dietę."
+      }
+    ]
+  },
+
+  {
+    "word": "celebrate",
+    "translations": ["świętować"],
+    "sentences": [
+      {
+        "sentence": "We celebrated his birthday yesterday.",
+        "translation": "Świętowaliśmy jego urodziny wczoraj."
+      },
+      {
+        "sentence": "They celebrated their victory.",
+        "translation": "Świętowali swoje zwycięstwo."
+      }
+    ]
+  },
+
+  {
+    "word": "perspective",
+    "translations": ["perspektywa"],
+    "sentences": [
+      {
+        "sentence": "Try to see the situation from another perspective.",
+        "translation": "Spróbuj spojrzeć na sytuację z innej perspektywy."
+      },
+      {
+        "sentence": "The painting has a unique perspective.",
+        "translation": "Obraz ma wyjątkową perspektywę."
+      }
+    ]
+  },
+
+  {
+    "word": "foundation",
+    "translations": ["podstawa", "fundament"],
+    "sentences": [
+      {
+        "sentence": "Trust is the foundation of a good relationship.",
+        "translation": "Zaufanie jest podstawą dobrej relacji."
+      },
+      {
+        "sentence": "The building’s foundation is very strong.",
+        "translation": "Fundament budynku jest bardzo solidny."
+      }
+    ]
+  },
+
+  {
+    "word": "injury",
+    "translations": ["kontuzja", "uraz"],
+    "sentences": [
+      {
+        "sentence": "He suffered a serious knee injury.",
+        "translation": "Doznał poważnej kontuzji kolana."
+      },
+      {
+        "sentence": "The injury prevented him from playing.",
+        "translation": "Kontuzja uniemożliwiła mu grę."
+      }
+    ]
+  },
+
+  {
+    "word": "youth",
+    "translations": ["młodość"],
+    "sentences": [
+      {
+        "sentence": "He spent his youth in the countryside.",
+        "translation": "Spędził młodość na wsi."
+      },
+      {
+        "sentence": "Youth is full of energy and dreams.",
+        "translation": "Młodość jest pełna energii i marzeń."
+      }
+    ]
+  },
+
+  {
+    "word": "vehicle",
+    "translations": ["pojazd"],
+    "sentences": [
+      {
+        "sentence": "This vehicle is very fuel-efficient.",
+        "translation": "Ten pojazd jest bardzo oszczędny."
+      },
+      {
+        "sentence": "Only authorized vehicles can enter.",
+        "translation": "Tylko autoryzowane pojazdy mogą wjechać."
+      }
+    ]
+  },
+
+  {
+    "word": "temporary",
+    "translations": ["tymczasowy"],
+    "sentences": [
+      {
+        "sentence": "He found a temporary job.",
+        "translation": "Znalazł tymczasową pracę."
+      },
+      {
+        "sentence": "The road is closed for temporary repairs.",
+        "translation": "Droga jest zamknięta z powodu tymczasowych napraw."
+      }
+    ]
+  },
+
+  {
+    "word": "affection",
+    "translations": ["uczucie", "czułość"],
+    "sentences": [
+      {
+        "sentence": "She showed great affection for her dog.",
+        "translation": "Okazywała dużą czułość swojemu psu."
+      },
+      {
+        "sentence": "He expressed his affection openly.",
+        "translation": "Okazywał swoje uczucie otwarcie."
+      }
+    ]
+  },
+
+  {
+    "word": "determine",
+    "translations": ["ustalać"],
+    "sentences": [
+      {
+        "sentence": "We must determine the next steps.",
+        "translation": "Musimy ustalić kolejne kroki."
+      },
+      {
+        "sentence": "The results will determine our decision.",
+        "translation": "Wyniki ustalą naszą decyzję."
+      }
+    ]
+  },
+
+  {
+    "word": "priority",
+    "translations": ["priorytet"],
+    "sentences": [
+      {
+        "sentence": "Safety is our top priority.",
+        "translation": "Bezpieczeństwo jest naszym najwyższym priorytetem."
+      },
+      {
+        "sentence": "You need to set your priorities.",
+        "translation": "Musisz ustalić swoje priorytety."
+      }
+    ]
+  },
+
+  {
+    "word": "quantity",
+    "translations": ["ilość"],
+    "sentences": [
+      {
+        "sentence": "The quantity of products is limited.",
+        "translation": "Ilość produktów jest ograniczona."
+      },
+      {
+        "sentence": "We need to check the quantity in stock.",
+        "translation": "Musimy sprawdzić ilość na magazynie."
+      }
+    ]
+  },
+
+  {
+    "word": "relate",
+    "translations": ["odnosić się", "wiązać się"],
+    "sentences": [
+      {
+        "sentence": "The problems relate to each other.",
+        "translation": "Problemy te odnoszą się do siebie."
+      },
+      {
+        "sentence": "I can relate to your situation.",
+        "translation": "Rozumiem Twoją sytuację."
+      }
+    ]
+  },
+
+  {
+    "word": "variety",
+    "translations": ["różnorodność"],
+    "sentences": [
+      {
+        "sentence": "The shop offers a wide variety of products.",
+        "translation": "Sklep oferuje szeroką różnorodność produktów."
+      },
+      {
+        "sentence": "We need more variety in our diet.",
+        "translation": "Potrzebujemy większej różnorodności w diecie."
+      }
+    ]
+  },
+
+  {
+    "word": "ability",
+    "translations": ["zdolność", "umiejętność"],
+    "sentences": [
+      {
+        "sentence": "He has the ability to solve complex problems.",
+        "translation": "Ma zdolność rozwiązywania złożonych problemów."
+      },
+      {
+        "sentence": "This task requires special abilities.",
+        "translation": "To zadanie wymaga specjalnych umiejętności."
+      }
+    ]
+  }
+]
