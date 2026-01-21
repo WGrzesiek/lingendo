@@ -1,0 +1,52 @@
+spring:
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+  datasource:
+    url: jdbc:postgresql://192.168.23.9:5432/koog
+    username: admin
+    password: adminpassword
+  flyway:
+    enabled: false
+
+  kafka:
+    bootstrap-servers: 192.168.23.9:9094
+
+server:
+  port: 7777
+
+management:
+  tracing:
+    export:
+      zipkin:
+        endpoint: http://192.168.23.9:9411/api/v2/spans
+
+springdoc:
+  swagger-ui:
+    enabled: true
+
+# Konfiguracja OpenAI - DEV
+openai:
+  api-key: ${OPENAI_API_KEY:}
+
+# Konfiguracja AI - DEV
+ai:
+  sentence:
+    model: gpt-5-mini
+    temperature: 0.7
+    prompt-version: 1
+    max-sentences-per-word: 3
+
+# Logging - więcej szczegółów w DEV
+logging:
+  level:
+    root: INFO
+    com.learnwords.koogservice: DEBUG
+    org.springframework.kafka: INFO
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql: TRACE
+    ai.koog: DEBUG

@@ -104,7 +104,6 @@ class AiClient(
             outputTokensCount = outputTokens,
             totalTokensCount = structured.message.metaInfo.totalTokensCount,
             cost = totalCost
-
         )
     }
 }

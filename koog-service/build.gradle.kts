@@ -5,6 +5,8 @@ plugins {
     id("io.spring.dependency-management") version "1.1.7"
     kotlin("plugin.jpa") version "2.2.21"
     kotlin("plugin.serialization") version "2.2.21"
+    id("org.flywaydb.flyway") version "11.9.1"
+    id("jacoco")
 }
 
 group = "com.learnwords"
@@ -55,6 +57,7 @@ dependencies {
     testImplementation("org.springframework.boot:spring-boot-starter-zipkin-test")
     testImplementation("org.springframework.boot:spring-boot-testcontainers")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
+    testImplementation("io.mockk:mockk:1.13.13")
     testImplementation("org.testcontainers:testcontainers-junit-jupiter")
     testImplementation("org.testcontainers:testcontainers-kafka")
     testImplementation("org.testcontainers:testcontainers-postgresql")
@@ -75,4 +78,24 @@ allOpen {
 
 tasks.withType<Test> {
     useJUnitPlatform()
+}
+
+jacoco {
+    toolVersion = "0.8.12"
+}
+
+tasks.jacocoTestReport {
+    dependsOn(tasks.test)
+    reports {
+        xml.required.set(true)
+        html.required.set(true)
+    }
+}
+
+flyway {
+    url = System.getenv("FLYWAY_URL") ?: "jdbc:postgresql://localhost:5432/koog"
+    user = System.getenv("FLYWAY_USER") ?: "admin"
+    password = System.getenv("FLYWAY_PASSWORD") ?: ""
+    schemas = arrayOf(System.getenv("FLYWAY_SCHEMAS") ?: "public")
+    locations = arrayOf("filesystem:src/main/resources/db/migration")
 }

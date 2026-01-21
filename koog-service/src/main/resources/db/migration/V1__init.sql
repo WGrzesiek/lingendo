@@ -1,4 +1,5 @@
-CREATE DATABASE koog;
+-- V1__init.sql
+-- Inicjalizacja tabel dla koog-service
 
 CREATE TABLE IF NOT EXISTS sentence_generation_job (
     job_id VARCHAR(36) NOT NULL PRIMARY KEY,
@@ -12,8 +13,11 @@ CREATE TABLE IF NOT EXISTS sentence_generation_job (
     requested_at         TIMESTAMP WITHOUT TIME ZONE NOT NULL,
     started_at           TIMESTAMP WITHOUT TIME ZONE,
     finished_at          TIMESTAMP WITHOUT TIME ZONE
-
 );
+
+CREATE INDEX IF NOT EXISTS idx_job_correlation_id ON sentence_generation_job(correlation_id);
+CREATE INDEX IF NOT EXISTS idx_job_user_id ON sentence_generation_job(requested_by_user_id);
+CREATE INDEX IF NOT EXISTS idx_job_status ON sentence_generation_job(status);
 
 CREATE TABLE IF NOT EXISTS sentence_generation_item
 (
@@ -32,6 +36,9 @@ CREATE TABLE IF NOT EXISTS sentence_generation_item
     error_code     VARCHAR(255),
     error_message  VARCHAR(255),
     cost_estimate  DOUBLE PRECISION,
+    input_tokens_count  integer,
+    output_tokens_count integer,
+    total_tokens_count  integer,
     created_at     TIMESTAMP WITHOUT TIME ZONE NOT NULL,
     updated_at     TIMESTAMP WITHOUT TIME ZONE NOT NULL,
     CONSTRAINT pk_sentence_generation_item PRIMARY KEY (item_id)
@@ -39,6 +46,10 @@ CREATE TABLE IF NOT EXISTS sentence_generation_item
 
 ALTER TABLE sentence_generation_item
     ADD CONSTRAINT FK_SENTENCE_GENERATION_ITEM_ON_JOB FOREIGN KEY (job_id) REFERENCES sentence_generation_job (job_id);
+
+CREATE INDEX IF NOT EXISTS idx_item_job_id ON sentence_generation_item(job_id);
+CREATE INDEX IF NOT EXISTS idx_item_word_id ON sentence_generation_item(word_id);
+CREATE INDEX IF NOT EXISTS idx_item_status ON sentence_generation_item(status);
 
 CREATE TABLE IF NOT EXISTS outbox
 (
@@ -53,3 +64,6 @@ CREATE TABLE IF NOT EXISTS outbox
     updated_at    TIMESTAMP WITHOUT TIME ZONE NOT NULL,
     CONSTRAINT pk_outbox PRIMARY KEY (event_id)
 );
+
+CREATE INDEX IF NOT EXISTS idx_outbox_status ON outbox(status);
+CREATE INDEX IF NOT EXISTS idx_outbox_created_at ON outbox(created_at);
