@@ -30,7 +30,7 @@ class AiClient(
     private var aiModelType: String
 ) {
 
-    private val promptExecutor = simpleOpenAIExecutor(apiKey)
+    private val promptExecutor by lazy { simpleOpenAIExecutor(apiKey) }
 
     /**
      * Agent do prostych odpowiedzi tekstowych (Basic Agent)
