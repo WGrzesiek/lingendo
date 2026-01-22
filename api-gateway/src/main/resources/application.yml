@@ -18,6 +18,12 @@ spring:
       server:
         webflux:
           routes:
+            - id: koog-service
+              uri: http://koog-service:7777
+              predicates:
+                - Path=/openapi/koog-api
+              filters:
+                - SetPath=/v3/api-docs
             - id: api-gateway-service
               uri: http://api-gateway:8811
               predicates:
@@ -48,6 +54,10 @@ spring:
                 - Path=/openapi/deck-service
               filters:
                 - SetPath=/api-docs
+            - id: koog-api
+              uri: http://koog-service:7777
+              predicates:
+                - Path=/api/v1/sentences/generate
             - id: deck-api
               uri: http://deck-service:8814
               predicates:
@@ -126,6 +136,8 @@ springdoc:
         url: /openapi/deck-service
       - name: statistics-service
         url: /openapi/statistics-service
+      - name: koog-api
+        url: /openapi/koog-api
 management:
   endpoints:
     web:
