@@ -45,6 +45,5 @@ class Outbox(
     @Column(name = "updated_at", nullable = false)
     var updatedAt: Instant = Instant.now()
 ) {
-    // Konstruktor bezargumentowy wymagany przez JPA
     protected constructor() : this(eventId = null)
 }
