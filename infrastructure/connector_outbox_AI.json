@@ -1,5 +1,5 @@
 {
-  "name": "outbox-connector",
+  "name": "outbox-koog-connector",
   "config": {
     "connector.class": "io.debezium.connector.postgresql.PostgresConnector",
     "plugin.name": "pgoutput",
