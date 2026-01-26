@@ -20,10 +20,10 @@ class Outbox(
     @Column(name = "event_id", nullable = false, unique = true)
     val eventId: String? = null,
     
-    @Column(name = "agregate_type", nullable = false)
+    @Column(name = "aggregate_type", nullable = false)
     val agregateType: String = "",
     
-    @Column(name = "agregate_id", nullable = false)
+    @Column(name = "aggregate_id", nullable = false)
     val agregateId: String = "",
     
     @Column(name = "event_type", nullable = false)
