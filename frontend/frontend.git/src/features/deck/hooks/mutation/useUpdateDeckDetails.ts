@@ -1,7 +1,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { updateDeckDetails } from "../../services/deck.service";
 import { type DeckDetailsDto } from "../../types";
-import { qk } from "@/lib/queryKeys";
+import { REFETCH_GROUPS } from "@/lib/queryKeys";
 
 export const useUpdateDeckDetails = () => {
   const queryClient = useQueryClient();
@@ -9,10 +9,12 @@ export const useUpdateDeckDetails = () => {
   return useMutation({
     mutationFn: ({ deckId, data }: { deckId: string; data: DeckDetailsDto }) =>
       updateDeckDetails(deckId, data),
-    onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({
-        queryKey: qk.deck.detail(variables.deckId),
-      });
+    onSuccess: async () => {
+      await Promise.all(
+        REFETCH_GROUPS.AFTER_DECK_MUTATION.map((key) =>
+          queryClient.refetchQueries({ queryKey: [key] }),
+        ),
+      );
     },
   });
 };

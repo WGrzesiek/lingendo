@@ -6,7 +6,7 @@ import {
   CreateBatchResponse,
 } from "../../services/vocabulary.service";
 import type { AxiosError } from "axios";
-import { qk } from "@/lib/queryKeys";
+import { REFETCH_GROUPS, QUERY_KEYS } from "@/lib/queryKeys";
 
 /**
  * Hook do dodawania słówek batch do konkretnego decka
@@ -21,10 +21,11 @@ export const useCreateBatchWordsForDeck = () => {
   >({
     mutationFn: ({ deckId, words }) => createBatchWordsForDeck(deckId, words),
     onSuccess: async () => {
-      await queryClient.invalidateQueries({queryKey: qk.deck.iDecksCreateInfiniteRoot(),});
-      await queryClient.refetchQueries({queryKey: qk.deck.iDecksCreateInfiniteRoot(),});
-
-
+      await Promise.all(
+        REFETCH_GROUPS.AFTER_DECK_MUTATION.map((key) =>
+          queryClient.refetchQueries({ queryKey: [key] }),
+        ),
+      );
     },
   });
 };
@@ -38,8 +39,7 @@ export const useCreateBatchWordsForCommunity = () => {
   return useMutation<CreateBatchResponse, AxiosError, VocabularyWord[]>({
     mutationFn: (words) => createBatchWordsForCommunity(words),
     onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: qk.community.words() });
-      await  queryClient.refetchQueries({ queryKey: qk.community.words() });
+      await queryClient.refetchQueries({ queryKey: [QUERY_KEYS.COMMUNITY] });
     },
   });
 };

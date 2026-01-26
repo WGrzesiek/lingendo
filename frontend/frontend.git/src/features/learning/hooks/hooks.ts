@@ -1,5 +1,5 @@
 import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
-import { qk } from "@/lib/queryKeys";
+import { QUERY_KEYS, REFETCH_GROUPS } from "@/lib/queryKeys";
 import {
   completeSession,
   getLearnHeaderProgress,
@@ -18,17 +18,19 @@ export const useCompleteSession = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (sessionId: string) => completeSession(sessionId),
-    onSuccess: (_, sessionId) => {
-      queryClient.invalidateQueries({
-        queryKey: qk.learning.sessionCompleted(sessionId),
-      });
+    onSuccess: async () => {
+      await Promise.all(
+        REFETCH_GROUPS.AFTER_LEARNING.map((key) =>
+          queryClient.refetchQueries({ queryKey: [key] }),
+        ),
+      );
     },
   });
 };
 
 export const useLearnHeaderProgress = (sessionId: string) => {
   return useQuery<LearnHeaderProgress>({
-    queryKey: qk.learning.headerProgress(sessionId),
+    queryKey: [QUERY_KEYS.LEARNING, "headerProgress", sessionId],
     queryFn: () => getLearnHeaderProgress(sessionId),
     enabled: !!sessionId,
   });
@@ -36,7 +38,7 @@ export const useLearnHeaderProgress = (sessionId: string) => {
 
 export const useNextFlashcardRecommendation = (sessionId: string) => {
   return useQuery<NextFlashcardRecommendation>({
-    queryKey: qk.learning.nextFlashcard(sessionId),
+    queryKey: [QUERY_KEYS.LEARNING, "session", sessionId],
     queryFn: () => getNextFlashcard(sessionId),
     enabled: !!sessionId,
   });
@@ -55,11 +57,8 @@ export const useSubmitAnswerMutation = () => {
       answer: RememberAnswer | QuizAnswer | TypingAnswer;
     }) => submitAnswer(sessionId, flashcardId, answer),
     onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({
-        queryKey: qk.learning.nextFlashcard(variables.sessionId),
-      });
-      queryClient.invalidateQueries({
-        queryKey: qk.learning.headerProgress(variables.sessionId),
+      queryClient.refetchQueries({
+        queryKey: [QUERY_KEYS.LEARNING, "session", variables.sessionId],
       });
     },
   });

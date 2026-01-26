@@ -9,7 +9,7 @@ import type {
   UpdateGroupDto,
   AddGroupMembersBatchDto,
 } from "../types/group.types";
-import {qk} from "@/lib/queryKeys";
+import { QUERY_KEYS } from "@/lib/queryKeys";
 
 // ============================================
 // HOOKI DLA ZARZĄDZANIA GRUPAMI
@@ -20,7 +20,7 @@ import {qk} from "@/lib/queryKeys";
  */
 export const useGroupDetail = (groupId: string) => {
   return useQuery({
-    queryKey: qk.groups.detail(groupId),
+    queryKey: [QUERY_KEYS.GROUPS, "detail", groupId],
     queryFn: () => groupsService.getGroupById(groupId),
     enabled: !!groupId,
   });
@@ -34,9 +34,8 @@ export const useCreateGroup = () => {
 
   return useMutation({
     mutationFn: (data: CreateGroupDto) => groupsService.createGroup(data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: qk.groups.all });
-      queryClient.invalidateQueries({ queryKey: qk.groups.withStats() });
+    onSuccess: async () => {
+      await queryClient.refetchQueries({ queryKey: [QUERY_KEYS.GROUPS] });
     },
   });
 };
@@ -55,9 +54,10 @@ export const useUpdateGroup = () => {
       groupId: string;
       data: UpdateGroupDto;
     }) => groupsService.updateGroup(groupId, data),
-    onSuccess: (_, { groupId }) => {
-      queryClient.invalidateQueries({ queryKey: qk.groups.all });
-      queryClient.invalidateQueries({queryKey: qk.studentGroups.groupDetail(groupId),
+    onSuccess: async () => {
+      await queryClient.refetchQueries({ queryKey: [QUERY_KEYS.GROUPS] });
+      await queryClient.refetchQueries({
+        queryKey: [QUERY_KEYS.STUDENT_GROUPS],
       });
     },
   });
@@ -71,9 +71,8 @@ export const useDeleteGroup = () => {
 
   return useMutation({
     mutationFn: (groupId: string) => groupsService.deleteGroup(groupId),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: qk.groups.all });
-      queryClient.invalidateQueries({ queryKey: qk.groups.withStats() });
+    onSuccess: async () => {
+      await queryClient.refetchQueries({ queryKey: [QUERY_KEYS.GROUPS] });
     },
   });
 };
@@ -85,11 +84,9 @@ export const useDeleteGroup = () => {
 /**
  * Hook do pobierania członków grupy
  */
-export const useGroupMembers = (
-  groupId: string
-) => {
+export const useGroupMembers = (groupId: string) => {
   return useQuery({
-    queryKey: qk.groups.members(groupId),
+    queryKey: [QUERY_KEYS.GROUPS, "members", groupId],
     queryFn: () => groupMembersService.getMembers(groupId),
     enabled: !!groupId,
   });
@@ -109,15 +106,10 @@ export const useAddGroupMembersBatch = () => {
       groupId: string;
       data: AddGroupMembersBatchDto;
     }) => groupMembersService.addMembersBatch(groupId, data),
-    onSuccess: (_, { groupId }) => {
-      queryClient.invalidateQueries({
-        queryKey: qk.studentGroups.groupDetail(groupId),
-      });
-      queryClient.invalidateQueries({
-        queryKey: qk.groups.members(groupId),
-      });
-      queryClient.invalidateQueries({
-        queryKey: qk.groups.withStats(),
+    onSuccess: async () => {
+      await queryClient.refetchQueries({ queryKey: [QUERY_KEYS.GROUPS] });
+      await queryClient.refetchQueries({
+        queryKey: [QUERY_KEYS.STUDENT_GROUPS],
       });
     },
   });
@@ -138,15 +130,10 @@ export const useRemoveGroupMembersBatch = () => {
       groupId: string;
       studentIds: string[];
     }) => groupMembersService.removeMembersBatch(groupId, studentIds),
-    onSuccess: (_, { groupId }) => {
-      queryClient.invalidateQueries({
-        queryKey: qk.studentGroups.groupDetail(groupId),
-      });
-      queryClient.invalidateQueries({
-        queryKey: qk.groups.members(groupId),
-      });
-      queryClient.invalidateQueries({
-        queryKey: qk.groups.withStats(),
+    onSuccess: async () => {
+      await queryClient.refetchQueries({ queryKey: [QUERY_KEYS.GROUPS] });
+      await queryClient.refetchQueries({
+        queryKey: [QUERY_KEYS.STUDENT_GROUPS],
       });
     },
   });
@@ -161,7 +148,7 @@ export const useRemoveGroupMembersBatch = () => {
  */
 export const useGroupsWithStats = () => {
   return useQuery({
-    queryKey: qk.groups.withStats(),
+    queryKey: [QUERY_KEYS.GROUPS, "withStats"],
     queryFn: () => groupStatsService.getGroupsWithStats(),
   });
 };
@@ -171,7 +158,7 @@ export const useGroupsWithStats = () => {
  */
 export const useGroupDashboard = (groupId: string) => {
   return useQuery({
-    queryKey: qk.groups.dashboard(groupId),
+    queryKey: [QUERY_KEYS.GROUPS, "dashboard", groupId],
     queryFn: () => groupStatsService.getGroupDashboard(groupId),
     enabled: !!groupId,
   });
@@ -182,7 +169,7 @@ export const useGroupDashboard = (groupId: string) => {
  */
 export const useGroupCourses = (groupId: string, limit: number = 10) => {
   return useQuery({
-    queryKey: qk.groups.courses(groupId, limit),
+    queryKey: [QUERY_KEYS.GROUPS, "courses", groupId, limit],
     queryFn: () => groupStatsService.getSharedCourses(groupId, limit),
     enabled: !!groupId,
   });
@@ -193,7 +180,7 @@ export const useGroupCourses = (groupId: string, limit: number = 10) => {
  */
 export const useGroupActivity = (groupId: string, limit: number = 10) => {
   return useQuery({
-    queryKey: qk.groups.activity(groupId, limit),
+    queryKey: [QUERY_KEYS.GROUPS, "activity", groupId, limit],
     queryFn: () => groupStatsService.getActivityFeed(groupId, limit),
     enabled: !!groupId,
   });
@@ -205,10 +192,10 @@ export const useGroupActivity = (groupId: string, limit: number = 10) => {
 export const useGroupLeaderboard = (
   groupId: string,
   days: number = 30,
-  limit: number = 10
+  limit: number = 10,
 ) => {
   return useQuery({
-    queryKey: qk.groups.leaderboard(groupId, days, limit),
+    queryKey: [QUERY_KEYS.GROUPS, "leaderboard", groupId, days, limit],
     queryFn: () => groupStatsService.getLeaderboard(groupId, days, limit),
     enabled: !!groupId,
   });

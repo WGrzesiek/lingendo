@@ -4,14 +4,14 @@ import {
   DeckFlashcard,
 } from "../services/flashcard.service";
 import { PageResponse } from "@/types/common";
-import { qk } from "@/lib/queryKeys";
+import { QUERY_KEYS } from "@/lib/queryKeys";
 
 /**
  * Hook do pobierania fiszek z infinite scroll
  */
 export const useInfiniteDeckFlashcards = (deckId: string, pageSize = 20) => {
   return useInfiniteQuery<PageResponse<DeckFlashcard>, Error>({
-    queryKey: qk.deck.flashcards(deckId),
+    queryKey: [QUERY_KEYS.FLASHCARDS, "infinite", deckId],
     queryFn: async ({ pageParam = 0 }) => {
       return getDeckFlashcardsPage({
         deckId,

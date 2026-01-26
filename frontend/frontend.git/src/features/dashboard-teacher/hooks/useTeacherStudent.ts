@@ -5,15 +5,14 @@ import {
   teacherDashboardStatsApi,
 } from "../services/teacherStudentApi";
 import type { CreateInvitationRequest } from "../types/api";
-import { qk } from "@/lib/queryKeys";
-
+import { QUERY_KEYS } from "@/lib/queryKeys";
 
 /**
  * Hook do pobierania zaproszeń nauczyciela
  */
 export const useTeacherInvitations = (page: number = 0, size: number = 20) => {
   return useQuery({
-    queryKey: qk.teacherStudent.invitationsList(page, size),
+    queryKey: [QUERY_KEYS.TEACHER_STUDENT, "invitations", page, size],
     queryFn: () => teacherStudentApi.getInvitations(page, size),
   });
 };
@@ -27,12 +26,9 @@ export const useCreateInvitation = () => {
   return useMutation({
     mutationFn: (request: CreateInvitationRequest) =>
       teacherStudentApi.createInvitation(request),
-    onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: qk.teacherStudent.invitations(),
-      });
-      queryClient.invalidateQueries({
-        queryKey: qk.teacherStudent.stats(),
+    onSuccess: async () => {
+      await queryClient.refetchQueries({
+        queryKey: [QUERY_KEYS.TEACHER_STUDENT],
       });
     },
   });
@@ -47,12 +43,9 @@ export const useDeactivateInvitation = () => {
   return useMutation({
     mutationFn: (invitationId: string) =>
       teacherStudentApi.deactivateInvitation(invitationId),
-    onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: qk.teacherStudent.invitations(),
-      });
-      queryClient.invalidateQueries({
-        queryKey: qk.teacherStudent.stats(),
+    onSuccess: async () => {
+      await queryClient.refetchQueries({
+        queryKey: [QUERY_KEYS.TEACHER_STUDENT],
       });
     },
   });
@@ -67,12 +60,9 @@ export const useDeleteInvitation = () => {
   return useMutation({
     mutationFn: (invitationId: string) =>
       teacherStudentApi.deleteInvitation(invitationId),
-    onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: qk.teacherStudent.invitations(),
-      });
-      queryClient.invalidateQueries({
-        queryKey: qk.teacherStudent.stats(),
+    onSuccess: async () => {
+      await queryClient.refetchQueries({
+        queryKey: [QUERY_KEYS.TEACHER_STUDENT],
       });
     },
   });
@@ -83,7 +73,7 @@ export const useDeleteInvitation = () => {
  */
 export const useInvitationInfo = (code: string) => {
   return useQuery({
-    queryKey: qk.teacherStudent.invitationInfo(code),
+    queryKey: [QUERY_KEYS.TEACHER_STUDENT, "invitationInfo", code],
     queryFn: () => teacherStudentApi.getInvitationInfo(code),
     enabled: !!code,
   });
@@ -96,7 +86,7 @@ export const useInvitationInfo = (code: string) => {
  */
 export const useTeacherStudents = (page: number = 0, size: number = 20) => {
   return useQuery({
-    queryKey: qk.teacherStudent.studentsList(page, size),
+    queryKey: [QUERY_KEYS.TEACHER_STUDENT, "students", page, size],
     queryFn: () => teacherStudentApi.getStudents(page, size),
   });
 };
@@ -110,12 +100,9 @@ export const useRemoveStudent = () => {
   return useMutation({
     mutationFn: (studentId: string) =>
       teacherStudentApi.removeStudent(studentId),
-    onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: qk.teacherStudent.students(),
-      });
-      queryClient.invalidateQueries({
-        queryKey: qk.teacherStudent.stats(),
+    onSuccess: async () => {
+      await queryClient.refetchQueries({
+        queryKey: [QUERY_KEYS.TEACHER_STUDENT],
       });
     },
   });
@@ -130,12 +117,9 @@ export const useBlockStudent = () => {
   return useMutation({
     mutationFn: (studentId: string) =>
       teacherStudentApi.blockStudent(studentId),
-    onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: qk.teacherStudent.students(),
-      });
-      queryClient.invalidateQueries({
-        queryKey: qk.teacherStudent.stats(),
+    onSuccess: async () => {
+      await queryClient.refetchQueries({
+        queryKey: [QUERY_KEYS.TEACHER_STUDENT],
       });
     },
   });
@@ -150,12 +134,9 @@ export const useUnblockStudent = () => {
   return useMutation({
     mutationFn: (studentId: string) =>
       teacherStudentApi.unblockStudent(studentId),
-    onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: qk.teacherStudent.students(),
-      });
-      queryClient.invalidateQueries({
-        queryKey: qk.teacherStudent.stats(),
+    onSuccess: async () => {
+      await queryClient.refetchQueries({
+        queryKey: [QUERY_KEYS.TEACHER_STUDENT],
       });
     },
   });
@@ -168,7 +149,7 @@ export const useUnblockStudent = () => {
  */
 export const useTeacherStats = () => {
   return useQuery({
-    queryKey: qk.teacherStudent.stats(),
+    queryKey: [QUERY_KEYS.TEACHER_STUDENT, "stats"],
     queryFn: () => teacherStudentApi.getTeacherStats(),
   });
 };
@@ -178,7 +159,7 @@ export const useTeacherStats = () => {
  */
 export const useTopStudents = (limit: number = 5) => {
   return useQuery({
-    queryKey: qk.teacherStudent.topStudents(limit),
+    queryKey: [QUERY_KEYS.TEACHER_STUDENT, "topStudents", limit],
     queryFn: () => teacherDashboardStatsApi.getTopStudents(limit),
   });
 };
@@ -188,7 +169,7 @@ export const useTopStudents = (limit: number = 5) => {
  */
 export const useTeacherStatsDetails = () => {
   return useQuery({
-    queryKey: qk.teacherStudent.statsDetails(),
+    queryKey: [QUERY_KEYS.TEACHER_STUDENT, "statsDetails"],
     queryFn: () => teacherDashboardStatsApi.getStatsDetails(),
   });
 };
@@ -198,7 +179,7 @@ export const useTeacherStatsDetails = () => {
  */
 export const useTeacherActivity = (limit: number = 10) => {
   return useQuery({
-    queryKey: qk.teacherStudent.activity(limit),
+    queryKey: [QUERY_KEYS.TEACHER_STUDENT, "activity", limit],
     queryFn: () => teacherDashboardStatsApi.getActivity(limit),
   });
 };
@@ -214,9 +195,9 @@ export const useJoinTeacher = () => {
   return useMutation({
     mutationFn: (invitationCode: string) =>
       studentTeacherApi.joinTeacher(invitationCode),
-    onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: qk.teacherStudent.myTeachers(),
+    onSuccess: async () => {
+      await queryClient.refetchQueries({
+        queryKey: [QUERY_KEYS.TEACHER_STUDENT],
       });
     },
   });
@@ -227,7 +208,7 @@ export const useJoinTeacher = () => {
  */
 export const useMyTeachers = (page: number = 0, size: number = 20) => {
   return useQuery({
-    queryKey: qk.teacherStudent.myTeachersList(page, size),
+    queryKey: [QUERY_KEYS.TEACHER_STUDENT, "myTeachers", page, size],
     queryFn: () => studentTeacherApi.getMyTeachers(page, size),
   });
 };
@@ -241,9 +222,9 @@ export const useLeaveTeacher = () => {
   return useMutation({
     mutationFn: (teacherId: string) =>
       studentTeacherApi.leaveTeacher(teacherId),
-    onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: qk.teacherStudent.myTeachers(),
+    onSuccess: async () => {
+      await queryClient.refetchQueries({
+        queryKey: [QUERY_KEYS.TEACHER_STUDENT],
       });
     },
   });

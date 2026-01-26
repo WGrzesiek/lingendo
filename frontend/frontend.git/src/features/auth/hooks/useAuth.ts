@@ -9,7 +9,7 @@ import type { ApiErrorResponse } from "@/types/common";
 
 import { CURRENT_USER_KEY } from "./useCurrentUser";
 import { login, signup, logout, getCurrentUser } from "../services/auth";
-
+import { REFETCH_GROUPS } from "@/lib/queryKeys";
 /**
  * Hook do obsługi procesów logowania, rejestracji i wylogowania
  * Korzysta z React Query mutations, cache’uje usera oraz
@@ -54,8 +54,11 @@ export const useAuth = () => {
   const logoutMutation = useMutation<void, AxiosError<ApiErrorResponse>, void>({
     mutationFn: logout,
 
-    onSuccess: () => {
-      queryClient.setQueryData(CURRENT_USER_KEY, null);
+    onSuccess: async () => {
+      await Promise.all(
+          REFETCH_GROUPS.ON_LOGOUT.map((key) =>
+              queryClient.refetchQueries({queryKey: [key]}),
+          ),);
 
       router.push("/login");
     },

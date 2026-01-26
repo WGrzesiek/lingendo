@@ -4,14 +4,14 @@ import {
   getStatistics,
 } from "../services/statistics.service";
 import { IPdfExportOptions } from "../types/pdf-export.types";
-import { qk } from "@/lib/queryKeys";
+import { QUERY_KEYS } from "@/lib/queryKeys";
 
 /**
  * Hook do pobierania statystyk użytkownika
  */
 export const useStatistics = () =>
   useQuery({
-    queryKey: qk.statistics.all,
+    queryKey: [QUERY_KEYS.STATISTICS],
     queryFn: getStatistics,
   });
 

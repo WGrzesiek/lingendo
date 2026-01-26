@@ -5,16 +5,14 @@ import type {
   ChangePasswordRequest,
 } from "../types/settings.types";
 import { toast } from "sonner";
-import {qk} from "@/lib/queryKeys";
-
+import { QUERY_KEYS } from "@/lib/queryKeys";
 
 export const useProfile = () => {
   return useQuery({
-    queryKey: qk.settings.profile(),
+    queryKey: [QUERY_KEYS.SETTINGS, "profile"],
     queryFn: () => settingsApiService.getProfile(),
   });
 };
-
 
 export const useUpdateProfile = () => {
   const queryClient = useQueryClient();
@@ -22,9 +20,9 @@ export const useUpdateProfile = () => {
   return useMutation({
     mutationFn: (request: UpdateProfileRequest) =>
       settingsApiService.updateProfile(request),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: qk.settings.profile() });
-      queryClient.invalidateQueries({ queryKey: qk.auth.me() });
+    onSuccess: async () => {
+      await queryClient.refetchQueries({ queryKey: [QUERY_KEYS.SETTINGS] });
+      await queryClient.refetchQueries({ queryKey: [QUERY_KEYS.AUTH] });
       toast.success("Profil został zaktualizowany");
     },
     onError: (error: Error) => {

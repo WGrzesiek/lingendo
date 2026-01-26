@@ -1,5 +1,5 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { qk } from "@/lib/queryKeys";
+import { QUERY_KEYS, REFETCH_GROUPS } from "@/lib/queryKeys";
 import {
   enrollToDeck,
   updateFlashcardsPerSession,
@@ -27,9 +27,12 @@ export const useEnrollToDeck = () => {
       deckId: string;
       data?: CreateEnrollmentRequest;
     }) => enrollToDeck(deckId, data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: qk.deckShare.sharedWithMe() });
-      queryClient.invalidateQueries({ queryKey: qk.deck.all });
+    onSuccess: async () => {
+      await Promise.all(
+        REFETCH_GROUPS.AFTER_DECK_MUTATION.map((key) =>
+          queryClient.refetchQueries({ queryKey: [key] }),
+        ),
+      );
     },
   });
 };
@@ -48,13 +51,8 @@ export const useUpdateLearnAlgorithm = () => {
       enrollmentId: string;
       data: UpdateLearnAlgorithmRequest;
     }) => updateLearnAlgorithm(enrollmentId, data),
-    onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({
-        queryKey: qk.deck.detail(variables.enrollmentId),
-      });
-      queryClient.invalidateQueries({
-        queryKey: qk.deck.details(variables.enrollmentId),
-      });
+    onSuccess: async () => {
+      await queryClient.refetchQueries({ queryKey: [QUERY_KEYS.DECKS] });
     },
   });
 };
@@ -73,13 +71,8 @@ export const useUpdateFlashcardsPerSession = () => {
       enrollmentId: string;
       data: UpdateFlashcardsPerSessionRequest;
     }) => updateFlashcardsPerSession(enrollmentId, data),
-    onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({
-        queryKey: qk.deck.detail(variables.enrollmentId),
-      });
-      queryClient.invalidateQueries({
-        queryKey: qk.deck.details(variables.enrollmentId),
-      });
+    onSuccess: async () => {
+      await queryClient.refetchQueries({ queryKey: [QUERY_KEYS.DECKS] });
     },
   });
 };
@@ -98,13 +91,8 @@ export const useUpdateReviewSchedule = () => {
       enrollmentId: string;
       data: UpdateReviewScheduleRequest;
     }) => updateReviewSchedule(enrollmentId, data),
-    onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({
-        queryKey: qk.deck.detail(variables.enrollmentId),
-      });
-      queryClient.invalidateQueries({
-        queryKey: qk.deck.details(variables.enrollmentId),
-      });
+    onSuccess: async () => {
+      await queryClient.refetchQueries({ queryKey: [QUERY_KEYS.DECKS] });
     },
   });
 };

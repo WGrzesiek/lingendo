@@ -9,7 +9,7 @@ import {
   useMutation,
   useQueryClient,
 } from "@tanstack/react-query";
-import { qk } from "@/lib/queryKeys";
+import { QUERY_KEYS, REFETCH_GROUPS } from "@/lib/queryKeys";
 import {
   getNextFlashcardReview,
   getReviewHeader,
@@ -21,7 +21,7 @@ import { CourseWord } from "@/features/course/types/words.types";
 
 export const useNextFlashcardRecommendationReview = (enrollmentId: string) => {
   return useQuery<NextFlashcardRecommendation>({
-    queryKey: qk.learning.nextFlashcardReview(enrollmentId),
+    queryKey: [QUERY_KEYS.LEARNING, "nextFlashcardReview", enrollmentId],
     queryFn: () => getNextFlashcardReview(enrollmentId),
     enabled: !!enrollmentId,
   });
@@ -29,17 +29,17 @@ export const useNextFlashcardRecommendationReview = (enrollmentId: string) => {
 
 export const useReviewHeader = (enrollmentId: string) => {
   return useQuery({
-    queryKey: qk.review.header(enrollmentId),
+    queryKey: [QUERY_KEYS.REVIEW, "header", enrollmentId],
     queryFn: () => getReviewHeader(enrollmentId),
   });
 };
 
 export const useReviewWordsViewInfinite = (
   enrollmentId: string | null,
-  pageSize = 10
+  pageSize = 10,
 ) => {
   return useInfiniteQuery<PageResponse<CourseWord>, Error>({
-    queryKey: qk.review.words(enrollmentId || ""),
+    queryKey: [QUERY_KEYS.REVIEW, "words", enrollmentId || ""],
     queryFn: async ({ pageParam = 0 }) => {
       return getReviewWordsView(enrollmentId!, {
         page: pageParam as number,
@@ -64,10 +64,12 @@ export const useSubmitAnswerMutationReview = () => {
   >({
     mutationFn: ({ flashcardId, answer }) =>
       submitAnswerReview(flashcardId, answer),
-    onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({
-        queryKey: qk.learning.nextFlashcardReview(variables.enrollmentId),
-      });
+    onSuccess: async () => {
+      await Promise.all(
+        REFETCH_GROUPS.AFTER_LEARNING.map((key) =>
+          queryClient.refetchQueries({ queryKey: [key] }),
+        ),
+      );
     },
   });
 };

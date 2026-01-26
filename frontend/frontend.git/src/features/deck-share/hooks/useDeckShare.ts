@@ -12,14 +12,14 @@ import type {
   SharedDeckDto,
 } from "../types/deckShare.types";
 import type { PageResponse } from "@/types/common";
-import { qk } from "@/lib/queryKeys";
+import { QUERY_KEYS } from "@/lib/queryKeys";
 
 /**
  * Hook do pobierania udostępnień konkretnej talii
  */
 export function useDeckShares(deckId: string) {
   return useQuery({
-    queryKey: qk.deckShare.deckShares(deckId),
+    queryKey: [QUERY_KEYS.DECK_SHARE, "deckShares", deckId],
     queryFn: () => deckShareService.getDeckShares(deckId),
     enabled: !!deckId,
   });
@@ -30,7 +30,7 @@ export function useDeckShares(deckId: string) {
  */
 export function useMyShares(page: number = 0, size: number = 20) {
   return useQuery({
-    queryKey: [...qk.deckShare.myShares(), page, size],
+    queryKey: [QUERY_KEYS.DECK_SHARE, "myShares", page, size],
     queryFn: () => deckShareService.getMyShares(page, size),
   });
 }
@@ -40,7 +40,7 @@ export function useMyShares(page: number = 0, size: number = 20) {
  */
 export function useInfiniteMyShares(pageSize: number = 20) {
   return useInfiniteQuery<PageResponse<DeckShareResponse>, Error>({
-    queryKey: [...qk.deckShare.myShares(), "infinite"],
+    queryKey: [QUERY_KEYS.DECK_SHARE, "myShares", "infinite"],
     queryFn: async ({ pageParam = 0 }) =>
       deckShareService.getMyShares(pageParam as number, pageSize),
     initialPageParam: 0,
@@ -54,7 +54,7 @@ export function useInfiniteMyShares(pageSize: number = 20) {
  */
 export function useSharedWithMe(page: number = 0, size: number = 20) {
   return useQuery({
-    queryKey: [...qk.deckShare.sharedWithMe(), page, size],
+    queryKey: [QUERY_KEYS.DECK_SHARE, "sharedWithMe", page, size],
     queryFn: () => deckShareService.getSharedWithMe(page, size),
   });
 }
@@ -64,7 +64,7 @@ export function useSharedWithMe(page: number = 0, size: number = 20) {
  */
 export function useInfiniteSharedWithMe(pageSize: number = 20) {
   return useInfiniteQuery<PageResponse<SharedDeckDto>, Error>({
-    queryKey: [...qk.deckShare.sharedWithMe(), "infinite"],
+    queryKey: [QUERY_KEYS.DECK_SHARE, "sharedWithMe", "infinite"],
     queryFn: async ({ pageParam = 0 }) =>
       deckShareService.getSharedWithMe(pageParam as number, pageSize),
     initialPageParam: 0,
@@ -78,7 +78,7 @@ export function useInfiniteSharedWithMe(pageSize: number = 20) {
  */
 export function useHasAccessToDeck(deckId: string) {
   return useQuery({
-    queryKey: qk.deckShare.hasAccess(deckId),
+    queryKey: [QUERY_KEYS.DECK_SHARE, "hasAccess", deckId],
     queryFn: () => deckShareService.hasAccessToDeck(deckId),
     enabled: !!deckId,
   });
@@ -98,11 +98,8 @@ export function useShareDeck() {
       deckId: string;
       request: ShareDeckRequest;
     }) => deckShareService.shareDeck(deckId, request),
-    onSuccess: (_, { deckId }) => {
-      queryClient.invalidateQueries({
-        queryKey: qk.deckShare.deckShares(deckId),
-      });
-      queryClient.invalidateQueries({ queryKey: qk.deckShare.myShares() });
+    onSuccess: async () => {
+      await queryClient.refetchQueries({ queryKey: [QUERY_KEYS.DECK_SHARE] });
     },
   });
 }
@@ -121,11 +118,8 @@ export function useShareDeckBatch() {
       deckId: string;
       request: BatchShareDeckRequest;
     }) => deckShareService.shareDeckBatch(deckId, request),
-    onSuccess: (_, { deckId }) => {
-      queryClient.invalidateQueries({
-        queryKey: qk.deckShare.deckShares(deckId),
-      });
-      queryClient.invalidateQueries({ queryKey: qk.deckShare.myShares() });
+    onSuccess: async () => {
+      await queryClient.refetchQueries({ queryKey: [QUERY_KEYS.DECK_SHARE] });
     },
   });
 }
@@ -139,11 +133,8 @@ export function useShareDeckWithAllStudents() {
   return useMutation({
     mutationFn: ({ deckId, message }: { deckId: string; message?: string }) =>
       deckShareService.shareDeckWithAllStudents(deckId, message),
-    onSuccess: (_, { deckId }) => {
-      queryClient.invalidateQueries({
-        queryKey: qk.deckShare.deckShares(deckId),
-      });
-      queryClient.invalidateQueries({ queryKey: qk.deckShare.myShares() });
+    onSuccess: async () => {
+      await queryClient.refetchQueries({ queryKey: [QUERY_KEYS.DECK_SHARE] });
     },
   });
 }
@@ -157,11 +148,8 @@ export function useShareDeckWithAllFriends() {
   return useMutation({
     mutationFn: ({ deckId, message }: { deckId: string; message?: string }) =>
       deckShareService.shareDeckWithAllFriends(deckId, message),
-    onSuccess: (_, { deckId }) => {
-      queryClient.invalidateQueries({
-        queryKey: qk.deckShare.deckShares(deckId),
-      });
-      queryClient.invalidateQueries({ queryKey: qk.deckShare.myShares() });
+    onSuccess: async () => {
+      await queryClient.refetchQueries({ queryKey: [QUERY_KEYS.DECK_SHARE] });
     },
   });
 }
@@ -182,13 +170,9 @@ export function useShareDeckWithGroup() {
       groupId: string;
       message?: string;
     }) => deckShareService.shareDeckWithGroup(deckId, groupId, message),
-    onSuccess: (_, { deckId }) => {
-      queryClient.invalidateQueries({
-        queryKey: qk.deckShare.deckShares(deckId),
-      });
-      queryClient.invalidateQueries({ queryKey: qk.deckShare.myShares() });
-      // Invalidate group stats as well
-      queryClient.invalidateQueries({ queryKey: ["groups"] });
+    onSuccess: async () => {
+      await queryClient.refetchQueries({ queryKey: [QUERY_KEYS.DECK_SHARE] });
+      await queryClient.refetchQueries({ queryKey: [QUERY_KEYS.GROUPS] });
     },
   });
 }
@@ -209,11 +193,8 @@ export function useShareDeckWithUser() {
       targetUserId: string;
       message?: string;
     }) => deckShareService.shareDeckWithUser(deckId, targetUserId, message),
-    onSuccess: (_, { deckId }) => {
-      queryClient.invalidateQueries({
-        queryKey: qk.deckShare.deckShares(deckId),
-      });
-      queryClient.invalidateQueries({ queryKey: qk.deckShare.myShares() });
+    onSuccess: async () => {
+      await queryClient.refetchQueries({ queryKey: [QUERY_KEYS.DECK_SHARE] });
     },
   });
 }
@@ -226,8 +207,8 @@ export function useRevokeDeckShare() {
 
   return useMutation({
     mutationFn: (shareId: string) => deckShareService.revokeDeckShare(shareId),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: qk.deckShare.all });
+    onSuccess: async () => {
+      await queryClient.refetchQueries({ queryKey: [QUERY_KEYS.DECK_SHARE] });
     },
   });
 }
@@ -241,11 +222,8 @@ export function useRevokeAllDeckShares() {
   return useMutation({
     mutationFn: (deckId: string) =>
       deckShareService.revokeAllDeckShares(deckId),
-    onSuccess: (_, deckId) => {
-      queryClient.invalidateQueries({
-        queryKey: qk.deckShare.deckShares(deckId),
-      });
-      queryClient.invalidateQueries({ queryKey: qk.deckShare.myShares() });
+    onSuccess: async () => {
+      await queryClient.refetchQueries({ queryKey: [QUERY_KEYS.DECK_SHARE] });
     },
   });
 }

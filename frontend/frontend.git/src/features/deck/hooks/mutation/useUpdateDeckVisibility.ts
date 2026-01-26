@@ -1,7 +1,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { updateDeckVisibility } from "../../services/deck.service";
 import type { UpdateDeckVisibilityRequest } from "../../types";
-import { qk } from "@/lib/queryKeys";
+import { REFETCH_GROUPS } from "@/lib/queryKeys";
 
 /**
  * Hook do zmiany widoczności talii (publiczna/prywatna)
@@ -16,12 +16,12 @@ export const useUpdateDeckVisibility = () => {
       deckId: string;
       data: UpdateDeckVisibilityRequest;
     }) => updateDeckVisibility(deckId, data),
-    onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({
-        queryKey: qk.deck.detail(variables.deckId),
-      });
-      queryClient.invalidateQueries({ queryKey: qk.deck.all });
-      queryClient.invalidateQueries({ queryKey: qk.deck.userDecks() });
+    onSuccess: async () => {
+      await Promise.all(
+        REFETCH_GROUPS.AFTER_DECK_MUTATION.map((key) =>
+          queryClient.refetchQueries({ queryKey: [key] }),
+        ),
+      );
     },
   });
 };
