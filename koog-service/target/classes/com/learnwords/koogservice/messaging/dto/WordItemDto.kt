@@ -8,10 +8,8 @@ import com.fasterxml.jackson.annotation.JsonProperty
 data class WordItemDto(
     @JsonProperty("word_id")
     val wordId: String,
-
     @JsonProperty("word")
     val word: String,
-
     @JsonProperty("translations")
     val translations: List<String>,
 )

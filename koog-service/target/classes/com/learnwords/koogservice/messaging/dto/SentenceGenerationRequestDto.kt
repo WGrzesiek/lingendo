@@ -13,22 +13,16 @@ import com.fasterxml.jackson.annotation.JsonProperty
 data class SentenceGenerationRequestDto(
     @JsonProperty("id")
     val id: String,
-    
     @JsonProperty("requested_by_user_id")
     val requestedByUserId: String,
-    
     @JsonProperty("words")
     val words: List<WordItemDto>,
-    
     @JsonProperty("level")
     val level: String = "B1",
-    
     @JsonProperty("category")
     val category: String = "general",
-
     @JsonProperty("language_from")
     val languageFrom: String,
-
     @JsonProperty("language_to")
     val languageTo: String,
 )
