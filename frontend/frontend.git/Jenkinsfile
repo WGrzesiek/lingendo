@@ -2,6 +2,7 @@ pipeline {
 	agent {
 		label 'builder'
 	}
+	options { skipDefaultCheckout(true) }
 
 	parameters {
     string(name: 'REGISTRY', defaultValue: 'localhost:5000', description: 'Local Docker registry')
@@ -23,7 +24,7 @@ pipeline {
 				dir('frontend') {
             script {
                 def tag = params.TAG?.trim() ? params.TAG.trim() : "${env.BUILD_NUMBER}"
-						def image = "${env.REGISTRY}/${env.IMAGE_NAME}:${tag}"
+                        def image = "${params.REGISTRY}/${params.IMAGE_NAME}:${tag}"
 						sh "docker build -t ${image} ."
 						sh "docker push ${image}"
 						echo "Pushed Docker image: ${image}"

@@ -1,6 +1,7 @@
 import apiClient from "@/lib/api/axios";
 import type { LoginRequest, SignupRequest, User } from "../types";
 
+const BASE_URL = "/v1/gateway";
 /**
  * Logowanie użytkownika
  * Backend ustawia access token w httpOnly cookie
@@ -8,7 +9,7 @@ import type { LoginRequest, SignupRequest, User } from "../types";
  * @returns Promise który rozwiązuje się po udanym logowaniu
  */
 export const login = async (data: LoginRequest): Promise<void> => {
-  await apiClient.post("/login", data);
+  await apiClient.post(`${BASE_URL}/login`, data);
   console.log("[Login] Zalogowano pomyślnie, token w cookie");
 };
 
@@ -18,7 +19,7 @@ export const login = async (data: LoginRequest): Promise<void> => {
  * @returns Promise który rozwiązuje się po udanej rejestracji
  */
 export const signup = async (data: SignupRequest): Promise<void> => {
-  await apiClient.post("/signup", data);
+  await apiClient.post(`/v1/users/register`, data);
 };
 
 /**
@@ -29,7 +30,7 @@ export const signup = async (data: SignupRequest): Promise<void> => {
  */
 export const logout = async (): Promise<void> => {
   try {
-    await apiClient.post("/logout");
+    await apiClient.post(`${BASE_URL}/logout`);
     console.log("[Logout] Wylogowano pomyślnie");
   } catch (error) {
     console.error("[Logout] Błąd wylogowania:", error);
@@ -44,6 +45,6 @@ export const logout = async (): Promise<void> => {
  * @throws Error jeśli użytkownik nie jest zalogowany lub token jest nieprawidłowy
  */
 export const getCurrentUser = async (): Promise<User> => {
-  const response = await apiClient.get<User>("/me");
+  const response = await apiClient.get<User>(`${BASE_URL}/me`);
   return response.data;
 };

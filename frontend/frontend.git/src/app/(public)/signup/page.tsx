@@ -8,16 +8,16 @@ const SignupPage = () => {
   // useRedirectIfAuthenticated();
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background">
-      <div className="w-full max-w-md p-8 bg-card rounded-lg shadow-md border">
-        <h1 className="text-2xl font-bold text-center mb-6">Create Account</h1>
+    <div className="min-h-screen flex items-center justify-center bg-background py-8">
+      <div className="w-full max-w-lg p-8 bg-card rounded-lg shadow-md border">
+        <h1 className="text-2xl font-bold text-center mb-6">Utwórz konto</h1>
 
         <SignupForm />
 
         <p className="text-center text-sm text-muted-foreground mt-4">
-          Already have an account?{" "}
-          <Link href="/signin" className="text-primary hover:underline">
-            Sign in
+          Masz już konto?{" "}
+          <Link href="/login" className="text-primary hover:underline">
+            Zaloguj się
           </Link>
         </p>
       </div>

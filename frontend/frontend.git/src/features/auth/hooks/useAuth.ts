@@ -1,96 +1,81 @@
 "use client";
 
-import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import type { AxiosError } from "axios";
+
+import type { LoginRequest, SignupRequest, User } from "../types";
+import type { ApiErrorResponse } from "@/types/common";
+
+import { CURRENT_USER_KEY } from "./useCurrentUser";
 import { login, signup, logout, getCurrentUser } from "../services/auth";
-import type { LoginRequest, SignupRequest } from "../types";
-import { AxiosError } from "axios";
 
 /**
- * Hook do zarządzania procesami uwierzytelniania użytkownika
- * Obsługuje logowanie, rejestrację i wylogowanie
- * Automatycznie przekierowuje użytkownika do odpowiedniego dashboardu na podstawie roli
+ * Hook do obsługi procesów logowania, rejestracji i wylogowania
+ * Korzysta z React Query mutations, cache’uje usera oraz
+ * automatycznie aktualizuje navbar po login/logout
  */
 export const useAuth = () => {
   const router = useRouter();
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const queryClient = useQueryClient();
 
-  /**
-   * Obsługuje proces logowania użytkownika
-   * Po udanym logowaniu pobiera dane użytkownika i przekierowuje do odpowiedniego dashboardu
-   * @param data - Dane logowania (username i password)
-   */
-  const handleLogin = async (data: LoginRequest) => {
-    setIsLoading(true);
-    setError(null);
-
-    try {
+  const loginMutation = useMutation<
+    User,
+    AxiosError<ApiErrorResponse>,
+    LoginRequest
+  >({
+    mutationFn: async (data) => {
       await login(data);
-      const user = await getCurrentUser();
+      return await getCurrentUser();
+    },
+
+    onSuccess: (user) => {
+      queryClient.setQueryData(CURRENT_USER_KEY, user);
+
       if (user.accountType === "TEACHER") {
         router.push("/dashboard-teacher");
       } else {
         router.push("/dashboard");
       }
-    } catch (err) {
-      const message =
-        err instanceof AxiosError
-          ? err.response?.data?.message || "Login failed"
-          : "Login failed";
-      setError(message);
-      throw err;
-    } finally {
-      setIsLoading(false);
-    }
-  };
+    },
+  });
 
-  /**
-   * Obsługuje proces rejestracji nowego użytkownika
-   * Po udanej rejestracji przekierowuje do strony logowania
-   * @param data - Dane rejestracyjne (email, password, opcjonalnie name)
-   */
-  const handleSignup = async (data: SignupRequest) => {
-    setIsLoading(true);
-    setError(null);
-
-    try {
-      await signup(data);
+  const signupMutation = useMutation<
+    void,
+    AxiosError<ApiErrorResponse>,
+    SignupRequest
+  >({
+    mutationFn: signup,
+    onSuccess: () => {
       router.push("/login");
-    } catch (err) {
-      const message =
-        err instanceof AxiosError
-          ? err.response?.data?.message || "Signup failed"
-          : "Signup failed";
-      setError(message);
-      throw err;
-    } finally {
-      setIsLoading(false);
-    }
-  };
+    },
+  });
 
-  /**
-   * Obsługuje proces wylogowania użytkownika
-   * Usuwa token uwierzytelniający i przekierowuje do strony logowania
-   */
-  const handleLogout = async () => {
-    setIsLoading(true);
+  const logoutMutation = useMutation<void, AxiosError<ApiErrorResponse>, void>({
+    mutationFn: logout,
 
-    try {
-      await logout();
+    onSuccess: () => {
+      queryClient.setQueryData(CURRENT_USER_KEY, null);
+
       router.push("/login");
-    } catch (err) {
-      console.error("Logout error:", err);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+    },
+  });
 
   return {
-    login: handleLogin,
-    signup: handleSignup,
-    logout: handleLogout,
-    isLoading,
-    error,
+    login: loginMutation.mutate,
+    loginAsync: loginMutation.mutateAsync,
+    signup: signupMutation.mutate,
+    signupAsync: signupMutation.mutateAsync,
+    logout: logoutMutation.mutate,
+    logoutAsync: logoutMutation.mutateAsync,
+
+    isLoading:
+      loginMutation.isPending ||
+      signupMutation.isPending ||
+      logoutMutation.isPending,
+
+    loginError: loginMutation.error,
+    signupError: signupMutation.error,
+    logoutError: logoutMutation.error,
   };
 };

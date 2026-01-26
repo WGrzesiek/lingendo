@@ -6,9 +6,9 @@ import { type Tier } from "@/components/pricing/TierCard";
 
 const TIERS: Tier[] = [
   {
-    id: "free",
-    name: "Free",
-    tagline: "Dla startujących z Lingendo",
+    id: "basic",
+    name: "Basic",
+    tagline: "Darmowy plan dla startujących z Lingendo",
     priceMonthly: 0,
     priceYearly: 0,
     ctaLabel: "Załóż darmowe konto",
@@ -22,34 +22,50 @@ const TIERS: Tier[] = [
     ],
   },
   {
-    id: "pro",
-    name: "Pro",
-    tagline: "Dla osób, które chcą regularnego postępu",
+    id: "premium",
+    name: "Premium",
+    tagline: "Kursy społeczności, znajomych i pełny dostęp",
     priceMonthly: 19,
     priceYearly: 180,
-    ctaLabel: "Wybierz Pro",
+    ctaLabel: "Wybierz Premium",
     highlighted: true,
     features: [
-      { label: "Wszystko z Free", included: true },
+      { label: "Wszystko z Basic", included: true },
       { label: "Nielimitowane zestawy i talie", included: true },
+      { label: "Kursy społeczności i znajomych", included: true },
       { label: "Zaawansowane statystyki i cele", included: true },
-      { label: "Tryb offline", included: true },
-      { label: "Import/eksport CSV", included: true },
+      { label: "Tryb offline + Import/eksport CSV", included: true },
       { label: "Wsparcie e-mail", included: true },
     ],
   },
   {
-    id: "teams",
-    name: "Teams",
-    tagline: "Dla szkół i zespołów",
+    id: "student",
+    name: "Student",
+    tagline: "Dla uczniów korzystających z talii nauczyciela",
+    priceMonthly: 0,
+    priceYearly: 0,
+    ctaLabel: "Dołącz jako uczeń",
+    features: [
+      { label: "Dostęp do talii nauczyciela", included: true },
+      { label: "Fiszki i powtórki (SR)", included: true },
+      { label: "Śledzenie postępów przez nauczyciela", included: true },
+      { label: "Własne zestawy (ograniczone)", included: true },
+      { label: "Podstawowe statystyki", included: true },
+      { label: "Wsparcie przez nauczyciela", included: true },
+    ],
+  },
+  {
+    id: "teacher",
+    name: "Teacher",
+    tagline: "Dla nauczycieli i szkół językowych",
     priceMonthly: 49,
     priceYearly: 480,
-    ctaLabel: "Skontaktuj się z nami",
+    ctaLabel: "Zostań nauczycielem",
     features: [
-      { label: "Wszystko z Pro", included: true },
-      { label: "Panel nauczyciela / lidera", included: true },
-      { label: "Talie współdzielone", included: true },
-      { label: "SSO / SCIM (opcjonalnie)", included: true },
+      { label: "Panel nauczyciela", included: true },
+      { label: "Tworzenie i udostępnianie talii", included: true },
+      { label: "Zarządzanie uczniami", included: true },
+      { label: "Śledzenie postępów uczniów", included: true },
       { label: "Priorytetowe wsparcie", included: true },
       { label: "Fakturowanie zbiorcze", included: true },
     ],
@@ -62,7 +78,7 @@ export function PricingSection() {
       <SectionHeader
         eyebrow="Cennik"
         title="Wybierz plan dopasowany do Twojej nauki"
-        subtitle="Zacznij za darmo. Przejdź na Pro, gdy będziesz gotowy. Dla szkół i firm mamy plan Teams."
+        subtitle="Zacznij za darmo z Basic. Przejdź na Premium po więcej funkcji. Uczniowie i nauczyciele mają dedykowane plany."
       />
       <div className="mt-10">
         <PricingTable

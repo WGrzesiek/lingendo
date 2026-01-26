@@ -6,9 +6,9 @@ import axios from "axios";
  * Obsługuje automatyczne odświeżanie tokenów przy błędzie 401
  */
 const apiClient = axios.create({
-  // baseURL: "http://staging.ibis-tautara.ts.net:8811/api/v1/gateway",
+  // baseURL: "http://staging.ibis-tautara.ts.net:8811/api",
   baseURL: "/api",
-  timeout: 10000,
+  timeout: 3000,
   headers: {
     "Content-Type": "application/json",
     Accept: "application/json",
@@ -46,7 +46,7 @@ async function refreshAccess(): Promise<boolean> {
   if (!refreshing) {
     refreshing = (async () => {
       try {
-        await axios.post("/refresh", {}, { withCredentials: true });
+        await apiClient.post("/v1/gateway/refresh", {});
         console.log("[Axios] Token odświeżony pomyślnie");
       } catch (error) {
         console.error("[Axios] Nie udało się odświeżyć tokenu");
@@ -74,8 +74,20 @@ apiClient.interceptors.response.use(
   (response) => response,
   async (error) => {
     const originalRequest = error.config;
+    const status = error.response?.status;
+    const url = originalRequest?.url ?? "";
 
-    if (error.response?.status === 401 && !originalRequest._retry) {
+    // Jezeli blad z /me to nie odswiezamy
+    if (status === 401 && url.includes("/me")) {
+      return Promise.reject(error);
+    }
+
+    if (
+      status === 401 &&
+      !originalRequest._retry &&
+      !url.includes("/login") &&
+      !url.includes("/refresh")
+    ) {
       originalRequest._retry = true;
 
       console.log("[Axios] Otrzymano 401, próba odświeżenia tokenu...");
@@ -87,7 +99,10 @@ apiClient.interceptors.response.use(
         return apiClient(originalRequest);
       } else {
         console.log("[Axios] Refresh nieudany, przekierowanie na /login");
-        if (typeof window !== "undefined") {
+        if (
+          typeof window !== "undefined" &&
+          window.location.pathname !== "/login"
+        ) {
           window.location.href = "/login";
         }
       }

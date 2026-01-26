@@ -24,7 +24,7 @@ type Props = {
   className?: string;
 };
 
-export function TierCard({ tier, billing, onSelect, className = "" }: Props) {
+export function TierCard({ tier, billing, onSelect }: Props) {
   const price = billing === "monthly" ? tier.priceMonthly : tier.priceYearly;
   const per = billing === "monthly" ? "/msc" : "/rok";
 
