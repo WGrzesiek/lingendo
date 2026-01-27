@@ -7,9 +7,6 @@ import java.util.List;
  * DTO eventu wygenerowanych zdań AI z koog-service.
  */
 public record SentenceGeneratedEventDto(
-    String eventId,
-    String correlationId,
-    String jobId,
     String wordId,
     List<GeneratedSentenceDto> sentences,
     GenerationMetadataDto metadata,
