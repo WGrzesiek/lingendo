@@ -53,15 +53,10 @@ export const useAuth = () => {
 
   const logoutMutation = useMutation<void, AxiosError<ApiErrorResponse>, void>({
     mutationFn: logout,
-
-    onSuccess: async () => {
-      await Promise.all(
-          REFETCH_GROUPS.ON_LOGOUT.map((key) =>
-              queryClient.refetchQueries({queryKey: [key]}),
-          ),);
-
-      router.push("/login");
-    },
+    onSuccess: () => {
+      queryClient.clear();
+    router.push("/login");
+  },
   });
 
   return {
