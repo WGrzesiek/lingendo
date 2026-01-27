@@ -65,8 +65,7 @@ public class SentenceAIProjectionUpdaterImpl implements SentenceAIProjectionUpda
             return;
         }
 
-        log.info("Otrzymano event AI_SENTENCE_GENERATED - eventId: {}, wordId: {}, liczba zdań: {}", 
-                event.eventId(), event.wordId(), event.sentences().size());
+        log.info("Otrzymano event AI_SENTENCE_GENERATED - wordId: {}, liczba zdań: {}", event.wordId(), event.sentences().size());
 
         try {
             validateEvent(event);
@@ -89,13 +88,13 @@ public class SentenceAIProjectionUpdaterImpl implements SentenceAIProjectionUpda
             
             vocabularyRepository.addSentenceAIIds(event.wordId(), savedSentenceIds);
             
-            log.info("Zapisano {} zdań AI i zaktualizowano Vocabulary dla wordId: {}, correlationId: {}", 
-                    savedSentenceIds.size(), event.wordId(), event.correlationId());
+            log.info("Zapisano {} zdań AI i zaktualizowano Vocabulary dla wordId: {}",
+                    savedSentenceIds.size(), event.wordId());
             
         } catch (IllegalArgumentException e) {
-            log.error("Walidacja nie powiodła się dla eventu {}: {}", event.eventId(), e.getMessage());
+            log.error("Walidacja nie powiodła się dla eventu {}: {}", event.wordId(), e.getMessage());
         } catch (Exception e) {
-            log.error("Błąd podczas przetwarzania eventu {}: {}", event.eventId(), e.getMessage(), e);
+            log.error("Błąd podczas przetwarzania eventu {}: {}", event.wordId(), e.getMessage(), e);
         }
     }
 
@@ -103,9 +102,6 @@ public class SentenceAIProjectionUpdaterImpl implements SentenceAIProjectionUpda
      * Waliduje dane eventu.
      */
     private void validateEvent(SentenceGeneratedEventDto event) {
-        if (event.eventId() == null || event.eventId().isBlank()) {
-            throw new IllegalArgumentException("ID eventu nie może być puste");
-        }
         if (event.wordId() == null || event.wordId().isBlank()) {
             throw new IllegalArgumentException("ID słowa nie może być puste");
         }
