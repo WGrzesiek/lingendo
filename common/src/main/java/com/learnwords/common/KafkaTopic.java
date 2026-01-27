@@ -36,6 +36,6 @@ public class KafkaTopic {
     public static final String DECK_SHARE_REVOKED = "deck.share.revoked";
 
     // AI Sentence generation events
-    public static final String AI_SENTENCE_GENERATED = "ai.sentence.generated";
+    public static final String AI_SENTENCE_GENERATED = "outbox.event.SentenceGeneration";
 
 }
