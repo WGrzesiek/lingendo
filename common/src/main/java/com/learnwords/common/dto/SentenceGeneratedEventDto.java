@@ -17,7 +17,7 @@ public record SentenceGeneratedEventDto(
      * DTO pojedynczego wygenerowanego zdania.
      */
     public record GeneratedSentenceDto(
-        String sentence,
+        String text,
         String translation
     ) {}
     
