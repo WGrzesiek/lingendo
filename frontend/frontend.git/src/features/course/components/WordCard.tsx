@@ -6,11 +6,14 @@ interface WordCardProps {
 }
 
 export const WordCard = ({ word }: WordCardProps) => {
+  const sentences = word.sentences ?? [];
+  const sentencesAI = word.sentencesAI ?? [];
+  const hasSentences = sentences.length > 0 || sentencesAI.length > 0;
+
   return (
     <div
-      className={`p-4 border rounded-lg hover:bg-accent/50 transition-colors ${
-        word.isLearned ? "border-success/30 bg-success/5" : ""
-      }`}
+      className={`p-4 border rounded-lg hover:bg-accent/50 transition-colors ${word.isLearned ? "border-success/30 bg-success/5" : ""
+        }`}
     >
       {/* MOBILE LAYOUT - badgesy na górze */}
       <div className="flex flex-wrap items-center gap-2 mb-3 sm:hidden">
@@ -42,21 +45,35 @@ export const WordCard = ({ word }: WordCardProps) => {
           </span>
         </div>
 
-        {(word.sentences ?? []).length > 0 ||
-        (word.sentencesAI ?? []).length > 0 ? (
+        {hasSentences ? (
           <div className="space-y-2 mt-3">
-            {[...(word.sentences ?? []), ...(word.sentencesAI ?? [])].map(
-              (sentence) => (
-                <div key={sentence.id} className="space-y-1">
-                  <p className="text-sm italic text-muted-foreground">
-                    &ldquo;{sentence.sentence}&rdquo;
-                  </p>
-                  <p className="text-sm italic text-muted-foreground">
-                    &ldquo;{sentence.translation}&rdquo;
-                  </p>
+            {/* Zwykłe zdania - bez ikony */}
+            {sentences.map((sentence) => (
+              <div key={sentence.id} className="space-y-1">
+                <p className="text-sm italic text-muted-foreground">
+                  &ldquo;{sentence.sentence}&rdquo;
+                </p>
+                <p className="text-sm italic text-muted-foreground">
+                  &ldquo;{sentence.translation}&rdquo;
+                </p>
+              </div>
+            ))}
+            {/* Zdania AI - z ikoną Sparkles */}
+            {sentencesAI.map((sentence) => (
+              <div key={sentence.id} className="space-y-1">
+                <div className="flex items-start gap-2">
+                  <Sparkles className="w-4 h-4 text-amber-400 mt-0.5 flex-shrink-0" />
+                  <div>
+                    <p className="text-sm italic text-muted-foreground">
+                      &ldquo;{sentence.sentence}&rdquo;
+                    </p>
+                    <p className="text-sm italic text-muted-foreground">
+                      &ldquo;{sentence.translation}&rdquo;
+                    </p>
+                  </div>
                 </div>
-              )
-            )}
+              </div>
+            ))}
           </div>
         ) : (
           <div className="flex items-center gap-2 text-sm text-muted-foreground mt-3">
@@ -98,21 +115,35 @@ export const WordCard = ({ word }: WordCardProps) => {
             )}
           </div>
 
-          {(word.sentences ?? []).length > 0 ||
-          (word.sentencesAI ?? []).length > 0 ? (
+          {hasSentences ? (
             <div className="space-y-2">
-              {[...(word.sentences ?? []), ...(word.sentencesAI ?? [])].map(
-                (sentence) => (
-                  <div key={sentence.id} className="space-y-1">
-                    <p className="text-sm italic text-muted-foreground">
-                      &ldquo;{sentence.sentence}&rdquo;
-                    </p>
-                    <p className="text-sm italic text-muted-foreground">
-                      &ldquo;{sentence.translation}&rdquo;
-                    </p>
+              {/* Zwykłe zdania - bez ikony */}
+              {sentences.map((sentence) => (
+                <div key={sentence.id} className="space-y-1">
+                  <p className="text-sm italic text-muted-foreground">
+                    &ldquo;{sentence.sentence}&rdquo;
+                  </p>
+                  <p className="text-sm italic text-muted-foreground">
+                    &ldquo;{sentence.translation}&rdquo;
+                  </p>
+                </div>
+              ))}
+              {/* Zdania AI - z ikoną Sparkles */}
+              {sentencesAI.map((sentence) => (
+                <div key={sentence.id} className="space-y-1">
+                  <div className="flex items-start gap-2">
+                    <Sparkles className="w-4 h-4 text-amber-400 mt-0.5 flex-shrink-0" />
+                    <div>
+                      <p className="text-sm italic text-muted-foreground">
+                        &ldquo;{sentence.sentence}&rdquo;
+                      </p>
+                      <p className="text-sm italic text-muted-foreground">
+                        &ldquo;{sentence.translation}&rdquo;
+                      </p>
+                    </div>
                   </div>
-                )
-              )}
+                </div>
+              ))}
             </div>
           ) : (
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
@@ -125,3 +156,4 @@ export const WordCard = ({ word }: WordCardProps) => {
     </div>
   );
 };
+
