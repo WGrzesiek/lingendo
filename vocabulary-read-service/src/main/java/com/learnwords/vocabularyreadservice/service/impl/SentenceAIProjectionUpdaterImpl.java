@@ -77,7 +77,7 @@ public class SentenceAIProjectionUpdaterImpl implements SentenceAIProjectionUpda
                 
                 SentenceAI sentenceAI = SentenceAI.builder()
                         .id(sentenceId)
-                        .sentenceAI(sentence.sentence())
+                        .sentenceAI(sentence.text())
                         .translationAI(sentence.translation())
                         .createdAt(Instant.now())
                         .build();
@@ -109,7 +109,7 @@ public class SentenceAIProjectionUpdaterImpl implements SentenceAIProjectionUpda
             throw new IllegalArgumentException("Lista zdań nie może być pusta");
         }
         for (SentenceGeneratedEventDto.GeneratedSentenceDto sentence : event.sentences()) {
-            if (sentence.sentence() == null || sentence.sentence().isBlank()) {
+            if (sentence.text() == null || sentence.text().isBlank()) {
                 throw new IllegalArgumentException("Zdanie nie może być puste");
             }
             if (sentence.translation() == null || sentence.translation().isBlank()) {
