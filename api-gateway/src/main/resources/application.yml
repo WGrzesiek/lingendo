@@ -23,7 +23,7 @@ spring:
               predicates:
                 - Path=/openapi/koog-api
               filters:
-                - SetPath=/v3/api-docs
+                - SetPath=/api-docs
             - id: api-gateway-service
               uri: http://api-gateway:8811
               predicates:
@@ -57,7 +57,7 @@ spring:
             - id: koog-api
               uri: http://koog-service:7777
               predicates:
-                - Path=/api/v1/sentences/generate
+                - Path=/api/v1/sentences/**
             - id: deck-api
               uri: http://deck-service:8814
               predicates:
