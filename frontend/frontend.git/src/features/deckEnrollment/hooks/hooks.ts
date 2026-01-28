@@ -51,8 +51,11 @@ export const useUpdateLearnAlgorithm = () => {
       enrollmentId: string;
       data: UpdateLearnAlgorithmRequest;
     }) => updateLearnAlgorithm(enrollmentId, data),
-    onSuccess: async () => {
+    onSuccess: async (enrollmentId) => {
+      await queryClient.refetchQueries({ queryKey: [QUERY_KEYS.ENROLLMENTS] });
       await queryClient.refetchQueries({ queryKey: [QUERY_KEYS.DECKS] });
+      await queryClient.refetchQueries({ queryKey: [QUERY_KEYS.COURSES, enrollmentId, 'header'] });
+      await queryClient.refetchQueries({ queryKey: [QUERY_KEYS.COURSES, enrollmentId, 'progress'] });
     },
   });
 };
