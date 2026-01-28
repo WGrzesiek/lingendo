@@ -30,7 +30,7 @@ export const useCompleteSession = () => {
 
 export const useLearnHeaderProgress = (sessionId: string) => {
   return useQuery<LearnHeaderProgress>({
-    queryKey: [QUERY_KEYS.LEARNING, "headerProgress", sessionId],
+    queryKey: [QUERY_KEYS.LEARNING,  sessionId],
     queryFn: () => getLearnHeaderProgress(sessionId),
     enabled: !!sessionId,
   });
@@ -38,7 +38,7 @@ export const useLearnHeaderProgress = (sessionId: string) => {
 
 export const useNextFlashcardRecommendation = (sessionId: string) => {
   return useQuery<NextFlashcardRecommendation>({
-    queryKey: [QUERY_KEYS.LEARNING, "session", sessionId],
+    queryKey: [QUERY_KEYS.LEARNING, sessionId],
     queryFn: () => getNextFlashcard(sessionId),
     enabled: !!sessionId,
   });
@@ -58,7 +58,7 @@ export const useSubmitAnswerMutation = () => {
     }) => submitAnswer(sessionId, flashcardId, answer),
     onSuccess: (_, variables) => {
       queryClient.refetchQueries({
-        queryKey: [QUERY_KEYS.LEARNING, "session", variables.sessionId],
+        queryKey: [QUERY_KEYS.LEARNING, variables.sessionId],
       });
     },
   });
