@@ -21,7 +21,7 @@ export const useInfiniteDecksCreatedByMe = (
   pageSize = 20,
 ) => {
   return useInfiniteQuery<PageResponse<ICreatedDeckListItem>, Error>({
-    queryKey: [QUERY_KEYS.DECKS, "createdByMe", "infinite", filters, pageSize],
+    queryKey: [QUERY_KEYS.DECKS, "createdByMe"],
     queryFn: async ({ pageParam = 0 }) =>
       getDecksCreatedByMe({
         ...filters,

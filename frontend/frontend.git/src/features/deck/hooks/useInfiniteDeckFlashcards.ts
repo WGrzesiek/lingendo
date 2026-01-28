@@ -11,7 +11,7 @@ import { QUERY_KEYS } from "@/lib/queryKeys";
  */
 export const useInfiniteDeckFlashcards = (deckId: string, pageSize = 20) => {
   return useInfiniteQuery<PageResponse<DeckFlashcard>, Error>({
-    queryKey: [QUERY_KEYS.FLASHCARDS, deckId],
+    queryKey: [QUERY_KEYS.FLASHCARDS, deckId, "infinite"],
     queryFn: async ({ pageParam = 0 }) => {
       return getDeckFlashcardsPage({
         deckId,

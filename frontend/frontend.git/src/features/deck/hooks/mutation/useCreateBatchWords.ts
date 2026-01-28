@@ -21,7 +21,9 @@ export const useCreateBatchWordsForDeck = () => {
   >({
     mutationFn: ({ deckId, words }) => createBatchWordsForDeck(deckId, words),
     onSuccess: async (_, {deckId}) => {
-      await queryClient.refetchQueries({ queryKey: [QUERY_KEYS.FLASHCARDS, deckId] })
+      await queryClient.refetchQueries({ queryKey: [QUERY_KEYS.FLASHCARDS, deckId] }),
+          await queryClient.refetchQueries({ queryKey: [QUERY_KEYS.FLASHCARDS, deckId, "infinite"] })
+          await queryClient.refetchQueries({ queryKey: [QUERY_KEYS.DECKS, "createdByMe"] })
     },
   });
 };
