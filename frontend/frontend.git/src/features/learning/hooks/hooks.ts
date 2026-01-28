@@ -59,6 +59,11 @@ export const useSubmitAnswerMutation = () => {
     onSuccess: (_, variables) => {
       queryClient.refetchQueries({
         queryKey: [QUERY_KEYS.LEARNING, "session", variables.sessionId],
+
+      });
+      queryClient.refetchQueries({
+        queryKey: [QUERY_KEYS.LEARNING, "headerProgress", variables.sessionId],
+
       });
     },
   });
