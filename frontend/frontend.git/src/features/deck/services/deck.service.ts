@@ -360,3 +360,22 @@ export const getDeckDetail = async (
   );
   return response.data;
 };
+
+export interface GenerateSentencesResponse {
+  message: string;
+  correlationId: string;
+  wordsCount: number;
+}
+
+export const generateSentences = async (
+  deckId: string
+): Promise<GenerateSentencesResponse> => {
+  const response = await apiClient.post<GenerateSentencesResponse>(
+    `${BASE_URL}/${deckId}/generate-sentences`
+  );
+  console.log(
+    "[Deck Service] Rozpoczęto generowanie zdań dla talii:",
+    response.data.correlationId
+  );
+  return response.data;
+};

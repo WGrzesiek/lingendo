@@ -4,7 +4,7 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Search, BookOpen, Loader2 } from "lucide-react";
+import { Search, BookOpen, Loader2, Sparkles } from "lucide-react";
 import { useState, useMemo, useEffect } from "react";
 import { DeckDetailsHeader } from "@/features/deck/components/details/DeckDetailsHeader";
 import { DeckDetailsStats } from "@/features/deck/components/details/DeckDetailsStats";
@@ -22,12 +22,20 @@ import type {
   DeckDifficulty,
 } from "@/features/deck/types/deck.types";
 import type { DeckVisibility } from "@/features/deck/types/created-deck.types";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { useGenerateSentences } from "@/features/deck/hooks/mutation/useGenerateSentences";
 
 /**
  * Strona szczegółów decka - uniwersalna dla owner i enrolled
  * Pokazuje informacje o kursie, słówka, statystyki (dla właściciela)
  */
 export default function DeckDetailsClient({ deckId }: { deckId: string }) {
+  const { mutate: generateSentences, isPending: isGenerating } = useGenerateSentences();
   const [searchQuery, setSearchQuery] = useState("");
   const [lastScrollElement, setLastScrollElement] =
     useState<HTMLDivElement | null>(null);
@@ -94,36 +102,36 @@ export default function DeckDetailsClient({ deckId }: { deckId: string }) {
 
   const deck: DeckDetails | null = deckDetail
     ? {
-        id: deckDetail.id,
-        name: deckDetail.name,
-        description: deckDetail.deckDescription || "",
-        category: deckDetail.deckCategory as DeckCategory,
-        difficulty: deckDetail.deckDifficulty as DeckDifficulty,
-        visibility: deckDetail.visibility as DeckVisibility,
-        languageFrom: deckDetail.languageFrom,
-        languageTo: deckDetail.languageTo,
-        wordCount: deckDetail.wordCount,
-        createdAt: deckDetail.createdAt,
-        updatedAt: deckDetail.updatedAt,
-        createdBy: {
-          id: deckDetail.ownerId,
-          username: deckDetail.username,
-        },
-        isOwner,
-        isTeacher: currentUser?.accountType === "TEACHER",
-      }
+      id: deckDetail.id,
+      name: deckDetail.name,
+      description: deckDetail.deckDescription || "",
+      category: deckDetail.deckCategory as DeckCategory,
+      difficulty: deckDetail.deckDifficulty as DeckDifficulty,
+      visibility: deckDetail.visibility as DeckVisibility,
+      languageFrom: deckDetail.languageFrom,
+      languageTo: deckDetail.languageTo,
+      wordCount: deckDetail.wordCount,
+      createdAt: deckDetail.createdAt,
+      updatedAt: deckDetail.updatedAt,
+      createdBy: {
+        id: deckDetail.ownerId,
+        username: deckDetail.username,
+      },
+      isOwner,
+      isTeacher: currentUser?.accountType === "TEACHER",
+    }
     : null;
 
   const stats: DeckStats | null =
     statsData && statsData[deckId]
       ? {
-          totalStudents: statsData[deckId].totalStudents || 0,
-          completedStudents: statsData[deckId].completedStudents || 0,
-          activeStudents:
-            statsData[deckId].totalStudents -
-            (statsData[deckId].completedStudents || 0),
-          //NOTE dorobic event w stats - ile wyswietlen ma kurs(tz ile osób go oglądało)
-        }
+        totalStudents: statsData[deckId].totalStudents || 0,
+        completedStudents: statsData[deckId].completedStudents || 0,
+        activeStudents:
+          statsData[deckId].totalStudents -
+          (statsData[deckId].completedStudents || 0),
+        //NOTE dorobic event w stats - ile wyswietlen ma kurs(tz ile osób go oglądało)
+      }
       : null;
 
   if (isDeckLoading || isUserLoading) {
@@ -168,9 +176,39 @@ export default function DeckDetailsClient({ deckId }: { deckId: string }) {
                   Wszystkie słówka w tym kursie
                 </p>
               </div>
-              <Badge variant="secondary" className="text-lg px-4 py-2">
-                {totalElements} słówek
-              </Badge>
+              <div className="flex items-center gap-3">
+                {isOwner && (
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button
+                          variant="outline"
+                          onClick={() => generateSentences(deckId)}
+                          disabled={isGenerating}
+                        >
+                          {isGenerating ? (
+                            <>
+                              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                              Generowanie...
+                            </>
+                          ) : (
+                            <>
+                              <Sparkles className="w-4 h-4 mr-2" />
+                              Generuj zdania AI
+                            </>
+                          )}
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent className="max-w-xs">
+                        <p>Funkcja eksperymentalna. Generuje zdania dla wszystkich słówek w talii. Przetwarzanie 20 słówek zajmuje ok. 3 minuty.</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                )}
+                <Badge variant="secondary" className="text-lg px-4 py-2">
+                  {totalElements} słówek
+                </Badge>
+              </div>
             </div>
 
             {/* Search */}

@@ -47,7 +47,6 @@ export const WordCard = ({ word }: WordCardProps) => {
 
         {hasSentences ? (
           <div className="space-y-2 mt-3">
-            {/* Zwykłe zdania - bez ikony */}
             {sentences.map((sentence) => (
               <div key={sentence.id} className="space-y-1">
                 <p className="text-sm italic text-muted-foreground">
@@ -58,7 +57,6 @@ export const WordCard = ({ word }: WordCardProps) => {
                 </p>
               </div>
             ))}
-            {/* Zdania AI - z ikoną Sparkles */}
             {sentencesAI.map((sentence) => (
               <div key={sentence.id} className="space-y-1">
                 <div className="flex items-start gap-2">
@@ -117,7 +115,6 @@ export const WordCard = ({ word }: WordCardProps) => {
 
           {hasSentences ? (
             <div className="space-y-2">
-              {/* Zwykłe zdania - bez ikony */}
               {sentences.map((sentence) => (
                 <div key={sentence.id} className="space-y-1">
                   <p className="text-sm italic text-muted-foreground">
@@ -128,7 +125,6 @@ export const WordCard = ({ word }: WordCardProps) => {
                   </p>
                 </div>
               ))}
-              {/* Zdania AI - z ikoną Sparkles */}
               {sentencesAI.map((sentence) => (
                 <div key={sentence.id} className="space-y-1">
                   <div className="flex items-start gap-2">
