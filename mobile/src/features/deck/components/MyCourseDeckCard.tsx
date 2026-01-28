@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, ActivityIndicator } from 'react-native';
-import { CheckCircle, AlertCircle, BookOpen, Calendar, Globe, Lock } from 'lucide-react-native';
+import { CheckCircle, AlertCircle, BookOpen, Calendar, Globe, Lock, ChevronRight } from 'lucide-react-native';
 import { router } from 'expo-router';
 import type { CreatedDeckListItem } from '../types';
 import { useEnrollment } from '@/features/enroll';
@@ -14,6 +14,10 @@ interface MyCourseDeckCardProps {
  * Karta kursu utworzonego przez usera
  */
 export const MyCourseDeckCard = ({ deck }: MyCourseDeckCardProps) => {
+  const handlePress = () => {
+    router.push(`/(dashboard)/deck/${deck.id}`);
+  };
+
   const [isEnrolled, setIsEnrolled] = useState(false);
   const { useEnrollToDeck } = useEnrollment();
   const enrollMutation = useEnrollToDeck();
@@ -50,19 +54,25 @@ export const MyCourseDeckCard = ({ deck }: MyCourseDeckCardProps) => {
   };
 
   return (
-    <View className="rounded-xl border border-border bg-card p-4">
+    <TouchableOpacity
+      onPress={handlePress}
+      activeOpacity={0.7}
+      className="rounded-xl border border-border bg-card p-4">
       {/* Tytuł i status widoczności */}
-      <View className="mb-2 flex-row items-start justify-between">
+      <View className="mb-2 flex-row items-center justify-between">
         <Text className="flex-1 text-lg font-semibold text-foreground" numberOfLines={1}>
           {deck.name}
         </Text>
-        <View
-          className={`ml-2 rounded-full px-2 py-1 ${isPublic ? 'bg-green-500/20' : 'bg-orange-500/20'}`}>
-          {isPublic ? (
-            <Globe size={14} className="text-green-500" />
-          ) : (
-            <Lock size={14} className="text-orange-500" />
-          )}
+        <View className="flex-row items-center gap-2">
+          <View
+            className={`rounded-full px-2 py-1 ${isPublic ? 'bg-green-500/20' : 'bg-orange-500/20'}`}>
+            {isPublic ? (
+              <Globe size={14} className="text-green-500" />
+            ) : (
+              <Lock size={14} className="text-orange-500" />
+            )}
+          </View>
+          <ChevronRight size={20} className="text-muted-foreground" />
         </View>
       </View>
 
@@ -139,6 +149,6 @@ export const MyCourseDeckCard = ({ deck }: MyCourseDeckCardProps) => {
           </Text>
         </View>
       )}
-    </View>
+    </TouchableOpacity>
   );
 };
