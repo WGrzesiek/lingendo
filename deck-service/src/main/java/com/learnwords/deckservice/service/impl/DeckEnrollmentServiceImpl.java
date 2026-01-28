@@ -11,8 +11,10 @@ import com.learnwords.deckservice.entity.DeckShare;
 import com.learnwords.deckservice.enums.*;
 import com.learnwords.deckservice.repository.DeckEnrollmentRepository;
 import com.learnwords.deckservice.repository.DeckRepository;
+import com.learnwords.deckservice.repository.SessionRepository;
 import com.learnwords.deckservice.service.DeckEnrollmentService;
 import com.learnwords.deckservice.service.DeckShareService;
+import com.learnwords.deckservice.service.SessionService;
 import com.learnwords.deckservice.service.UserProgressService;
 import com.learnwords.deckservice.service.event.GenericEventProducer;
 import com.learnwords.deckservice.service.utils.DeckUtils;
@@ -37,18 +39,20 @@ public class DeckEnrollmentServiceImpl implements DeckEnrollmentService {
     private final DeckShareService deckShareService;
     private final GenericEventProducer eventProducer;
     private final UserProgressService userProgressService;
+    private final SessionRepository sessionRepository;
 
 
-    public DeckEnrollmentServiceImpl(DeckRepository deckRepository, 
-                                     DeckEnrollmentRepository deckEnrollmentRepository, 
+    public DeckEnrollmentServiceImpl(DeckRepository deckRepository,
+                                     DeckEnrollmentRepository deckEnrollmentRepository,
                                      @Lazy DeckShareService deckShareService,
                                      GenericEventProducer eventProducer,
-                                     @Lazy UserProgressService userProgressService) {
+                                     @Lazy UserProgressService userProgressService, SessionRepository sessionRepository) {
         this.eventProducer = eventProducer;
         this.deckRepository = deckRepository;
         this.deckEnrollmentRepository = deckEnrollmentRepository;
         this.deckShareService = deckShareService;
         this.userProgressService = userProgressService;
+        this.sessionRepository = sessionRepository;
     }
 
     @Override
@@ -115,6 +119,7 @@ public class DeckEnrollmentServiceImpl implements DeckEnrollmentService {
             log.info("Zmiana algorytmu z {} na {} - resetowanie postępu nauki dla wszystkich fiszek", 
                     previousAlgorithm, algorithm);
             userProgressService.resetAllProgressForEnrollment(deckEnrollment, algorithm);
+            sessionRepository.deleteByEnrollment_Id(enrollmentId);
         }
         
         deckEnrollment.setPreferredAlgorithm(algorithm);

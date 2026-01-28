@@ -19,5 +19,7 @@ public interface SessionRepository extends JpaRepository<Session, String> {
     int countByEnrollment_Id(String enrollmentId);
     int countByEnrollment_IdAndStatus(String enrollmentId, SessionStatus status);
     List<Session> findByEnrollment_Id(String enrollmentId);
+    boolean deleteByEnrollment_Id(String enrollmentId);
+
 
 }
