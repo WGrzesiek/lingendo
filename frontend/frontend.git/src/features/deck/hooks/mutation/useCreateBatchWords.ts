@@ -6,7 +6,7 @@ import {
   CreateBatchResponse,
 } from "../../services/vocabulary.service";
 import type { AxiosError } from "axios";
-import { REFETCH_GROUPS, QUERY_KEYS } from "@/lib/queryKeys";
+import { QUERY_KEYS } from "@/lib/queryKeys";
 
 /**
  * Hook do dodawania słówek batch do konkretnego decka
@@ -20,12 +20,8 @@ export const useCreateBatchWordsForDeck = () => {
     { deckId: string; words: VocabularyWord[] }
   >({
     mutationFn: ({ deckId, words }) => createBatchWordsForDeck(deckId, words),
-    onSuccess: async () => {
-      await Promise.all(
-        REFETCH_GROUPS.AFTER_DECK_MUTATION.map((key) =>
-          queryClient.refetchQueries({ queryKey: [key] }),
-        ),
-      );
+    onSuccess: async (_, {deckId}) => {
+      await queryClient.refetchQueries({ queryKey: [QUERY_KEYS.FLASHCARDS, deckId] })
     },
   });
 };
