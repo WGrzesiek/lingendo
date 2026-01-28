@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, ActivityIndicator } from 'react-native';
-import { CheckCircle, AlertCircle, BookOpen, Calendar } from 'lucide-react-native';
+import { CheckCircle, AlertCircle, BookOpen, Calendar,ChevronRight } from 'lucide-react-native';
 import { router } from 'expo-router';
 import type { PublicDeckItem } from '../types';
 import { useEnrollment } from '@/features/enroll';
@@ -11,9 +11,12 @@ interface CommunityCourseCardProps {
 }
 
 /**
- * Karta kursu społeczności - wersja mobilna
+ * Karta kursu społeczności
  */
 export const CommunityCourseCard = ({ course }: CommunityCourseCardProps) => {
+  const handlePress = () => {
+    router.push(`/(dashboard)/deck/${course.id}`);
+  };
   const [isEnrolled, setIsEnrolled] = useState(false);
   const { useEnrollToDeck } = useEnrollment();
   const enrollMutation = useEnrollToDeck();
@@ -38,7 +41,6 @@ export const CommunityCourseCard = ({ course }: CommunityCourseCardProps) => {
 
     return () => clearTimeout(timeout);
   }, [isEnrolled]);
-
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('pl-PL', {
       day: 'numeric',
@@ -48,11 +50,17 @@ export const CommunityCourseCard = ({ course }: CommunityCourseCardProps) => {
   };
 
   return (
-    <View className="rounded-xl border border-border bg-card p-4">
+    <TouchableOpacity
+      onPress={handlePress}
+      activeOpacity={0.7}
+      className="rounded-xl border border-border bg-card p-4">
       {/* Tytuł */}
-      <Text className="mb-2 text-lg font-semibold text-foreground" numberOfLines={1}>
-        {course.name}
-      </Text>
+      <View className="mb-2 flex-row items-center justify-between">
+        <Text className="flex-1 text-lg font-semibold text-foreground" numberOfLines={1}>
+          {course.name}
+        </Text>
+        <ChevronRight size={20} className="text-muted-foreground" />
+      </View>
 
       {/* Badge'y */}
       <View className="mb-3 flex-row flex-wrap gap-2">
@@ -127,6 +135,6 @@ export const CommunityCourseCard = ({ course }: CommunityCourseCardProps) => {
           </Text>
         </View>
       )}
-    </View>
+    </TouchableOpacity>
   );
 };

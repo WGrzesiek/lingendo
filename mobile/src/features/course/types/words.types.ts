@@ -83,3 +83,22 @@ export interface CourseWord {
   algorithmState: string;
   sessionNumber: number;
 }
+
+export interface ApiFlashcardItem {
+  id: string;
+  wordDto: {
+    id: string;
+    word: string;
+    translations: string[];
+    sentences: Array<{
+      id: string;
+      sentence: string;
+      translation: string;
+    }>;
+    sentencesAI: Array<{
+      id: string;
+      sentence: string;
+      translation: string;
+    }>;
+  };
+}

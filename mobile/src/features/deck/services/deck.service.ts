@@ -11,8 +11,9 @@ import type {
   UpdateDeckRequest,
   DeckVisibility,
   DeckOwnerType,
-  LearnAlgorithm,
+  LearnAlgorithm, DeckDetailResponse, DeckFlashcard,
 } from '../types';
+import { ApiFlashcardItem } from '@/features/course';
 
 export const deckService = {
   /**
@@ -84,6 +85,52 @@ export const deckService = {
       `${ENDPOINTS.DECKS.USER_FILTER}?ownerType=${ownerType}`
     );
     return data;
+  },
+
+  getDeckDetail: async (deckId: string): Promise<DeckDetailResponse> => {
+    const {data} = await apiClient.get<DeckDetailResponse>(`${ENDPOINTS.DECKS.LIST}/${deckId}`);
+    console.log(
+      "[Deck Service] Pobrano szczegóły deck detail:",
+      data.name
+    );
+    return data;
+  },
+
+  /**
+   * Pobiera stronę fiszek dla danej talii.
+   * @param params deckId, page, size
+   * @returns PageResponse<DeckFlashcard>
+   */
+  getDeckFlashcardsPage: async ({ deckId, page = 0, size = 10 }: {
+    deckId: string;
+    page?: number;
+    size?: number;
+  }): Promise<PageResponse<DeckFlashcard>> => {
+      const response = await apiClient.get<PageResponse<ApiFlashcardItem>>(
+        `/v1/decks/${deckId}/flashcards/page`,
+        {
+          params: { page, size },
+        }
+      );
+
+      const content = Array.isArray(response.data.content)
+        ? response.data.content.map((item) => ({
+            id: item.wordDto.id,
+            word: item.wordDto.word,
+            translations: item.wordDto.translations ?? [],
+            sentences: item.wordDto.sentences ?? [],
+            sentencesAI: item.wordDto.sentencesAI ?? [],
+          }))
+        : [];
+
+      console.log(
+        `[DeckService] Pobrano stronę fiszek: ${content.length} (deckId: ${deckId}, page: ${page}, size: ${size})`
+      );
+
+      return {
+        ...response.data,
+        content,
+      };
   },
 
   /**

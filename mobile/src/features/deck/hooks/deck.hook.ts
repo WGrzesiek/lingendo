@@ -1,4 +1,4 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient, useInfiniteQuery } from '@tanstack/react-query';
 import { QUERY_KEYS, INVALIDATION_GROUPS } from '@/constants';
 import { deckService, flashcardService } from '../services';
 import type {
@@ -8,8 +8,9 @@ import type {
   DeckVisibility,
   LearnAlgorithm,
   DeckFilters,
-  WordToAdd,
+  WordToAdd, DeckFlashcard,
 } from '../types';
+import { PageResponse } from '@/types/common';
 
 export const useDeck = () => {
   const queryClient = useQueryClient();
@@ -125,6 +126,29 @@ export const useDeck = () => {
     useQuery({
       queryKey: [QUERY_KEYS.FLASHCARDS, deckId, { page, size }],
       queryFn: () => flashcardService.getDeckFlashcardsPage(deckId, page, size),
+      enabled: !!deckId,
+    });
+
+   const useDeckDetail = (deckId: string) =>
+    useQuery({
+      queryKey: [QUERY_KEYS.DECKS, 'detail', deckId],
+      queryFn: () => deckService.getDeckDetail(deckId),
+      enabled: !!deckId,
+    });
+
+  const useInfiniteDeckFlashcards = (deckId: string, pageSize = 20) =>
+    useInfiniteQuery<PageResponse<DeckFlashcard>, Error>({
+      queryKey: [QUERY_KEYS.FLASHCARDS, deckId, "infinite"],
+      queryFn: async ({ pageParam = 0 }) => deckService.getDeckFlashcardsPage({
+          deckId,
+          page: pageParam as number,
+          size: pageSize,
+        }),
+      initialPageParam: 0,
+      getNextPageParam: (lastPage) => {
+        if (lastPage.last) return undefined;
+        return lastPage.number + 1;
+      },
       enabled: !!deckId,
     });
 
@@ -263,6 +287,8 @@ export const useDeck = () => {
     useDeckStatistics,
     useDecksCreatedByMe,
     useDeckFlashcards,
+    useDeckDetail,
+    useInfiniteDeckFlashcards,
     // Mutations
     useCreateDeck,
     useUpdateDeck,

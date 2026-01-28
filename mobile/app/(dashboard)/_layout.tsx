@@ -59,6 +59,12 @@ export default function DashboardLayout() {
         }}
       />
       <Tabs.Screen
+        name="deck/[id]"
+        options={{
+          href: null,
+        }}
+      />
+      <Tabs.Screen
         name="learn/[enrollmentId]/[sessionId]"
         options={{
           href: null,
