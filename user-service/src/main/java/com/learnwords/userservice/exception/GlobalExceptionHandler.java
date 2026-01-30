@@ -1,9 +1,6 @@
 package com.learnwords.userservice.exception;
 
-import com.learnwords.userservice.exception.exceptions.EmailAlreadyExistsException;
-import com.learnwords.userservice.exception.exceptions.UserNotFoundException;
-import com.learnwords.userservice.exception.exceptions.UsernameAlreadyExistsException;
-import com.learnwords.userservice.exception.exceptions.WrongPasswordException;
+import com.learnwords.userservice.exception.exceptions.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -53,6 +50,63 @@ public class GlobalExceptionHandler {
         log.error("Wrong password: {}", ex.getMessage());
         ApiErrorResponse errorResponse = new ApiErrorResponse(HttpStatus.UNAUTHORIZED.value(), ex.getMessage());
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorResponse);
+    }
+
+
+    @ExceptionHandler(InvalidInvitationException.class)
+    public ResponseEntity<ApiErrorResponse> handleInvalidInvitationException(InvalidInvitationException ex) {
+        log.error("Invalid invitation: {}", ex.getMessage());
+        ApiErrorResponse errorResponse = new ApiErrorResponse(HttpStatus.BAD_REQUEST.value(), ex.getMessage());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+    }
+
+    @ExceptionHandler(RelationNotFoundException.class)
+    public ResponseEntity<ApiErrorResponse> handleRelationNotFoundException(RelationNotFoundException ex) {
+        log.error("Relation not found: {}", ex.getMessage());
+        ApiErrorResponse errorResponse = new ApiErrorResponse(HttpStatus.NOT_FOUND.value(), ex.getMessage());
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
+    }
+
+    @ExceptionHandler(RelationAlreadyExistsException.class)
+    public ResponseEntity<ApiErrorResponse> handleRelationAlreadyExistsException(RelationAlreadyExistsException ex) {
+        log.error("Relation already exists: {}", ex.getMessage());
+        ApiErrorResponse errorResponse = new ApiErrorResponse(HttpStatus.CONFLICT.value(), ex.getMessage());
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(errorResponse);
+    }
+
+    @ExceptionHandler(InvalidOperationException.class)
+    public ResponseEntity<ApiErrorResponse> handleInvalidOperationException(InvalidOperationException ex) {
+        log.error("Invalid operation: {}", ex.getMessage());
+        ApiErrorResponse errorResponse = new ApiErrorResponse(HttpStatus.BAD_REQUEST.value(), ex.getMessage());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+    }
+
+    @ExceptionHandler(UnauthorizedOperationException.class)
+    public ResponseEntity<ApiErrorResponse> handleUnauthorizedOperationException(UnauthorizedOperationException ex) {
+        log.error("Unauthorized operation: {}", ex.getMessage());
+        ApiErrorResponse errorResponse = new ApiErrorResponse(HttpStatus.FORBIDDEN.value(), ex.getMessage());
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(errorResponse);
+    }
+
+    @ExceptionHandler(GroupNotFoundException.class)
+    public ResponseEntity<ApiErrorResponse> handleGroupNotFoundException(GroupNotFoundException ex) {
+        log.error("Group not found: {}", ex.getMessage());
+        ApiErrorResponse errorResponse = new ApiErrorResponse(HttpStatus.NOT_FOUND.value(), ex.getMessage());
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
+    }
+
+    @ExceptionHandler(GroupMemberNotFoundException.class)
+    public ResponseEntity<ApiErrorResponse> handleGroupMemberNotFoundException(GroupMemberNotFoundException ex) {
+        log.error("Group member not found: {}", ex.getMessage());
+        ApiErrorResponse errorResponse = new ApiErrorResponse(HttpStatus.NOT_FOUND.value(), ex.getMessage());
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
+    }
+
+    @ExceptionHandler(GroupMemberAlreadyExistsException.class)
+    public ResponseEntity<ApiErrorResponse> handleGroupMemberAlreadyExistsException(GroupMemberAlreadyExistsException ex) {
+        log.error("Group member already exists: {}", ex.getMessage());
+        ApiErrorResponse errorResponse = new ApiErrorResponse(HttpStatus.CONFLICT.value(), ex.getMessage());
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(errorResponse);
     }
 
     @ResponseStatus(HttpStatus.BAD_REQUEST)

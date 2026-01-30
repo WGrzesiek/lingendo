@@ -14,7 +14,7 @@ pipeline {
     booleanParam(name: 'SKIP_TESTS', defaultValue: true, description: 'Pominąć testy?')
     string(name: 'REGISTRY', defaultValue: 'localhost:5000', description: 'Local Docker registry')
     string(name: 'IMAGE_NAME', defaultValue: 'learnwords/user-service', description: 'Nazwa obrazu')
-    string(name: 'TAG', defaultValue: '', description: 'Tag obrazu (puste => auto)')
+    string(name: 'TAG', defaultValue: 'dev-1', description: 'Tag obrazu')
   }
 
   environment {
@@ -24,6 +24,16 @@ pipeline {
   }
 
   stages {
+      stage('Coverage') {
+          steps {
+              jacoco(
+                  execPattern: 'target/jacoco.exec',
+                  classPattern: 'target/classes',
+                  sourcePattern: 'src/main/java'
+              )
+          }
+      }
+
 		stage('Checkout parent') {
 			steps {
 				dir('parent') {

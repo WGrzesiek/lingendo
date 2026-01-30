@@ -20,7 +20,11 @@ spring:
       resourceserver:
         jwt:
           jwk-set-uri: ${SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI:http://api-gateway:8811/.well-known/jwks.json}
-
+  kafka:
+    consumer:
+      bootstrap-servers: ${KAFKA_BOOTSTRAP:kafka:9092}
+    producer:
+      bootstrap-servers: ${KAFKA_BOOTSTRAP:kafka:9092}
 grpc:
   server:
     port: ${GRPC_PORT:9090}

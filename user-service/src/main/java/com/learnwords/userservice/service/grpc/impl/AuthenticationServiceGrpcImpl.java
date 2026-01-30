@@ -84,6 +84,23 @@ public class AuthenticationServiceGrpcImpl extends AuthServiceGrpc.AuthServiceIm
         log.error("Internal error while fetching user by ID='{}'", request.getUserId(), e);
         responseObserver.onError(new StatusRuntimeException(Status.UNAUTHENTICATED.withDescription("Internal error while fetching user")));
     }
-
+    }
+    @Override
+    public void getUserNameById(GetUserByIdRequest request, StreamObserver<GetUserNameByIdResponse> responseObserver) {
+        try {
+            if (request.getUserId() == null || request.getUserId().isBlank()) {
+                responseObserver.onError(new StatusRuntimeException(Status.INVALID_ARGUMENT.withDescription("User ID must be provided")));
+                return;
+            }
+            var username = userService.getUsernameById(request.getUserId());
+            var response = GetUserNameByIdResponse.newBuilder()
+                    .setUsername(username)
+                    .build();
+            responseObserver.onNext(response);
+            responseObserver.onCompleted();
+        } catch (Exception e) {
+            log.error("Internal error while fetching username by ID='{}'", request.getUserId(), e);
+            responseObserver.onError(new StatusRuntimeException(Status.UNAUTHENTICATED.withDescription("Internal error while fetching username")));
+        }
     }
 }
