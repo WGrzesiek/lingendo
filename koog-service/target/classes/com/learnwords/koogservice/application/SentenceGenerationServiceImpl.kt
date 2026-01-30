@@ -165,10 +165,7 @@ class SentenceGenerationServiceImpl(
 
 
         val response = runBlocking { aiClient.generateSentenceStructured(prompt)}
-        
-        // Nadpisujemy wordId wartością z requestu - AI czasami zwraca błędny identyfikator
-        val correctedResult = response.json.copy(wordId = word.wordId)
-        val resultJsonString: String = json.encodeToString(correctedResult)
+        val resultJsonString: String = json.encodeToString(response.json)
 
         itemRepository.updateItemResult(item.itemId , EventStatus.SUCCESS, resultJsonString,
             response.inputTokensCount,
