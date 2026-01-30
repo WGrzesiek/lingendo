@@ -1,0 +1,27 @@
+{
+  "name": "koog-outbox-connector",
+  "config": {
+    "connector.class": "io.debezium.connector.postgresql.PostgresConnector",
+    "plugin.name": "pgoutput",
+    "slot.name": "koog_outbox_slot",
+    "database.hostname": "postgres",
+    "database.port": "5432",
+    "database.user": "admin",
+    "database.password": "adminpassword",
+    "database.dbname": "koog",
+    "key.converter.schemas.enable": "false",
+    "value.converter.schemas.enable": "false",
+    "table.include.list": "public.outbox",
+    "topic.prefix": "koog",
+    "key.converter": "org.apache.kafka.connect.json.JsonConverter",
+    "value.converter": "org.apache.kafka.connect.json.JsonConverter",
+    "transforms": "route",
+    "transforms.route.type": "io.debezium.transforms.outbox.EventRouter",
+    "transforms.route.table.field.event.id": "event_id",
+    "transforms.route.table.field.event.key": "aggregate_id",
+    "transforms.route.table.field.event.type": "event_type",
+    "transforms.route.table.field.event.payload": "payload",
+    "transforms.route.route.by.field": "aggregate_type",
+    "transforms.route.table.expand.json.payload": "true"
+  }
+}

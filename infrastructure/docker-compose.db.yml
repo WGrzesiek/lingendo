@@ -60,7 +60,6 @@ services:
       - redis_data:/data
     networks: [learnwords-net]
 
-
   redisinsight:
     image: redis/redisinsight:2.70
     container_name: redisinsight
@@ -68,10 +67,39 @@ services:
       - "5540:5540"
     networks: [learnwords-net]
 
+  clickhouse:
+    image: clickhouse/clickhouse-server:24.8
+    container_name: clickhouse
+    ports:
+      - "8123:8123"   # HTTP
+      - "9007:9000"   # Native
+    environment:
+      - CLICKHOUSE_DB=learnwords
+      - CLICKHOUSE_USER=wawrzen
+      - CLICKHOUSE_PASSWORD=Ubuntu98
+      - TZ=Europe/Warsaw
+    ulimits:
+      nofile:
+        soft: 262144
+        hard: 262144
+    networks: [learnwords-net]
+    volumes:
+      - clickhouse_data:/var/lib/clickhouse
+
+  tabix:
+    image: spoonest/clickhouse-tabix-web-client
+    container_name: clickhouse-tabix
+    ports:
+      - "8072:80"
+    networks: [learnwords-net]
+    depends_on: [clickhouse]
+
+
 volumes:
   pgdata:
   mongodb-data:
   redis_data:
+  clickhouse_data:
 
 networks:
   learnwords-net:

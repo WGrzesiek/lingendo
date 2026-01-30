@@ -10,6 +10,8 @@ pipeline{
         booleanParam(name: 'ENABLE_MONGOEXPRESS', defaultValue: false, description: 'Uruchom Mongo Express')
 		booleanParam(name: 'ENABLE_REDIS', defaultValue: true, description: 'Uruchom Redis')
 		booleanParam(name: 'ENABLE_REDISINSIGHT', defaultValue: false, description: 'Uruchom RedisInsight')
+		booleanParam(name: 'ENABLE_CLIKKHOUSE', defaultValue: true, description: 'Uruchom ClickHouse')
+		booleanParam(name: 'ENABLE_TABIX', defaultValue: false, description: 'Uruchom Tabix')
         string(name: 'COMPOSE_PATH', defaultValue: 'docker-compose.db.yml', description: 'Ścieżka do pliku docker-compose.yml')
     }
 
@@ -48,6 +50,12 @@ pipeline{
 		  }
 		  if (params.ENABLE_REDISINSIGHT) {
 			composeEnvVars += " redisinsight "
+		  }
+		  if (params.ENABLE_CLIKKHOUSE) {
+			composeEnvVars += " clickhouse "
+		  }
+		  if (params.ENABLE_TABIX) {
+			composeEnvVars += " tabix "
 		  }
           sh """
             docker compose -f ${params.COMPOSE_PATH} ${params.ACTION} -d ${composeEnvVars}
