@@ -16,7 +16,7 @@ import java.time.Instant
     """
     Schemat wyniku generowania zdań.
     - schema: Wersja używanego schematu.
-    - wordId: Unikalny identyfikator słowa, dla którego wygenerowano zdania.
+    - wordId: Unikalny identyfikator słowa, przepisz z oryginalnego żądania.
     - target: Informacje o grupie docelowej dla generowanych zdań.
     - sentences: Lista wygenerowanych zdań wraz z ich tłumaczeniami.
     - metadata: Dodatkowe informacje o procesie generowania.
@@ -24,7 +24,7 @@ import java.time.Instant
 data class SentenceSchema(
     @property:LLMDescription("Wersja używanego schematu.")
     val schema: String = "ai.sentence.result.v1",
-    @property:LLMDescription("Unikalny identyfikator słowa, dla którego wygenerowano zdania.")
+    @property:LLMDescription("Unikalny identyfikator słowa, przepisz z oryginalnego żądania.")
     val wordId: String,
     @property:LLMDescription("Słowo, dla którego zostały wygenerowane zdania.")
     val word: String,

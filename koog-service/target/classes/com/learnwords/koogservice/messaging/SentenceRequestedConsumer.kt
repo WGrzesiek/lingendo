@@ -33,7 +33,8 @@ class SentenceRequestedConsumer(
         topics = [TOPIC],
         groupId = GROUP_ID,
         properties = [
-            "spring.json.value.default.type=com.learnwords.koogservice.messaging.dto.SentenceGenerationRequestDto"
+            "spring.json.value.default.type=com.learnwords.koogservice.messaging.dto.SentenceGenerationRequestDto",
+            "spring.json.use.type.headers=false"
         ]
     )
     fun consume(request: SentenceGenerationRequestDto) {

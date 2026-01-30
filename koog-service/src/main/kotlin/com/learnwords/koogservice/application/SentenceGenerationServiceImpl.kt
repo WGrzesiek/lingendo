@@ -1,13 +1,13 @@
 package com.learnwords.koogservice.application
 
-import aws.smithy.kotlin.runtime.util.type
 import com.learnwords.koogservice.ai.AiClient
 import com.learnwords.koogservice.ai.SentencePrompt
 import com.learnwords.koogservice.enums.EventStatus
-import com.learnwords.koogservice.messaging.OutboxPublisher
 import com.learnwords.koogservice.messaging.dto.*
+import com.learnwords.koogservice.persistence.entity.Outbox
 import com.learnwords.koogservice.persistence.entity.SentenceGenerationItem
 import com.learnwords.koogservice.persistence.entity.SentenceGenerationJob
+import com.learnwords.koogservice.persistence.repository.OutboxRepository
 import com.learnwords.koogservice.persistence.repository.SentenceGenerationItemRepository
 import com.learnwords.koogservice.persistence.repository.SentenceGenerationJobRepository
 import kotlinx.coroutines.runBlocking
@@ -17,7 +17,6 @@ import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.Instant
 import java.util.*
-import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 /**
  * Implementacja serwisu generowania zdań.
@@ -32,7 +31,7 @@ class SentenceGenerationServiceImpl(
     private val jobRepository: SentenceGenerationJobRepository,
     private val itemRepository: SentenceGenerationItemRepository,
     private val aiClient: AiClient,
-    private val outboxPublisher: OutboxPublisher,
+    private val outboxRepository: OutboxRepository
 ) : SentenceGenerationService {
 
     private val log = LoggerFactory.getLogger(SentenceGenerationServiceImpl::class.java)
@@ -63,16 +62,6 @@ class SentenceGenerationServiceImpl(
 
         jobRepository.updateJobStarted(job.jobId, EventStatus.PROCESSING, Instant.now())
 
-//        // 4. Publikuj event startu
-//        outboxPublisher.publishJobStatus(
-//            JobStatusEventDto(
-//                eventId = UUID.randomUUID().toString(),
-//                jobId = job.jobId ,
-//                correlationId = request.correlationId,
-//                status = EventStatus.PROCESSING.name,
-//                itemsTotal = items.size
-//            )
-//        )
 
         var successCount = 0
         var failCount = 0
@@ -101,17 +90,8 @@ class SentenceGenerationServiceImpl(
             Instant.now()
         )
 
-//        outboxPublisher.publishJobStatus(
-//            JobStatusEventDto(
-//                eventId = UUID.randomUUID().toString(),
-//                jobId = job.jobId ,
-//                correlationId = request.correlationId,
-//                status = finalStatus.name,
-//                itemsTotal = items.size,
-//                itemsSucceeded = successCount,
-//                itemsFailed = failCount
-//            )
-//        )
+
+
 
         log.info(
             "Zakończono Job {} - status: {}, sukces: {}, błędy: {}",
@@ -185,10 +165,10 @@ class SentenceGenerationServiceImpl(
 
 
         val response = runBlocking { aiClient.generateSentenceStructured(prompt)}
-        val resultJsonString: String = json.encodeToString(response.json)
-
-
-
+        
+        // Nadpisujemy wordId wartością z requestu - AI czasami zwraca błędny identyfikator
+        val correctedResult = response.json.copy(wordId = word.wordId)
+        val resultJsonString: String = json.encodeToString(correctedResult)
 
         itemRepository.updateItemResult(item.itemId , EventStatus.SUCCESS, resultJsonString,
             response.inputTokensCount,
@@ -197,6 +177,18 @@ class SentenceGenerationServiceImpl(
             response.cost
         )
 
+        outboxRepository.save(Outbox(
+            eventId = UUID.randomUUID().toString(),
+            agregateType = "SentenceGeneration",
+            agregateId = item.itemId ?: UUID.randomUUID().toString(),
+            eventType = "SentenceGenerationCompleted",
+            payload = resultJsonString,
+            status = "PENDING",
+            retryCount = 0,
+            createdAt = Instant.now(),
+            updatedAt = Instant.now()
+        )
+        )
         log.debug("Wygenerowano {} zdań dla słówka: {}", response.json.sentences.size, word.word)
     }
     private val json = Json {
