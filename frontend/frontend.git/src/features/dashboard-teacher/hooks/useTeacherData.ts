@@ -1,13 +1,13 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { teacherCourseService } from "../services/teacherService";
-import { qk } from "@/lib/queryKeys";
+import { QUERY_KEYS } from "@/lib/queryKeys";
 
 /**
  * Hook do pobierania kursów nauczyciela
  */
 export const useTeacherCourses = () => {
   return useQuery({
-    queryKey: qk.teacher.courses(),
+    queryKey: [QUERY_KEYS.TEACHER, "courses"],
     queryFn: () => teacherCourseService.getCourses(),
   });
 };
@@ -23,8 +23,8 @@ export const useToggleCourseSharing = () => {
       share
         ? teacherCourseService.shareCourse(courseId)
         : teacherCourseService.unshareCourse(courseId),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: qk.teacher.courses() });
+    onSuccess: async () => {
+      await queryClient.refetchQueries({ queryKey: [QUERY_KEYS.TEACHER] });
     },
   });
 };

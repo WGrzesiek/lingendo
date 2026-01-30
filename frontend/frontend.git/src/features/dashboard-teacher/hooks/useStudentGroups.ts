@@ -6,7 +6,7 @@ import type {
   AddMembersRequest,
   RemoveMembersRequest,
 } from "../types/api";
-import { qk } from "@/lib/queryKeys";
+import { QUERY_KEYS } from "@/lib/queryKeys";
 
 /**
  * Hook do pobierania listy grup nauczyciela
@@ -14,10 +14,16 @@ import { qk } from "@/lib/queryKeys";
 export const useTeacherGroups = (
   includeArchived: boolean = false,
   page: number = 0,
-  size: number = 20
+  size: number = 20,
 ) => {
   return useQuery({
-    queryKey: qk.studentGroups.groupsList(includeArchived, page, size),
+    queryKey: [
+      QUERY_KEYS.STUDENT_GROUPS,
+      "groups",
+      includeArchived,
+      page,
+      size,
+    ],
     queryFn: () =>
       studentGroupsApi.getTeacherGroups(includeArchived, page, size),
   });
@@ -28,7 +34,7 @@ export const useTeacherGroups = (
  */
 export const useGroupDetail = (groupId: string) => {
   return useQuery({
-    queryKey: qk.studentGroups.groupDetail(groupId),
+    queryKey: [QUERY_KEYS.STUDENT_GROUPS, "groupDetail", groupId],
     queryFn: () => studentGroupsApi.getGroup(groupId),
     enabled: !!groupId,
   });
@@ -43,12 +49,9 @@ export const useCreateGroup = () => {
   return useMutation({
     mutationFn: (request: CreateGroupRequest) =>
       studentGroupsApi.createGroup(request),
-    onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: qk.studentGroups.groups(),
-      });
-      queryClient.invalidateQueries({
-        queryKey: qk.studentGroups.stats(),
+    onSuccess: async () => {
+      await queryClient.refetchQueries({
+        queryKey: [QUERY_KEYS.STUDENT_GROUPS],
       });
     },
   });
@@ -68,12 +71,9 @@ export const useUpdateGroup = () => {
       groupId: string;
       request: UpdateGroupRequest;
     }) => studentGroupsApi.updateGroup(groupId, request),
-    onSuccess: (_, { groupId }) => {
-      queryClient.invalidateQueries({
-        queryKey: qk.studentGroups.groups(),
-      });
-      queryClient.invalidateQueries({
-        queryKey: qk.studentGroups.groupDetail(groupId),
+    onSuccess: async () => {
+      await queryClient.refetchQueries({
+        queryKey: [QUERY_KEYS.STUDENT_GROUPS],
       });
     },
   });
@@ -87,15 +87,9 @@ export const useArchiveGroup = () => {
 
   return useMutation({
     mutationFn: (groupId: string) => studentGroupsApi.archiveGroup(groupId),
-    onSuccess: (_, groupId) => {
-      queryClient.invalidateQueries({
-        queryKey: qk.studentGroups.groups(),
-      });
-      queryClient.invalidateQueries({
-        queryKey: qk.studentGroups.groupDetail(groupId),
-      });
-      queryClient.invalidateQueries({
-        queryKey: qk.studentGroups.stats(),
+    onSuccess: async () => {
+      await queryClient.refetchQueries({
+        queryKey: [QUERY_KEYS.STUDENT_GROUPS],
       });
     },
   });
@@ -109,15 +103,9 @@ export const useRestoreGroup = () => {
 
   return useMutation({
     mutationFn: (groupId: string) => studentGroupsApi.restoreGroup(groupId),
-    onSuccess: (_, groupId) => {
-      queryClient.invalidateQueries({
-        queryKey: qk.studentGroups.groups(),
-      });
-      queryClient.invalidateQueries({
-        queryKey: qk.studentGroups.groupDetail(groupId),
-      });
-      queryClient.invalidateQueries({
-        queryKey: qk.studentGroups.stats(),
+    onSuccess: async () => {
+      await queryClient.refetchQueries({
+        queryKey: [QUERY_KEYS.STUDENT_GROUPS],
       });
     },
   });
@@ -131,12 +119,9 @@ export const useDeleteGroup = () => {
 
   return useMutation({
     mutationFn: (groupId: string) => studentGroupsApi.deleteGroup(groupId),
-    onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: qk.studentGroups.groups(),
-      });
-      queryClient.invalidateQueries({
-        queryKey: qk.studentGroups.stats(),
+    onSuccess: async () => {
+      await queryClient.refetchQueries({
+        queryKey: [QUERY_KEYS.STUDENT_GROUPS],
       });
     },
   });
@@ -149,7 +134,7 @@ export const useDeleteGroup = () => {
  */
 export const useGroupStats = () => {
   return useQuery({
-    queryKey: qk.studentGroups.stats(),
+    queryKey: [QUERY_KEYS.STUDENT_GROUPS, "stats"],
     queryFn: () => studentGroupsApi.getGroupStats(),
   });
 };
@@ -162,10 +147,10 @@ export const useGroupStats = () => {
 export const useGroupMembers = (
   groupId: string,
   page: number = 0,
-  size: number = 20
+  size: number = 20,
 ) => {
   return useQuery({
-    queryKey: qk.studentGroups.groupMembers(groupId, page, size),
+    queryKey: [QUERY_KEYS.STUDENT_GROUPS, "members", groupId, page, size],
     queryFn: () => studentGroupsApi.getGroupMembers(groupId, page, size),
     enabled: !!groupId,
   });
@@ -185,15 +170,9 @@ export const useAddGroupMembers = () => {
       groupId: string;
       request: AddMembersRequest;
     }) => studentGroupsApi.addMembers(groupId, request),
-    onSuccess: (_, { groupId }) => {
-      queryClient.invalidateQueries({
-        queryKey: qk.studentGroups.groupDetail(groupId),
-      });
-      queryClient.invalidateQueries({
-        queryKey: qk.studentGroups.groupMembers(groupId, 0, 20),
-      });
-      queryClient.invalidateQueries({
-        queryKey: qk.studentGroups.stats(),
+    onSuccess: async () => {
+      await queryClient.refetchQueries({
+        queryKey: [QUERY_KEYS.STUDENT_GROUPS],
       });
     },
   });
@@ -213,15 +192,9 @@ export const useRemoveGroupMembers = () => {
       groupId: string;
       request: RemoveMembersRequest;
     }) => studentGroupsApi.removeMembers(groupId, request),
-    onSuccess: (_, { groupId }) => {
-      queryClient.invalidateQueries({
-        queryKey: qk.studentGroups.groupDetail(groupId),
-      });
-      queryClient.invalidateQueries({
-        queryKey: qk.studentGroups.groupMembers(groupId, 0, 20),
-      });
-      queryClient.invalidateQueries({
-        queryKey: qk.studentGroups.stats(),
+    onSuccess: async () => {
+      await queryClient.refetchQueries({
+        queryKey: [QUERY_KEYS.STUDENT_GROUPS],
       });
     },
   });
@@ -234,7 +207,7 @@ export const useRemoveGroupMembers = () => {
  */
 export const useStudentGroups = (page: number = 0, size: number = 20) => {
   return useQuery({
-    queryKey: qk.studentGroups.myGroupsList(page, size),
+    queryKey: [QUERY_KEYS.STUDENT_GROUPS, "myGroups", page, size],
     queryFn: () => studentGroupsApi.getStudentGroups(page, size),
   });
 };

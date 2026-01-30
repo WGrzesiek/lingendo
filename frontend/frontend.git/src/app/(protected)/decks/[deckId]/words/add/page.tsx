@@ -146,16 +146,9 @@ const AddWordsPage = () => {
     createBatchForDeck(
       { deckId, words: vocabularyWords },
       {
-        onSuccess: (data) => {
-          setSuccessMessage(
-            `Pomyślnie dodano ${data.created} słówek do kursu "${
-              deckDetail?.name || "kursu"
-            }"!`
-          );
-
-          setTimeout(() => {
-            router.push("/my-courses");
-          }, 2000);
+        onSuccess: () => {
+          toast.success("Słówka zostały pomyślnie zapisane", { duration: 4000 });
+          router.back()
         },
         onError: () => {
           toast.error("Wystąpił błąd podczas zapisywania słówek");

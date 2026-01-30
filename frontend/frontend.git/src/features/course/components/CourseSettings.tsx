@@ -39,6 +39,8 @@ import {
   useUpdateLearnAlgorithm,
   useUpdateFlashcardsPerSession,
 } from "@/features/deckEnrollment/hooks/hooks";
+import {router} from "next/client";
+import {toast} from "sonner";
 
 interface CourseSettingsProps {
   enrollmentId: string;
@@ -129,6 +131,8 @@ export const CourseSettings = ({ enrollmentId }: CourseSettingsProps) => {
         onSuccess: () => {
           setCurrentAlgorithm(selectedAlgorithm.id);
           setAlgorithmDialogOpen(false);
+          toast.success("Algorytm nauki został zmieniony, odśwież stronę.", {duration: 4000});
+          router.reload()
         },
       }
     );

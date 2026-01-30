@@ -11,6 +11,10 @@ interface SimpleWordCardProps {
  * Bez statusów nauki (nauczone/powtórzone)
  */
 export const WordCard = ({ word }: SimpleWordCardProps) => {
+  const sentences = word.sentences ?? [];
+  const sentencesAI = word.sentencesAI ?? [];
+  const hasSentences = sentences.length > 0 || sentencesAI.length > 0;
+
   return (
     <div className="p-4 border rounded-lg hover:bg-accent/50 transition-colors">
       {/* MOBILE LAYOUT */}
@@ -22,21 +26,33 @@ export const WordCard = ({ word }: SimpleWordCardProps) => {
             {(word.translations ?? []).join(", ")}
           </span>
         </div>
-        {(word.sentences ?? []).length > 0 ||
-        (word.sentencesAI ?? []).length > 0 ? (
+        {hasSentences ? (
           <div className="space-y-2 mt-3">
-            {[...(word.sentences ?? []), ...(word.sentencesAI ?? [])].map(
-              (sentence) => (
-                <div key={sentence.id} className="space-y-1">
-                  <p className="text-sm italic text-muted-foreground">
-                    &ldquo;{sentence.sentence}&rdquo;
-                  </p>
-                  <p className="text-sm italic text-muted-foreground">
-                    &ldquo;{sentence.translation}&rdquo;
-                  </p>
+            {sentences.map((sentence) => (
+              <div key={sentence.id} className="space-y-1">
+                <p className="text-sm italic text-muted-foreground">
+                  &ldquo;{sentence.sentence}&rdquo;
+                </p>
+                <p className="text-sm italic text-muted-foreground">
+                  &ldquo;{sentence.translation}&rdquo;
+                </p>
+              </div>
+            ))}
+            {sentencesAI.map((sentence) => (
+              <div key={sentence.id} className="space-y-1">
+                <div className="flex items-start gap-2">
+                  <Sparkles className="w-4 h-4 text-amber-400 mt-0.5 flex-shrink-0" />
+                  <div>
+                    <p className="text-sm italic text-muted-foreground">
+                      &ldquo;{sentence.sentence}&rdquo;
+                    </p>
+                    <p className="text-sm italic text-muted-foreground">
+                      &ldquo;{sentence.translation}&rdquo;
+                    </p>
+                  </div>
                 </div>
-              )
-            )}
+              </div>
+            ))}
           </div>
         ) : (
           <div className="flex items-center gap-2 text-sm text-muted-foreground mt-3">
@@ -64,21 +80,33 @@ export const WordCard = ({ word }: SimpleWordCardProps) => {
               ))}
             </div>
           </div>
-          {(word.sentences ?? []).length > 0 ||
-          (word.sentencesAI ?? []).length > 0 ? (
+          {hasSentences ? (
             <div className="space-y-2">
-              {[...(word.sentences ?? []), ...(word.sentencesAI ?? [])].map(
-                (sentence) => (
-                  <div key={sentence.id} className="space-y-1">
-                    <p className="text-sm italic text-muted-foreground">
-                      &ldquo;{sentence.sentence}&rdquo;
-                    </p>
-                    <p className="text-sm italic text-muted-foreground">
-                      &ldquo;{sentence.translation}&rdquo;
-                    </p>
+              {sentences.map((sentence) => (
+                <div key={sentence.id} className="space-y-1">
+                  <p className="text-sm italic text-muted-foreground">
+                    &ldquo;{sentence.sentence}&rdquo;
+                  </p>
+                  <p className="text-sm italic text-muted-foreground">
+                    &ldquo;{sentence.translation}&rdquo;
+                  </p>
+                </div>
+              ))}
+              {sentencesAI.map((sentence) => (
+                <div key={sentence.id} className="space-y-1">
+                  <div className="flex items-start gap-2">
+                    <Sparkles className="w-4 h-4 text-amber-400 mt-0.5 flex-shrink-0" />
+                    <div>
+                      <p className="text-sm italic text-muted-foreground">
+                        &ldquo;{sentence.sentence}&rdquo;
+                      </p>
+                      <p className="text-sm italic text-muted-foreground">
+                        &ldquo;{sentence.translation}&rdquo;
+                      </p>
+                    </div>
                   </div>
-                )
-              )}
+                </div>
+              ))}
             </div>
           ) : (
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
@@ -91,3 +119,4 @@ export const WordCard = ({ word }: SimpleWordCardProps) => {
     </div>
   );
 };
+

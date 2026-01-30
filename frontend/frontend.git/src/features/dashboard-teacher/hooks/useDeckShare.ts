@@ -4,7 +4,7 @@ import type {
   ShareDeckRequestBody,
   BatchShareDeckRequestBody,
 } from "../types/api";
-import { qk } from "@/lib/queryKeys";
+import { QUERY_KEYS } from "@/lib/queryKeys";
 
 /**
  * Hook do udostępniania talii (pojedynczego celu)
@@ -20,13 +20,8 @@ export const useShareDeck = () => {
       deckId: string;
       request: ShareDeckRequestBody;
     }) => deckShareApi.shareDeck(deckId, request),
-    onSuccess: (_, { deckId }) => {
-      queryClient.invalidateQueries({
-        queryKey: qk.deckShare.deckShares(deckId),
-      });
-      queryClient.invalidateQueries({
-        queryKey: qk.deckShare.mySharesPaged(0, 20),
-      });
+    onSuccess: async () => {
+      await queryClient.refetchQueries({ queryKey: [QUERY_KEYS.DECK_SHARE] });
     },
   });
 };
@@ -45,13 +40,8 @@ export const useShareDeckBatch = () => {
       deckId: string;
       request: BatchShareDeckRequestBody;
     }) => deckShareApi.shareDeckBatch(deckId, request),
-    onSuccess: (_, { deckId }) => {
-      queryClient.invalidateQueries({
-        queryKey: qk.deckShare.deckShares(deckId),
-      });
-      queryClient.invalidateQueries({
-        queryKey: qk.deckShare.mySharesPaged(0, 20),
-      });
+    onSuccess: async () => {
+      await queryClient.refetchQueries({ queryKey: [QUERY_KEYS.DECK_SHARE] });
     },
   });
 };
@@ -65,15 +55,10 @@ export const useShareDeckWithAllStudents = () => {
   return useMutation({
     mutationFn: (deckId: string) =>
       deckShareApi.shareDeckWithAllStudents(deckId),
-    onSuccess: (_, deckId) => {
-      queryClient.invalidateQueries({
-        queryKey: qk.deckShare.deckShares(deckId),
-      });
-      queryClient.invalidateQueries({
-        queryKey: qk.deckShare.mySharesPaged(0, 20),
-      });
-      queryClient.invalidateQueries({
-        queryKey: qk.teacherStudent.students(),
+    onSuccess: async () => {
+      await queryClient.refetchQueries({ queryKey: [QUERY_KEYS.DECK_SHARE] });
+      await queryClient.refetchQueries({
+        queryKey: [QUERY_KEYS.TEACHER_STUDENT],
       });
     },
   });
@@ -88,13 +73,8 @@ export const useShareDeckWithAllFriends = () => {
   return useMutation({
     mutationFn: (deckId: string) =>
       deckShareApi.shareDeckWithAllFriends(deckId),
-    onSuccess: (_, deckId) => {
-      queryClient.invalidateQueries({
-        queryKey: qk.deckShare.deckShares(deckId),
-      });
-      queryClient.invalidateQueries({
-        queryKey: qk.deckShare.mySharesPaged(0, 20),
-      });
+    onSuccess: async () => {
+      await queryClient.refetchQueries({ queryKey: [QUERY_KEYS.DECK_SHARE] });
     },
   });
 };
@@ -115,15 +95,10 @@ export const useShareDeckWithGroup = () => {
       groupId: string;
       message?: string;
     }) => deckShareApi.shareDeckWithGroup(deckId, groupId, message),
-    onSuccess: (_, { deckId, groupId }) => {
-      queryClient.invalidateQueries({
-        queryKey: qk.deckShare.deckShares(deckId),
-      });
-      queryClient.invalidateQueries({
-        queryKey: qk.deckShare.mySharesPaged(0, 20),
-      });
-      queryClient.invalidateQueries({
-        queryKey: qk.studentGroups.groupDetail(groupId),
+    onSuccess: async () => {
+      await queryClient.refetchQueries({ queryKey: [QUERY_KEYS.DECK_SHARE] });
+      await queryClient.refetchQueries({
+        queryKey: [QUERY_KEYS.STUDENT_GROUPS],
       });
     },
   });
@@ -143,13 +118,8 @@ export const useShareDeckWithUser = () => {
       deckId: string;
       targetUserId: string;
     }) => deckShareApi.shareDeckWithUser(deckId, targetUserId),
-    onSuccess: (_, { deckId }) => {
-      queryClient.invalidateQueries({
-        queryKey: qk.deckShare.deckShares(deckId),
-      });
-      queryClient.invalidateQueries({
-        queryKey: qk.deckShare.mySharesPaged(0, 20),
-      });
+    onSuccess: async () => {
+      await queryClient.refetchQueries({ queryKey: [QUERY_KEYS.DECK_SHARE] });
     },
   });
 };
@@ -162,10 +132,8 @@ export const useRevokeShare = () => {
 
   return useMutation({
     mutationFn: (shareId: string) => deckShareApi.revokeShare(shareId),
-    onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: qk.deckShare.all,
-      });
+    onSuccess: async () => {
+      await queryClient.refetchQueries({ queryKey: [QUERY_KEYS.DECK_SHARE] });
     },
   });
 };
@@ -175,7 +143,7 @@ export const useRevokeShare = () => {
  */
 export const useDeckShares = (deckId: string) => {
   return useQuery({
-    queryKey: qk.deckShare.deckShares(deckId),
+    queryKey: [QUERY_KEYS.DECK_SHARE, "deckShares", deckId],
     queryFn: () => deckShareApi.getDeckShares(deckId),
     enabled: !!deckId,
   });
@@ -186,7 +154,7 @@ export const useDeckShares = (deckId: string) => {
  */
 export const useMyShares = (page: number = 0, size: number = 20) => {
   return useQuery({
-    queryKey: qk.deckShare.mySharesPaged(page, size),
+    queryKey: [QUERY_KEYS.DECK_SHARE, "myShares", page, size],
     queryFn: () => deckShareApi.getMyShares(page, size),
   });
 };
@@ -196,7 +164,7 @@ export const useMyShares = (page: number = 0, size: number = 20) => {
  */
 export const useSharedWithMe = (page: number = 0, size: number = 20) => {
   return useQuery({
-    queryKey: qk.deckShare.sharedWithMePaged(page, size),
+    queryKey: [QUERY_KEYS.DECK_SHARE, "sharedWithMe", page, size],
     queryFn: () => deckShareApi.getSharedWithMe(page, size),
   });
 };

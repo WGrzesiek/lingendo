@@ -4,6 +4,7 @@ import "../styles/globals.css";
 import { Providers } from "@/components/providers/Providers";
 import { Navbar } from "@/components/menu/navbar";
 import { Footer } from "@/components/footer/Footer";
+import { Toaster } from "@/components/ui/sonner";
 
 const inter = Inter({
   subsets: ["latin", "latin-ext"], // latin-ext dla polskich znaków
@@ -43,6 +44,7 @@ export default function RootLayout({
           <Navbar />
           <main className="pt-16">{children}</main>
           <Footer />
+          <Toaster />
         </Providers>
       </body>
     </html>

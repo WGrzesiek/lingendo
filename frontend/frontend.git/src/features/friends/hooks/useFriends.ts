@@ -6,7 +6,7 @@ import {
   friendsStatsApiService,
 } from "../services/friends.service";
 import { toast } from "sonner";
-import { qk } from "@/lib/queryKeys";
+import { QUERY_KEYS } from "@/lib/queryKeys";
 
 // ============================================
 // HOOKI DLA ZNAJOMYCH
@@ -17,7 +17,7 @@ import { qk } from "@/lib/queryKeys";
  */
 export const useFriends = (page: number = 0, size: number = 20) => {
   return useQuery({
-    queryKey: qk.friends.listFiltered({ page, size }),
+    queryKey: [QUERY_KEYS.FRIENDS, "list", { page, size }],
     queryFn: () => friendsApiService.getFriends(page, size),
   });
 };
@@ -27,7 +27,7 @@ export const useFriends = (page: number = 0, size: number = 20) => {
  */
 export const useAllFriends = () => {
   return useQuery({
-    queryKey: qk.friends.allFriends(),
+    queryKey: [QUERY_KEYS.FRIENDS, "allFriends"],
     queryFn: () => friendsApiService.getAllFriends(),
   });
 };
@@ -37,7 +37,7 @@ export const useAllFriends = () => {
  */
 export const useFriendsStats = () => {
   return useQuery({
-    queryKey: qk.friends.stats(),
+    queryKey: [QUERY_KEYS.FRIENDS, "stats"],
     queryFn: () => friendsApiService.getStats(),
   });
 };
@@ -47,7 +47,7 @@ export const useFriendsStats = () => {
  */
 export const useCheckFriendship = (otherUserId: string) => {
   return useQuery({
-    queryKey: qk.friends.check(otherUserId),
+    queryKey: [QUERY_KEYS.FRIENDS, "check", otherUserId],
     queryFn: () => friendsApiService.checkFriendship(otherUserId),
     enabled: !!otherUserId,
   });
@@ -61,8 +61,8 @@ export const useRemoveFriend = () => {
 
   return useMutation({
     mutationFn: (friendId: string) => friendsApiService.removeFriend(friendId),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: qk.friends.all });
+    onSuccess: async () => {
+      await queryClient.refetchQueries({ queryKey: [QUERY_KEYS.FRIENDS] });
       toast.success("Usunięto znajomego");
     },
     onError: () => {
@@ -80,8 +80,8 @@ export const useBlockUser = () => {
   return useMutation({
     mutationFn: (userToBlockId: string) =>
       friendsApiService.blockUser(userToBlockId),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: qk.friends.all });
+    onSuccess: async () => {
+      await queryClient.refetchQueries({ queryKey: [QUERY_KEYS.FRIENDS] });
       toast.success("Użytkownik został zablokowany");
     },
     onError: () => {
@@ -99,8 +99,8 @@ export const useUnblockUser = () => {
   return useMutation({
     mutationFn: (userToUnblockId: string) =>
       friendsApiService.unblockUser(userToUnblockId),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: qk.friends.all });
+    onSuccess: async () => {
+      await queryClient.refetchQueries({ queryKey: [QUERY_KEYS.FRIENDS] });
       toast.success("Użytkownik został odblokowany");
     },
     onError: () => {
@@ -114,7 +114,7 @@ export const useUnblockUser = () => {
  */
 export const useBlockedUsers = () => {
   return useQuery({
-    queryKey: qk.friends.blocked(),
+    queryKey: [QUERY_KEYS.FRIENDS, "blocked"],
     queryFn: () => friendsApiService.getBlockedUsers(),
   });
 };
@@ -124,7 +124,7 @@ export const useBlockedUsers = () => {
  */
 export const useFriendDetail = (userId: string) => {
   return useQuery({
-    queryKey: qk.friends.userStats(userId),
+    queryKey: [QUERY_KEYS.FRIENDS, "userStats", userId],
     queryFn: () => friendsStatsApiService.getUserStats(userId),
     enabled: !!userId,
   });
@@ -135,7 +135,7 @@ export const useFriendDetail = (userId: string) => {
  */
 export const useFriendsEnriched = () => {
   return useQuery({
-    queryKey: qk.friends.enriched(),
+    queryKey: [QUERY_KEYS.FRIENDS, "enriched"],
     queryFn: () => friendsStatsApiService.getFriendsEnriched(),
   });
 };
@@ -153,9 +153,8 @@ export const useSendFriendRequest = () => {
   return useMutation({
     mutationFn: (targetUserId: string) =>
       friendRequestsApiService.sendRequest(targetUserId),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: qk.friends.requests() });
-      queryClient.invalidateQueries({ queryKey: qk.friends.stats() });
+    onSuccess: async () => {
+      await queryClient.refetchQueries({ queryKey: [QUERY_KEYS.FRIENDS] });
       toast.success("Zaproszenie zostało wysłane");
     },
     onError: () => {
@@ -169,7 +168,7 @@ export const useSendFriendRequest = () => {
  */
 export const useReceivedRequests = () => {
   return useQuery({
-    queryKey: qk.friends.receivedRequests(),
+    queryKey: [QUERY_KEYS.FRIENDS, "receivedRequests"],
     queryFn: () => friendRequestsApiService.getReceivedRequests(),
   });
 };
@@ -179,7 +178,7 @@ export const useReceivedRequests = () => {
  */
 export const useSentRequests = () => {
   return useQuery({
-    queryKey: qk.friends.sentRequests(),
+    queryKey: [QUERY_KEYS.FRIENDS, "sentRequests"],
     queryFn: () => friendRequestsApiService.getSentRequests(),
   });
 };
@@ -193,8 +192,8 @@ export const useAcceptRequest = () => {
   return useMutation({
     mutationFn: (friendshipId: string) =>
       friendRequestsApiService.acceptRequest(friendshipId),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: qk.friends.all });
+    onSuccess: async () => {
+      await queryClient.refetchQueries({ queryKey: [QUERY_KEYS.FRIENDS] });
       toast.success("Zaproszenie zostało zaakceptowane");
     },
     onError: () => {
@@ -212,9 +211,8 @@ export const useRejectRequest = () => {
   return useMutation({
     mutationFn: (friendshipId: string) =>
       friendRequestsApiService.rejectRequest(friendshipId),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: qk.friends.requests() });
-      queryClient.invalidateQueries({ queryKey: qk.friends.stats() });
+    onSuccess: async () => {
+      await queryClient.refetchQueries({ queryKey: [QUERY_KEYS.FRIENDS] });
       toast.success("Zaproszenie zostało odrzucone");
     },
     onError: () => {
@@ -232,9 +230,8 @@ export const useCancelRequest = () => {
   return useMutation({
     mutationFn: (friendshipId: string) =>
       friendRequestsApiService.cancelRequest(friendshipId),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: qk.friends.requests() });
-      queryClient.invalidateQueries({ queryKey: qk.friends.stats() });
+    onSuccess: async () => {
+      await queryClient.refetchQueries({ queryKey: [QUERY_KEYS.FRIENDS] });
       toast.success("Zaproszenie zostało anulowane");
     },
     onError: () => {
@@ -252,7 +249,7 @@ export const useCancelRequest = () => {
  */
 export const useSearchUsers = (query: string) => {
   return useQuery({
-    queryKey: qk.friends.search(query),
+    queryKey: [QUERY_KEYS.FRIENDS, "search", query],
     queryFn: () => userSearchApiService.searchUsers(query),
     enabled: query.length >= 2,
     staleTime: 30 * 1000,

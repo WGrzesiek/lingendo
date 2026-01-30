@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { getDeckDetail } from "../services/deck.service";
-import { qk } from "@/lib/queryKeys";
+import { QUERY_KEYS } from "@/lib/queryKeys";
 
 /**
  * Hook do pobierania szczegółowych informacji o talii (deckdetail)
@@ -8,7 +8,7 @@ import { qk } from "@/lib/queryKeys";
  */
 export const useDeckDetail = (deckId: string) => {
   return useQuery({
-    queryKey: qk.deck.detail1(deckId),
+    queryKey: [QUERY_KEYS.DECKS, "detail", deckId],
     queryFn: () => getDeckDetail(deckId),
     enabled: !!deckId,
   });
