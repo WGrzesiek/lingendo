@@ -10,7 +10,11 @@ import java.time.Instant;
 @Getter
 @Setter
 @Entity
-@Table(name = "flashcard")
+@Table(name = "flashcard",
+        indexes = {
+                @Index(name = "idx_flashcard_deck_id", columnList = "deck_id"),
+                @Index(name = "idx_flashcard_word_id", columnList = "word_id")
+        })
 public class Flashcard {
 
     @Id

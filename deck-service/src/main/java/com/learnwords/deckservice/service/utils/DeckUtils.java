@@ -45,9 +45,6 @@ public class DeckUtils {
     }
 
 
-
-
-
     /**
      * Pobiera talię jeśli użytkownik ma do niej uprawnienia
      *

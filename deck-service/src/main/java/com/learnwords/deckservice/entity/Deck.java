@@ -13,7 +13,14 @@ import java.util.Set;
 @Getter
 @Setter
 @Entity
-@Table(name = "deck")
+@Table(name = "deck",
+        indexes = {
+                @Index(name = "idx_deck_owner_id", columnList = "owner_id"),
+                @Index(name = "idx_deck_visibility", columnList = "visibility"),
+                @Index(name = "idx_deck_category", columnList = "category"),
+                @Index(name = "idx_deck_language_from", columnList = "language_from"),
+                @Index(name = "idx_deck_language_to", columnList = "language_to")
+        })
 public class Deck {
     @Id
     @Column(nullable = false, unique = true, length = 36)
@@ -70,6 +77,11 @@ public class Deck {
     @Enumerated(EnumType.STRING)
     @Column(name = "owner", nullable = false)
     private DeckOwner owner;
+
+    @Builder.Default
+    @Enumerated(EnumType.STRING)
+    @Column(name = "review_schedule", nullable = false)
+    private ReviewSchedule reviewSchedule = ReviewSchedule.AUTO;
 
     @Builder.Default
     @Column(nullable = false, updatable = false)

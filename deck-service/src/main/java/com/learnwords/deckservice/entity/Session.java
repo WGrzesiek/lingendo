@@ -3,6 +3,7 @@ package com.learnwords.deckservice.entity;
 import com.learnwords.deckservice.enums.SessionStatus;
 import com.learnwords.deckservice.enums.SessionType;
 import jakarta.persistence.*;
+import jakarta.persistence.criteria.CriteriaBuilder;
 import lombok.*;
 
 import java.io.Serializable;
@@ -15,7 +16,13 @@ import java.util.List;
 @Entity
 @Setter
 @Getter
-@Table(name = "session")
+@Table(name = "session",
+        indexes = {
+                @Index(name = "idx_session_enrollment_id", columnList = "enrollment_id"),
+                @Index(name = "idx_session_status", columnList = "status"),
+                @Index(name = "idx_session_type", columnList = "type"),
+                @Index(name = "idx_session_started_at", columnList = "started_at")
+        })
 public class Session {
     @Id
     @Column(nullable = false, unique = true, length = 36)
@@ -42,6 +49,13 @@ public class Session {
 
     @Column(name = "completed_at")
     private Instant completedAt;
+
+    @Column(name = "session_number")
+    private Integer sessionNumber;
+
+    @Builder.Default
+    @Column(name = "correct_answers")
+    private Integer correctAnswers = 0;
 
     @Builder.Default
     @Column(nullable = false, updatable = false)

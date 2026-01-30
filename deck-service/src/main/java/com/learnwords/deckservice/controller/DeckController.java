@@ -4,6 +4,7 @@ import com.learnwords.deckservice.dto.*;
 import com.learnwords.deckservice.dto.deck.CreateDeckDto;
 import com.learnwords.deckservice.dto.deck.DeckDetailsDto;
 import com.learnwords.deckservice.dto.deck.DeckDto;
+import com.learnwords.deckservice.dto.deck.GenerateSentencesResponse;
 import com.learnwords.deckservice.enums.DeckOwner;
 import com.learnwords.deckservice.enums.DeckVisibility;
 import com.learnwords.deckservice.exception.exceptions.DeckNotFoundException;
@@ -19,6 +20,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -147,46 +149,7 @@ public class DeckController {
         this.deckService = deckService;
     }
 
-//    /**
-//     * Pobiera paginowaną listę talii kursów studenta.
-//     *
-//     * <p>Endpoint zwraca talie przypisane do użytkownika z nagłówka x-client-id.
-//     * Wyniki są paginowane według podanych parametrów page i size.
-//     *
-//     * @param userId ID użytkownika z nagłówka x-client-id
-//     * @param page numer strony (domyślnie 0)
-//     * @param size rozmiar strony (domyślnie 4)
-//     * @return strona talii kursów studenta
-//     */
-//    @Operation(
-//        summary = "Pobierz talie kursów studenta",
-//        description = "Pobiera paginowaną listę talii kursów przypisanych do użytkownika."
-//    )
-//    @ApiResponses(value = {
-//        @ApiResponse(
-//            responseCode = "200",
-//            description = "Lista talii kursów pobrana pomyślnie",
-//            content = @Content(schema = @Schema(implementation = StudentMyCourseListItemDto.class))
-//        ),
-//        @ApiResponse(
-//            responseCode = "400",
-//            description = "Błędne parametry zapytania",
-//            content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))
-//        )
-//    })
-//    @GetMapping("/student-my-decks")
-//    public ResponseEntity<Page<StudentMyCourseListItemDto>> getStudentMyCourseListItemDto(
-//            @Parameter(description = "ID użytkownika z nagłówka", required = true, example = "user-123") @RequestHeader(USER_ID_HEADER) String userId,
-//            @RequestParam(defaultValue = "0") int page,
-//            @RequestParam(defaultValue = "4") int size
-//    ) {
-//
-//        log.debug("Pobieranie talii kursów studenta - userId: {}, page: {}, size: {}", userId, page, size);
-//        Page<StudentMyCourseListItemDto> decks = deckService.getStudentMyCourseDecks(userId, page, size);
-//        log.info("Znaleziono {} talii kursów dla użytkownika {}", decks.getTotalElements(), userId);
-//        return ResponseEntity.ok(decks);
-//
-//    }
+
 
     /**
      * Pobiera listę talii z opcjonalnymi filtrami.
@@ -222,13 +185,20 @@ public class DeckController {
         )
     })
     @GetMapping()
-    public ResponseEntity<List<DeckDto>> getDecksByFilter(
+    public ResponseEntity<Page<DeckDto>> getDecksByFilter(
             @Parameter(description = "ID użytkownika z nagłówka", required = true, example = "user-123") @RequestHeader(USER_ID_HEADER) String userId,
-            @Parameter(description = "Czy talia jest publiczna", example = "true") @RequestParam(required = false) DeckVisibility deckVisibility,
-            @Parameter(description = "Typ właściciela talii", schema = @Schema(implementation = DeckOwner.class)) @RequestParam(required = false) DeckOwner owner) {
+            @Parameter(description = "Ty widocznosci", schema = @Schema(implementation = DeckVisibility.class))
+            @RequestParam(required = false) List<DeckVisibility> deckVisibility,
+            @Parameter(description = "Typ właściciela talii", schema = @Schema(implementation = DeckOwner.class))
+            @RequestParam(required = false) List<DeckOwner> owner,
+            @Parameter(description = "Numer strony (0-based)", example = "0")
+            @RequestParam(defaultValue = "0") int page,
+            @Parameter(description = "Rozmiar strony", example = "10")
+            @RequestParam(defaultValue = "10") int size)
+    {
         log.debug("Pobieranie talii z filtrami - userId: {}, isPublic: {}, owner: {}", userId, deckVisibility, owner);
-        List<DeckDto> decks = deckService.getDecksByFilter(userId, deckVisibility, owner);
-        log.info("Znaleziono {} talii spełniających kryteria", decks.size());
+        Page<DeckDto> decks = deckService.getDecksByFilter(userId, deckVisibility, owner,page,size);
+        log.info("Znaleziono {} talii spełniających kryteria", decks.getContent().size());
         return ResponseEntity.ok(decks);
     }
 
@@ -461,50 +431,50 @@ public class DeckController {
         return ResponseEntity.ok(updatedDetails);
     }
 
-    /**
-     * Pobiera talie użytkownika z opcjonalnymi filtrami.
-     * 
-     * <p>Zwraca talie należące do konkretnego użytkownika z możliwością filtrowania według:
-     * <ul>
-     *   <li>Widoczności (publiczne/prywatne)</li>
-     *   <li>Typu właściciela (USER, ADMIN, SYSTEM)</li>
-     * </ul>
-     * 
-     * <p>ID użytkownika jest pobierane z nagłówka x-client-id (automatyczna autoryzacja).
-     * Bez filtrów zwraca wszystkie talie użytkownika.
-     * 
-     * @param userId ID użytkownika z nagłówka x-client-id
-     * @param deckVisibility czy talia jest publiczna (opcjonalny)
-     * @param owner typ właściciela talii (opcjonalny)
-     * @return lista talii użytkownika spełniających kryteria
-     * @throws IllegalArgumentException jeśli brak nagłówka x-client-id
-     */
-    @Operation(
-        summary = "Pobierz talie użytkownika z filtrami",
-        description = "Pobiera talie konkretnego użytkownika z opcjonalnymi filtrami widoczności i właściciela. UserId jest pobierany automatycznie z nagłówka."
-    )
-    @ApiResponses(value = {
-        @ApiResponse(
-            responseCode = "200",
-            description = "Lista talii użytkownika",
-            content = @Content(schema = @Schema(implementation = DeckDto.class))
-        ),
-        @ApiResponse(
-            responseCode = "400",
-            description = "Brak wymaganego nagłówka x-client-id",
-            content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))
-        )
-    })
-    @GetMapping("/user/filter")
-    public ResponseEntity<List<DeckDto>> filterUserDecks(
-            @Parameter(description = "ID użytkownika z nagłówka", required = true, example = "user-123") @RequestHeader(USER_ID_HEADER) String userId,
-            @Parameter(description = "Czy talia jest publiczna", example = "true") @RequestParam(required = false) DeckVisibility deckVisibility,
-            @Parameter(description = "Typ właściciela talii", schema = @Schema(implementation = DeckOwner.class)) @RequestParam(required = false) DeckOwner owner) {
-        log.debug("Filtrowanie talii użytkownika {} - isPublic: {}, owner: {}", userId, deckVisibility, owner);
-        List<DeckDto> decks = deckService.getDecksByFilter(userId, deckVisibility, owner);
-        log.info("Znaleziono {} talii użytkownika {} spełniających kryteria", decks.size(), userId);
-        return ResponseEntity.ok(decks);
-    }
+//    /**
+//     * Pobiera talie użytkownika z opcjonalnymi filtrami.
+//     *
+//     * <p>Zwraca talie należące do konkretnego użytkownika z możliwością filtrowania według:
+//     * <ul>
+//     *   <li>Widoczności (publiczne/prywatne)</li>
+//     *   <li>Typu właściciela (USER, ADMIN, SYSTEM)</li>
+//     * </ul>
+//     *
+//     * <p>ID użytkownika jest pobierane z nagłówka x-client-id (automatyczna autoryzacja).
+//     * Bez filtrów zwraca wszystkie talie użytkownika.
+//     *
+//     * @param userId ID użytkownika z nagłówka x-client-id
+//     * @param deckVisibility czy talia jest publiczna (opcjonalny)
+//     * @param owner typ właściciela talii (opcjonalny)
+//     * @return lista talii użytkownika spełniających kryteria
+//     * @throws IllegalArgumentException jeśli brak nagłówka x-client-id
+//     */
+//    @Operation(
+//        summary = "Pobierz talie użytkownika z filtrami",
+//        description = "Pobiera talie konkretnego użytkownika z opcjonalnymi filtrami widoczności i właściciela. UserId jest pobierany automatycznie z nagłówka."
+//    )
+//    @ApiResponses(value = {
+//        @ApiResponse(
+//            responseCode = "200",
+//            description = "Lista talii użytkownika",
+//            content = @Content(schema = @Schema(implementation = DeckDto.class))
+//        ),
+//        @ApiResponse(
+//            responseCode = "400",
+//            description = "Brak wymaganego nagłówka x-client-id",
+//            content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))
+//        )
+//    })
+//    @GetMapping("/user/filter")
+//    public ResponseEntity<List<DeckDto>> filterUserDecks(
+//            @Parameter(description = "ID użytkownika z nagłówka", required = true, example = "user-123") @RequestHeader(USER_ID_HEADER) String userId,
+//            @Parameter(description = "Czy talia jest publiczna", example = "true") @RequestParam(required = false) DeckVisibility deckVisibility,
+//            @Parameter(description = "Typ właściciela talii", schema = @Schema(implementation = DeckOwner.class)) @RequestParam(required = false) DeckOwner owner) {
+//        log.debug("Filtrowanie talii użytkownika {} - isPublic: {}, owner: {}", userId, deckVisibility, owner);
+//        List<DeckDto> decks = deckService.getDecksByFilter(userId, deckVisibility, owner);
+//        log.info("Znaleziono {} talii użytkownika {} spełniających kryteria", decks.size(), userId);
+//        return ResponseEntity.ok(decks);
+//    }
 
 //    /**
 //     * Pobiera wszystkie talie użytkownika.
@@ -543,39 +513,45 @@ public class DeckController {
 //        log.info("Znaleziono {} talii użytkownika {}", decks.size(), userId);
 //        return ResponseEntity.ok(decks);
 //    }
-//    /**
-//     * Pobiera wszystkie talie publiczne.
-//     *
-//     * <p>Zwraca listę wszystkich talii oznaczonych jako publiczne.
-//     * Endpoint nie wymaga autoryzacji - każdy może przeglądać publiczne talie.
-//     *
-//     * <p>Publiczne talie mogą być:
-//     * <ul>
-//     *   <li>Utworzone przez użytkowników i udostępnione publicznie</li>
-//     *   <li>Talie systemowe dostępne dla wszystkich</li>
-//     *   <li>Talie administracyjne jako materiały edukacyjne</li>
-//     * </ul>
-//     *
-//     * @return lista wszystkich publicznych talii
-//     */
-//    @Operation(
-//        summary = "Pobierz wszystkie talie publiczne",
-//        description = "Pobiera listę wszystkich talii oznaczonych jako publiczne. Nie wymaga autoryzacji."
-//    )
-//    @ApiResponses(value = {
-//        @ApiResponse(
-//            responseCode = "200",
-//            description = "Lista publicznych talii",
-//            content = @Content(schema = @Schema(implementation = DeckDto.class))
-//        )
-//    })
-//    @GetMapping("/public")
-//    public ResponseEntity<List<DeckDto>> getPublicDecks() {
-//        log.debug("Pobieranie wszystkich talii publicznych");
-//        List<DeckDto> decks = deckService.getPublicDecks();
-//        log.info("Znaleziono {} talii publicznych", decks.size());
-//        return ResponseEntity.ok(decks);
-//    }
+
+    /**
+     * Pobiera wszystkie talie publiczne z paginacją.
+     *
+     * <p>Zwraca stronę wszystkich talii oznaczonych jako publiczne.
+     * Endpoint nie wymaga autoryzacji - każdy może przeglądać publiczne talie.
+     *
+     * <p>Publiczne talie mogą być:
+     * <ul>
+     *   <li>Utworzone przez użytkowników i udostępnione publicznie</li>
+     *   <li>Talie systemowe dostępne dla wszystkich</li>
+     *   <li>Talie administracyjne jako materiały edukacyjne</li>
+     * </ul>
+     *
+     * @param owner opcjonalny filtr typu właściciela (USER, ADMIN, SYSTEM)
+     * @param page numer strony (domyślnie 0)
+     * @param size rozmiar strony (domyślnie 20)
+     * @return strona publicznych talii
+     */
+    @Operation(
+        summary = "Pobierz wszystkie talie publiczne",
+        description = "Pobiera stronę wszystkich talii oznaczonych jako publiczne. Nie wymaga autoryzacji."
+    )
+    @ApiResponses(value = {
+        @ApiResponse(
+            responseCode = "200",
+            description = "Strona publicznych talii",
+            content = @Content(schema = @Schema(implementation = DeckDto.class))
+        )
+    })
+    @GetMapping("/public")
+    public ResponseEntity<Page<DeckDto>> getPublicDecks(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size) {
+        log.debug("Pobieranie talii community (PUBLIC + COMMUNITY): page={}, size={}", page, size);
+        Page<DeckDto> decks = deckService.getPublicDecks(DeckOwner.COMMUNITY, page, size);
+        log.info("Znaleziono {} talii community", decks.getTotalElements());
+        return ResponseEntity.ok(decks);
+    }
 
     /**
      * Zmienia nazwę talii.
@@ -1120,5 +1096,48 @@ public class DeckController {
         boolean isAvailable = !isTaken;
         log.info("Nazwa talii '{}' dla użytkownika {} jest dostępna: {}", deckName, userId, isAvailable);
         return ResponseEntity.ok(isAvailable);
+    }
+
+    /**
+     * Generuje przykładowe zdania dla wszystkich słówek w talii.
+     * 
+     * <p>Wysyła asynchroniczne żądanie do serwisu AI o wygenerowanie zdań.
+     * Rezultat będzie dostępny po przetworzeniu przez serwis koog-service.
+     * 
+     * @param deckId ID talii dla której generować zdania
+     * @param userId ID użytkownika z nagłówka x-client-id
+     * @return informacje o wysłanym żądaniu (correlationId, liczba słówek)
+     * @throws IllegalArgumentException jeśli deckId lub userId jest pusty
+     * @throws DeckNotFoundException jeśli talia o podanym ID nie istnieje
+     */
+    @Operation(
+        summary = "Generuj zdania dla talii",
+        description = "Wysyła asynchroniczne żądanie generowania przykładowych zdań dla wszystkich słówek w talii."
+    )
+    @ApiResponses(value = {
+        @ApiResponse(
+            responseCode = "202",
+            description = "Żądanie generowania zdań przyjęte do przetworzenia",
+            content = @Content(schema = @Schema(implementation = GenerateSentencesResponse.class))
+        ),
+        @ApiResponse(
+            responseCode = "400",
+            description = "Brak wymaganego nagłówka lub nieprawidłowe ID talii",
+            content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))
+        ),
+        @ApiResponse(
+            responseCode = "404",
+            description = "Talia nie znaleziona",
+            content = @Content(schema = @Schema(implementation = ApiErrorResponse.class))
+        )
+    })
+    @PostMapping("/{deckId}/generate-sentences")
+    public ResponseEntity<GenerateSentencesResponse> generateSentences(
+            @Parameter(description = "ID talii", required = true, example = "deck-123") @PathVariable String deckId,
+            @Parameter(description = "ID użytkownika z nagłówka", required = true, example = "user-123") @RequestHeader(USER_ID_HEADER) String userId) {
+        log.debug("Żądanie generowania zdań dla talii {} przez użytkownika {}", deckId, userId);
+        GenerateSentencesResponse response = deckService.generateSentences(deckId, userId);
+        log.info("Żądanie generowania zdań wysłane dla talii {} - {} słówek", deckId, response.wordsCount());
+        return ResponseEntity.status(HttpStatus.ACCEPTED).body(response);
     }
 }

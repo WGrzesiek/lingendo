@@ -6,7 +6,18 @@ import lombok.*;
 import java.time.Instant;
 
 @Entity
-@Table(name = "deck_enrollment")
+@Table(name = "deck_enrollment",
+        uniqueConstraints = {
+                @UniqueConstraint(name = "uk_deck_enrollment_user_deck", columnNames = {"deck_id", "user_id"})
+        },
+        indexes = {
+                @Index(name = "idx_deck_enrollment_deck_id", columnList = "deck_id"),
+                @Index(name = "idx_deck_enrollment_user_id", columnList = "user_id"),
+                @Index(name = "idx_deck_enrollment_status", columnList = "status"),
+                @Index(name = "idx_deck_enrollment_role", columnList = "role"),
+                @Index(name = "idx_deck_enrollment_source", columnList = "source"),
+                @Index(name = "idx_deck_enrollment_last_accessed", columnList = "last_accessed_at")
+        })
 @Getter @Setter @Builder @NoArgsConstructor @AllArgsConstructor
 public class DeckEnrollment {
 
@@ -35,6 +46,10 @@ public class DeckEnrollment {
     @Enumerated(EnumType.STRING)
     @Column(name = "preferred_algorithm")
     private LearnAlgorithm preferredAlgorithm;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "preferred_review_schedule", nullable = false)
+    private ReviewSchedule preferredReviewSchedule = ReviewSchedule.AUTO;
 
     @Enumerated(EnumType.STRING)
     @Builder.Default

@@ -4,15 +4,14 @@ import com.learnwords.common.KafkaTopic;
 import com.learnwords.common.events.DeckEnrollmentsFinished;
 import com.learnwords.common.events.SessionFinishedEvent;
 import com.learnwords.common.events.SessionStartedEvent;
+import com.learnwords.deckservice.dto.facade.learn.SessionInfo;
 import com.learnwords.deckservice.dto.session.SessionDto;
 import com.learnwords.deckservice.entity.DeckEnrollment;
-import com.learnwords.deckservice.entity.Flashcard;
 import com.learnwords.deckservice.entity.Session;
 import com.learnwords.deckservice.enums.SessionStatus;
 import com.learnwords.deckservice.enums.SessionType;
 import com.learnwords.deckservice.exception.exceptions.*;
 import com.learnwords.deckservice.repository.DeckEnrollmentRepository;
-import com.learnwords.deckservice.repository.FlashcardRepository;
 import com.learnwords.deckservice.repository.SessionRepository;
 import com.learnwords.deckservice.service.FlashcardFetchStrategy;
 import com.learnwords.deckservice.service.SessionFlashcardService;
@@ -95,7 +94,7 @@ public class SessionServiceImpl implements SessionService {
 
         DeckEnrollment deckEnrollment = DeckUtils.getDeckEnrollmentIfUserHasPermissions(deckEnrollmentRepository, deckId, userId);
         AbstractAlgorithm algorithm = algorithmFactory.get(deckEnrollment.getPreferredAlgorithm());
-
+        int sessionNumber = sessionRepository.countByEnrollment_Id(deckEnrollment.getId()) + 1;
         log.debug("Liczba fiszek w sesji - deckId: '{}'", deckId);
 
         String sessionId = UUID.randomUUID().toString();
@@ -105,6 +104,7 @@ public class SessionServiceImpl implements SessionService {
                 .status(SessionStatus.IN_PROGRESS)
                 .type(SessionType.LEARNING)
                 .startedAt(Instant.now())
+                .sessionNumber(sessionNumber)
                 .build();
 
         sessionRepository.save(session);
@@ -183,8 +183,8 @@ public class SessionServiceImpl implements SessionService {
                 enrollment.getId(),
                 List.of(SessionStatus.IN_PROGRESS, SessionStatus.PAUSED)
         );
-
-        if (!hasActiveSessions) {
+        int totalSessions = (int) Math.ceil((double) enrollment.getDeck().getWordCount() / enrollment.getHowManyFlashcardsForOneSession());
+        if (!hasActiveSessions && enrollment.getCompletedSessionsCount() >= totalSessions) {
             enrollment.markCompleted();
             log.info("Ukończono naukę talii - deckEnrollmentId: '{}'", enrollment.getId());
 
@@ -310,8 +310,49 @@ public class SessionServiceImpl implements SessionService {
                 .startedAt(session.getStartedAt())
                 .completedAt(session.getCompletedAt())
                 .sessionFlashcards(session.getSessionFlashcards())
+                .correctAnswers(session.getCorrectAnswers())
+                .sessionNumber(session.getSessionNumber())
                 .build();
     }
 
+    @Override
+    public int getCompletedSessionsCount(String deckId, String userId){
+        log.debug("Pobieranie liczby ukończonych sesji - deckId: '{}', userId: '{}'", deckId, userId);
+        DeckEnrollment enrollment = DeckUtils.getDeckEnrollmentIfUserHasPermissions(
+                deckEnrollmentRepository, deckId, userId);
+        int completedSessions = sessionRepository.countByEnrollment_IdAndStatus(
+                enrollment.getId(), SessionStatus.COMPLETED);
+        log.debug("Liczba ukończonych sesji - deckId: '{}', userId: '{}', completedSessions: '{}'",
+                deckId, userId, completedSessions);
+        return completedSessions;
+    }
+
+    @Override
+    public List<SessionInfo> getSessionsInfoByDeckId(String enrollmentId, String userId) {
+        log.debug("Pobieranie informacji o sesjach - enrollmentId: '{}', userId: '{}'", enrollmentId, userId);
+        DeckEnrollment enrollment = DeckUtils.getDeckEnrollmentIfUserHasPermissions(
+                deckEnrollmentRepository, enrollmentId, userId);
+        List<Session> sessions = sessionRepository.findByEnrollment_Id(enrollment.getId());
+        List<SessionInfo> sessionInfos = sessions.stream()
+                .map(session -> new SessionInfo(
+                        session.getId(),
+                        session.getSessionNumber(),
+                        session.getStatus()
+                ))
+                .toList();
+        log.debug("Pobrano informacje o sesjach - enrollmentId: '{}', userId: '{}', sessionCount: '{}'",
+                enrollmentId, userId, sessionInfos.size());
+        return sessionInfos;
+    }
+
+    @Override
+    public void recordCorrectAnswer(String sessionId, String userId) {
+        log.debug("Rejestrowanie poprawnej odpowiedzi - sessionId: '{}', userId: '{}'", sessionId, userId);
+        Session session = getSessionIfUserHasPermissions(sessionRepository, userId, sessionId);
+        session.setCorrectAnswers(session.getCorrectAnswers()+1);
+        sessionRepository.save(session);
+        log.debug("Zarejestrowano poprawną odpowiedź - sessionId: '{}', userId: '{}', totalCorrectAnswers: '{}'",
+                sessionId, userId, session.getCorrectAnswers());
+    }
 
 }

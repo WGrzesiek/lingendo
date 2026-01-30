@@ -1,11 +1,11 @@
 package com.learnwords.deckservice.service;
 
 import com.learnwords.deckservice.dto.*;
-import com.learnwords.deckservice.dto.deck.CreateDeckDto;
-import com.learnwords.deckservice.dto.deck.DeckDetailsDto;
-import com.learnwords.deckservice.dto.deck.DeckDto;
+import com.learnwords.deckservice.dto.deck.*;
+import com.learnwords.deckservice.entity.Deck;
 import com.learnwords.deckservice.enums.DeckOwner;
 import com.learnwords.deckservice.enums.DeckVisibility;
+import org.springframework.data.domain.Page;
 
 import java.util.List;
 
@@ -46,7 +46,6 @@ import java.util.List;
  * @see com.learnwords.deckservice.entity.Deck
  * @see DeckDto
  * @see DeckDetailsDto
- * @see DeckStatisticsDto
  * @see com.learnwords.deckservice.service.impl.DeckServiceImpl
  */
 public interface DeckService {
@@ -57,10 +56,14 @@ public interface DeckService {
     DeckOwner changeDeckOwner(String deckId, String userId, DeckOwner newOwner);
 
     DeckDto getDeckById(String deckId, String userId);
-    List<DeckDto> getDecksByFilter(String userId, DeckVisibility visibility, DeckOwner owner);
+    Deck getDeckById(String deckId);
+
+    Page<DeckDto> getDecksByFilter(String userId, List<DeckVisibility> visibility, List<DeckOwner> owner, int page, int size);
+    Page<DeckDto> getPublicDecks(DeckOwner owner, int page, int size);
     DeckDetailsDto getDeckDetailsById(String deckId, String userId); // Szczegóły statyczne (opis, ilość słów)
     DeckDetailsDto editDeckDetails(String deckId, DeckDetailsDto deckDetailsDto, String userId);
     long getTotalFlashcardsCount(String deckId, String userId);
     boolean isDeckNameTaken(String userId, String deckName);
+    GenerateSentencesResponse generateSentences(String userId, String deckId);
 
 }

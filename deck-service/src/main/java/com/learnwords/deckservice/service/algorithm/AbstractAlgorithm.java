@@ -4,10 +4,11 @@ import com.learnwords.deckservice.enums.LearnAlgorithm;
 import com.learnwords.deckservice.service.algorithm.state.AlgorithmState;
 import com.learnwords.deckservice.service.evaluationService.responseResult.AlgorithmResult;
 import com.learnwords.deckservice.service.evaluationService.responseResult.Failure;
+import com.learnwords.deckservice.service.evaluationService.responseResult.MaxLevel;
 import com.learnwords.deckservice.service.evaluationService.responseResult.Success;
 
 
-public abstract sealed class AbstractAlgorithm implements Algorithm<AlgorithmState> permits GrzesiekAlgorithm {
+public abstract sealed class AbstractAlgorithm implements Algorithm<AlgorithmState> permits GrzesiekAlgorithm, LeitnerAlgorithm {
 
     @Override
     public AlgorithmState initialize() {
@@ -37,6 +38,9 @@ public abstract sealed class AbstractAlgorithm implements Algorithm<AlgorithmSta
     @Override
     public AlgorithmResult<AlgorithmState> processAnswer(AlgorithmState state, boolean correct) {
         if (correct) {
+            if(state.getStep().isLastLearnStep()) {
+                return new MaxLevel<>(state);
+            }
             return new Success<>(promote(state));
         } else {
             return new Failure<>(demote(state));
@@ -44,7 +48,7 @@ public abstract sealed class AbstractAlgorithm implements Algorithm<AlgorithmSta
     }
 
 
-    protected abstract AlgorithmState getInitialState();
+    public abstract AlgorithmState getInitialState();
 
     public abstract LearnAlgorithm getType();
 }

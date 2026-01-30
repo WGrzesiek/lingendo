@@ -11,7 +11,11 @@ import java.time.Instant;
 @Getter
 @Builder
 @Entity
-@Table(name = "session_flashcard")
+@Table(name = "session_flashcard",
+        indexes = {
+                @Index(name = "idx_session_flashcard_session_id", columnList = "session_id"),
+                @Index(name = "idx_session_flashcard_flashcard_id", columnList = "flashcard_id")
+        })
 public class SessionFlashcard {
 
     @Id

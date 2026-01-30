@@ -18,6 +18,7 @@ public record SessionDto(
         SessionType type,
         Instant startedAt,
         Instant completedAt,
-        List<SessionFlashcard> sessionFlashcards
-)
+        List<SessionFlashcard> sessionFlashcards,
+        Integer correctAnswers,
+        Integer sessionNumber)
 {}

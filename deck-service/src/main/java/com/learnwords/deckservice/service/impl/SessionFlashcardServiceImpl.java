@@ -2,6 +2,7 @@ package com.learnwords.deckservice.service.impl;
 
 import com.learnwords.common.dto.SentenceDto;
 import com.learnwords.common.dto.WordDto;
+import com.learnwords.deckservice.dto.session.FlashcardSessionNumber;
 import com.learnwords.deckservice.dto.sessionFlashcard.SessionFlashcardDto;
 import com.learnwords.deckservice.entity.*;
 import com.learnwords.deckservice.exception.exceptions.InvalidSessionIdException;
@@ -222,6 +223,14 @@ public class SessionFlashcardServiceImpl implements SessionFlashcardService {
                 .flashcardWithWords(flashcardWithWords)
                 .build();
 
+    }
+
+    @Override
+    public List<FlashcardSessionNumber> getFlashcardSessionNumbersByIds(List<String> flashcardIds) {
+        if (flashcardIds == null || flashcardIds.isEmpty()) {
+            return Collections.emptyList();
+        }
+        return sessionFlashcardRepository.getFlashcardSessionNumbersByIds(flashcardIds);
     }
 
 }

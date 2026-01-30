@@ -43,6 +43,9 @@ public class CreateDeckDto {
     @NotNull(message = "Należy określić poziom trudności talii")
     private DeckDifficulty difficulty;
 
+    @NotNull(message = "Należy określić harmonogram powtórek")
+    private ReviewSchedule reviewSchedule;
+
     @Builder.Default
     @NotNull(message = "Określ, czy talia ma być publiczna czy prywatna")
     DeckVisibility visibility = DeckVisibility.PRIVATE;

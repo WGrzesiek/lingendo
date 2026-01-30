@@ -1,5 +1,6 @@
 package com.learnwords.deckservice.service;
 
+import com.learnwords.deckservice.dto.session.FlashcardSessionNumber;
 import com.learnwords.deckservice.dto.sessionFlashcard.SessionFlashcardDto;
 import com.learnwords.deckservice.entity.SessionFlashcard;
 
@@ -35,4 +36,5 @@ public interface SessionFlashcardService {
     List<SessionFlashcard> getSessionFlashcards(String sessionId);
     SessionFlashcardDto getSessionFlashcardsWithWords(String sessionId);
     //TODO wypelnienie wszystkich sesji fiszkai z danego decka
+    List<FlashcardSessionNumber> getFlashcardSessionNumbersByIds(List<String> flashcardIds);
 }

@@ -1,6 +1,8 @@
 package com.learnwords.deckservice.enums;
 
-public enum DeckOwner {
+import java.io.Serializable;
+
+public enum DeckOwner implements Serializable {
     I,
     TEACHER,
     FRIEND,

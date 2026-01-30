@@ -21,6 +21,15 @@ grpc:
     vocabulary-read:
       address: ${GRPC_VOCAB_READ_ADDRESS}
       negotiationType: ${GRPC_VOCAB_READ_NEGOTIATION:TLS}
+    auth:
+      address: ${GRPC_CLIENT_AUTH_ADDRESS}
+      negotiationType: ${GRPC_CLIENT_AUTH_NEGOTIATIONTYPE:PLAINTEXT}
+    user-relations:
+      address: ${GRPC_USER_RELATIONS_ADDRESS}
+      negotiationType: ${GRPC_USER_RELATIONS_NEGOTIATION:PLAINTEXT}
+    student-groups:
+      address: ${GRPC_STUDENT_GROUPS_ADDRESS}
+      negotiationType: ${GRPC_STUDENT_GROUPS_NEGOTIATION:PLAINTEXT}
 logging:
   logstash:
     host: ${LOGSTASH_HOST}

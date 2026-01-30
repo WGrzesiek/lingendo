@@ -14,7 +14,7 @@ pipeline {
     booleanParam(name: 'SKIP_TESTS', defaultValue: true, description: 'Pominąć testy?')
     string(name: 'REGISTRY', defaultValue: 'localhost:5000', description: 'Local Docker registry')
     string(name: 'IMAGE_NAME', defaultValue: 'learnwords/deck-service', description: 'Nazwa obrazu')
-    string(name: 'TAG', defaultValue: '', description: 'Tag obrazu (puste => auto)')
+    string(name: 'TAG', defaultValue: 'dev-1', description: 'Tag obrazu')
 
   }
 
@@ -58,6 +58,16 @@ stage('Build & Install deck-service') {
         }
     }
 }
+
+stage('Code Stats') {
+    steps {
+        dir('deck-service') {
+            sh 'scc --format json --output scc.json .'
+            archiveArtifacts artifacts: 'scc.json', fingerprint: true
+        }
+    }
+}
+
 stage('Test & Coverage') {
     when { expression { !params.SKIP_TESTS } }
     steps {

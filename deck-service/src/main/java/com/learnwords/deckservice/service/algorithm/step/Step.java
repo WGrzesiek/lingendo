@@ -3,7 +3,7 @@ package com.learnwords.deckservice.service.algorithm.step;
 import org.springframework.stereotype.Component;
 
 @Component
-public sealed interface Step permits GrzesiekStep {
+public sealed interface Step permits GrzesiekStep, LeitnerStep {
 
 
     String name();
@@ -16,5 +16,9 @@ public sealed interface Step permits GrzesiekStep {
 
     boolean isMaxLevel();
 
+    boolean isLastLearnStep();
+
     int index();
+
+    int stepCount();
 }

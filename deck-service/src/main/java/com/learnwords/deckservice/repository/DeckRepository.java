@@ -8,31 +8,32 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
-
+@Repository
 public interface DeckRepository extends JpaRepository<Deck, String> {
     boolean existsByNameAndOwnerId(String name, String userId);
-    
-//    List<Deck> findByUserId(String userId);
-//    Page<Deck> findByUserId(String userId, Pageable pageable);
-//    List<Deck> findByUserIdAndIsPublic(String userId, boolean isPublic);
-//    List<Deck> findByUserIdAndOwner(String userId, DeckOwner owner);
-//    List<Deck> findByIsPublic(boolean isPublic);
-//    List<Deck> findByOwner(DeckOwner owner);
-//
-//    long countByUserId(String userId);
-//    long countByUserIdAndIsPublic(String userId, boolean isPublic);
-//
-    @Query("SELECT d FROM Deck d WHERE " +
-           "(d.ownerId = :ownerId) AND " +
-           "(:isPublic IS NULL OR d.visibility = :visibility) AND " +
-           "(:owner IS NULL OR d.owner = :owner)")
-    List<Deck> findByFilters(
-        @Param("ownerId") String userId,
-        @Param("visibility") DeckVisibility visibility,
-        @Param("owner") DeckOwner owner
-    );
 
+ @Query("""
+            SELECT d FROM Deck d WHERE
+            d.ownerId = :userId
+            AND (:visibility IS NULL OR d.visibility IN :visibility)
+            AND (:owner IS NULL OR d.owner IN :owner)
+           """)
+    Page<Deck> findOwnedDecksWithFilters(
+            @Param("userId") String userId,
+            @Param("visibility") List<DeckVisibility> visibility,
+            @Param("owner") List<DeckOwner> owner,
+            Pageable pageable);
+
+Page<Deck> findByIdIn(List<String> ids, Pageable pageable);
+
+    @Query("""
+            SELECT d FROM Deck d WHERE
+            d.visibility = 'PUBLIC'
+            AND (:owner IS NULL OR d.owner = :owner)
+           """)
+    Page<Deck> findPublicDecks(@Param("owner") DeckOwner owner, Pageable pageable);
 }

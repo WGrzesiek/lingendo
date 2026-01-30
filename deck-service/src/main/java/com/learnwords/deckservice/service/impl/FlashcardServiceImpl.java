@@ -17,6 +17,7 @@ import com.learnwords.deckservice.exception.exceptions.InvalidWordDataException;
 import com.learnwords.deckservice.exception.exceptions.UserPermissionsMissing;
 import com.learnwords.deckservice.repository.DeckRepository;
 import com.learnwords.deckservice.repository.FlashcardRepository;
+import com.learnwords.deckservice.service.DeckAccessService;
 import com.learnwords.deckservice.service.algorithm.GrzesiekAlgorithm;
 import com.learnwords.deckservice.service.FlashcardService;
 import com.learnwords.deckservice.service.event.GenericEventProducer;
@@ -25,6 +26,7 @@ import com.learnwords.vocabulary.v1.Word;
 
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.*;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Service;
 
@@ -67,6 +69,7 @@ public class FlashcardServiceImpl implements FlashcardService {
     private final DeckRepository deckRepository;
     private final VocabularyGrpcClient vocabularyGrpcClient;
     private final GenericEventProducer eventProducer;
+    private final DeckAccessService deckAccessService;
 
     /**
      * Konstruktor z dependency injection.
@@ -74,12 +77,19 @@ public class FlashcardServiceImpl implements FlashcardService {
      * @param flashcardRepository repozytorium fiszek
      * @param deckRepository repozytorium talii
      * @param vocabularyGrpcClient klient gRPC do komunikacji z Vocabulary Service
+     * @param deckAccessService serwis sprawdzający dostęp do talii
      */
-    public FlashcardServiceImpl(FlashcardRepository flashcardRepository, DeckRepository deckRepository, VocabularyGrpcClient vocabularyGrpcClient, GenericEventProducer eventProducer) {
+    public FlashcardServiceImpl(
+            FlashcardRepository flashcardRepository, 
+            DeckRepository deckRepository, 
+            VocabularyGrpcClient vocabularyGrpcClient, 
+            GenericEventProducer eventProducer,
+            DeckAccessService deckAccessService) {
         this.flashcardRepository = flashcardRepository;
         this.deckRepository = deckRepository;
         this.vocabularyGrpcClient = vocabularyGrpcClient;
         this.eventProducer = eventProducer;
+        this.deckAccessService = deckAccessService;
     }
 
     @Override
@@ -111,6 +121,24 @@ public class FlashcardServiceImpl implements FlashcardService {
 
         log.debug("Zwrócono fiszkę - flashcardId: '{}', wordId: '{}'", flashcardId, flashcard.getWordId());
         return flashcardDto;
+    }
+
+    @Override
+    public Page<FlashcardDto> getFlashcardsFromDeckPaged(String deckId, String userId, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").ascending());
+        if (userId == null || userId.isBlank()) {
+            log.error("UserId jest pusty");
+            throw new IllegalArgumentException("UserId nie może być pusty");
+        }
+        Page<Flashcard> flashcardsPage = flashcardRepository.findByDeckId(deckId, pageable);
+        log.debug("Pobieranie fiszek z talii - deckId: '{}' userId: '{}'", deckId, userId);
+        List<Flashcard> flashcards = flashcardsPage.getContent();
+        List<FlashcardDto> flashcardDtos = mapFlashcardsToDto(flashcards);
+        return new PageImpl<>(
+                flashcardDtos,
+                flashcardsPage.getPageable(),
+                flashcardsPage.getTotalElements()
+        );
     }
 
     /**
@@ -214,6 +242,14 @@ public class FlashcardServiceImpl implements FlashcardService {
             
             log.debug("Znaleziono fiszki w talii - deckId: '{}', count: {}", deckId, flashcards.size());
             return mapFlashcardsToDto(flashcards);
+    }
+
+    @Override
+    public List<FlashcardDto> getFlashcardsByIds(List<String> flashcardIds) {
+        log.debug("Pobieranie fiszek po ID - flashcardIds count: {}", flashcardIds.size());
+        List<Flashcard> flashcards = flashcardRepository.findByIdIn(flashcardIds);
+        log.debug("Znaleziono fiszki po ID - found count: {}", flashcards.size());
+        return mapFlashcardsToDto(flashcards);
     }
 
 
@@ -330,7 +366,14 @@ public class FlashcardServiceImpl implements FlashcardService {
                 deckId, deck.getWordCount());
 
     }
-
+    private FlashcardDto mapFlashcardToDto(Flashcard flashcard) {
+        var wordResponse = vocabularyGrpcClient.getWordById(flashcard.getWordId());
+        WordDto wordDto = mapProtoToWordDto(wordResponse.getWord());
+        return new FlashcardDto(
+                flashcard.getId(),
+                wordDto
+        );
+    }
     /**
      * Mapuje listę fiszek wraz z danymi słówek na FlashcardDto.
      * 
@@ -505,10 +548,12 @@ public class FlashcardServiceImpl implements FlashcardService {
                     log.error("Nie znaleziono fiszki - flashcardId: '{}'", flashcardId);
                     return new FlashcardNotFoundException(flashcardId);
                 });
-        if (!flashcard.getDeck().getOwnerId().equals(userId)) {
-            log.warn("Brak uprawnień do fiszki - userId: '{}', flashcardId: '{}', deckOwnerId: '{}'", 
-                    userId, flashcardId, flashcard.getDeck().getOwnerId());
-            throw new UserPermissionsMissing("Użytkownik nie ma uprawnień do tej fiszki");
+        
+        Deck deck = flashcard.getDeck();
+        if (!deckAccessService.canAccessDeck(userId, deck.getId(), deck.getOwnerId())) {
+            log.warn("Brak dostępu do fiszki - userId: '{}', flashcardId: '{}', deckId: '{}'", 
+                    userId, flashcardId, deck.getId());
+            throw new UserPermissionsMissing("Użytkownik nie ma dostępu do tej fiszki");
         }
         return flashcard;
     }

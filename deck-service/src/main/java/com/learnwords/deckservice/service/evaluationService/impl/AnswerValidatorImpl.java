@@ -2,6 +2,7 @@ package com.learnwords.deckservice.service.evaluationService.impl;
 
 import com.learnwords.deckservice.dto.flashcard.FlashcardDto;
 import com.learnwords.deckservice.service.algorithm.step.GrzesiekStep;
+import com.learnwords.deckservice.service.algorithm.step.LeitnerStep;
 import com.learnwords.deckservice.service.algorithm.step.Step;
 import com.learnwords.deckservice.service.evaluationService.*;
 import lombok.extern.slf4j.Slf4j;
@@ -21,8 +22,19 @@ public class AnswerValidatorImpl implements AnswerValidator {
         };
     }
 
+    @Override
+    public boolean validateReview(FlashcardDto flashcard, TextAnswer answer) {
+        String given = normalize(answer.text());
+        String word = normalize(flashcard.wordDto().word());
+        return equalsNormalized(word, given);
+
+    }
+
     private boolean validateRemembered(RememberedAnswer answer, Step step) {
-        if( step == GrzesiekStep.SHOW_BOTH || step == GrzesiekStep.SHOW_LANGUAGE_FROM|| step == GrzesiekStep.SHOW_LANGUAGE_TO){
+        if (step == GrzesiekStep.SHOW_BOTH || step == GrzesiekStep.SHOW_LANGUAGE_FROM || step == GrzesiekStep.SHOW_LANGUAGE_TO) {
+            return answer.remembered();
+        }
+        if (step instanceof LeitnerStep) {
             return answer.remembered();
         }
         return false;
@@ -33,7 +45,7 @@ public class AnswerValidatorImpl implements AnswerValidator {
         List<String> expectedTranslations = flashcard.wordDto().translations().stream()
                 .map(this::normalize)
                 .toList();
-        if (step == GrzesiekStep.QUIZ){
+        if (step == GrzesiekStep.QUIZ) {
             return matchesAny(expectedTranslations, given);
         }
         return false;

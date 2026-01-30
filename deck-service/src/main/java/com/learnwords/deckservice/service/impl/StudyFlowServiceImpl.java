@@ -9,6 +9,7 @@ import com.learnwords.deckservice.dto.learningStrategy.NextFlashcardRecommendati
 import com.learnwords.deckservice.dto.userFlashcardProgress.UserFlashcardProgressDto;
 import com.learnwords.deckservice.entity.DeckEnrollment;
 import com.learnwords.deckservice.entity.SessionFlashcard;
+import com.learnwords.deckservice.exception.exceptions.IsNoMoreFlashcardsError;
 import com.learnwords.deckservice.exception.exceptions.SessionFinishedException;
 import com.learnwords.deckservice.service.*;
 import com.learnwords.deckservice.service.algorithm.AlgorithmFactory;
@@ -21,6 +22,7 @@ import com.learnwords.deckservice.service.learningStrategy.LearningStrategy;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
 @Slf4j
@@ -65,7 +67,7 @@ public class StudyFlowServiceImpl implements StudyFlowService {
                 .orElseThrow(() -> new IllegalStateException("No strategy found for algorithm: " + deckEnrollment.getPreferredAlgorithm()));
 
         return strategy.recommendNext(sessionFlashcards, userId)
-                .orElseThrow(() -> new SessionFinishedException("No more flashcards to learn in this session"));
+                .orElseThrow(() -> new IsNoMoreFlashcardsError());
     }
 
     @Override
@@ -82,9 +84,12 @@ public class StudyFlowServiceImpl implements StudyFlowService {
         boolean isCorrect = answerValidator.validate(flashcardDto, userAnswer, currentState.getStep());
         AlgorithmResult<AlgorithmState> result = algorithm.processAnswer(currentState, isCorrect);
         userProgressService.updateProgress(progress, result, isCorrect);
+        long responseTimeMs = Duration.between(progress.lastShownAt(), Instant.now()).toMillis();
 
 
-
+        if(isCorrect){
+            sessionService.recordCorrectAnswer(sessionId, userId);
+        }
         FlashcardAnsweredEvent event = FlashcardAnsweredEvent.builder()
                 .eventTime(Instant.now())
                 .userId(userId)
@@ -93,6 +98,7 @@ public class StudyFlowServiceImpl implements StudyFlowService {
                 .flashcardId(flashcardId)
                 .correct(isCorrect)
                 .receivedAt(Instant.now())
+                .timeTaken(Duration.ofMillis(responseTimeMs))
                 .build();
         eventProducer.send(KafkaTopic.FLASHCARD_ANSWERED, event);
 
@@ -101,7 +107,5 @@ public class StudyFlowServiceImpl implements StudyFlowService {
                 result
         );
     }
-
-
 }
 

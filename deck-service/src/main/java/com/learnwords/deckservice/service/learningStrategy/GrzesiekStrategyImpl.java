@@ -18,6 +18,7 @@ import com.learnwords.deckservice.service.algorithm.state.GrzesiekState;
 import com.learnwords.deckservice.service.algorithm.step.GrzesiekStep;
 import com.learnwords.deckservice.service.grpcClient.VocabularyGrpcClient;
 import com.learnwords.vocabulary.v1.Word;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
@@ -31,7 +32,7 @@ public final class GrzesiekStrategyImpl extends AbstractStrategyRecommender impl
     private static final double THRESHOLD = 0.2;
     private static final int QUIZ_OPTION_COUNT = 4;
 
-    public GrzesiekStrategyImpl(UserProgressService userProgressService, VocabularyGrpcClient vocabularyGrpcClient, AbstractAlgorithm algorithm, GrzesiekAlgorithm grzesiekAlgorithm) {
+    public GrzesiekStrategyImpl(UserProgressService userProgressService, VocabularyGrpcClient vocabularyGrpcClient, @Qualifier("grzesiekAlgorithm") AbstractAlgorithm algorithm, GrzesiekAlgorithm grzesiekAlgorithm) {
         super(userProgressService, vocabularyGrpcClient, algorithm);
         this.grzesiekAlgorithm = grzesiekAlgorithm;
     }
@@ -81,6 +82,16 @@ public final class GrzesiekStrategyImpl extends AbstractStrategyRecommender impl
                     GrzesiekStep.SHOW_LANGUAGE_TO,
                     GrzesiekStep.WRITE_LANGUAGE_FROM);
         }
+        if (ratio(howMany, totalCards, GrzesiekStep.WRITE_LANGUAGE_TO) < THRESHOLD) {
+            return pick(eligibleCards, eligibleProgress,
+                    GrzesiekStep.SHOW_BOTH,
+                    GrzesiekStep.QUIZ,
+                    GrzesiekStep.SHOW_LANGUAGE_FROM,
+                    GrzesiekStep.SHOW_LANGUAGE_TO,
+                    GrzesiekStep.WRITE_LANGUAGE_FROM,
+                    GrzesiekStep.WRITE_LANGUAGE_TO
+            );
+        }
 
         return pick(eligibleCards, eligibleProgress,
                 GrzesiekStep.SHOW_BOTH,
@@ -103,6 +114,7 @@ public final class GrzesiekStrategyImpl extends AbstractStrategyRecommender impl
 
 
         InteractionType type;
+        //Note bierze czasmi drugie tlumaczenie slowka jako opcje do quziu
         List<String> quizOptions = generateQuizOptions(content, session.getSessionFlashcards().stream()
                 .map(SessionFlashcard::getFlashcard)
                 .toList());
@@ -110,8 +122,16 @@ public final class GrzesiekStrategyImpl extends AbstractStrategyRecommender impl
         if (state.getStep() == GrzesiekStep.QUIZ) {
             type = InteractionType.QUIZ_CHOICE;
         } else if (state.getStep() == GrzesiekStep.WRITE_LANGUAGE_TO) {
-            type = InteractionType.TYPING_INPUT;
-        } else {
+            type = InteractionType.TYPING_INPUT_TO;
+        } else if (state.getStep() == GrzesiekStep.WRITE_LANGUAGE_FROM) {
+            type = InteractionType.TYPING_INPUT_FROM;
+        }
+        else if (state.getStep() == GrzesiekStep.SHOW_LANGUAGE_FROM) {
+            type = InteractionType.REMEMBER_CHECK_FROM;
+        } else if (state.getStep() == GrzesiekStep.SHOW_LANGUAGE_TO) {
+            type = InteractionType.REMEMBER_CHECK_TO;
+        }
+        else {
             type = InteractionType.PRESENTATION;
         }
 
@@ -129,6 +149,7 @@ public final class GrzesiekStrategyImpl extends AbstractStrategyRecommender impl
     }
 
     private double ratio(Map<GrzesiekStep, Long> map, int total, GrzesiekStep step) {
+        if (total <= 0) return 0.0;
         return (double) map.getOrDefault(step, 0L) / total;
     }
 
