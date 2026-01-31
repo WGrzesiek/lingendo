@@ -13,8 +13,12 @@ import com.learnwords.deckservice.repository.UserFlashcardProgressRepository;
 import com.learnwords.deckservice.service.algorithm.AlgorithmFactory;
 import com.learnwords.deckservice.service.algorithm.GrzesiekAlgorithm;
 import com.learnwords.deckservice.service.utils.DeckUtils;
+import io.qameta.allure.Description;
 import io.qameta.allure.Epic;
 import io.qameta.allure.Feature;
+import io.qameta.allure.Severity;
+import io.qameta.allure.SeverityLevel;
+import io.qameta.allure.Story;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -142,6 +146,10 @@ public class UserProgressServiceTest {
     }
 
     @Test
+    @Story("Inicjalizacja postępu słówka")
+    @DisplayName("Inicjalizuje postęp słówka w talii")
+    @Description("Tworzy i zapisuje początkowy stan postępu nauki dla nowego słówka w talii")
+    @Severity(SeverityLevel.CRITICAL)
     public void initialFlashcardState_shouldPersist(){
         when(deckEnrollmentRepository.findById(DECK_ID)).thenReturn(Optional.of(deckEnrollment));
         when(algorithmFactory.get(deckEnrollment.getPreferredAlgorithm())).thenReturn(new GrzesiekAlgorithm());
@@ -159,6 +167,10 @@ public class UserProgressServiceTest {
     }
 
     @Test
+    @Story("Inicjalizacja postępu słówka")
+    @DisplayName("Rzuca wyjątek gdy brak zapisania do talii")
+    @Description("Rzuca DeckNotFoundException gdy użytkownik nie jest zapisany do talii")
+    @Severity(SeverityLevel.NORMAL)
     public void initialFlashcardState_shouldThrowException_whenDeckEnrollmentNotFound(){
         when(deckEnrollmentRepository.findById(DECK_ID)).thenReturn(Optional.empty());
         assertThatThrownBy(() -> {
@@ -168,6 +180,10 @@ public class UserProgressServiceTest {
     }
 
     @Test
+    @Story("Inicjalizacja postępu słówka")
+    @DisplayName("Inicjalizuje postęp nawet gdy już zapisany")
+    @Description("Pozwala na ponowną inicjalizację postępu dla istniejącego zapisu")
+    @Severity(SeverityLevel.NORMAL)
     public void initialFlashcardState_shouldPresist_whenDeckIdAlreadyEnrolled(){
         when(deckEnrollmentRepository.findById(DECK_ID)).thenReturn(Optional.of(deckEnrollment));
         when(algorithmFactory.get(deckEnrollment.getPreferredAlgorithm())).thenReturn(new GrzesiekAlgorithm());
@@ -186,6 +202,10 @@ public class UserProgressServiceTest {
     }
 
     @Test
+    @Story("Resetowanie postępu")
+    @DisplayName("Resetuje cały postęp dla zapisu do talii")
+    @Description("Przywraca stan początkowy dla wszystkich słówek w ramach zapisu użytkownika do talii")
+    @Severity(SeverityLevel.CRITICAL)
     public void resetAllProgressForEnrollment_shouldDeleteAllUserFlashcardProgresses() {
         when(algorithmFactory.get(deckEnrollment.getPreferredAlgorithm()))
                 .thenReturn(new GrzesiekAlgorithm());
@@ -212,6 +232,10 @@ public class UserProgressServiceTest {
     }
 
     @Test
+    @Story("Pobieranie postępu")
+    @DisplayName("Pobiera stronicowaną listę postępów")
+    @Description("Zwraca listę DTO z postępem nauki dla danego zapisu z uwzględnieniem stronicowania")
+    @Severity(SeverityLevel.NORMAL)
     public void getProgressForEnrollment_shouldReturnProgressList(){
 
         Pageable pageable = PageRequest.of(
@@ -245,6 +269,10 @@ public class UserProgressServiceTest {
     }
 
     @Test
+    @Story("Pobieranie postępu do powtórek")
+    @DisplayName("Pobiera słówka do powtórki")
+    @Description("Zwraca tylko słówka w fazie powtórki (REVIEW) dla danego zapisu")
+    @Severity(SeverityLevel.CRITICAL)
     void getReviewProgressForEnrollment_shouldReturnPagedDtos() {
         // given
         var progress = UserFlashcardProgress.builder()
