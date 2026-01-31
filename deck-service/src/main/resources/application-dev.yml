@@ -8,16 +8,20 @@ spring:
     username: ${DB_POSTGRESQL_USER:admin}
     password: ${DB_POSTGRESQL_PASSWORD:adminpassword}
 
-    datasource:
-      url: ${DATASOURCE_URL:jdbc:postgresql://postgres:5432/outbox}
-      username: ${DATASOURCE_USERNAME:admin}
-      password: ${DATASOURCE_PASSWORD:adminpassword}
+  jpa:
+    hibernate:
+      ddl-auto: update
+
+  flyway:
+    enabled: false
 
   kafka:
     consumer:
-      bootstrap-servers: ${KAFKA_BOOTSTRAP:kafka:9092}
+      bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:kafka:9092}
+      auto-offset-reset: ${KAFKA_AUTO_OFFSET_RESET:earliest}
+      group-id: ${KAFKA_GROUP:deck-service-group}
     producer:
-      bootstrap-servers: ${KAFKA_BOOTSTRAP:kafka:9092}
+      bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:kafka:9092}
 
 server:
   port: ${SERVER_PORT:8814}
@@ -27,7 +31,34 @@ grpc:
     vocabulary-read:
       address: ${GRPC_VOCAB_READ_ADDRESS:static://vocabulary-read-service:9099}
       negotiationType: ${GRPC_VOCAB_READ_NEGOTIATION:PLAINTEXT}
+    auth:
+      address: ${GRPC_CLIENT_AUTH_ADDRESS:static://auth-service:9098}
+      negotiationType: ${GRPC_CLIENT_AUTH_NEGOTIATIONTYPE:PLAINTEXT}
+    user-relations:
+      address: ${GRPC_USER_RELATIONS_ADDRESS:static://user-relations-service:9097}
+      negotiationType: ${GRPC_USER_RELATIONS_NEGOTIATION:PLAINTEXT}
+    student-groups:
+      address: ${GRPC_STUDENT_GROUPS_ADDRESS:static://student-groups-service:9096}
+      negotiationType: ${GRPC_STUDENT_GROUPS_NEGOTIATION:PLAINTEXT}
 
 logging:
+  level:
+    root: INFO
+    org.springframework: INFO
+    org.springframework.kafka: INFO
+    org.apache.kafka: INFO
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql: TRACE
+    org.postgresql: INFO
+    io.grpc: INFO
+
   logstash:
     host: ${LOGSTASH_HOST:logstash-1}
+
+management:
+  tracing:
+    sampling:
+      probability: 1.0
+  zipkin:
+    tracing:
+      endpoint: ${ZIPKIN_ENDPOINT:http://zipkin:9411/api/v2/spans}

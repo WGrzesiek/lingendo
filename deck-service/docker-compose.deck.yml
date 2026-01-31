@@ -4,29 +4,25 @@ services:
   deck-service:
     image: ${IMAGE_NAME:-deck-service}:${IMAGE_TAG:-dev}
     container_name: deck-service
-    environment:
-      # Spring profile
-      SPRING_PROFILES_ACTIVE: ${PROFILE:-dev}
+    restart: unless-stopped
 
-      # HTTP
+    environment:
+      SPRING_PROFILES_ACTIVE: ${PROFILE:-dev}
       SERVER_PORT: ${PORT:-8814}
 
-      # DB
       DB_POSTGRESQL_HOST: ${DB_POSTGRESQL_HOST:-postgres}
       DB_POSTGRESQL_PORT: ${DB_POSTGRESQL_PORT:-5432}
       DB_POSTGRESQL_NAME: ${DB_POSTGRESQL_NAME:-deck}
       DB_POSTGRESQL_USER: ${DB_POSTGRESQL_USER:-admin}
       DB_POSTGRESQL_PASSWORD: ${DB_POSTGRESQL_PASSWORD:-adminpassword}
 
-      # Kafka
-      KAFKA_BOOTSTRAP: ${KAFKA_BOOTSTRAP:-kafka:9092}
+      KAFKA_BOOTSTRAP_SERVERS: ${KAFKA_BOOTSTRAP_SERVERS:-kafka:9092}
       KAFKA_GROUP: ${KAFKA_GROUP:-deck-service-group}
+      KAFKA_AUTO_OFFSET_RESET: ${KAFKA_AUTO_OFFSET_RESET:-earliest}
 
-      # gRPC client -> vocabulary-read-service
       GRPC_VOCAB_READ_ADDRESS: ${GRPC_VOCAB_READ_ADDRESS:-static://vocabulary-read-service:9099}
       GRPC_VOCAB_READ_NEGOTIATION: ${GRPC_VOCAB_READ_NEGOTIATION:-PLAINTEXT}
 
-      # gRPC client -> user-service (auth, user-relations, student-groups)
       GRPC_CLIENT_AUTH_ADDRESS: ${GRPC_CLIENT_AUTH_ADDRESS:-static://user-service:9098}
       GRPC_CLIENT_AUTH_NEGOTIATIONTYPE: ${GRPC_CLIENT_AUTH_NEGOTIATIONTYPE:-PLAINTEXT}
       GRPC_USER_RELATIONS_ADDRESS: ${GRPC_USER_RELATIONS_ADDRESS:-static://user-service:9098}
@@ -34,18 +30,23 @@ services:
       GRPC_STUDENT_GROUPS_ADDRESS: ${GRPC_STUDENT_GROUPS_ADDRESS:-static://user-service:9098}
       GRPC_STUDENT_GROUPS_NEGOTIATION: ${GRPC_STUDENT_GROUPS_NEGOTIATION:-PLAINTEXT}
 
-      # Log levels / JVM (opcjonalnie)
-      LOG_LEVEL_KAFKA: ${LOG_LEVEL_KAFKA:-INFO}
-      LOG_LEVEL_HIBERNATE: ${LOG_LEVEL_HIBERNATE:-INFO}
-      LOG_LEVEL_POSTGRESQL: ${LOG_LEVEL_POSTGRESQL:-INFO}
-      JAVA_OPTS: ${JAVA_OPTS:-}
       LOGSTASH_HOST: ${LOGSTASH_HOST:-logstash}
+
+
+      JAVA_OPTS: ${JAVA_OPTS:-}
 
     ports:
       - "${PORT:-8814}:${PORT:-8814}"
 
-    # Jeśli potrzebujesz zależności na tej samej sieci
-    networks: [learnwords-net]
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:${PORT:-8814}/actuator/health/readiness | grep -q '\"status\"\\s*:\\s*\"UP\"'"]
+      interval: 10s
+      timeout: 3s
+      retries: 12
+      start_period: 30s
+
+    networks:
+      - learnwords-net
 
 networks:
   learnwords-net:
