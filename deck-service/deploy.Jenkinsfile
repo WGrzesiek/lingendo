@@ -7,7 +7,7 @@ pipeline {
     parameters {
         string(name: 'ACTION', defaultValue: 'up', description: 'Dostępne akcje: up, down, restart')
         string(name: 'BRANCH_NAME', defaultValue: 'main', description: 'Nazwa brancha z docker-compose.yml')
-        string(name: 'SPRING_PROFILES_ACTIVE', defaultValue: 'dev', description: 'Aktywne profile Springa')
+        string(name: 'PROFILE', defaultValue: 'dev', description: 'Aktywne profile Springa')
     }
     stages {
         stage('Compose Down') {
@@ -45,7 +45,7 @@ pipeline {
             steps {
                 sh """
                     docker compose -f docker-compose.deck.yml down
-                    IMAGE_NAME=${IMAGE_NAME} IMAGE_TAG=${IMAGE_TAG} SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE} docker compose -f docker-compose.deck.yml up -d
+                    IMAGE_NAME=${IMAGE_NAME} IMAGE_TAG=${IMAGE_TAG} PROFILE=${PROFILE} docker compose -f docker-compose.deck.yml up -d
                 """
             }
         }
