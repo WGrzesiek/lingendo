@@ -36,7 +36,7 @@ public class AbstractStateTest {
     public void shouldStayAtMaxStepWhenNextCalled(){
         GrzesiekState testState = new GrzesiekState(GrzesiekStep.WRITE_LANGUAGE_TO);
         GrzesiekState nextState = testState.next();
-        assertEquals(GrzesiekStep.WRITE_LANGUAGE_TO, nextState.getStep());
+        assertEquals(GrzesiekStep.MAX_LEVEL, nextState.getStep());
     }
 
     @Test
@@ -112,6 +112,6 @@ public class AbstractStateTest {
         assertEquals(GrzesiekStep.WRITE_LANGUAGE_TO, state.getStep());
 
         state = state.next();
-        assertEquals(GrzesiekStep.WRITE_LANGUAGE_TO, state.getStep());
+        assertEquals(GrzesiekStep.MAX_LEVEL, state.getStep());
     }
 }
