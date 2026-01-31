@@ -39,7 +39,7 @@ services:
       - "${PORT:-8814}:${PORT:-8814}"
 
     healthcheck:
-      test: ["CMD-SHELL", "wget -qO- http://localhost:${PORT:-8814}/actuator/health/readiness | grep -q '\"status\"\\s*:\\s*\"UP\"'"]
+      test: ["CMD-SHELL", "wget -qO- http://deck-service:${PORT:-8814}/actuator/health/readiness | grep -q '\"status\"\\s*:\\s*\"UP\"'"]
       interval: 10s
       timeout: 3s
       retries: 12
