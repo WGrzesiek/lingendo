@@ -2,7 +2,7 @@ pipeline {
     agent { label 'deploy' }
     parameters {
         string(name: 'BRANCH_NAME', defaultValue: 'main', description: 'Nazwa brancha z docker-compose.yml')
-        string(name: 'CONNECTOR_JSON_PATH', defaultValue: 'connector_outbox.json', description: 'Ścieżka do pliku JSON z konfiguracją konektora')
+        string(name: 'CONNECTOR_JSON_PATH', defaultValue: 'connector_outbox_AI.json', description: 'Ścieżka do pliku JSON z konfiguracją konektora AI')
         string(name: 'CONNECTOR_METHOD', defaultValue: 'POST', description: 'Metoda HTTP: POST (pierwsze uruchomienie) lub PUT (aktualizacja)')
         string(name: 'TARGET_HOST', defaultValue: '192.168.23.9', description: 'Adres IP maszyny docelowej (staging/prod)')
     }
@@ -18,22 +18,22 @@ pipeline {
                 )
             }
         }
-        stage('Debezium Connector') {
+        stage('Debezium Connector AI') {
             steps {
                 script {
                     if (params.CONNECTOR_METHOD == 'POST') {
-                        echo "Tworzenie connectora (POST) na ${params.TARGET_HOST}"
+                        echo "Tworzenie connectora AI (POST) na ${params.TARGET_HOST}"
                         sh """
                             curl -X POST -H 'Content-Type: application/json' \
                                 --data-binary @${params.CONNECTOR_JSON_PATH} \
                                 http://${params.TARGET_HOST}:8083/connectors
                         """
                     } else {
-                        echo "Aktualizacja connectora (PUT) na ${params.TARGET_HOST}"
+                        echo "Aktualizacja connectora AI (PUT) na ${params.TARGET_HOST}"
                         sh """
                             curl -X PUT -H 'Content-Type: application/json' \
                                 --data-binary @${params.CONNECTOR_JSON_PATH} \
-                                http://${params.TARGET_HOST}:8083/connectors/outbox-connector/config
+                                http://${params.TARGET_HOST}:8083/connectors/outbox-connector-ai/config
                         """
                     }
                 }
@@ -45,7 +45,7 @@ pipeline {
             echo 'Pipeline failed!'
         }
         success {
-            echo 'Connector wysłany pomyślnie!'
+            echo 'Connector AI wysłany pomyślnie!'
         }
     }
 }
