@@ -1,6 +1,3 @@
-server:
-  port: ${SERVER_PORT:8812}
-
 spring:
   config:
     activate:
@@ -15,11 +12,9 @@ spring:
     hibernate:
       ddl-auto: ${HIBERNATE_DDL_AUTO:none}
 
-  kafka:
-    producer:
-      bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS}
-    consumer:
-      bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS}
+  flyway:
+    enabled: true
+    validate-on-migrate: true
 
   security:
     oauth2:
@@ -27,12 +22,33 @@ spring:
         jwt:
           jwk-set-uri: ${SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI}
 
+  kafka:
+    consumer:
+      bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS}
+      auto-offset-reset: ${KAFKA_AUTO_OFFSET_RESET:latest}
+      group-id: ${KAFKA_GROUP:user-service-group}
+    producer:
+      bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS}
+
+server:
+  port: ${SERVER_PORT:8812}
+
 grpc:
   server:
-    port: ${GRPC_PORT}
+    port: ${GRPC_PORT:9098}
     address: 0.0.0.0
     reflectionServiceEnabled: true
 
 logging:
   level:
     root: INFO
+  logstash:
+    host: ${LOGSTASH_HOST}
+
+management:
+  tracing:
+    sampling:
+      probability: ${TRACING_PROBABILITY:0.1}
+  zipkin:
+    tracing:
+      endpoint: ${ZIPKIN_ENDPOINT}
