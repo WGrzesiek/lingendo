@@ -1,0 +1,47 @@
+spring:
+  config:
+    activate:
+      on-profile: dev
+
+  datasource:
+    url: ${CLICKHOUSE_URL:jdbc:clickhouse://clickhouse:8123/analytics}
+    username: ${CLICKHOUSE_USER:wawrzen}
+    password: ${CLICKHOUSE_PASSWORD:Ubuntu98}
+    driver-class-name: com.clickhouse.jdbc.ClickHouseDriver
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+
+  flyway:
+    enabled: false
+
+  kafka:
+    consumer:
+      bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:kafka:9092}
+      auto-offset-reset: ${KAFKA_AUTO_OFFSET_RESET:earliest}
+      group-id: ${KAFKA_GROUP:statistics-service-group}
+    producer:
+      bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:kafka:9092}
+
+server:
+  port: ${SERVER_PORT:8799}
+
+logging:
+  level:
+    root: ${LOG_LEVEL_ROOT:INFO}
+    io.debezium: ${LOG_LEVEL_DEBEZIUM:INFO}
+    io.debezium.connector.postgresql: ${LOG_LEVEL_DEBEZIUM_PG:INFO}
+    org.apache.kafka: ${LOG_LEVEL_KAFKA:INFO}
+    org.hibernate: ${LOG_LEVEL_HIBERNATE:INFO}
+    org.postgresql: ${LOG_LEVEL_POSTGRESQL:INFO}
+  logstash:
+    host: ${LOGSTASH_HOST:logstash-1}
+
+management:
+  tracing:
+    sampling:
+      probability: 1.0
+  zipkin:
+    tracing:
+      endpoint: ${ZIPKIN_ENDPOINT:http://zipkin:9411/api/v2/spans}
