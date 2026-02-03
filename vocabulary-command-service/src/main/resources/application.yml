@@ -1,31 +1,26 @@
 spring:
   application:
-    name: ${SPRING_APPLICATION_NAME:vocabulary-command-service}
+    name: vocabulary-command-service
 
   jpa:
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
+
   flyway:
-    enabled: true
     locations: classpath:db/migration
     baseline-on-migrate: true
+
   kafka:
     producer:
-      bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:127.0.0.1:9092}
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
     consumer:
-      bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:127.0.0.1:9092}
-      group-id: ${KAFKA_GROUP_ID:learnwords-group}
-      auto-offset-reset: ${KAFKA_AUTO_OFFSET_RESET:earliest}
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       value-deserializer: org.springframework.kafka.support.serializer.ErrorHandlingDeserializer
       properties:
         spring.deserializer.value.delegate.class: org.springframework.kafka.support.serializer.JsonDeserializer
         spring.json.trusted.packages: "*"
-server:
-  port: ${SERVER_PORT:8810}
 
 springdoc:
   api-docs:
@@ -33,15 +28,6 @@ springdoc:
   swagger-ui:
     enabled: false
 
-logging:
-  level:
-    org.apache.kafka: ${LOG_LEVEL_KAFKA:INFO}
-    io.debezium: ${LOG_LEVEL_DEBEZIUM:INFO}
-    io.debezium.connector.postgresql: ${LOG_LEVEL_DEBEZIUM_PG:INFO}
-    org.mongodb: ${LOG_LEVEL_MONGO:INFO}
-    org.springframework.data.mongodb: ${LOG_LEVEL_SDMONGO:INFO}
-  logstash:
-    host: ${LOGSTASH_HOST:localhost}
 management:
   endpoints:
     web:
@@ -49,10 +35,6 @@ management:
         include: health,info,prometheus
   endpoint:
     health:
+      probes:
+        enabled: true
       show-details: always
-  zipkin:
-    tracing:
-      endpoint: http://zipkin:9411/api/v2/spans
-  tracing:
-    sampling:
-      probability: 1

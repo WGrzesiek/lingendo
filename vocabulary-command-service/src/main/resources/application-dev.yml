@@ -7,15 +7,21 @@ spring:
     url: ${DATASOURCE_URL:jdbc:postgresql://postgres:5432/outbox}
     username: ${DATASOURCE_USERNAME:admin}
     password: ${DATASOURCE_PASSWORD:adminpassword}
+
   jpa:
     hibernate:
       ddl-auto: ${HIBERNATE_DDL_AUTO:update}
 
+  flyway:
+    enabled: true
+
   kafka:
     consumer:
-      bootstrap-servers: ${KAFKA_BOOTSTRAP:kafka:9092}
+      bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:kafka:9092}
+      group-id: ${KAFKA_GROUP:vocabulary-command-group}
+      auto-offset-reset: ${KAFKA_AUTO_OFFSET_RESET:earliest}
     producer:
-      bootstrap-servers: ${KAFKA_BOOTSTRAP:kafka:9092}
+      bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:kafka:9092}
 
 server:
   port: ${SERVER_PORT:8810}
@@ -23,3 +29,18 @@ server:
 logging:
   level:
     root: DEBUG
+    org.apache.kafka: ${LOG_LEVEL_KAFKA:INFO}
+    io.debezium: ${LOG_LEVEL_DEBEZIUM:INFO}
+    io.debezium.connector.postgresql: ${LOG_LEVEL_DEBEZIUM_PG:INFO}
+    org.mongodb: ${LOG_LEVEL_MONGO:INFO}
+    org.springframework.data.mongodb: ${LOG_LEVEL_SDMONGO:INFO}
+  logstash:
+    host: ${LOGSTASH_HOST:logstash}
+
+management:
+  tracing:
+    sampling:
+      probability: 1.0
+  zipkin:
+    tracing:
+      endpoint: ${ZIPKIN_ENDPOINT:http://zipkin:9411/api/v2/spans}
