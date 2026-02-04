@@ -426,6 +426,7 @@
         <module>../user-service</module>
         <module>../deck-service</module>
         <module>../proto-shared</module>
+        <module>../statistics-service</module>
     </modules>
 
     <build>
