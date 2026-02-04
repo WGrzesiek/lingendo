@@ -16,7 +16,7 @@ services:
       # MongoDB
       DB_MONGODB_HOST: ${DB_MONGODB_HOST:-mongodb}
       DB_MONGODB_PORT: ${DB_MONGODB_PORT:-27017}
-      DB_MONGODB_NAME: ${DB_MONGODB_NAME:-vocabulary-read}
+      DB_MONGODB_NAME: ${DB_MONGODB_NAME:-vocabulary-command-service}
       DB_MONGODB_USER: ${DB_MONGODB_USER:-User}
       DB_MONGODB_PASSWORD: ${DB_MONGODB_PASSWORD:-password}
 

@@ -7,7 +7,7 @@ spring:
     mongodb:
       host: ${DB_MONGODB_HOST:mongodb}
       port: ${DB_MONGODB_PORT:27017}
-      database: ${DB_MONGODB_NAME:vocabulary-read}
+      database: ${DB_MONGODB_NAME:vocabulary-command-service}
       username: ${DB_MONGODB_USER:User}
       password: ${DB_MONGODB_PASSWORD:password}
 
