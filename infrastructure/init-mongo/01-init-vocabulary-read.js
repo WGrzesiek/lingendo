@@ -1,15 +1,16 @@
 // Inicjalizacja MongoDB dla vocabulary-read-service
 // Skrypt wykonywany przy pierwszym uruchomieniu kontenera
 
-db = db.getSiblingDB("vocabulary-read");
+db = db.getSiblingDB("vocabulary-command-service");
 
 db.createUser({
   user: "User",
   pwd: "password",
-  roles: [{ role: "readWrite", db: "vocabulary-read" }],
+  roles: [{ role: "readWrite", db: "vocabulary-command-service" }],
 });
 
-db.createCollection("vocabularies");
+db.createCollection("sentence");
+db.createCollection("vocabulary");
 
 db.vocabularies.createIndex({ deckId: 1 });
 db.vocabularies.createIndex({ userId: 1 });

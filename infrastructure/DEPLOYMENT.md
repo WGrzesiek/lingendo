@@ -11,12 +11,12 @@
 7. [Krok 5: Debezium Connect](#krok-5-debezium-connect)
 8. [Krok 6: Utworzenie konektorów](#krok-6-utworzenie-konektorów)
 9. [Krok 7: Serwisy backendowe](#krok-7-serwisy-backendowe)
-10. [Krok 8: API Gateway](#krok-8-api-gateway)
-11. [Krok 9: Frontend](#krok-9-frontend)
-12. [Krok 10: Nginx](#krok-10-nginx)
-13. [Krok 11: Monitoring (opcjonalnie)](#krok-11-monitoring-opcjonalnie)
-14. [Krok 12: ELK Stack (opcjonalnie)](#krok-12-elk-stack-opcjonalnie)
-15. [Weryfikacja](#weryfikacja)
+10. [Krok 8: Koog Service (AI)](#krok-8-koog-service-ai---opcjonalnie)
+11. [Krok 9: API Gateway](#krok-9-api-gateway)
+12. [Krok 10: Frontend](#krok-10-frontend)
+13. [Krok 11: Nginx](#krok-11-nginx)
+14. [Krok 12: Monitoring (opcjonalnie)](#krok-12-monitoring-opcjonalnie)
+15. [Krok 13: ELK Stack (opcjonalnie)](#krok-13-elk-stack-opcjonalnie)
 16. [Troubleshooting](#troubleshooting)
 
 ---
@@ -116,8 +116,8 @@ docker compose -f docker-compose.db.yml up -d
 **Co zostanie utworzone automatycznie:**
 
 - PostgreSQL: bazy `outbox`, `user_management`, `deck`, `koog` + włączony `wal_level=logical`
-- MongoDB: baza `vocabulary-read` z użytkownikiem
-- ClickHouse: baza `analytics` z tabelami
+- MongoDB: baza `vocabulary-command-service` z użytkownikiem
+- ClickHouse: baza `analytics` (tabele tworzy Flyway)
 
 ---
 
@@ -410,7 +410,26 @@ docker exec clickhouse clickhouse-client --query "DROP TABLE IF EXISTS analytics
 
 ---
 
-## Krok 8: API Gateway
+## Krok 8: Koog Service (AI) - opcjonalnie
+
+Serwis AI do generowania przykładowych zdań. Wymaga klucza OpenAI API.
+
+> ⚠️ **Klucz OpenAI API:** Aby uzyskać klucz, skontaktuj się z twórcą projektu.
+
+### Budowanie i uruchamianie
+
+```bash
+cd koog-service
+
+./gradlew clean build -x test
+docker build -t koog-service:local .
+OPENAI_API_KEY=sk-xxx IMAGE_NAME=koog-service IMAGE_TAG=local docker compose -f docker-compose.koog.yml up -d
+```
+> Migracje Flyway dla bazy `koog` uruchomi się automatycznie przy starcie serwisu
+
+---
+
+## Krok 9: API Gateway
 
 ```bash
 cd learnwords-backend/api-gateway
@@ -421,7 +440,7 @@ IMAGE_NAME=api-gateway IMAGE_TAG=local docker compose -f docker-compose.api-gate
 
 ---
 
-## Krok 9: Frontend
+## Krok 10: Frontend
 
 ```bash
 cd learnwords-frontend
@@ -437,7 +456,7 @@ curl -s http://localhost:3001 | head -20
 
 ---
 
-## Krok 10: Nginx
+## Krok 11: Nginx
 
 ```bash
 cd Infra
@@ -453,7 +472,7 @@ curl -s http://localhost/health
 
 ---
 
-## Krok 11: Monitoring (opcjonalnie)
+## Krok 12: Monitoring (opcjonalnie)
 
 ```bash
 cd Infra
@@ -468,7 +487,7 @@ docker compose -f docker-compose.monitoring.yml up -d
 
 ---
 
-## Krok 12: ELK Stack (opcjonalnie)
+## Krok 13: ELK Stack (opcjonalnie)
 
 ```bash
 cd Infra/docker-elk
