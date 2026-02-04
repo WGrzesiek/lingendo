@@ -2,7 +2,6 @@ import type {
   StudentStatistics,
   Deck,
   LeaderboardEntry,
-  RecentActivityItem,
 } from '@/features/dashboard';
 
 /**
@@ -61,38 +60,4 @@ export const MOCK_LEADERBOARD: LeaderboardEntry[] = [
   { rank: 3, userId: 1, username: 'jan_kowalski', points: 1250, isCurrentUser: true },
   { rank: 4, userId: 12, username: 'maria_zielinska', points: 980 },
   { rank: 5, userId: 13, username: 'tomek_lewandowski', points: 750 },
-];
-
-/**
- * Zamockowana ostatnia aktywność
- */
-export const MOCK_RECENT_ACTIVITY: RecentActivityItem[] = [
-  {
-    id: 1,
-    type: 'lesson_completed',
-    title: 'Ukończono lekcję',
-    description: 'Deutsch Basics A1 - Czasowniki',
-    timestamp: '2025-01-17T10:30:00Z',
-  },
-  {
-    id: 2,
-    type: 'streak_reached',
-    title: 'Seria 7 dni!',
-    description: 'Utrzymujesz serię nauki przez tydzień',
-    timestamp: '2025-01-17T00:00:00Z',
-  },
-  {
-    id: 3,
-    type: 'achievement_earned',
-    title: 'Nowe osiągnięcie',
-    description: 'Zdobyto odznakę "Początkujący Poliglota"',
-    timestamp: '2025-01-16T18:00:00Z',
-  },
-  {
-    id: 4,
-    type: 'deck_started',
-    title: 'Rozpoczęto nowy kurs',
-    description: 'English Business',
-    timestamp: '2025-01-15T12:00:00Z',
-  },
 ];

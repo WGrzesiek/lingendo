@@ -10,7 +10,7 @@ import { MyCourses } from '@/components/dashboard/MyCourses';
 import { QuickActions } from '@/components/dashboard/QuickActions';
 import { Leaderboard } from '@/components/dashboard/Leaderboard';
 import { RecentActivity } from '@/components/dashboard/RecentActivity';
-import { MOCK_LEADERBOARD, MOCK_RECENT_ACTIVITY } from '@/mocks/dashboard';
+import { MOCK_LEADERBOARD } from '@/mocks/dashboard';
 
 /**
  * Dashboard dla ucznia
