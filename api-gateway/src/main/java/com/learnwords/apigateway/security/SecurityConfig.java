@@ -29,11 +29,35 @@ public class SecurityConfig {
     @Value("${spring.security.oauth2.resourceserver.jwt.jwk-set-uri}")
     private String jwkSetUri;
 
+    /**
+     * Lista ścieżek publicznych - nie wymagają tokenu
+     */
+    private static final List<String> PUBLIC_PATHS = List.of(
+            "/api/v1/gateway/login",
+            "/api/v1/gateway/refresh",
+            "/api/v1/gateway/logout",
+            "/api/v1/users/register",
+            "/login",
+            "/refresh",
+            "/logout",
+            "/register",
+            "/actuator/health",
+            "/actuator/info",
+            "/actuator/prometheus",
+            "/.well-known"
+    );
+
     @Bean
     SecurityWebFilterChain securityWebFilterChain(ServerHttpSecurity http) {
         var defaultConverter = new ServerBearerTokenAuthenticationConverter();
 
         ServerAuthenticationConverter cookieFirst = exchange -> {
+            String path = exchange.getRequest().getPath().value();
+            
+            if (PUBLIC_PATHS.stream().anyMatch(path::startsWith)) {
+                return Mono.empty();
+            }
+            
             var cookie = exchange.getRequest().getCookies().getFirst("access_token");
             if (cookie != null && StringUtils.hasText(cookie.getValue())) {
                 var token = cookie.getValue();
