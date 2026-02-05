@@ -565,6 +565,34 @@ docker compose -f docker-compose.monitoring.yml up -d
 - Grafana: http://localhost:3000 (admin/admin)
 - Zipkin: http://localhost:9411
 
+### Konfiguracja Grafana
+
+**1. Dodaj Prometheus jako Data Source:**
+
+1. Zaloguj się do Grafana (admin/admin)
+2. Przejdź do **Connections** → **Data Sources** → **Add data source**
+3. Wybierz **Prometheus**
+4. W polu **URL** wpisz: `http://prometheus:9090`
+5. Kliknij **Save & Test**
+
+**2. Importuj dashboardy:**
+
+W folderze `Infra/grafana-dashboard/` znajdują się gotowe dashboardy:
+
+| Dashboard                   | Opis                                 |
+| --------------------------- | ------------------------------------ |
+| `JVM (Micrometer)`          | Metryki JVM dla serwisów Spring Boot |
+| `KAFKA Dashboard`           | Metryki Kafka (kafka-exporter)       |
+| `NGINX Prometheus exporter` | Metryki Nginx (nginx-exporter)       |
+
+Aby zaimportować dashboard:
+
+1. Przejdź do **Dashboards** → **New** → **Import**
+2. Kliknij **Upload dashboard JSON file**
+3. Wybierz plik z `Infra/grafana-dashboard/`
+4. Wybierz **Prometheus** jako data source
+5. Kliknij **Import**
+
 ---
 
 ## Krok 13: ELK Stack (opcjonalnie)
