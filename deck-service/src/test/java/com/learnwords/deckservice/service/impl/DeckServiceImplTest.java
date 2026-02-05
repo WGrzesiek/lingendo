@@ -1,5 +1,6 @@
 package com.learnwords.deckservice.service.impl;
 
+import com.learnwords.auth.v1.GetUserNameByIdResponse;
 import com.learnwords.common.KafkaTopic;
 import com.learnwords.common.events.DeckCreatedEvent;
 import com.learnwords.deckservice.dto.deck.CreateDeckDto;
@@ -10,8 +11,10 @@ import com.learnwords.deckservice.enums.*;
 import com.learnwords.deckservice.exception.exceptions.DeckWithThisNameForThisUserAlreadyExistsException;
 import com.learnwords.deckservice.exception.exceptions.UserPermissionsMissing;
 import com.learnwords.deckservice.repository.DeckRepository;
+import com.learnwords.deckservice.service.DeckAccessService;
 import com.learnwords.deckservice.service.DeckEnrollmentService;
 import com.learnwords.deckservice.service.event.GenericEventProducer;
+import com.learnwords.deckservice.service.grpcClient.UserGrcpClient;
 import io.qameta.allure.Description;
 import io.qameta.allure.Epic;
 import io.qameta.allure.Feature;
@@ -51,7 +54,10 @@ class DeckServiceImplTest {
     private DeckRepository deckRepository;
 
     @Mock
-    private DeckEnrollmentService deckEnrollmentService;
+    private DeckAccessService deckAccessService;
+
+    @Mock
+    private UserGrcpClient userGrcpClient;
 
     @Mock
     private GenericEventProducer eventProducer;
@@ -250,13 +256,16 @@ class DeckServiceImplTest {
     @Severity(SeverityLevel.NORMAL)
     void getDeckById_shouldReturnDtoWhenUserHasAccess() {
         when(deckRepository.findById(DECK_ID)).thenReturn(Optional.of(deck));
-
+        when(deckAccessService.canAccessDeck(USER_ID,DECK_ID,deck.getOwnerId())).thenReturn(true);
+        when(userGrcpClient.getUserNameById(deck.getOwnerId())).thenReturn(GetUserNameByIdResponse.newBuilder()
+                        .setUsername("testuser")
+                        .build());
         DeckDto result = deckService.getDeckById(DECK_ID, USER_ID);
 
         assertThat(result.id()).isEqualTo(DECK_ID);
         assertThat(result.name()).isEqualTo(DECK_NAME);
         assertThat(result.ownerId()).isEqualTo(USER_ID);
-        assertThat(result.deckOwner()).isEqualTo(deck.getOwner().name());
+        assertThat(result.deckOwner().name()).isEqualTo(deck.getOwner().name());
         assertThat(result.visibility()).isEqualTo(deck.getVisibility());
     }
 

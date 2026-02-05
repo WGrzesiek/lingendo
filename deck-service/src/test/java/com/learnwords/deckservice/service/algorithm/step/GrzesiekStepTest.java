@@ -15,7 +15,7 @@ public class GrzesiekStepTest {
                 () -> assertEquals(GrzesiekStep.SHOW_LANGUAGE_TO, GrzesiekStep.SHOW_LANGUAGE_FROM.nextStep()),
                 () -> assertEquals(GrzesiekStep.WRITE_LANGUAGE_FROM, GrzesiekStep.SHOW_LANGUAGE_TO.nextStep()),
                 () -> assertEquals(GrzesiekStep.WRITE_LANGUAGE_TO, GrzesiekStep.WRITE_LANGUAGE_FROM.nextStep()),
-                () -> assertEquals(GrzesiekStep.WRITE_LANGUAGE_TO, GrzesiekStep.WRITE_LANGUAGE_TO.nextStep())
+                () -> assertEquals(GrzesiekStep.MAX_LEVEL, GrzesiekStep.WRITE_LANGUAGE_TO.nextStep())
         );
     }
 
@@ -27,7 +27,7 @@ public class GrzesiekStepTest {
                 () -> assertEquals(GrzesiekStep.QUIZ, GrzesiekStep.SHOW_LANGUAGE_FROM.previousStep()),
                 () -> assertEquals(GrzesiekStep.SHOW_LANGUAGE_FROM, GrzesiekStep.SHOW_LANGUAGE_TO.previousStep()),
                 () -> assertEquals(GrzesiekStep.SHOW_LANGUAGE_TO, GrzesiekStep.WRITE_LANGUAGE_FROM.previousStep()),
-                () -> assertEquals(GrzesiekStep.WRITE_LANGUAGE_FROM, GrzesiekStep.WRITE_LANGUAGE_TO.previousStep())
+                () -> assertEquals(GrzesiekStep.MAX_LEVEL, GrzesiekStep.WRITE_LANGUAGE_TO.previousStep())
         );
     }
 
@@ -39,7 +39,7 @@ public class GrzesiekStepTest {
     @Test
     void shouldIdentifyMaxLevel() {
         assertAll(
-                () -> assertTrue(GrzesiekStep.WRITE_LANGUAGE_TO.isMaxLevel()),
+                () -> assertTrue(GrzesiekStep.MAX_LEVEL.isMaxLevel()),
                 () -> assertFalse(GrzesiekStep.SHOW_BOTH.isMaxLevel()),
                 () -> assertFalse(GrzesiekStep.QUIZ.isMaxLevel()),
                 () -> assertFalse(GrzesiekStep.SHOW_LANGUAGE_FROM.isMaxLevel()),

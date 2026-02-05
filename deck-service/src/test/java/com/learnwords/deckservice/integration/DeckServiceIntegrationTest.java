@@ -1,5 +1,6 @@
 package com.learnwords.deckservice.integration;
 
+import com.learnwords.auth.v1.GetUserNameByIdResponse;
 import com.learnwords.common.KafkaTopic;
 import com.learnwords.common.events.DeckCreatedEvent;
 import com.learnwords.deckservice.dto.deck.CreateDeckDto;
@@ -10,9 +11,11 @@ import com.learnwords.deckservice.enums.*;
 import com.learnwords.deckservice.exception.exceptions.DeckWithThisNameForThisUserAlreadyExistsException;
 import com.learnwords.deckservice.exception.exceptions.UserPermissionsMissing;
 import com.learnwords.deckservice.repository.DeckRepository;
+import com.learnwords.deckservice.service.DeckAccessService;
 import com.learnwords.deckservice.service.DeckEnrollmentService;
 import com.learnwords.deckservice.service.DeckService;
 import com.learnwords.deckservice.service.event.GenericEventProducer;
+import com.learnwords.deckservice.service.grpcClient.UserGrcpClient;
 import io.qameta.allure.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -38,8 +41,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.*;
 
 @SpringBootTest
 @Testcontainers
@@ -75,6 +77,12 @@ class DeckServiceIntegrationTest {
 
     @MockitoBean
     private DeckEnrollmentService deckEnrollmentService;
+
+    @MockitoBean
+    private DeckAccessService deckAccessService;
+
+    @MockitoBean
+    private UserGrcpClient userGrpcClient;
 
     private static final String USER_ID = "integration-user-1";
     private static final String OTHER_USER_ID = "integration-user-2";
@@ -169,6 +177,10 @@ class DeckServiceIntegrationTest {
     void getDeckById_shouldReturnDeckForOwner() {
         deckService.createDeck(USER_ID, createDeckDto);
         Deck saved = deckRepository.findAll().get(0);
+        when(deckAccessService.canAccessDeck(USER_ID,saved.getId(), saved.getOwnerId())).thenReturn(true);
+        when(userGrpcClient.getUserNameById(anyString())).thenReturn(GetUserNameByIdResponse.newBuilder()
+                .setUsername("IntegrationUser")
+                .build());
 
         DeckDto dto = deckService.getDeckById(saved.getId(), USER_ID);
 
@@ -278,37 +290,6 @@ class DeckServiceIntegrationTest {
         assertThat(updated.getDifficulty()).isEqualTo(DeckDifficulty.HARD);
     }
 
-//    @Test
-//    @Transactional
-//    @Story("Filtrowanie talii")
-//    @Severity(SeverityLevel.NORMAL)
-//    @DisplayName("Filtruje talie po widoczności i właścicielu")
-//    @Description("Zwraca tylko talie spełniające kryteria visibility i owner dla użytkownika")
-//    void getDecksByFilter_shouldReturnMatchingDecks() {
-//        deckService.createDeck(USER_ID, createDeckDto);
-//
-//        CreateDeckDto publicDeckDto = CreateDeckDto.builder()
-//                .deckName("Publiczna talia")
-//                .description(createDeckDto.getDescription())
-//                .visibility(DeckVisibility.PUBLIC)
-//                .owner(DeckOwner.COMMUNITY)
-//                .learnAlgorithm(createDeckDto.getLearnAlgorithm())
-//                .languageFrom(createDeckDto.getLanguageFrom())
-//                .languageTo(createDeckDto.getLanguageTo())
-//                .category(createDeckDto.getCategory())
-//                .difficulty(createDeckDto.getDifficulty())
-//                .howManyFlashcardsForOneSession(createDeckDto.getHowManyFlashcardsForOneSession())
-//                .build();
-//        deckService.createDeck(USER_ID, publicDeckDto);
-//
-//        List<DeckDto> result = deckService.getDecksByFilter(USER_ID, DeckVisibility.PUBLIC, DeckOwner.COMMUNITY);
-//
-//        assertThat(result).hasSize(1);
-//        DeckDto dto = result.get(0);
-//        assertThat(dto.name()).isEqualTo("Publiczna talia");
-//        assertThat(dto.visibility()).isEqualTo(DeckVisibility.PUBLIC);
-//        assertThat(dto.ownerType()).isEqualTo(DeckOwner.COMMUNITY.name());
-//    }
 
     @Test
     @Transactional

@@ -4,14 +4,25 @@ spring:
       on-profile: prod
 
   datasource:
-    url: jdbc:postgresql://${DB_POSTGRESQL_HOST}:${DB_POSTGRESQL_PORT}/${DB_POSTGRESQL_NAME}
+    url: jdbc:postgresql://${DB_POSTGRESQL_HOST}:${DB_POSTGRESQL_PORT:5432}/${DB_POSTGRESQL_NAME}
     username: ${DB_POSTGRESQL_USER}
     password: ${DB_POSTGRESQL_PASSWORD}
+
+  jpa:
+    hibernate:
+      ddl-auto: validate
+
   flyway:
+    enabled: true
     validate-on-migrate: true
+
   kafka:
     consumer:
-      bootstrap-servers: ${KAFKA_BOOTSTRAP}
+      bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS}
+      auto-offset-reset: ${KAFKA_AUTO_OFFSET_RESET:latest}
+      group-id: ${KAFKA_GROUP:deck-service-group}
+    producer:
+      bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS}
 
 server:
   port: ${SERVER_PORT:8814}
@@ -23,13 +34,31 @@ grpc:
       negotiationType: ${GRPC_VOCAB_READ_NEGOTIATION:TLS}
     auth:
       address: ${GRPC_CLIENT_AUTH_ADDRESS}
-      negotiationType: ${GRPC_CLIENT_AUTH_NEGOTIATIONTYPE:PLAINTEXT}
+      negotiationType: ${GRPC_CLIENT_AUTH_NEGOTIATIONTYPE:TLS}
     user-relations:
       address: ${GRPC_USER_RELATIONS_ADDRESS}
-      negotiationType: ${GRPC_USER_RELATIONS_NEGOTIATION:PLAINTEXT}
+      negotiationType: ${GRPC_USER_RELATIONS_NEGOTIATION:TLS}
     student-groups:
       address: ${GRPC_STUDENT_GROUPS_ADDRESS}
-      negotiationType: ${GRPC_STUDENT_GROUPS_NEGOTIATION:PLAINTEXT}
+      negotiationType: ${GRPC_STUDENT_GROUPS_NEGOTIATION:TLS}
+
 logging:
+  level:
+    root: INFO
+    org.springframework: INFO
+    org.springframework.kafka: WARN
+    org.apache.kafka: WARN
+    org.hibernate: WARN
+    org.postgresql: WARN
+    io.grpc: WARN
+
   logstash:
     host: ${LOGSTASH_HOST}
+
+management:
+  tracing:
+    sampling:
+      probability: ${TRACING_PROBABILITY:0.1}
+  zipkin:
+    tracing:
+      endpoint: ${ZIPKIN_ENDPOINT}
