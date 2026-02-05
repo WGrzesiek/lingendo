@@ -1,12 +1,14 @@
 spring:
-  data:
-    redis:
-      host: ${SPRING_DATA_REDIS_HOST:localhost}
-      port: ${SPRING_DATA_REDIS_PORT:6379}
-      password: ${SPRING_DATA_REDIS_PASSWORD:SuperSecret123}
   config:
     activate:
       on-profile: dev
+
+  data:
+    redis:
+      host: ${SPRING_DATA_REDIS_HOST:redis}
+      port: ${SPRING_DATA_REDIS_PORT:6379}
+      password: ${SPRING_DATA_REDIS_PASSWORD:SuperSecret123}
+
   security:
     oauth2:
       resourceserver:
@@ -15,13 +17,35 @@ spring:
           jwk-set-uri: ${SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI:http://api-gateway:8811/.well-known/jwks.json}
           cookie-name: ${ACCESS_TOKEN:access_token}
 
+  cloud:
+    gateway:
+      server:
+        webflux:
+          globalcors:
+            cors-configurations:
+              "[/**]":
+                allowedOrigins:
+                  - "http://localhost:8811"
+                  - "http://localhost:3000"
+                  - "http://127.0.0.1:8811"
+                  - "https://lingendo.app"
+
+server:
+  port: ${SERVER_PORT:8811}
 
 logging:
   level:
     root: DEBUG
+    org.springframework.web: ${LOG_LEVEL_WEB:INFO}
+    org.springframework.http.converter: ${LOG_LEVEL_HTTP_CONVERTER:INFO}
 
-server:
-  port: ${SERVER_PORT:8811}
+management:
+  tracing:
+    sampling:
+      probability: 1.0
+  zipkin:
+    tracing:
+      endpoint: ${ZIPKIN_ENDPOINT:http://zipkin:9411/api/v2/spans}
 
 jwt:
   private-key-location: ${JWT_PRIVATE_KEY_LOCATION:classpath:jwt/private_key.pem}
@@ -29,7 +53,6 @@ jwt:
   expire-in: ${JWT_EXPIRE_IN:86400000}
   keys:
     kid: ${KID:gateway-kid}
-
 
 grpc:
   client:
@@ -39,8 +62,5 @@ grpc:
 
 security:
   jwt:
-    issuer: "learnwords-api"
-    kid: "gateway-kid"
     access-ttl: 60m
     refresh-ttl: 30d
-#    //na czcas deva 60min a normalnie 15min

@@ -1,124 +1,108 @@
-spring:
+pring:
   application:
     name: api-gateway
-  data:
-    redis:
-      host: ${SPRING_DATA_REDIS_HOST:192.168.23.9}
-      port: ${SPRING_DATA_REDIS_PORT:6379}
-      password: ${SPRING_DATA_REDIS_PASSWORD:SuperSecret123}
-  security:
-    oauth2:
-      resourceserver:
-        jwt:
-          issuer-uri: ${SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI:http://192.168.23.9:8811}
-          jwk-set-uri: ${SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI:http://192.168.23.9:8811/.well-known/jwks.json}
-          cookie-name: ${ACCESS_TOKEN:access_token}
+
   cloud:
     gateway:
       server:
         webflux:
           routes:
+            # OpenAPI proxy (agregacja swaggerów)
             - id: koog-service
               uri: http://koog-service:7777
               predicates:
                 - Path=/openapi/koog-api
               filters:
                 - SetPath=/api-docs
+
             - id: api-gateway-service
               uri: http://api-gateway:8811
               predicates:
                 - Path=/openapi/api-gateway-service
               filters:
                 - SetPath=/v3/api-docs
+
             - id: user-service
               uri: http://user-service:8812
               predicates:
                 - Path=/openapi/user-service
               filters:
                 - SetPath=/api-docs
+
             - id: vocabulary-command-service
               uri: http://vocabulary-command-service:8810
               predicates:
                 - Path=/openapi/vocabulary-command-service
               filters:
                 - SetPath=/api-docs
+
             - id: vocabulary-read-service
               uri: http://vocabulary-read-service:8813
               predicates:
                 - Path=/openapi/vocabulary-read-service
               filters:
                 - SetPath=/api-docs
+
             - id: deck-service
               uri: http://deck-service:8814
               predicates:
                 - Path=/openapi/deck-service
               filters:
                 - SetPath=/api-docs
-            - id: koog-api
-              uri: http://koog-service:7777
-              predicates:
-                - Path=/api/v1/sentences/**
-            - id: deck-api
-              uri: http://deck-service:8814
-              predicates:
-                - Path=/api/v1/decks/**,/api/v1/sessions/**,/api/v1/flashcards/**,/api/v1/enrollments/**, /api/v1/decks-share/**
-              filters:
-                - RemoveRequestHeader=X-User-Id
-                - RemoveRequestHeader=X-Client-Id
-                - RemoveRequestHeader=X-Roles
-            - id: user-api
-              uri: http://user-service:8812
-              predicates:
-                - Path=/api/v1/users/**, /api/v1/groups/**, /api/v1/teacher-student/**, /api/v1/friends/**,
-            - id: vocabulary-command-api
-              uri: http://vocabulary-command-service:8810
-              predicates:
-                - Path=/api/v1/vocabulary/**,/api/v1/sentences/**
-            - id: vocabulary-read-api
-              uri: http://vocabulary-read-service:8813
-              predicates:
-                - Path=/api/v1/read/vocabulary/**,/api/v1/read/sentences/**
-            - id: statistics-api
-              uri: http://statistics-service:8799
-              predicates:
-                - Path=/api/v1/dashboard/**,/api/v1/courses/**, /api/v1/stats/**, /api/v1/stats/friends/**, /api/v1/dashboard/teacher/**, /api/v1/stats/groups/**
-              filters:
-                - RemoveRequestHeader=X-User-Id
-                - RemoveRequestHeader=X-Client-Id
-                - RemoveRequestHeader=X-Roles
+
             - id: statistics-service
               uri: http://statistics-service:8799
               predicates:
                 - Path=/openapi/statistics-service
               filters:
                 - SetPath=/api-docs
+
+            # API proxy
+            - id: koog-api
+              uri: http://koog-service:7777
+              predicates:
+                - Path=/api/v1/sentences/**
+
+            - id: deck-api
+              uri: http://deck-service:8814
+              predicates:
+                - Path=/api/v1/decks/**,/api/v1/sessions/**,/api/v1/flashcards/**,/api/v1/enrollments/**,/api/v1/decks-share/**
+              filters:
+                - RemoveRequestHeader=X-User-Id
+                - RemoveRequestHeader=X-Client-Id
+                - RemoveRequestHeader=X-Roles
+
+            - id: user-api
+              uri: http://user-service:8812
+              predicates:
+                - Path=/api/v1/users/**,/api/v1/groups/**,/api/v1/teacher-student/**,/api/v1/friends/**
+
+            - id: vocabulary-command-api
+              uri: http://vocabulary-command-service:8810
+              predicates:
+                - Path=/api/v1/vocabulary/**,/api/v1/sentences/**
+
+            - id: vocabulary-read-api
+              uri: http://vocabulary-read-service:8813
+              predicates:
+                - Path=/api/v1/read/vocabulary/**,/api/v1/read/sentences/**
+
+            - id: statistics-api
+              uri: http://statistics-service:8799
+              predicates:
+                - Path=/api/v1/dashboard/**,/api/v1/courses/**,/api/v1/stats/**,/api/v1/stats/friends/**,/api/v1/dashboard/teacher/**,/api/v1/stats/groups/**
+              filters:
+                - RemoveRequestHeader=X-User-Id
+                - RemoveRequestHeader=X-Client-Id
+                - RemoveRequestHeader=X-Roles
+
           globalcors:
             cors-configurations:
               "[/**]":
-                allowedOrigins:
-                  - "http://localhost:8811"
-                  - "http://localhost:3000"
-                  - "http://127.0.0.1:8811"
-                  - "https://lingendo.app"
-                allowedMethods:
-                  - GET
-                  - POST
-                  - PUT
-                  - DELETE
-                  - OPTIONS
+                allowedMethods: [GET, POST, PUT, DELETE, OPTIONS]
                 allowedHeaders: "*"
                 allowCredentials: true
                 maxAge: 3600
-server:
-  error:
-    include-message: always
-    include-binding-errors: always
-  port: ${SERVER_PORT:8811}
-
-logging:
-  level:
-    org.springframework.web: ${LOG_LEVEL_WEB:INFO}
-    org.springframework.http.converter: ${LOG_LEVEL_HTTP_CONVERTER:INFO}
 
 springdoc:
   swagger-ui:
@@ -138,6 +122,7 @@ springdoc:
         url: /openapi/statistics-service
       - name: koog-api
         url: /openapi/koog-api
+
 management:
   endpoints:
     web:
@@ -145,26 +130,9 @@ management:
         include: health,info,prometheus
   endpoint:
     health:
+      probes:
+        enabled: true
       show-details: always
-  zipkin:
-    tracing:
-      endpoint: http://zipkin:9411/api/v2/spans
-  tracing:
-    sampling:
-      probability: 1
-
-jwt:
-  private-key-location: classpath:jwt/private_key.pem
-  public-key-location: classpath:jwt/public_key.pem
-  expire-in: ${JWT_EXPIRE_IN:86400000}
-  keys:
-    kid: ${KID:gateway-kid}
-
-grpc:
-  client:
-    auth:
-      address: ${GRPC_CLIENT_AUTH_ADDRESS:static://192.168.23.9:9098}
-      negotiationType: ${GRPC_CLIENT_AUTH_NEGOTIATIONTYPE:PLAINTEXT}
 
 security:
   jwt:
