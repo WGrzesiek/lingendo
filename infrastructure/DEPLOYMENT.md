@@ -79,8 +79,7 @@ learnwords/
 │   ├── docker-elk/                 # ELK Stack
 │   ├── connector_outbox.json       # Konektor Debezium
 │   ├── connector_outbox_AI.json    # Konektor AI
-│   ├── postgresql.conf             # Konfiguracja PostgreSQL
-│   └── Makefile                    # Skróty
+│   └── postgresql.conf             # Konfiguracja PostgreSQL
 ├── learnwords-backend/
 │   ├── api-gateway/
 │   └── learnwords-services/
