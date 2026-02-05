@@ -14,10 +14,11 @@
 10. [Krok 8: Koog Service (AI)](#krok-8-koog-service-ai---opcjonalnie)
 11. [Krok 9: API Gateway](#krok-9-api-gateway)
 12. [Krok 10: Frontend](#krok-10-frontend)
-13. [Krok 11: Nginx](#krok-11-nginx)
-14. [Krok 12: Monitoring (opcjonalnie)](#krok-12-monitoring-opcjonalnie)
-15. [Krok 13: ELK Stack (opcjonalnie)](#krok-13-elk-stack-opcjonalnie)
-16. [Troubleshooting](#troubleshooting)
+13. [Krok 10a: Mobile App (Expo)](#krok-10a-mobile-app-expo---opcjonalnie)
+14. [Krok 11: Nginx](#krok-11-nginx)
+15. [Krok 12: Monitoring (opcjonalnie)](#krok-12-monitoring-opcjonalnie)
+16. [Krok 13: ELK Stack (opcjonalnie)](#krok-13-elk-stack-opcjonalnie)
+17. [Troubleshooting](#troubleshooting)
 
 ---
 
@@ -84,6 +85,8 @@ learnwords/
 │       ├── vocabulary-read-service/
 │       └── statistics-service/
 ├── learnwords-frontend/
+├── moblie/
+├── qaa
 └── koog-service/                   # Serwis AI
 ```
 
@@ -425,6 +428,7 @@ cd koog-service
 docker build -t koog-service:local .
 OPENAI_API_KEY=sk-xxx IMAGE_NAME=koog-service IMAGE_TAG=local docker compose -f docker-compose.koog.yml up -d
 ```
+
 > Migracje Flyway dla bazy `koog` uruchomi się automatycznie przy starcie serwisu
 
 ---
@@ -453,6 +457,28 @@ IMAGE_NAME=learnwords-frontend IMAGE_TAG=local docker compose -f docker-compose.
 ```bash
 curl -s http://localhost:3001 | head -20
 ```
+
+---
+
+## Krok 10a: Mobile App (Expo) - opcjonalnie
+
+Aplikacja mobilna do lokalnego testowania.
+
+```bash
+cd mobile
+npm install
+npm start
+```
+
+Po uruchomieniu pojawi się menu z opcjami:
+
+| Klawisz | Akcja                                                 |
+| ------- | ----------------------------------------------------- |
+| `i`     | Uruchom na symulatorze iOS (wymaga Xcode)             |
+| `a`     | Uruchom na emulatorze Android (wymaga Android Studio) |
+| `w`     | Uruchom w przeglądarce (web)                          |
+
+Możesz też zeskanować **QR kod** aplikacją **Expo Go** na fizycznym urządzeniu (iOS/Android).
 
 ---
 
