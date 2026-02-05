@@ -5,21 +5,19 @@ spring:
 
   data:
     mongodb:
-      database: ${DB_MONGODB_NAME:vocabulary-command-service}
       host: ${DB_MONGODB_HOST:mongodb}
+      port: ${DB_MONGODB_PORT:27017}
+      database: ${DB_MONGODB_NAME:vocabulary-command-service}
       username: ${DB_MONGODB_USER:User}
       password: ${DB_MONGODB_PASSWORD:password}
-      port: ${DB_MONGODB_PORT:27017}
-
-  jpa:
-    hibernate:
-      ddl-auto: update
 
   kafka:
     consumer:
-      bootstrap-servers: ${KAFKA_BOOTSTRAP:kafka:9092}
+      bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:kafka:9092}
+      auto-offset-reset: ${KAFKA_AUTO_OFFSET_RESET:earliest}
+      group-id: ${KAFKA_GROUP:vocabulary-read-service-group}
     producer:
-      bootstrap-servers: ${KAFKA_BOOTSTRAP:kafka:9092}
+      bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:kafka:9092}
 
 server:
   port: ${SERVER_PORT:8813}
@@ -27,9 +25,18 @@ server:
 grpc:
   server:
     port: ${GRPC_PORT:9099}
-    address: 0.0.0.0
-    reflectionServiceEnabled: true
 
 logging:
   level:
     root: DEBUG
+    org.apache.kafka: ${LOG_LEVEL_KAFKA:INFO}
+  logstash:
+    host: ${LOGSTASH_HOST:logstash}
+
+management:
+  tracing:
+    sampling:
+      probability: 1.0
+  zipkin:
+    tracing:
+      endpoint: ${ZIPKIN_ENDPOINT:http://zipkin:9411/api/v2/spans}
