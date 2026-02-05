@@ -22,6 +22,11 @@
 
 ---
 
+## Uwaga
+
+Jezeli w trakcie działania aplikacji wystapią błędy
+bardzo proszę o restart serwisów aplikacyjnych(deck-service uruchomić na końcu).
+
 ## Wymagania wstępne
 
 - **Docker** >= 24.0
@@ -410,6 +415,55 @@ docker exec clickhouse clickhouse-client --query "DROP TABLE IF EXISTS analytics
 ```
 
 > **Uwaga:** Aby sprawdzić status migracji, użyj `flyway:info` zamiast `flyway:migrate`.
+
+#### Cron dla Leaderboard Snapshot
+
+Po wykonaniu migracji Flyway (tabele są już utworzone), skonfiguruj zadanie cron aktualizujące ranking użytkowników co godzinę.
+
+**1. Utwórz plik SQL:**
+
+```bash
+cat > ~/leaderboard_snapshot.sql << 'EOF'
+INSERT INTO analytics.leaderboard_snapshot
+SELECT
+    now() AS snapshot_time,
+    row_number() OVER (ORDER BY sum(u.points) DESC) AS rank,
+    u.user_id,
+    dictGetString('analytics.usernames_dict', 'username', u.user_id) AS username,
+    sum(u.points) AS total_points,
+    countDistinctIf(d.deck_enrollment_id, d.deck_enrollment_id != '') AS finished_decks_count
+FROM analytics.user_points_total u
+LEFT JOIN analytics.deck_enrollments_finished d ON u.user_id = d.user_id
+GROUP BY u.user_id
+ORDER BY rank
+LIMIT 1000;
+EOF
+```
+
+**2. Dodaj zadanie cron:**
+
+```bash
+crontab -e
+```
+
+Dodaj linię (wykonuje się co godzinę o pełnej godzinie):
+
+```cron
+0 * * * * docker exec clickhouse clickhouse-client --query "$(cat ~/leaderboard_snapshot.sql)" >> ~/leaderboard_cron.log 2>&1
+```
+
+**3. Weryfikacja:**
+
+```bash
+# Sprawdź czy cron jest aktywny
+crontab -l
+
+# Ręczne wykonanie testu
+docker exec clickhouse clickhouse-client --query "$(cat ~/leaderboard_snapshot.sql)"
+
+# Sprawdź dane
+docker exec clickhouse clickhouse-client --query "SELECT * FROM analytics.leaderboard_snapshot ORDER BY snapshot_time DESC LIMIT 10"
+```
 
 ---
 
