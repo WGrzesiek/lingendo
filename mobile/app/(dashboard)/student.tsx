@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, Alert, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
@@ -10,7 +10,6 @@ import { MyCourses } from '@/components/dashboard/MyCourses';
 import { QuickActions } from '@/components/dashboard/QuickActions';
 import { Leaderboard } from '@/components/dashboard/Leaderboard';
 import { RecentActivity } from '@/components/dashboard/RecentActivity';
-import { MOCK_LEADERBOARD } from '@/mocks/dashboard';
 
 /**
  * Dashboard dla ucznia
@@ -18,20 +17,69 @@ import { MOCK_LEADERBOARD } from '@/mocks/dashboard';
 function StudentDashboard() {
   const { user, isUserLoading, logout, isLogoutLoading } = useAuth();
 
-  const { useStudentStatistics, useStudentActivity } = useDashboard();
+  const { useStudentStatistics, useStudentActivity, useLeaderboardOverview } = useDashboard();
   const { useMyEnrolledDecks } = useDeck();
 
-  const { data: statistics, isLoading: isStatsLoading, isError: isStatsError, } = useStudentStatistics();
+  const {
+    data: statistics,
+    isLoading: isStatsLoading,
+    isError: isStatsError,
+  } = useStudentStatistics();
   const {
     data: activityData,
     isLoading: isActivityLoading,
     isError: isActivityError,
   } = useStudentActivity();
+  const { data: leaderboardData, isLoading: isLeaderboardLoading } = useLeaderboardOverview();
   const {
     data: enrolledDecksResponse,
     isLoading: isDecksLoading,
     isError: isDecksError,
   } = useMyEnrolledDecks(0, 5);
+
+  const leaderboardEntries = useMemo(() => {
+    if (!leaderboardData) return [];
+
+    const entries = [
+      ...leaderboardData.top3.map((e) => ({
+        rank: e.rank,
+        userId: parseInt(e.userId, 10) || 0,
+        username: e.displayName,
+        points: e.points,
+        isCurrentUser: e.userId === leaderboardData.you?.userId,
+      })),
+    ];
+
+
+    if (
+      leaderboardData.you &&
+      !entries.some((e) => e.userId === parseInt(leaderboardData.you.userId, 10))
+    ) {
+      entries.push({
+        rank: leaderboardData.you.rank,
+        userId: parseInt(leaderboardData.you.userId, 10) || 0,
+        username: leaderboardData.you.displayName,
+        points: leaderboardData.you.points,
+        isCurrentUser: true,
+      });
+    }
+
+
+    if (
+      leaderboardData.aboveYou &&
+      !entries.some((e) => e.userId === parseInt(leaderboardData.aboveYou.userId, 10))
+    ) {
+      entries.push({
+        rank: leaderboardData.aboveYou.rank,
+        userId: parseInt(leaderboardData.aboveYou.userId, 10) || 0,
+        username: leaderboardData.aboveYou.displayName,
+        points: leaderboardData.aboveYou.points,
+        isCurrentUser: false,
+      });
+    }
+
+    return entries.sort((a, b) => a.rank - b.rank).slice(0, 5);
+  }, [leaderboardData]);
 
   useEffect(() => {
     if (!isUserLoading && !user) {
@@ -39,7 +87,8 @@ function StudentDashboard() {
     }
   }, [user, isUserLoading]);
 
-  const isLoading = isUserLoading || isStatsLoading || isDecksLoading || isActivityLoading;
+  const isLoading =
+    isUserLoading || isStatsLoading || isDecksLoading || isActivityLoading || isLeaderboardLoading;
   const isError = isStatsError || isDecksError || isActivityError;
 
   if (isLoading) {
@@ -70,7 +119,6 @@ function StudentDashboard() {
   }
 
   const decks = enrolledDecksResponse?.content ?? [];
-
 
   const handleDeckPress = (deck: DeckListItem) => {
     router.push(`/(dashboard)/course/${deck.enrollmentId}`);
@@ -134,14 +182,18 @@ function StudentDashboard() {
             <QuickActions onActionPress={handleQuickAction} />
           </View>
 
-          {/* Ranking - na razie mock, do podłączenia */}
+          {/* Ranking */}
           <View className="mb-6">
-            <Leaderboard entries={MOCK_LEADERBOARD} />
+            <Leaderboard entries={leaderboardEntries} />
           </View>
 
           {/* Ostatnia aktywność */}
           <View className="mb-6">
-            <RecentActivity activities={activityData} isLoading={isActivityLoading} isError={isActivityError} />
+            <RecentActivity
+              activities={activityData}
+              isLoading={isActivityLoading}
+              isError={isActivityError}
+            />
           </View>
 
           {/* Info o użytkowniku */}

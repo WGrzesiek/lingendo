@@ -23,6 +23,9 @@ export const ENDPOINTS = {
     STUDENT_LEADERBOARD: '/v1/dashboard/student/leaderboard',
     TEACHER_STATS: '/v1/dashboard/teacher/stats',
   },
+  LEADERBOARD: {
+    FULL: '/v1/leaderboard',
+  },
   DECKS: {
     LIST: '/v1/decks',
     PUBLIC: '/v1/decks/public',

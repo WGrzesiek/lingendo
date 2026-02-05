@@ -1,5 +1,5 @@
 import { Tabs } from 'expo-router';
-import { Home, Globe, BookOpen } from 'lucide-react-native';
+import { Home, Globe, BookOpen, Trophy } from 'lucide-react-native';
 
 /**
  * Layout nawigacji tab bar dla dashboard
@@ -42,6 +42,13 @@ export default function DashboardLayout() {
         options={{
           title: 'Moje kursy',
           tabBarIcon: ({ color, size }) => <BookOpen size={size} color={color} />,
+        }}
+      />
+      <Tabs.Screen
+        name="leaderboard"
+        options={{
+          title: 'Ranking',
+          tabBarIcon: ({ color, size }) => <Trophy size={size} color={color} />,
         }}
       />
 
