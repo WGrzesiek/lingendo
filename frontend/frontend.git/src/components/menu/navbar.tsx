@@ -180,13 +180,17 @@ export function Navbar() {
 
                 {user && (
                   <>
-                    <Link
-                      href={privateMenuItems[0].href}
-                      onClick={() => setOpen(false)}
-                      className="text-md font-medium"
-                    >
-                      Dashboard
-                    </Link>
+                    {/* Wszystkie elementy menu - takie same jak na desktop */}
+                    {privateMenuItems.map((item) => (
+                      <Link
+                        key={item.href}
+                        href={item.href}
+                        onClick={() => setOpen(false)}
+                        className="text-md font-medium"
+                      >
+                        {item.label}
+                      </Link>
+                    ))}
 
                     <Link
                       href="/settings"

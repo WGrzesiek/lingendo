@@ -499,7 +499,7 @@ export const CATEGORIES = deckCategoryValues.map((value) => ({
 export const learnAlgorithmValues = [
   "GRZESIEK_ALGORITHM",
   "LEITNER_ALGORITHM",
-  "TEST_ALGORITHM",
+  // "TEST_ALGORITHM",
 ] as const;
 
 export type LearnAlgorithm = (typeof learnAlgorithmValues)[number];
@@ -525,12 +525,12 @@ export const learnAlgorithmConfig: Record<
     className: "bg-amber-50 text-amber-700 border-amber-200",
     iconColor: "text-amber-700",
   },
-  TEST_ALGORITHM: {
-    label: "Tryb Testowy",
-    icon: FlaskConical,
-    className: "bg-purple-50 text-purple-700 border-purple-200",
-    iconColor: "text-purple-700",
-  },
+  // TEST_ALGORITHM: {
+  //   label: "Tryb Testowy",
+  //   icon: FlaskConical,
+  //   className: "bg-purple-50 text-purple-700 border-purple-200",
+  //   iconColor: "text-purple-700",
+  // },
 };
 
 export const LEARN_ALGORITHMS = learnAlgorithmValues.map((value) => ({
