@@ -1,29 +1,18 @@
 spring:
   application:
     name: koog-service
+
   jpa:
-    hibernate:
-      ddl-auto: validate
+    open-in-view: false
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
-    open-in-view: false
-  datasource:
-    url: jdbc:postgresql://${DB_POSTGRESQL_HOST:localhost}:${DB_POSTGRESQL_PORT:5432}/${DB_POSTGRESQL_NAME:koog}
-    username: ${DB_POSTGRESQL_USER:admin}
-    password: ${DB_POSTGRESQL_PASSWORD:adminpassword}
-    hikari:
-      maximum-pool-size: ${DB_POOL_SIZE:10}
-      minimum-idle: ${DB_POOL_MIN_IDLE:2}
-      connection-timeout: ${DB_CONNECTION_TIMEOUT:30000}
+
   flyway:
-    enabled: ${FLYWAY_ENABLED:true}
     locations: classpath:db/migration
     baseline-on-migrate: true
-    validate-on-migrate: true
 
   kafka:
-    bootstrap-servers: ${KAFKA_BOOTSTRAP:localhost:9094}
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
@@ -31,16 +20,14 @@ spring:
       properties:
         spring.json.add.type.headers: false
     consumer:
-      group-id: ${KAFKA_GROUP:koog-service-group}
-      auto-offset-reset: earliest
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       value-deserializer: org.springframework.kafka.support.serializer.ErrorHandlingDeserializer
+      auto-offset-reset: earliest
       properties:
         spring.deserializer.value.delegate.class: org.springframework.kafka.support.serializer.JsonDeserializer
         spring.json.trusted.packages: "*"
 
 server:
-  port: ${SERVER_PORT:7777}
   shutdown: graceful
 
 management:
@@ -50,46 +37,27 @@ management:
         include: health,info,prometheus,metrics
   endpoint:
     health:
-      show-details: always
       probes:
         enabled: true
+      show-details: always
   health:
     livenessState:
       enabled: true
     readinessState:
       enabled: true
-  tracing:
-    sampling:
-      probability: ${TRACING_PROBABILITY:1.0}
-    export:
-      zipkin:
-        endpoint: ${ZIPKIN_ENDPOINT:http://localhost:9411/api/v2/spans}
 
 springdoc:
   api-docs:
     path: /api-docs
   swagger-ui:
-    enabled: ${SWAGGER_ENABLED:true}
     path: /swagger-ui.html
 
 # Konfiguracja OpenAI
 openai:
-  api-key: ${OPENAI_API_KEY:}
+  api-key: ""
 
 # Konfiguracja AI
 ai:
   sentence:
-    model: ${AI_MODEL:gpt-5-mini}
-    temperature: ${AI_TEMPERATURE:0.7}
-    prompt-version: ${AI_PROMPT_VERSION:1}
-    max-sentences-per-word: ${AI_MAX_SENTENCES:3}
-
-# Logging
-logging:
-  level:
-    root: ${LOG_LEVEL_ROOT:INFO}
-    com.learnwords.koogservice: ${LOG_LEVEL_APP:INFO}
-    org.springframework.kafka: ${LOG_LEVEL_KAFKA:INFO}
-    org.hibernate: ${LOG_LEVEL_HIBERNATE:INFO}
-    org.postgresql: ${LOG_LEVEL_POSTGRESQL:INFO}
-    ai.koog: ${LOG_LEVEL_AI:INFO}
+    prompt-version: 1
+    max-sentences-per-word: 3

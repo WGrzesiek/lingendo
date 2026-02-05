@@ -1,4 +1,17 @@
 spring:
+  config:
+    activate:
+      on-profile: dev
+
+  datasource:
+    url: jdbc:postgresql://${DB_POSTGRESQL_HOST:postgres}:${DB_POSTGRESQL_PORT:5432}/${DB_POSTGRESQL_NAME:koog}
+    username: ${DB_POSTGRESQL_USER:admin}
+    password: ${DB_POSTGRESQL_PASSWORD:adminpassword}
+    hikari:
+      maximum-pool-size: ${DB_POOL_SIZE:10}
+      minimum-idle: ${DB_POOL_MIN_IDLE:2}
+      connection-timeout: ${DB_CONNECTION_TIMEOUT:30000}
+
   jpa:
     hibernate:
       ddl-auto: update
@@ -6,47 +19,46 @@ spring:
     properties:
       hibernate:
         format_sql: true
-  datasource:
-    url: jdbc:postgresql://postgres:5432/koog
-    username: admin
-    password: adminpassword
+
   flyway:
-    enabled: false
+    enabled: ${FLYWAY_ENABLED:false}
 
   kafka:
-    bootstrap-servers: kafka:9092
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:kafka:9092}
+    consumer:
+      group-id: ${KAFKA_GROUP:koog-service-group}
 
 server:
-  port: 7777
+  port: ${SERVER_PORT:7777}
 
 management:
   tracing:
+    sampling:
+      probability: ${TRACING_PROBABILITY:1.0}
     export:
       zipkin:
-        endpoint: http://zipkin:9411/api/v2/spans
+        endpoint: ${ZIPKIN_ENDPOINT:http://zipkin:9411/api/v2/spans}
 
 springdoc:
   swagger-ui:
-    enabled: true
+    enabled: ${SWAGGER_ENABLED:true}
 
-# Konfiguracja OpenAI - DEV
 openai:
   api-key: ${OPENAI_API_KEY:}
 
-# Konfiguracja AI - DEV
 ai:
   sentence:
-    model: gpt-5-mini
-    temperature: 0.7
-    prompt-version: 1
-    max-sentences-per-word: 3
+    model: ${AI_MODEL:gpt-5-mini}
+    temperature: ${AI_TEMPERATURE:0.7}
+    prompt-version: ${AI_PROMPT_VERSION:1}
+    max-sentences-per-word: ${AI_MAX_SENTENCES:3}
 
-# Logging - więcej szczegółów w DEV
 logging:
   level:
-    root: INFO
-    com.learnwords.koogservice: DEBUG
-    org.springframework.kafka: INFO
+    root: ${LOG_LEVEL_ROOT:INFO}
+    com.learnwords.koogservice: ${LOG_LEVEL_APP:DEBUG}
+    org.springframework.kafka: ${LOG_LEVEL_KAFKA:INFO}
     org.hibernate.SQL: DEBUG
     org.hibernate.type.descriptor.sql: TRACE
-    ai.koog: DEBUG
+    org.postgresql: ${LOG_LEVEL_POSTGRESQL:INFO}
+    ai.koog: ${LOG_LEVEL_AI:DEBUG}
