@@ -1,20 +1,15 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, Alert, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 import { useAuth } from '@/features/auth';
-import type { Deck } from '@/types/dashboard';
+import { useDashboard } from '@/features/dashboard';
+import { useDeck, type DeckListItem } from '@/features/deck';
 import { StudentStatsGrid } from '@/components/dashboard/StudentStatsGrid';
 import { MyCourses } from '@/components/dashboard/MyCourses';
 import { QuickActions } from '@/components/dashboard/QuickActions';
 import { Leaderboard } from '@/components/dashboard/Leaderboard';
 import { RecentActivity } from '@/components/dashboard/RecentActivity';
-import {
-  MOCK_STATISTICS,
-  MOCK_DECKS,
-  MOCK_LEADERBOARD,
-  MOCK_RECENT_ACTIVITY,
-} from '@/mocks/dashboard';
 
 /**
  * Dashboard dla ucznia
@@ -22,17 +17,95 @@ import {
 function StudentDashboard() {
   const { user, isUserLoading, logout, isLogoutLoading } = useAuth();
 
+  const { useStudentStatistics, useStudentActivity, useLeaderboardOverview } = useDashboard();
+  const { useMyEnrolledDecks } = useDeck();
+
+  const {
+    data: statistics,
+    isLoading: isStatsLoading,
+    isError: isStatsError,
+  } = useStudentStatistics();
+  const {
+    data: activityData,
+    isLoading: isActivityLoading,
+    isError: isActivityError,
+  } = useStudentActivity();
+  const { data: leaderboardData, isLoading: isLeaderboardLoading } = useLeaderboardOverview();
+  const {
+    data: enrolledDecksResponse,
+    isLoading: isDecksLoading,
+    isError: isDecksError,
+  } = useMyEnrolledDecks(0, 5);
+
+  const leaderboardEntries = useMemo(() => {
+    if (!leaderboardData) return [];
+
+    const entries = [
+      ...leaderboardData.top3.map((e) => ({
+        rank: e.rank,
+        userId: parseInt(e.userId, 10) || 0,
+        username: e.displayName,
+        points: e.points,
+        isCurrentUser: e.userId === leaderboardData.you?.userId,
+      })),
+    ];
+
+
+    if (
+      leaderboardData.you &&
+      !entries.some((e) => e.userId === parseInt(leaderboardData.you.userId, 10))
+    ) {
+      entries.push({
+        rank: leaderboardData.you.rank,
+        userId: parseInt(leaderboardData.you.userId, 10) || 0,
+        username: leaderboardData.you.displayName,
+        points: leaderboardData.you.points,
+        isCurrentUser: true,
+      });
+    }
+
+
+    if (
+      leaderboardData.aboveYou &&
+      !entries.some((e) => e.userId === parseInt(leaderboardData.aboveYou.userId, 10))
+    ) {
+      entries.push({
+        rank: leaderboardData.aboveYou.rank,
+        userId: parseInt(leaderboardData.aboveYou.userId, 10) || 0,
+        username: leaderboardData.aboveYou.displayName,
+        points: leaderboardData.aboveYou.points,
+        isCurrentUser: false,
+      });
+    }
+
+    return entries.sort((a, b) => a.rank - b.rank).slice(0, 5);
+  }, [leaderboardData]);
+
   useEffect(() => {
     if (!isUserLoading && !user) {
       router.replace('/(auth)/login');
     }
   }, [user, isUserLoading]);
 
-  if (isUserLoading) {
+  const isLoading =
+    isUserLoading || isStatsLoading || isDecksLoading || isActivityLoading || isLeaderboardLoading;
+  const isError = isStatsError || isDecksError || isActivityError;
+
+  if (isLoading) {
     return (
       <SafeAreaView className="flex-1 items-center justify-center bg-background">
         <ActivityIndicator size="large" color="#22c55e" />
         <Text className="mt-4 text-muted-foreground">Ładowanie...</Text>
+      </SafeAreaView>
+    );
+  }
+
+  if (isError) {
+    return (
+      <SafeAreaView className="flex-1 items-center justify-center bg-background p-4">
+        <Text className="mb-4 text-center text-foreground">
+          Wystąpił błąd podczas ładowania danych. Spróbuj ponownie później.
+        </Text>
       </SafeAreaView>
     );
   }
@@ -45,8 +118,10 @@ function StudentDashboard() {
     );
   }
 
-  const handleDeckPress = (deck: Deck) => {
-    Alert.alert('Kurs', `Otwieranie kursu: ${deck.name}`);
+  const decks = enrolledDecksResponse?.content ?? [];
+
+  const handleDeckPress = (deck: DeckListItem) => {
+    router.push(`/(dashboard)/course/${deck.enrollmentId}`);
   };
 
   const handleQuickAction = (action: { title: string }) => {
@@ -90,12 +165,16 @@ function StudentDashboard() {
 
           {/* Statystyki */}
           <View className="mb-6">
-            <StudentStatsGrid statistics={MOCK_STATISTICS} />
+            <StudentStatsGrid
+              statistics={statistics}
+              isLoading={isStatsLoading}
+              isError={isStatsError}
+            />
           </View>
 
           {/* Moje kursy */}
           <View className="mb-6">
-            <MyCourses decks={MOCK_DECKS} onDeckPress={handleDeckPress} />
+            <MyCourses decks={decks} onDeckPress={handleDeckPress} />
           </View>
 
           {/* Szybkie akcje */}
@@ -105,12 +184,16 @@ function StudentDashboard() {
 
           {/* Ranking */}
           <View className="mb-6">
-            <Leaderboard entries={MOCK_LEADERBOARD} />
+            <Leaderboard entries={leaderboardEntries} />
           </View>
 
           {/* Ostatnia aktywność */}
           <View className="mb-6">
-            <RecentActivity activities={MOCK_RECENT_ACTIVITY} />
+            <RecentActivity
+              activities={activityData}
+              isLoading={isActivityLoading}
+              isError={isActivityError}
+            />
           </View>
 
           {/* Info o użytkowniku */}

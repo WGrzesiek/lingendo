@@ -3,7 +3,7 @@ import { router } from 'expo-router';
 import type { AxiosError } from 'axios';
 
 import { QUERY_KEYS, INVALIDATION_GROUPS } from '@/constants';
-import { AuthService } from '../services/auth.service';
+import { AuthService } from '@/features/auth';
 import type { LoginRequest, SignupRequest, User, ApiErrorResponse } from '../types';
 
 /**
@@ -16,7 +16,7 @@ export const useAuth = () => {
   // ========== QUERY: Aktualny użytkownik ==========
 
   const userQuery = useQuery<User | null>({
-    queryKey: QUERY_KEYS.USER,
+    queryKey: [QUERY_KEYS.USER],
     queryFn: async () => {
       try {
         return await AuthService.getCurrentUser();
@@ -38,7 +38,7 @@ export const useAuth = () => {
       console.log('[useAuth] Login udany, pobieranie usera...');
       try {
         const user = await AuthService.getCurrentUser();
-        queryClient.setQueryData(QUERY_KEYS.USER, user);
+        queryClient.setQueryData([QUERY_KEYS.USER], user);
         console.log('[useAuth] Pobieranie usera po logowaniu udane, przekierowanie...');
         router.replace('/(dashboard)/student');
       } catch (e) {
@@ -67,7 +67,7 @@ export const useAuth = () => {
     onSuccess: () => {
       console.log('[useAuth] Wylogowano, czyszczenie danych i przekierowanie do logowania...');
       INVALIDATION_GROUPS.ON_LOGOUT.forEach((key) => {
-        queryClient.removeQueries({ queryKey: key });
+        queryClient.removeQueries({ queryKey: [key] });
       });
       router.replace('/(auth)/login');
     },

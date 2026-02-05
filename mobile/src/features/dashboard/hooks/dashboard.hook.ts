@@ -20,4 +20,9 @@ export const useDashboard = () => {
       queryKey: [QUERY_KEYS.DASHBOARD, 'leaderboard'],
       queryFn: () => dashboardService.getLeaderboardOverview(),
     });
+  return {
+    useStudentStatistics,
+    useStudentActivity,
+    useLeaderboardOverview
+  }
 }

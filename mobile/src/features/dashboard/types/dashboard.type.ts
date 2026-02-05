@@ -7,12 +7,13 @@ export interface StudentStatistics {
 }
 
 export type StudentActivityType =
-  | "LESSON_COMPLETED"
-  | "SESSION_STARTED"
-  | "SESSION_COMPLETED"
-  | "LOGIN";
+  | 'LESSON_COMPLETED'
+  | 'SESSION_STARTED'
+  | 'SESSION_COMPLETED'
+  | 'LOGIN';
 
 export interface StudentActivityItem {
+
   type: StudentActivityType;
   title: string;
   subtitle: string;
@@ -27,8 +28,35 @@ export interface LeaderboardEntryDto {
   points: number;
   completedCourses: number;
 }
+
 export interface LeaderboardOverviewDto {
   top3: LeaderboardEntryDto[];
   you: LeaderboardEntryDto;
   aboveYou: LeaderboardEntryDto;
 }
+
+/**
+ * Wpis w rankingu (UI) - uproszczony dla komponentów
+ */
+export interface LeaderboardEntry {
+  rank: number;
+  userId: number;
+  username: string;
+  points: number;
+  isCurrentUser?: boolean;
+}
+
+/**
+ * Talia/kurs (UI) - uproszczony dla komponentów
+ */
+export interface Deck {
+  id: string;
+  enrollmentId: string;
+  name: string;
+  description: string;
+  totalCards: number;
+  learnedCards: number;
+  progress: number;
+  lastStudied?: string;
+}
+

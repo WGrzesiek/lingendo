@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Text } from 'react-native';
-import type { LeaderboardEntry } from '../../types/dashboard';
+import type { LeaderboardEntry } from '@/features/dashboard';
 
 interface LeaderboardProps {
   entries: LeaderboardEntry[];
