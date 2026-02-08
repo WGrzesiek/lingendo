@@ -1,0 +1,64 @@
+spring:
+  config:
+    activate:
+      on-profile: dev
+
+  datasource:
+    url: jdbc:postgresql://${DB_POSTGRESQL_HOST:postgres}:${DB_POSTGRESQL_PORT:5432}/${DB_POSTGRESQL_NAME:koog}
+    username: ${DB_POSTGRESQL_USER:admin}
+    password: ${DB_POSTGRESQL_PASSWORD:adminpassword}
+    hikari:
+      maximum-pool-size: ${DB_POOL_SIZE:10}
+      minimum-idle: ${DB_POOL_MIN_IDLE:2}
+      connection-timeout: ${DB_CONNECTION_TIMEOUT:30000}
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+
+  flyway:
+    enabled: ${FLYWAY_ENABLED:false}
+
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:kafka:9092}
+    consumer:
+      group-id: ${KAFKA_GROUP:koog-service-group}
+
+server:
+  port: ${SERVER_PORT:7777}
+
+management:
+  tracing:
+    sampling:
+      probability: ${TRACING_PROBABILITY:1.0}
+    export:
+      zipkin:
+        endpoint: ${ZIPKIN_ENDPOINT:http://zipkin:9411/api/v2/spans}
+
+springdoc:
+  swagger-ui:
+    enabled: ${SWAGGER_ENABLED:true}
+
+openai:
+  api-key: ${OPENAI_API_KEY:}
+
+ai:
+  sentence:
+    model: ${AI_MODEL:gpt-5-mini}
+    temperature: ${AI_TEMPERATURE:0.7}
+    prompt-version: ${AI_PROMPT_VERSION:1}
+    max-sentences-per-word: ${AI_MAX_SENTENCES:3}
+
+logging:
+  level:
+    root: ${LOG_LEVEL_ROOT:INFO}
+    com.learnwords.koogservice: ${LOG_LEVEL_APP:DEBUG}
+    org.springframework.kafka: ${LOG_LEVEL_KAFKA:INFO}
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql: TRACE
+    org.postgresql: ${LOG_LEVEL_POSTGRESQL:INFO}
+    ai.koog: ${LOG_LEVEL_AI:DEBUG}
