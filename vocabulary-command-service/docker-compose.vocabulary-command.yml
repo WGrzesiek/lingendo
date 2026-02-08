@@ -1,0 +1,52 @@
+name: learnwords
+
+services:
+  vocabulary-command-service:
+    image: ${IMAGE_NAME:-vocabulary-command-service}:${IMAGE_TAG:-dev}
+    container_name: vocabulary-command-service
+    restart: unless-stopped
+
+    environment:
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-dev}
+      SERVER_PORT: ${PORT:-8810}
+
+      # DB
+      DATASOURCE_URL: ${DATASOURCE_URL:-jdbc:postgresql://postgres:5432/outbox}
+      DATASOURCE_USERNAME: ${DATASOURCE_USERNAME:-admin}
+      DATASOURCE_PASSWORD: ${DATASOURCE_PASSWORD:-adminpassword}
+
+      # Kafka
+      KAFKA_BOOTSTRAP_SERVERS: ${KAFKA_BOOTSTRAP_SERVERS:-kafka:9092}
+      KAFKA_GROUP: ${KAFKA_GROUP:-vocabulary-command-group}
+      KAFKA_AUTO_OFFSET_RESET: ${KAFKA_AUTO_OFFSET_RESET:-earliest}
+
+      # Observability / logging
+      ZIPKIN_ENDPOINT: ${ZIPKIN_ENDPOINT:-http://zipkin:9411/api/v2/spans}
+      TRACING_PROBABILITY: ${TRACING_PROBABILITY:-1.0}
+      LOGSTASH_HOST: ${LOGSTASH_HOST:-logstash}
+
+      # log levels (opcjonalnie)
+      LOG_LEVEL_KAFKA: ${LOG_LEVEL_KAFKA:-INFO}
+      LOG_LEVEL_DEBEZIUM: ${LOG_LEVEL_DEBEZIUM:-INFO}
+      LOG_LEVEL_DEBEZIUM_PG: ${LOG_LEVEL_DEBEZIUM_PG:-INFO}
+      LOG_LEVEL_MONGO: ${LOG_LEVEL_MONGO:-INFO}
+      LOG_LEVEL_SDMONGO: ${LOG_LEVEL_SDMONGO:-INFO}
+
+      JAVA_OPTS: ${JAVA_OPTS:-}
+
+    ports:
+      - "${PORT:-8810}:${PORT:-8810}"
+
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://vocabulary-command-service:${PORT:-8810}/actuator/health/readiness | grep -q '\"status\"\\s*:\\s*\"UP\"'"]
+      interval: 10s
+      timeout: 3s
+      retries: 12
+      start_period: 30s
+
+    networks:
+      - learnwords-net
+
+networks:
+  learnwords-net:
+    external: true

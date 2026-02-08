@@ -1,0 +1,43 @@
+spring:
+  config:
+    activate:
+      on-profile: prod
+
+  datasource:
+    url: ${DATASOURCE_URL}
+    username: ${DATASOURCE_USERNAME}
+    password: ${DATASOURCE_PASSWORD}
+
+  jpa:
+    hibernate:
+      ddl-auto: ${HIBERNATE_DDL_AUTO:validate}
+
+  flyway:
+    enabled: true
+    validate-on-migrate: true
+
+  kafka:
+    consumer:
+      bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS}
+      group-id: ${KAFKA_GROUP:vocabulary-command-group}
+      auto-offset-reset: ${KAFKA_AUTO_OFFSET_RESET:latest}
+    producer:
+      bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS}
+
+server:
+  port: ${SERVER_PORT:8810}
+
+logging:
+  level:
+    root: INFO
+    org.apache.kafka: ${LOG_LEVEL_KAFKA:WARN}
+  logstash:
+    host: ${LOGSTASH_HOST}
+
+management:
+  tracing:
+    sampling:
+      probability: ${TRACING_PROBABILITY:0.1}
+  zipkin:
+    tracing:
+      endpoint: ${ZIPKIN_ENDPOINT}
