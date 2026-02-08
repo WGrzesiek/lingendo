@@ -1,0 +1,53 @@
+name: learnwords
+
+services:
+  vocabulary-read-service:
+    image: ${IMAGE_NAME:-vocabulary-read-service}:${IMAGE_TAG:-dev}
+    container_name: vocabulary-read-service
+    restart: unless-stopped
+
+    environment:
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-dev}
+
+      # HTTP / gRPC
+      SERVER_PORT: ${SERVER_PORT:-8813}
+      GRPC_PORT: ${GRPC_PORT:-9099}
+
+      # MongoDB
+      DB_MONGODB_HOST: ${DB_MONGODB_HOST:-mongodb}
+      DB_MONGODB_PORT: ${DB_MONGODB_PORT:-27017}
+      DB_MONGODB_NAME: ${DB_MONGODB_NAME:-vocabulary-command-service}
+      DB_MONGODB_USER: ${DB_MONGODB_USER:-User}
+      DB_MONGODB_PASSWORD: ${DB_MONGODB_PASSWORD:-password}
+
+      # Kafka
+      KAFKA_BOOTSTRAP_SERVERS: ${KAFKA_BOOTSTRAP_SERVERS:-kafka:9092}
+      KAFKA_GROUP: ${KAFKA_GROUP:-vocabulary-read-service-group}
+      KAFKA_AUTO_OFFSET_RESET: ${KAFKA_AUTO_OFFSET_RESET:-earliest}
+
+      # Observability
+      ZIPKIN_ENDPOINT: ${ZIPKIN_ENDPOINT:-http://zipkin:9411/api/v2/spans}
+      TRACING_PROBABILITY: ${TRACING_PROBABILITY:-1.0}
+      LOGSTASH_HOST: ${LOGSTASH_HOST:-logstash}
+
+      # Log levels
+      LOG_LEVEL_KAFKA: ${LOG_LEVEL_KAFKA:-INFO}
+      JAVA_OPTS: ${JAVA_OPTS:-}
+
+    ports:
+      - "${SERVER_PORT:-8813}:${SERVER_PORT:-8813}"   # HTTP
+      - "${GRPC_PORT:-9099}:${GRPC_PORT:-9099}"       # gRPC
+
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://vocabulary-read-service:${SERVER_PORT:-8813}/actuator/health/readiness | grep -q '\"status\"\\s*:\\s*\"UP\"'"]
+      interval: 10s
+      timeout: 3s
+      retries: 12
+      start_period: 30s
+
+    networks:
+      - learnwords-net
+
+networks:
+  learnwords-net:
+    external: true
