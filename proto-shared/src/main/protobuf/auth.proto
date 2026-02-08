@@ -1,0 +1,41 @@
+syntax = "proto3";
+
+package com.learnwords.auth.v1;
+
+option java_multiple_files = true;
+option java_package = "com.learnwords.auth.v1";
+option java_outer_classname = "AuthProto";
+
+
+message AuthenticateResponse{
+  string user_id = 1;
+  string username = 2;
+  repeated string roles = 3;
+  bool is_enabled = 4;
+  map<string, string> claims = 5;
+}
+message AuthenticateRequest{
+  string username = 1;
+  string password = 2;
+}
+
+message GetUserByIdRequest{
+  string user_id = 1;
+}
+
+message GetUserByIdResponse{
+  string user_id = 1;
+  string username = 2;
+  bool is_enabled = 4;
+  map<string, string> claims = 5;
+}
+
+message GetUserNameByIdResponse{
+  string username = 1;
+}
+
+service AuthService{
+  rpc Authenticate(AuthenticateRequest) returns (AuthenticateResponse);
+  rpc GetUserById(GetUserByIdRequest) returns (GetUserByIdResponse);
+  rpc GetUserNameById(GetUserByIdRequest) returns (GetUserNameByIdResponse);
+}

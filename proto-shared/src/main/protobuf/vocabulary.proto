@@ -1,0 +1,91 @@
+syntax = "proto3";
+
+package com.learnwords.vocabulary.v1;
+
+option java_multiple_files = true;
+option java_package = "com.learnwords.vocabulary.v1";
+option java_outer_classname = "VocabularyProto";
+
+import "google/protobuf/timestamp.proto";
+import "sentence.proto";
+
+// Word - pełna reprezentacja słowa z tłumaczeniami i zdaniami (NOWA wersja)
+message Word {
+  string id = 1;
+  string word = 2;
+  repeated string translations = 3;
+  repeated com.learnwords.sentence.v1.SentenceResponse sentences = 4;
+  repeated com.learnwords.sentence.v1.SentenceResponse sentences_ai = 5;
+}
+
+// Vocabulary - stara wersja (DEPRECATED - zostaje dla kompatybilności)
+message Vocabulary {
+  string id = 1;
+  string word = 2;
+  repeated string translations = 3;
+  repeated string sentence_ids = 4;
+}
+
+// OnlyWord - minimalna wersja (tylko id i słowo)
+message OnlyWord {
+  string id = 1;
+  string word = 2;
+}
+
+// ===== NOWE REQUESTY (dla Word) =====
+message GetWordRequest {
+  string id = 1;
+}
+
+message BatchGetWordsRequest {
+  repeated string ids = 1;
+}
+
+// ===== STARE REQUESTY (dla Vocabulary - DEPRECATED) =====
+message GetVocabularyRequest {
+  string id = 1;
+}
+
+message BatchGetVocabulariesRequest {
+  repeated string ids = 1;
+}
+
+message ListVocabulariesRequest {
+  int32 page_size = 1;
+  string page_token = 2;
+}
+
+// ===== NOWE RESPONSE (dla Word) =====
+message GetWordResponse {
+  Word word = 1;
+}
+
+message BatchGetWordsResponse {
+  repeated Word words = 1;
+}
+
+// ===== STARE RESPONSE (dla Vocabulary - DEPRECATED) =====
+message ListVocabulariesResponse{
+  repeated Vocabulary vocabularies = 1;
+  string next_page_token = 2;
+}
+
+message BatchGetVocabulariesResponse {
+  repeated Vocabulary vocabularies = 1;
+}
+
+message BatchGetOnlyWordResponse {
+  repeated OnlyWord word = 1;
+}
+
+service VocabularyReadService {
+  // ===== NOWE METODY (zwracają Word z pełnymi danymi) =====
+  rpc GetWord(GetWordRequest) returns (GetWordResponse);
+  rpc BatchGetWords(BatchGetWordsRequest) returns (BatchGetWordsResponse);
+  
+  // ===== STARE METODY (DEPRECATED - dla kompatybilności wstecznej) =====
+  rpc GetVocabulary(GetVocabularyRequest) returns (Vocabulary);
+  rpc BatchGetVocabularies(BatchGetVocabulariesRequest) returns (BatchGetVocabulariesResponse);
+  rpc BatchGetOnlyWord(BatchGetVocabulariesRequest) returns (BatchGetOnlyWordResponse);
+  rpc ListVocabularies(ListVocabulariesRequest) returns (ListVocabulariesResponse);
+}

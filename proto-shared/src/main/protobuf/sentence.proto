@@ -1,0 +1,44 @@
+syntax = "proto3";
+
+package com.learnwords.sentence.v1;
+
+option java_multiple_files = true;
+option java_package = "com.learnwords.sentence.v1";
+option java_outer_classname = "SentenceProto";
+
+import "google/protobuf/timestamp.proto";
+
+//Requesty
+message GetSentenceByIdRequest {
+  string id = 1;
+}
+
+message BatchGetSentencesByIdsRequest {
+  repeated string ids = 1;
+}
+
+message ListSentencesRequest {
+  int32 page_size = 1;
+  string fetch_strategy = 2; // e.g., "RANDOM", "SEQUENTIAL"
+}
+// koniec requestów
+
+//Response
+message SentenceResponse {
+  string id = 1;
+  string sentence = 2;
+  string translation = 3;
+}
+
+message ListSentencesResponse {
+  repeated SentenceResponse sentences = 1;
+}
+// koniec response'ów
+
+
+// Serwisy
+service SentenceReadService {
+  rpc GetSentenceById(GetSentenceByIdRequest) returns (SentenceResponse);
+  rpc BatchGetSentencesByIds(BatchGetSentencesByIdsRequest) returns (ListSentencesResponse);
+  rpc ListSentences(ListSentencesRequest) returns (ListSentencesResponse);
+}

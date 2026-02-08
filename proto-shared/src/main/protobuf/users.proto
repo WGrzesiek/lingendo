@@ -1,0 +1,156 @@
+syntax = "proto3";
+
+package com.learnwords.users.v1;
+
+option java_multiple_files = true;
+option java_package = "com.learnwords.users.v1";
+option java_outer_classname = "UsersProto";
+
+
+message UserBasicInfo {
+  string user_id = 1;
+  string username = 2;
+  string first_name = 3;
+  string last_name = 4;
+  string email = 5;
+}
+
+message GetStudentIdsRequest {
+  string teacher_id = 1;
+}
+
+message GetStudentIdsResponse {
+  repeated string student_ids = 1;
+}
+
+message GetStudentsRequest {
+  string teacher_id = 1;
+}
+
+message GetStudentsResponse {
+  repeated UserBasicInfo students = 1;
+}
+
+message GetTeacherIdsRequest {
+  string student_id = 1;
+}
+
+message GetTeacherIdsResponse {
+  repeated string teacher_ids = 1;
+}
+
+message GetTeachersRequest {
+  string student_id = 1;
+}
+
+message GetTeachersResponse {
+  repeated UserBasicInfo teachers = 1;
+}
+
+message IsTeacherOfRequest {
+  string teacher_id = 1;
+  string student_id = 2;
+}
+
+message IsTeacherOfResponse {
+  bool is_teacher = 1;
+}
+
+message CheckTeacherStudentAccessRequest {
+  string teacher_id = 1;
+  repeated string student_ids = 2;
+}
+
+message CheckTeacherStudentAccessResponse {
+  // Mapa student_id -> czy nauczyciel ma dostęp
+  map<string, bool> access_map = 1;
+}
+
+// --- Friendship Relations ---
+
+message GetFriendIdsRequest {
+  string user_id = 1;
+}
+
+message GetFriendIdsResponse {
+  repeated string friend_ids = 1;
+}
+
+message GetFriendsRequest {
+  string user_id = 1;
+}
+
+message GetFriendsResponse {
+  repeated UserBasicInfo friends = 1;
+}
+
+message AreFriendsRequest {
+  string user_id_1 = 1;
+  string user_id_2 = 2;
+}
+
+message AreFriendsResponse {
+  bool are_friends = 1;
+}
+
+message CheckFriendshipAccessRequest {
+  string user_id = 1;
+  repeated string other_user_ids = 2;
+}
+
+message CheckFriendshipAccessResponse {
+  map<string, bool> friendship_map = 1;
+}
+
+message CheckUserAccessRequest {
+  string requester_id = 1;
+  string owner_id = 2;
+}
+
+message CheckUserAccessResponse {
+  bool has_access = 1;
+  string access_type = 2;
+}
+
+message GetAccessibleUsersRequest {
+  string user_id = 1;
+}
+
+message GetAccessibleUsersResponse {
+  repeated string student_ids = 1;
+  repeated string teacher_ids = 2;
+  repeated string friend_ids = 3;
+  repeated string group_ids = 4;
+}
+
+message GetUsersByIdsRequest {
+  repeated string user_ids = 1;
+}
+
+message GetUsersByIdsResponse {
+  repeated UserBasicInfo users = 1;
+}
+
+service UserRelationsService {
+  
+  // --- Teacher-Student ---
+  rpc GetStudentIds(GetStudentIdsRequest) returns (GetStudentIdsResponse);
+  rpc GetStudents(GetStudentsRequest) returns (GetStudentsResponse);
+  rpc GetTeacherIds(GetTeacherIdsRequest) returns (GetTeacherIdsResponse);
+  rpc GetTeachers(GetTeachersRequest) returns (GetTeachersResponse);
+  rpc IsTeacherOf(IsTeacherOfRequest) returns (IsTeacherOfResponse);
+  rpc CheckTeacherStudentAccess(CheckTeacherStudentAccessRequest) returns (CheckTeacherStudentAccessResponse);
+  
+  // --- Friendship ---
+  rpc GetFriendIds(GetFriendIdsRequest) returns (GetFriendIdsResponse);
+  rpc GetFriends(GetFriendsRequest) returns (GetFriendsResponse);
+  rpc AreFriends(AreFriendsRequest) returns (AreFriendsResponse);
+  rpc CheckFriendshipAccess(CheckFriendshipAccessRequest) returns (CheckFriendshipAccessResponse);
+  
+  // --- Combined Access ---
+  rpc CheckUserAccess(CheckUserAccessRequest) returns (CheckUserAccessResponse);
+  rpc GetAccessibleUsers(GetAccessibleUsersRequest) returns (GetAccessibleUsersResponse);
+  
+  // --- User Info ---
+  rpc GetUsersByIds(GetUsersByIdsRequest) returns (GetUsersByIdsResponse);
+}
