@@ -1,0 +1,45 @@
+name: learnwords
+
+services:
+  api-gateway:
+    image: ${IMAGE_NAME:-api-gateway}:${IMAGE_TAG:-dev}
+    container_name: api-gateway
+    environment:
+      SPRING_PROFILES_ACTIVE: ${PROFILE:-dev}
+
+      # HTTP
+      SERVER_PORT: ${PORT:-8811}
+
+      # JWT / JWKS
+      JWT_PRIVATE_KEY_LOCATION: ${JWT_PRIVATE_KEY_LOCATION:-file:/etc/keys/private_key.pem}
+      JWT_PUBLIC_KEY_LOCATION:  ${JWT_PUBLIC_KEY_LOCATION:-file:/etc/keys/public_key.pem}
+      JWT_EXPIRE_IN: ${JWT_EXPIRE_IN:-86400000}
+
+      # Resource Server (gateway wystawia też JWKS/issuer — w dev wskazujemy na siebie)
+      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI: ${ISSUER_URI:-http://api-gateway:8811}
+      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI: ${JWKS_URI:-http://api-gateway:8811/.well-known/jwks.json}
+
+      # gRPC klient do user-service (adres po nazwie serwisu w tej samej sieci)
+      GRPC_CLIENT_AUTH_ADDRESS: ${GRPC_CLIENT_AUTH_ADDRESS:-static://user-service:9098}
+      GRPC_CLIENT_AUTH_NEGOTIATIONTYPE: ${GRPC_CLIENT_AUTH_NEGOTIATIONTYPE:-PLAINTEXT}
+
+      # Logi / JVM (opcjonalnie)
+      LOG_LEVEL_WEB: ${LOG_LEVEL_WEB:-INFO}
+      LOG_LEVEL_HTTP_CONVERTER: ${LOG_LEVEL_HTTP_CONVERTER:-INFO}
+      JAVA_OPTS: ${JAVA_OPTS:-}
+
+      # Redis
+      SPRING_DATA_REDIS_HOST: ${REDIS_HOST:-redis}
+      SPRING_DATA_REDIS_PORT: ${REDIS_PORT:-6379}
+      SPRING_DATA_REDIS_PASSWORD: ${REDIS_PASSWORD:-SuperSecret123}
+
+
+    volumes:
+      - ./secrets:/etc/keys:ro   # w secrets/ umieść private_key.pem i public_key.pem
+    ports:
+      - "${PORT:-8811}:${PORT:-8811}"
+    networks: [learnwords-net]
+
+networks:
+  learnwords-net:
+    external: true
