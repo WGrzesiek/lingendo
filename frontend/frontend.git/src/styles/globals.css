@@ -1,0 +1,371 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  /* Font Family */
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+
+  /* Custom colors dla LearnWords */
+  --color-success: var(--success);
+  --color-success-foreground: var(--success-foreground);
+  --color-success-light: var(--success-light);
+  --color-success-dark: var(--success-dark);
+
+  --color-warning: var(--warning);
+  --color-warning-foreground: var(--warning-foreground);
+  --color-warning-light: var(--warning-light);
+  --color-warning-dark: var(--warning-dark);
+
+  --color-info: var(--info);
+  --color-info-foreground: var(--info-foreground);
+  --color-info-light: var(--info-light);
+  --color-info-dark: var(--info-dark);
+
+  --color-error: var(--error);
+  --color-error-foreground: var(--error-foreground);
+  --color-error-light: var(--error-light);
+  --color-error-dark: var(--error-dark);
+
+  /* Learning-specific colors */
+  --color-correct: var(--correct);
+  --color-correct-foreground: var(--correct-foreground);
+  --color-incorrect: var(--incorrect);
+  --color-incorrect-foreground: var(--incorrect-foreground);
+  --color-progress: var(--progress);
+  --color-progress-foreground: var(--progress-foreground);
+
+  /* Difficulty levels */
+  --color-beginner: var(--beginner);
+  --color-beginner-foreground: var(--beginner-foreground);
+  --color-intermediate: var(--intermediate);
+  --color-intermediate-foreground: var(--intermediate-foreground);
+  --color-advanced: var(--advanced);
+  --color-advanced-foreground: var(--advanced-foreground);
+
+  /* Gamification */
+  --color-streak: var(--streak);
+  --color-streak-foreground: var(--streak-foreground);
+  --color-achievement: var(--achievement);
+  --color-achievement-foreground: var(--achievement-foreground);
+  --color-premium: var(--premium);
+  --color-premium-foreground: var(--premium-foreground);
+}
+
+:root {
+  --radius: 0.625rem;
+
+  /* ============================================ */
+  /* 🎨 GŁÓWNY MOTYW PRZEWODNI - ZIELONY (150°) */
+  /* Jasny, świeży design inspirowany naturą i wzrostem */
+  /* ============================================ */
+
+  /* Tła - delikatny gradient zieleni */
+  --background: oklch(
+    0.99 0.008 150
+  ); /* Lekko zielonkawe tło zamiast czystej bieli */
+  --foreground: oklch(0.145 0 0); /* Prawie czarny tekst */
+
+  /* Karty - białe na zielonkawym tle */
+  --card: oklch(1 0 0); /* Czysta biel dla kart */
+  --card-foreground: oklch(0.145 0 0); /* Ciemny tekst */
+
+  /* Popover (tooltips, dropdowns) */
+  --popover: oklch(1 0 0); /* Biały */
+  --popover-foreground: oklch(0.145 0 0); /* Ciemny tekst */
+
+  /* PRIMARY - główny zielony brand color (H=150) */
+  --primary: oklch(0.55 0.19 150); /* 🌿 Główny zielony - przyciski, linki */
+  --primary-foreground: oklch(0.98 0 0); /* Biały tekst */
+  --primary-hover: oklch(0.5 0.19 150); /* Ciemniejszy na hover */
+  --primary-light: oklch(0.95 0.08 150); /* Bardzo jasny zielony do tła */
+
+  /* SECONDARY - neutralny z lekkim zielonkawym odcieniem */
+  --secondary: oklch(0.96 0.01 150); /* Bardzo jasny zielonkawy */
+  --secondary-foreground: oklch(0.205 0 0); /* Ciemny tekst */
+  --secondary-hover: oklch(0.94 0.015 150); /* Lekko ciemniejszy na hover */
+
+  /* MUTED - wyciszone elementy (disabled, mniej ważne) */
+  --muted: oklch(
+    0.97 0.005 150
+  ); /* Bardzo jasny neutralny z odrobiną zieleni */
+  --muted-foreground: oklch(0.556 0 0); /* Szary tekst */
+
+  /* ACCENT - akcent (hover na kartach, wyróżnienia) */
+  --accent: oklch(0.97 0.015 150); /* Lekko zielonkawy hover */
+  --accent-foreground: oklch(0.205 0 0); /* Ciemny tekst */
+
+  /* DESTRUCTIVE - czerwony dla usuń/błędy */
+  --destructive: oklch(0.577 0.245 27); /* Czerwony */
+  --destructive-foreground: oklch(0.98 0 0); /* Biały tekst */
+
+  /* Borders & Inputs */
+  --border: oklch(0.91 0.01 150); /* Delikatnie zielonkawe bordery */
+  --input: oklch(
+    0.98 0.005 150
+  ); /* Bardzo jasne tło inputów z odrobiną zieleni */
+  --ring: oklch(0.55 0.19 150); /* Zielony focus ring (jak primary) */
+
+  /* Charts - paleta zieleni */
+  --chart-1: oklch(0.55 0.19 150); /* Główny zielony */
+  --chart-2: oklch(0.6 0.15 180); /* Cyjan */
+  --chart-3: oklch(0.65 0.17 120); /* Zielono-żółty */
+  --chart-4: oklch(0.7 0.15 85); /* Żółty */
+  --chart-5: oklch(0.6 0.15 200); /* Niebieski */
+
+  /* NAVBAR & MENU - glassmorphism z zielonym akcentem */
+  --navbar: oklch(1 0 0 / 80%); /* Półprzezroczysta biel (blur w komponencie) */
+  --navbar-foreground: oklch(0.145 0 0); /* Ciemny tekst */
+  --navbar-border: oklch(0.55 0.19 150 / 15%); /* Delikatny zielony border */
+  --navbar-active: oklch(0.55 0.19 150); /* Zielony dla aktywnego linka */
+  --navbar-hover: oklch(0.97 0.015 150); /* Lekko zielonkawy hover */
+
+  /* SIDEBAR/MENU (dla dashboard) */
+  --sidebar: oklch(0.99 0.005 150); /* Bardzo jasny zielonkawy */
+  --sidebar-foreground: oklch(0.145 0 0); /* Ciemny tekst */
+  --sidebar-primary: oklch(0.55 0.19 150); /* Zielony dla aktywnej pozycji */
+  --sidebar-primary-foreground: oklch(0.98 0 0); /* Biały tekst */
+  --sidebar-accent: oklch(0.97 0.015 150); /* Hover state */
+  --sidebar-accent-foreground: oklch(0.205 0 0); /* Ciemny tekst */
+  --sidebar-border: oklch(0.91 0.01 150); /* Delikatnie zielonkawe bordery */
+  --sidebar-ring: oklch(0.55 0.19 150); /* Zielony focus */
+
+  /* ============================================ */
+  /* 🎨 CUSTOM COLORS FOR LEARNWORDS - LIGHT MODE */
+  /* ============================================ */
+
+  /* Status colors - podstawowe statusy */
+  --success: oklch(0.6 0.19 150); /* 🟢 Zielony - sukces, poprawne */
+  --success-foreground: oklch(0.98 0 0); /* Biały tekst */
+  --success-light: oklch(0.95 0.08 150); /* Jasne tło dla success messages */
+  --success-dark: oklch(0.45 0.19 150); /* Ciemny hover state */
+
+  --warning: oklch(0.75 0.15 85); /* 🟡 Żółty - ostrzeżenie, uwaga */
+  --warning-foreground: oklch(0.2 0 0); /* Ciemny tekst (lepszy kontrast) */
+  --warning-light: oklch(0.95 0.08 85); /* Jasne tło dla warnings */
+  --warning-dark: oklch(0.65 0.15 85); /* Ciemny hover */
+
+  --info: oklch(0.6 0.15 240); /* 🔵 Niebieski - informacja */
+  --info-foreground: oklch(0.98 0 0); /* Biały tekst */
+  --info-light: oklch(0.95 0.08 240); /* Jasne tło dla info messages */
+  --info-dark: oklch(0.5 0.15 240); /* Ciemny hover */
+
+  --error: oklch(0.6 0.24 27); /* 🔴 Czerwony - błąd, destructive */
+  --error-foreground: oklch(0.98 0 0); /* Biały tekst */
+  --error-light: oklch(0.95 0.1 27); /* Jasne tło dla errors */
+  --error-dark: oklch(0.5 0.24 27); /* Ciemny hover */
+
+  /* Learning-specific - kolory do nauki */
+  --correct: oklch(0.58 0.2 150); /* ✅ Zielony - poprawna odpowiedź */
+  --correct-foreground: oklch(0.98 0 0); /* Biały tekst */
+
+  --incorrect: oklch(0.58 0.24 20); /* ❌ Czerwony - błędna odpowiedź */
+  --incorrect-foreground: oklch(0.98 0 0); /* Biały tekst */
+
+  --progress: oklch(0.65 0.17 180); /* 📊 Cyjan - pasek postępu */
+  --progress-foreground: oklch(0.98 0 0); /* Biały tekst */
+
+  /* Difficulty levels - poziomy trudności */
+  --beginner: oklch(0.7 0.15 150); /* 🟢 Zielony - podstawowy */
+  --beginner-foreground: oklch(0.15 0 0); /* Ciemny tekst */
+
+  --intermediate: oklch(
+    0.7 0.15 55
+  ); /* 🟠 Pomarańczowy - średniozaawansowany */
+  --intermediate-foreground: oklch(0.15 0 0); /* Ciemny tekst */
+
+  --advanced: oklch(0.6 0.2 340); /* 🔴 Czerwony/różowy - zaawansowany */
+  --advanced-foreground: oklch(0.98 0 0); /* Biały tekst */
+
+  /* Gamification - grywalizacja */
+  --streak: oklch(0.68 0.2 45); /* 🔥 Pomarańczowy - seria dni */
+  --streak-foreground: oklch(0.98 0 0); /* Biały tekst */
+
+  --achievement: oklch(0.65 0.18 85); /* 🏆 Złoty - osiągnięcia */
+  --achievement-foreground: oklch(0.15 0 0); /* Ciemny tekst */
+
+  --premium: oklch(0.55 0.2 285); /* 👑 Fioletowy - premium features */
+  --premium-foreground: oklch(0.98 0 0); /* Biały tekst */
+}
+
+.dark {
+  /* ============================================ */
+  /* 🌙 DARK MODE - Ciemny motyw z subtelnymi akcentami */
+  /* Mniej zieleni, więcej neutralności + niebieski i fioletowy */
+  /* ============================================ */
+
+  /* Tła - neutralne ciemne (bez zieleni!) */
+  --background: oklch(0.15 0 0); /* Neutralny ciemny */
+  --foreground: oklch(0.985 0 0); /* Prawie biały tekst */
+
+  /* Karty - neutralne, bez kolorowych odcieni */
+  --card: oklch(0.19 0 0); /* Neutralny ciemnoszary */
+  --card-foreground: oklch(0.985 0 0); /* Jasny tekst */
+
+  /* Popover */
+  --popover: oklch(0.19 0 0); /* Jak karty */
+  --popover-foreground: oklch(0.985 0 0); /* Jasny tekst */
+
+  /* PRIMARY - zielony tylko dla głównych akcji */
+  --primary: oklch(
+    0.6 0.16 150
+  ); /* 🌿 Umiarkowany zielony (mniej intensywny) */
+  --primary-foreground: oklch(0.98 0 0); /* Biały tekst */
+  --primary-hover: oklch(0.65 0.16 150); /* Jaśniejszy na hover */
+  --primary-light: oklch(0.22 0.08 150); /* Ciemne tło z subtelną zielenią */
+
+  /* SECONDARY - neutralny szary (główne tło elementów) */
+  --secondary: oklch(0.24 0 0); /* Neutralny ciemnoszary */
+  --secondary-foreground: oklch(0.985 0 0); /* Jasny tekst */
+  --secondary-hover: oklch(0.27 0 0); /* Jaśniejszy na hover */
+
+  /* MUTED - wyciszone */
+  --muted: oklch(0.25 0 0); /* Neutralny ciemny */
+  --muted-foreground: oklch(0.6 0 0); /* Szary tekst */
+
+  /* ACCENT - niebieski jako główny akcent! */
+  --accent: oklch(0.24 0.02 240); /* 🔵 Delikatnie niebieski hover */
+  --accent-foreground: oklch(0.985 0 0); /* Jasny tekst */ /* DESTRUCTIVE */
+  --destructive: oklch(0.65 0.22 27); /* Jaśniejszy czerwony */
+  --destructive-foreground: oklch(0.98 0 0); /* Biały tekst */
+
+  /* Borders & Inputs - neutralne */
+  --border: oklch(
+    1 0 0 / 8%
+  ); /* Przezroczysty biały border (mniej intensywny) */
+  --input: oklch(0.21 0 0); /* Neutralne ciemne tło inputów */
+  --ring: oklch(
+    0.6 0.15 240
+  ); /* 🔵 Niebieski focus ring (zamiast zielonego!) */
+
+  /* Charts - zróżnicowana paleta bez dominacji zieleni */
+  --chart-1: oklch(0.6 0.15 240); /* Niebieski (główny) */
+  --chart-2: oklch(0.6 0.16 150); /* Zielony */
+  --chart-3: oklch(0.65 0.17 180); /* Cyjan */
+  --chart-4: oklch(0.7 0.15 85); /* Żółty */
+  --chart-5: oklch(0.6 0.18 300); /* Fioletowy */
+
+  /* NAVBAR & MENU - neutralne ciemne z niebieskim akcentem */
+  --navbar: oklch(0.17 0 0 / 90%); /* Neutralny ciemny glassmorphism */
+  --navbar-foreground: oklch(0.985 0 0); /* Jasny tekst */
+  --navbar-border: oklch(0.6 0.15 240 / 15%); /* 🔵 Niebieski border */
+  --navbar-active: oklch(
+    0.6 0.15 240
+  ); /* 🔵 Niebieski dla aktywnego (nie zielony!) */
+  --navbar-hover: oklch(0.22 0.02 240); /* Delikatnie niebieski hover */
+
+  /* SIDEBAR/MENU - neutralne z niebieskim */
+  --sidebar: oklch(0.17 0 0); /* Neutralny ciemny */
+  --sidebar-foreground: oklch(0.985 0 0); /* Jasny tekst */
+  --sidebar-primary: oklch(
+    0.6 0.15 240
+  ); /* 🔵 Niebieski dla aktywnej pozycji */
+  --sidebar-primary-foreground: oklch(0.98 0 0); /* Biały tekst */
+  --sidebar-accent: oklch(0.22 0.02 240); /* Delikatnie niebieski hover */
+  --sidebar-accent-foreground: oklch(0.985 0 0); /* Jasny tekst */
+  --sidebar-border: oklch(1 0 0 / 8%); /* Neutralny border */
+  --sidebar-ring: oklch(
+    0.6 0.15 240
+  ); /* 🔵 Niebieski focus */ /* ============================================ */
+  /* 🎨 CUSTOM COLORS FOR LEARNWORDS - DARK MODE */
+  /* ============================================ */
+
+  /* Status colors - zróżnicowane, nie tylko zielone */
+  --success: oklch(
+    0.6 0.16 150
+  ); /* 🟢 Umiarkowany zielony (mniej intensywny) */
+  --success-foreground: oklch(0.98 0 0); /* Biały tekst */
+  --success-light: oklch(0.22 0.08 150); /* Ciemne tło */
+  --success-dark: oklch(0.55 0.16 150); /* Ciemniejszy wariant */
+
+  --warning: oklch(0.72 0.14 85); /* 🟡 Żółty - mniej intensywny */
+  --warning-foreground: oklch(0.98 0 0); /* Biały tekst */
+  --warning-light: oklch(0.23 0.08 85); /* Ciemne tło */
+  --warning-dark: oklch(0.65 0.14 85); /* Ciemniejszy wariant */
+
+  --info: oklch(0.6 0.15 240); /* 🔵 Niebieski - drugoplanowy kolor! */
+  --info-foreground: oklch(0.98 0 0); /* Biały tekst */
+  --info-light: oklch(0.22 0.08 240); /* Ciemne tło */
+  --info-dark: oklch(0.55 0.15 240); /* Ciemniejszy wariant */
+
+  --error: oklch(0.62 0.2 27); /* 🔴 Czerwony - mniej agresywny */
+  --error-foreground: oklch(0.98 0 0); /* Biały tekst */
+  --error-light: oklch(0.23 0.1 27); /* Ciemne tło */
+  --error-dark: oklch(0.55 0.2 27); /* Ciemniejszy wariant */
+
+  /* Learning-specific - zróżnicowane */
+  --correct: oklch(0.6 0.16 150); /* ✅ Zielony (jak success) */
+  --correct-foreground: oklch(0.98 0 0); /* Biały tekst */
+
+  --incorrect: oklch(0.62 0.2 20); /* ❌ Czerwony */
+  --incorrect-foreground: oklch(0.98 0 0); /* Biały tekst */
+
+  --progress: oklch(0.6 0.15 240); /* 📊 Niebieski (jak info) */
+  --progress-foreground: oklch(0.98 0 0); /* Biały tekst */
+
+  /* Difficulty levels - zróżnicowana paleta */
+  --beginner: oklch(0.65 0.14 150); /* 🟢 Zielony */
+  --beginner-foreground: oklch(0.98 0 0); /* Biały tekst */
+
+  --intermediate: oklch(0.68 0.14 55); /* 🟠 Pomarańczowy */
+  --intermediate-foreground: oklch(0.98 0 0); /* Biały tekst */
+
+  --advanced: oklch(0.62 0.18 340); /* 🔴 Czerwony/różowy */
+  --advanced-foreground: oklch(0.98 0 0); /* Biały tekst */
+
+  /* Gamification - zróżnicowane kolory */
+  --streak: oklch(0.68 0.18 45); /* 🔥 Pomarańczowy */
+  --streak-foreground: oklch(0.98 0 0); /* Biały tekst */
+
+  --achievement: oklch(0.7 0.16 85); /* 🏆 Złoty */
+  --achievement-foreground: oklch(0.98 0 0); /* Biały tekst (nie ciemny!) */
+
+  --premium: oklch(0.6 0.18 285); /* 👑 Fioletowy - trzeciorzędny kolor! */
+  --premium-foreground: oklch(0.98 0 0); /* Biały tekst */
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}

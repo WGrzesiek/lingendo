@@ -1,0 +1,15 @@
+version: "3.9"
+
+services:
+  nextjs:
+    image: ${IMAGE_NAME:-localhost:5000/learnwords/frontend}:${IMAGE_TAG:-dev}
+    container_name: nextjs
+    ports:
+      - "3001:3000"
+    environment:
+      - NODE_ENV=${NODE_ENV:-production}
+    networks: [learnwords-net]
+
+networks:
+  learnwords-net:
+    external: true

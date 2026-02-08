@@ -1,0 +1,65 @@
+pipeline {
+    agent { label "deploy" }
+    environment {
+        REGISTRY_HOST = "192.168.23.5:5000"
+        IMAGE_NAME = "${REGISTRY_HOST}/learnwords/frontend"
+    }
+    parameters {
+        string(name: 'ACTION', defaultValue: 'up', description: 'Dostępne akcje: up, down, restart')
+        string(name: 'BRANCH_NAME', defaultValue: 'main', description: 'Nazwa brancha z docker-compose.yml')
+        string(name: 'NODE_ENV', defaultValue: 'production', description: 'Środowisko Node.js')
+        string(name: 'IMAGE_TAG', defaultValue: 'dev', description: 'Tag obrazu Docker')
+    }
+    stages {
+        stage('Compose Down') {
+            when { expression { params.ACTION == 'down' } }
+            steps {
+                sh "docker compose -f docker-compose.frontend.yml down"
+            }
+        }
+        stage('Compose Restart') {
+            when { expression { params.ACTION == 'restart' } }
+            steps {
+                sh "docker compose -f docker-compose.frontend.yml restart"
+            }
+        }
+        stage('Pobierz obraz z repository') {
+            when { expression { params.ACTION == 'up' } }
+            steps {
+                sh "docker pull ${IMAGE_NAME}:${IMAGE_TAG}"
+            }
+        }
+        stage('Checkout') {
+            when { expression { params.ACTION == 'up' } }
+            steps {
+                checkout scmGit(
+                    branches: [[name: "*/${params.BRANCH_NAME}"]],
+                    userRemoteConfigs: [[
+                        url: 'git@bitbucket.org:grzegorz5/frontend.git',
+                        credentialsId: 'bitbucket'
+                    ]]
+                )
+            }
+        }
+        stage('Uruchom Docker Compose') {
+            when { expression { params.ACTION == 'up' } }
+            steps {
+                sh """
+                    docker compose -f docker-compose.frontend.yml down
+                    IMAGE_NAME=${IMAGE_NAME} IMAGE_TAG=${IMAGE_TAG} NODE_ENV=${NODE_ENV} docker compose -f docker-compose.frontend.yml up -d
+                """
+            }
+        }
+    }
+    post {
+        always {
+            echo "========always========"
+        }
+        success {
+            echo "========pipeline executed successfully ========"
+        }
+        failure {
+            echo "========pipeline execution failed========"
+        }
+    }
+}

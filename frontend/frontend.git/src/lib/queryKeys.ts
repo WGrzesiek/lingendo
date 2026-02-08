@@ -1,0 +1,89 @@
+export const QUERY_KEYS = {
+  AUTH: "auth",
+  USER: "user",
+  DASHBOARD: "dashboard",
+  DECKS: "decks",
+  FLASHCARDS: "flashcards",
+  ENROLLMENTS: "enrollments",
+  LEARNING: "learning",
+  COURSES: "courses",
+  LEADERBOARD: "leaderboard",
+  SETTINGS: "settings",
+  REVIEW: "review",
+  COMMUNITY: "community",
+  FRIENDS: "friends",
+  GROUPS: "groups",
+  STUDENT_GROUPS: "student-groups",
+  TEACHER: "teacher",
+  TEACHER_STUDENT: "teacher-student",
+  MY_TEACHERS: "my-teachers",
+  DECK_SHARE: "deck-share",
+  STATISTICS: "statistics",
+} as const;
+
+/**
+ * Grupy kluczy do masowej refetch
+ * Używaj po większych akcjach (np. zakończenie sesji nauki)
+ */
+export const REFETCH_GROUPS = {
+  AFTER_LEARNING: [
+    QUERY_KEYS.DASHBOARD,
+    QUERY_KEYS.LEARNING,
+    QUERY_KEYS.LEADERBOARD,
+    QUERY_KEYS.STATISTICS,
+  ] as const,
+  AFTER_REVIEW: [
+    QUERY_KEYS.DASHBOARD,
+    QUERY_KEYS.REVIEW,
+    QUERY_KEYS.LEADERBOARD,
+    QUERY_KEYS.STATISTICS,
+  ] as const,
+  AFTER_DECK_MUTATION: [
+    QUERY_KEYS.DECKS,
+    QUERY_KEYS.DASHBOARD,
+    QUERY_KEYS.FLASHCARDS,
+    QUERY_KEYS.ENROLLMENTS,
+    QUERY_KEYS.COMMUNITY,
+  ] as const,
+  AFTER_USER_UPDATE: [
+    QUERY_KEYS.USER,
+    QUERY_KEYS.DASHBOARD,
+    QUERY_KEYS.AUTH,
+    QUERY_KEYS.SETTINGS,
+  ] as const,
+  AFTER_ENROLLMENT: [
+    QUERY_KEYS.ENROLLMENTS,
+    QUERY_KEYS.DECKS,
+    QUERY_KEYS.DASHBOARD,
+    QUERY_KEYS.DECK_SHARE,
+  ] as const,
+  AFTER_FRIEND_ACTION: [QUERY_KEYS.FRIENDS, QUERY_KEYS.DASHBOARD] as const,
+  AFTER_GROUP_ACTION: [
+    QUERY_KEYS.GROUPS,
+    QUERY_KEYS.STUDENT_GROUPS,
+    QUERY_KEYS.DASHBOARD,
+  ] as const,
+  AFTER_TEACHER_ACTION: [
+    QUERY_KEYS.TEACHER,
+    QUERY_KEYS.TEACHER_STUDENT,
+    QUERY_KEYS.STUDENT_GROUPS,
+  ] as const,
+  AFTER_DECK_SHARE: [QUERY_KEYS.DECK_SHARE, QUERY_KEYS.DECKS] as const,
+
+  ON_LOGOUT: [
+    QUERY_KEYS.AUTH,
+    QUERY_KEYS.USER,
+    QUERY_KEYS.DASHBOARD,
+    QUERY_KEYS.DECKS,
+    QUERY_KEYS.FLASHCARDS,
+    QUERY_KEYS.ENROLLMENTS,
+    QUERY_KEYS.LEARNING,
+    QUERY_KEYS.COURSES,
+    QUERY_KEYS.LEADERBOARD,
+    QUERY_KEYS.FRIENDS,
+    QUERY_KEYS.GROUPS,
+    QUERY_KEYS.TEACHER,
+    QUERY_KEYS.SETTINGS,
+    QUERY_KEYS.STATISTICS,
+  ] as const,
+} as const;
