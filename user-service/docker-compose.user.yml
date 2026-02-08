@@ -1,0 +1,52 @@
+name: learnwords
+
+services:
+  user-service:
+    image: ${IMAGE_NAME:-user-service}:${IMAGE_TAG:-dev}
+    container_name: user-service
+    restart: unless-stopped
+
+    environment:
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-dev}
+
+      # HTTP + gRPC
+      SERVER_PORT: ${PORT:-8812}
+      GRPC_PORT: ${GRPC_PORT:-9098}
+
+      # DB
+      DATASOURCE_URL: ${DATASOURCE_URL:-jdbc:postgresql://postgres:5432/user_management}
+      DB_POSTGRESQL_USER: ${DB_POSTGRESQL_USER:-admin}
+      DB_POSTGRESQL_PASSWORD: ${DB_POSTGRESQL_PASSWORD:-adminpassword}
+
+      # Kafka
+      KAFKA_BOOTSTRAP_SERVERS: ${KAFKA_BOOTSTRAP_SERVERS:-kafka:9092}
+      KAFKA_GROUP: ${KAFKA_GROUP:-user-service-group}
+      KAFKA_AUTO_OFFSET_RESET: ${KAFKA_AUTO_OFFSET_RESET:-earliest}
+
+      # Security (Resource server)
+      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI: ${JWKS_URI:-http://api-gateway:8811/.well-known/jwks.json}
+
+      # Observability
+      ZIPKIN_ENDPOINT: ${ZIPKIN_ENDPOINT:-http://zipkin:9411/api/v2/spans}
+      TRACING_PROBABILITY: ${TRACING_PROBABILITY:-1.0}
+      LOGSTASH_HOST: ${LOGSTASH_HOST:-logstash}
+
+      JAVA_OPTS: ${JAVA_OPTS:-}
+
+    ports:
+      - "${PORT:-8812}:${PORT:-8812}"
+      - "${GRPC_PORT:-9098}:${GRPC_PORT:-9098}"
+
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://user-service:${PORT:-8812}/actuator/health/readiness | grep -q '\"status\"\\s*:\\s*\"UP\"'"]
+      interval: 10s
+      timeout: 3s
+      retries: 12
+      start_period: 30s
+
+    networks:
+      - learnwords-net
+
+networks:
+  learnwords-net:
+    external: true
