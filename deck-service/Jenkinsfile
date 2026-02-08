@@ -1,0 +1,156 @@
+pipeline {
+  agent { label 'builder' }
+
+  tools {
+    jdk 'JDK24'
+    maven 'Maven'
+  }
+
+  options {
+    timestamps()
+    ansiColor('xterm')
+  }
+
+  parameters {
+    string(name: 'PARENT_BRANCH', defaultValue: 'main', description: 'Git branch dla parent')
+    booleanParam(name: 'BUILD_PARENT', defaultValue: true, description: 'Zbudować parent?')
+    booleanParam(name: 'SKIP_TESTS', defaultValue: true, description: 'Pominąć testy?')
+    string(name: 'REGISTRY', defaultValue: 'localhost:5000', description: 'Local Docker registry')
+    string(name: 'IMAGE_NAME', defaultValue: 'learnwords/deck-service', description: 'Nazwa obrazu')
+    string(name: 'TAG', defaultValue: 'dev-1', description: 'Tag obrazu')
+  }
+
+  environment {
+    CREDS_ID    = 'bitbucket'
+    PARENT_REPO = 'git@bitbucket.org:grzegorz5/learnwords-parent.git'
+  }
+
+  stages {
+    stage('Checkout parent') {
+      steps {
+        dir('parent') {
+          git branch: params.PARENT_BRANCH, credentialsId: env.CREDS_ID, url: env.PARENT_REPO
+        }
+      }
+    }
+
+    stage('Checkout deck-service') {
+      steps {
+        dir('deck-service') {
+          checkout scm
+        }
+      }
+    }
+
+    stage('Build parent (optional)') {
+      when { expression { return params.BUILD_PARENT } }
+      steps {
+        dir('parent') {
+          sh 'mvn -U -B -N -f pom.xml install'
+        }
+      }
+    }
+
+    stage('Build & Install deck-service') {
+      steps {
+        dir('deck-service') {
+          script {
+            def mvnFlags = params.SKIP_TESTS ? "-DskipTests" : ""
+            sh "mvn -U -B clean install ${mvnFlags}"
+          }
+        }
+      }
+    }
+
+    stage('Code Stats') {
+      steps {
+        dir('deck-service') {
+          sh 'scc --format json --output scc.json .'
+          archiveArtifacts artifacts: 'scc.json', fingerprint: true, allowEmptyArchive: true
+        }
+      }
+    }
+
+    stage('Tests (do not abort immediately)') {
+      when { expression { !params.SKIP_TESTS } }
+      steps {
+        dir('deck-service') {
+          script {
+            def status = sh(script: 'mvn -B test', returnStatus: true)
+
+            env.TEST_EXIT_CODE = "${status}"
+
+            if (status != 0) {
+              echo "Tests failed (exit code=${status}) - continuing to post actions."
+            }
+          }
+        }
+      }
+    }
+
+    stage('Build Docker image') {
+      steps {
+        dir('deck-service') {
+          script {
+            def tag = params.TAG?.trim() ? params.TAG.trim() : "${env.BUILD_NUMBER}"
+            def image = "${params.REGISTRY}/${params.IMAGE_NAME}:${tag}"
+
+            sh "docker build -t ${image} ."
+            sh "docker push ${image}"
+
+            echo "Pushed Docker image: ${image}"
+          }
+        }
+      }
+    }
+  }
+
+  post {
+    always {
+      junit allowEmptyResults: true, testResults: 'deck-service/target/surefire-reports/*.xml'
+
+
+      dir('deck-service') {
+        allure([
+          includeProperties: false,
+          jdk: '',
+          results: [[path: 'target/allure-results']]
+        ])
+      }
+
+      script {
+        def jacocoExists = fileExists('deck-service/target/site/jacoco/jacoco.xml') || fileExists('deck-service/target/jacoco.exec')
+        if (jacocoExists) {
+          discoverReferenceBuild()
+          recordCoverage(
+            tools: [[parser: 'JACOCO']],
+            id: 'jacoco',
+            name: 'JaCoCo Coverage',
+            sourceCodeRetention: 'EVERY_BUILD',
+            sourceDirectories: [[path: 'deck-service/src/main/java']],
+            qualityGates: [
+              [threshold: 60.0, metric: 'LINE',   baseline: 'PROJECT', unstable: true],
+              [threshold: 60.0, metric: 'BRANCH', baseline: 'PROJECT', unstable: true]
+            ]
+          )
+        } else {
+          echo "JaCoCo output not found - skipping coverage publishing."
+        }
+      }
+
+      script {
+        if (!params.SKIP_TESTS && env.TEST_EXIT_CODE && env.TEST_EXIT_CODE != "0") {
+          currentBuild.result = 'FAILURE'
+        }
+      }
+    }
+
+    failure {
+      echo "Build FAILED"
+    }
+
+    success {
+      echo "Build SUCCESS"
+    }
+  }
+}

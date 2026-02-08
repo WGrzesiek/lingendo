@@ -1,0 +1,49 @@
+package com.learnwords.deckservice.entity;
+
+import jakarta.persistence.*;
+import lombok.*;
+
+import java.time.Instant;
+
+@NoArgsConstructor
+@AllArgsConstructor
+@Setter
+@Getter
+@Builder
+@Entity
+@Table(name = "session_flashcard",
+        indexes = {
+                @Index(name = "idx_session_flashcard_session_id", columnList = "session_id"),
+                @Index(name = "idx_session_flashcard_flashcard_id", columnList = "flashcard_id")
+        })
+public class SessionFlashcard {
+
+    @Id
+//    @GeneratedValue(strategy = GenerationType.UUID)
+    private String id;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "session_id", nullable = false)
+    private Session session;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "flashcard_id", nullable = false)
+    private Flashcard flashcard;
+
+    @Builder.Default
+    @Column(nullable = false, updatable = false)
+    private Instant createdAt = Instant.now();
+
+    @Column(nullable = false)
+    private Instant updatedAt;
+
+    @PrePersist
+    public void prePersist() {
+        updatedAt = createdAt;
+    }
+
+    @PreUpdate
+    public void preUpdate() {
+        updatedAt = Instant.now();
+    }
+}
