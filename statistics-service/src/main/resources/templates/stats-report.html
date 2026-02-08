@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="pl">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Raport Statystyk - LearnWords</title>
+    <style>
+      /* Fonty - wsparcie polskich znaków */
+      @font-face {
+        font-family: "Inter";
+        src: url("/fonts/Inter-Regular.ttf") format("truetype");
+        font-weight: 400;
+        font-style: normal;
+      }
+
+      @font-face {
+        font-family: "Inter";
+        src: url("/fonts/Inter-Bold.ttf") format("truetype");
+        font-weight: 700;
+        font-style: normal;
+      }
+
+      /* Konfiguracja strony PDF */
+      @page {
+        size: A4;
+        margin: 12mm 15mm;
+      }
+
+      /* Reset i podstawowe style */
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI",
+          Roboto, "Helvetica Neue", Arial, sans-serif;
+        line-height: 1.5;
+        color: #1f2937;
+        background: #ffffff;
+      }
+
+      /* Container - kompaktowy layout */
+      .container {
+        max-width: 100%;
+        margin: 0 auto;
+        padding: 8px;
+      }
+
+      /* Header - zielony motyw */
+      .header {
+        text-align: center;
+        border-bottom: 3px solid #22c55e;
+        padding-bottom: 14px;
+        margin-bottom: 18px;
+      }
+
+      .header h1 {
+        font-size: 28px;
+        font-weight: 700;
+        color: #166534;
+        margin-bottom: 6px;
+      }
+
+      .header p {
+        font-size: 13px;
+        color: #6b7280;
+      }
+
+      /* Metadata Section - kompaktowy */
+      .metadata {
+        display: flex;
+        justify-content: space-between;
+        padding: 10px;
+        background: #f9fafb;
+        border-radius: 6px;
+        margin-bottom: 16px;
+        font-size: 13px;
+      }
+
+      .metadata-item {
+        display: flex;
+        flex-direction: column;
+      }
+
+      .metadata-label {
+        font-weight: 600;
+        color: #6b7280;
+        margin-bottom: 4px;
+      }
+
+      .metadata-value {
+        color: #1f2937;
+        font-weight: 500;
+      }
+
+      /* Stats Grid - zielony motyw, kompaktowy */
+      .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 12px;
+        margin-bottom: 16px;
+      }
+
+      .stat-card {
+        background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+        color: white;
+        padding: 14px;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+      }
+
+      .stat-card.accent-purple {
+        background: linear-gradient(135deg, #16a34a 0%, #15803d 100%);
+      }
+
+      .stat-card.accent-green {
+        background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+      }
+
+      .stat-card.accent-orange {
+        background: linear-gradient(135deg, #16a34a 0%, #166534 100%);
+      }
+
+      .stat-card.accent-pink {
+        background: linear-gradient(135deg, #22c55e 0%, #15803d 100%);
+      }
+
+      .stat-card.accent-indigo {
+        background: linear-gradient(135deg, #16a34a 0%, #166534 100%);
+      }
+
+      .stat-label {
+        font-size: 12px;
+        opacity: 0.95;
+        margin-bottom: 6px;
+      }
+
+      .stat-value {
+        font-size: 26px;
+        font-weight: 700;
+      }
+
+      /* Section - kompaktowy */
+      .section {
+        margin-bottom: 16px;
+      }
+
+      .section-title {
+        font-size: 18px;
+        font-weight: 700;
+        color: #166534;
+        margin-bottom: 10px;
+        border-bottom: 2px solid #e5e7eb;
+        padding-bottom: 6px;
+      }
+
+      /* Chart Container - lekko zielony */
+      .chart-container {
+        background: #f9fafb;
+        padding: 14px;
+        border-radius: 6px;
+        margin-bottom: 12px;
+      }
+
+      .chart-title {
+        font-size: 15px;
+        font-weight: 600;
+        color: #166534;
+        margin-bottom: 10px;
+      }
+
+      /* Bar Chart - zielony motyw, kompaktowy */
+      .bar-chart {
+        display: flex;
+        align-items: flex-end;
+        height: 140px;
+        gap: 12px;
+        padding: 6px 0;
+      }
+
+      .bar-item {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+
+      .bar {
+        width: 100%;
+        background: linear-gradient(180deg, #22c55e 0%, #16a34a 100%);
+        border-radius: 3px 3px 0 0;
+        position: relative;
+        min-height: 6px;
+      }
+
+      .bar-value {
+        position: absolute;
+        top: -18px;
+        font-size: 11px;
+        font-weight: 600;
+        color: #166534;
+      }
+
+      .bar-label {
+        margin-top: 6px;
+        font-size: 10px;
+        color: #6b7280;
+        text-align: center;
+      }
+
+      .empty-chart-message {
+        text-align: center;
+        color: #6b7280;
+        font-size: 13px;
+        padding: 20px;
+      }
+
+      /* Progress Bar - zielony motyw, kompaktowy */
+      .progress-container {
+        margin-bottom: 14px;
+      }
+
+      .progress-label {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 6px;
+        font-size: 12px;
+      }
+
+      .progress-label-text {
+        font-weight: 600;
+        color: #166534;
+      }
+
+      .progress-label-value {
+        color: #6b7280;
+      }
+
+      .progress-bar {
+        width: 100%;
+        height: 20px;
+        background: #e5e7eb;
+        border-radius: 10px;
+        overflow: hidden;
+      }
+
+      .progress-fill {
+        height: 100%;
+        background: linear-gradient(90deg, #22c55e 0%, #16a34a 100%);
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        padding-right: 8px;
+        color: white;
+        font-size: 11px;
+        font-weight: 600;
+      }
+
+      /* Table - kompaktowy, nie dziel w połowie */
+      .data-table {
+        width: 100%;
+        border-collapse: collapse;
+        background: white;
+        border-radius: 6px;
+        overflow: hidden;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+        page-break-inside: avoid;
+      }
+
+      .data-table th {
+        background: #f3f4f6;
+        padding: 10px;
+        text-align: left;
+        font-weight: 600;
+        color: #166534;
+        font-size: 12px;
+        border-bottom: 2px solid #e5e7eb;
+      }
+
+      .data-table td {
+        padding: 9px 10px;
+        border-bottom: 1px solid #f3f4f6;
+        font-size: 12px;
+      }
+
+      .data-table tr:last-child td {
+        border-bottom: none;
+      }
+
+      .data-table tr:hover {
+        background: #f9fafb;
+      }
+
+      /* Footer - kompaktowy */
+      .footer {
+        text-align: center;
+        padding-top: 12px;
+        margin-top: 16px;
+        border-top: 2px solid #e5e7eb;
+        font-size: 11px;
+        color: #6b7280;
+      }
+
+      /* Highlights - zielony motyw */
+      .highlight-box {
+        background: #ecfdf3;
+        border-left: 4px solid #22c55e;
+        padding: 12px;
+        border-radius: 4px;
+        margin-bottom: 12px;
+      }
+
+      .highlight-title {
+        font-weight: 600;
+        color: #15803d;
+        margin-bottom: 6px;
+        font-size: 13px;
+      }
+
+      .highlight-text {
+        color: #1f2937;
+        font-size: 12px;
+      }
+
+      /* Page break control */
+      @media print {
+        .page-break {
+          page-break-after: always;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <!-- Header -->
+      <div class="header">
+        <h1>📊 Raport Statystyk LearnWords</h1>
+        <p>Szczegółowe zestawienie Twojej aktywności edukacyjnej</p>
+      </div>
+
+      <!-- Metadata -->
+      <div class="metadata">
+        <div class="metadata-item">
+          <span class="metadata-label">Data wygenerowania:</span>
+          <span class="metadata-value" th:text="${generatedDate}"
+            >2025-12-20</span
+          >
+        </div>
+        <div class="metadata-item">
+          <span class="metadata-label">Użytkownik:</span>
+          <span class="metadata-value" th:text="${userId}">user-123</span>
+        </div>
+        <div class="metadata-item">
+          <span class="metadata-label">Okres:</span>
+          <span class="metadata-value">Wszystkie dane</span>
+        </div>
+      </div>
+
+      <!-- Main Stats - warunek includeOverview -->
+      <div class="stats-grid" th:if="${options.includeOverview}">
+        <div class="stat-card">
+          <div class="stat-label">🔥 Seria dni nauki</div>
+          <div class="stat-value" th:text="${stats.streak}">0</div>
+        </div>
+        <div class="stat-card accent-purple">
+          <div class="stat-label">⭐ Łączne punkty</div>
+          <div class="stat-value" th:text="${stats.totalPoints}">0</div>
+        </div>
+        <div class="stat-card accent-green">
+          <div class="stat-label">✅ Ukończone sesje</div>
+          <div class="stat-value" th:text="${stats.sessionsCompleted}">0</div>
+        </div>
+        <div class="stat-card accent-orange">
+          <div class="stat-label">📚 Zapisane talie</div>
+          <div class="stat-value" th:text="${stats.enrolledDecks}">0</div>
+        </div>
+        <div class="stat-card accent-pink">
+          <div class="stat-label">🎯 Utworzone talie</div>
+          <div class="stat-value" th:text="${stats.createdDecks}">0</div>
+        </div>
+        <div class="stat-card accent-indigo">
+          <div class="stat-label">💯 Ukończone talie</div>
+          <div class="stat-value" th:text="${stats.completedDecks}">0</div>
+        </div>
+      </div>
+
+      <!-- Flashcards Stats - warunek includeSessionStats -->
+      <div class="section" th:if="${options.includeSessionStats}">
+        <h2 class="section-title">🎴 Statystyki fiszek</h2>
+
+        <div class="highlight-box">
+          <div class="highlight-title">Podsumowanie</div>
+          <div class="highlight-text">
+            Utworzyłeś
+            <strong th:text="${stats.flashcardsCreated}">0</strong> fiszek i
+            odpowiedziałeś na
+            <strong th:text="${stats.flashcardsAnswered}">0</strong> fiszek z
+            czego
+            <strong th:text="${stats.flashcardsAnsweredCorrectly}">0</strong>
+            poprawnie.
+          </div>
+        </div>
+
+        <div class="chart-container">
+          <div class="chart-title">Skuteczność odpowiedzi</div>
+          <div class="progress-container">
+            <div class="progress-label">
+              <span class="progress-label-text">Poprawne odpowiedzi</span>
+              <span class="progress-label-value">
+                <span th:text="${stats.flashcardsAnsweredCorrectly}">0</span> /
+                <span th:text="${stats.flashcardsAnswered}">0</span>
+              </span>
+            </div>
+            <div class="progress-bar">
+              <div
+                class="progress-fill"
+                th:style="'width: ' + ${stats.flashcardsAnswered > 0 ? (stats.flashcardsAnsweredCorrectly * 100.0 / stats.flashcardsAnswered) : 0} + '%'"
+                th:text="${stats.flashcardsAnswered > 0 ? #numbers.formatDecimal((stats.flashcardsAnsweredCorrectly * 100.0 / stats.flashcardsAnswered), 1, 1) + '%' : '0%'}"
+              >
+                0%
+              </div>
+            </div>
+          </div>
+
+          <div class="progress-container">
+            <div class="progress-label">
+              <span class="progress-label-text"
+                >Średnia odpowiedzi na sesję</span
+              >
+              <span
+                class="progress-label-value"
+                th:text="${#numbers.formatDecimal(stats.averageAnswersPerSession, 1, 1)}"
+                >0.0</span
+              >
+            </div>
+            <div class="progress-bar">
+              <div
+                class="progress-fill"
+                th:style="'width: ' + ${stats.averageAnswersPerSession > 0 ? (stats.averageAnswersPerSession * 2) : 0} + '%'"
+                th:text="${#numbers.formatDecimal(stats.averageAnswersPerSession, 1, 1)}"
+              >
+                0.0
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Monthly Points Chart - warunek includeMonthlyPoints -->
+      <div class="section" th:if="${options.includeMonthlyPoints}">
+        <h2 class="section-title">📈 Punkty w poszczególnych miesiącach</h2>
+        <div class="chart-container">
+          <!-- Wykres słupkowy - tylko jeśli są dane -->
+          <div
+            class="bar-chart"
+            th:if="${monthlyPoints != null and #lists.size(monthlyPoints) > 0}"
+          >
+            <div class="bar-item" th:each="entry : ${monthlyPoints}">
+              <div
+                class="bar"
+                th:style="'height: ' + ${maxPoints > 0 ? (entry.value * 100.0 / maxPoints) : 0} + '%;'"
+              >
+                <span class="bar-value" th:text="${entry.value}">0</span>
+              </div>
+              <div class="bar-label" th:text="${entry.key}">Miesiąc</div>
+            </div>
+          </div>
+          <!-- Komunikat gdy brak danych -->
+          <div
+            class="empty-chart-message"
+            th:if="${monthlyPoints == null or #lists.size(monthlyPoints) == 0}"
+          >
+            Brak zarejestrowanych punktów w poszczególnych miesiącach.
+          </div>
+        </div>
+      </div>
+
+      <!-- Summary Table -->
+      <div class="section">
+        <h2 class="section-title">📋 Szczegółowe zestawienie</h2>
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Kategoria</th>
+              <th>Wartość</th>
+              <th>Opis</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Seria dni nauki</td>
+              <td th:text="${stats.streak}">0</td>
+              <td>Liczba kolejnych dni nauki</td>
+            </tr>
+            <tr>
+              <td>Łączne punkty</td>
+              <td th:text="${stats.totalPoints}">0</td>
+              <td>Suma wszystkich zdobytych punktów</td>
+            </tr>
+            <tr>
+              <td>Utworzone talie</td>
+              <td th:text="${stats.createdDecks}">0</td>
+              <td>Liczba talii utworzonych przez Ciebie</td>
+            </tr>
+            <tr>
+              <td>Zapisane talie</td>
+              <td th:text="${stats.enrolledDecks}">0</td>
+              <td>Liczba talii, do których jesteś zapisany</td>
+            </tr>
+            <tr>
+              <td>Ukończone talie</td>
+              <td th:text="${stats.completedDecks}">0</td>
+              <td>Liczba w pełni ukończonych talii</td>
+            </tr>
+            <tr>
+              <td>Ukończone sesje</td>
+              <td th:text="${stats.sessionsCompleted}">0</td>
+              <td>Liczba przeprowadzonych sesji nauki</td>
+            </tr>
+            <tr>
+              <td>Utworzone fiszki</td>
+              <td th:text="${stats.flashcardsCreated}">0</td>
+              <td>Liczba fiszek dodanych przez Ciebie</td>
+            </tr>
+            <tr>
+              <td>Odpowiedziane fiszki</td>
+              <td th:text="${stats.flashcardsAnswered}">0</td>
+              <td>Liczba fiszek, na które udzieliłeś odpowiedzi</td>
+            </tr>
+            <tr>
+              <td>Poprawne odpowiedzi</td>
+              <td th:text="${stats.flashcardsAnsweredCorrectly}">0</td>
+              <td>Liczba poprawnych odpowiedzi na fiszki</td>
+            </tr>
+            <tr>
+              <td>Średnia odpowiedzi/sesję</td>
+              <td
+                th:text="${#numbers.formatDecimal(stats.averageAnswersPerSession, 1, 2)}"
+              >
+                0.00
+              </td>
+              <td>Średnia liczba odpowiedzi w jednej sesji</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Footer -->
+      <div class="footer">
+        <p>Wygenerowano przez LearnWords Statistics Service</p>
+        <p th:text="${'Data: ' + generatedDate}">Data: 2025-12-20</p>
+      </div>
+    </div>
+  </body>
+</html>
