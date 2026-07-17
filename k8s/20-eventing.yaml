@@ -1,0 +1,119 @@
+# Szyna zdarzeń in-cluster: Redpanda (single node, Kafka-API) + Debezium Server (CDC outbox).
+# Redpanda ograniczona pamięciowo dla low-RAM. Debezium Server = lekki proces zamiast Kafka Connect.
+#
+# UWAGA CDC: Debezium wymaga logical replication na źródłowej bazie outbox (Neon: włącz
+# logical replication + slot). Bez tego CDC nie ruszy — patrz MIGRATION-K3S.md.
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: redpanda
+  namespace: lingendo
+spec:
+  serviceName: redpanda
+  replicas: 1
+  selector:
+    matchLabels: { app: redpanda }
+  template:
+    metadata:
+      labels: { app: redpanda }
+    spec:
+      containers:
+        - name: redpanda
+          image: docker.redpanda.com/redpandadata/redpanda:v24.2.7
+          args:
+            - redpanda
+            - start
+            - --smp=1
+            - --memory=700M
+            - --reserve-memory=0M
+            - --overprovisioned
+            - --node-id=0
+            - --kafka-addr=PLAINTEXT://0.0.0.0:9092
+            - --advertise-kafka-addr=PLAINTEXT://redpanda.lingendo.svc.cluster.local:9092
+          ports:
+            - { name: kafka, containerPort: 9092 }
+          resources:
+            requests: { cpu: "100m", memory: "512Mi" }
+            limits: { cpu: "1", memory: "768Mi" }
+          volumeMounts:
+            - { name: data, mountPath: /var/lib/redpanda/data }
+  volumeClaimTemplates:
+    - metadata: { name: data }
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        resources: { requests: { storage: 2Gi } }
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: redpanda
+  namespace: lingendo
+spec:
+  clusterIP: None
+  selector: { app: redpanda }
+  ports:
+    - { name: kafka, port: 9092, targetPort: kafka }
+---
+# Debezium Server: source Postgres outbox → sink Redpanda. Config przez ConfigMap.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: debezium-server-config
+  namespace: lingendo
+data:
+  application.properties: |
+    debezium.sink.type=kafka
+    debezium.sink.kafka.producer.bootstrap.servers=redpanda.lingendo.svc.cluster.local:9092
+    debezium.sink.kafka.producer.key.serializer=org.apache.kafka.common.serialization.StringSerializer
+    debezium.sink.kafka.producer.value.serializer=org.apache.kafka.common.serialization.StringSerializer
+
+    debezium.source.connector.class=io.debezium.connector.postgresql.PostgresConnector
+    debezium.source.plugin.name=pgoutput
+    debezium.source.slot.name=dbz_outbox_slot
+    debezium.source.topic.prefix=outbox
+    debezium.source.table.include.list=public.outbox
+    debezium.source.offset.storage=org.apache.kafka.connect.storage.MemoryOffsetBackingStore
+
+    # Outbox event router → topiki <aggregate_type>.events
+    debezium.transforms=route
+    debezium.transforms.route.type=io.debezium.transforms.outbox.EventRouter
+    debezium.transforms.route.table.field.event.id=event_id
+    debezium.transforms.route.table.field.event.key=aggregate_id
+    debezium.transforms.route.table.field.event.type=event_type
+    debezium.transforms.route.table.field.event.payload=payload
+    debezium.transforms.route.route.by.field=aggregate_type
+    debezium.transforms.route.topic.regex=([^.]+)\\.([^.]+)\\.outbox
+    debezium.transforms.route.topic.replacement=$2.events
+    debezium.transforms.route.table.expand.json.payload=true
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: debezium-server
+  namespace: lingendo
+spec:
+  replicas: 1
+  selector:
+    matchLabels: { app: debezium-server }
+  template:
+    metadata:
+      labels: { app: debezium-server }
+    spec:
+      containers:
+        - name: debezium-server
+          image: debezium/server:3.0.0.Final
+          env:
+            # Źródło = baza outbox (Neon). Debezium czyta host/port/db/user/pass z env.
+            - { name: DEBEZIUM_SOURCE_DATABASE_HOSTNAME, value: "REPLACE_ME.neon.tech" }
+            - { name: DEBEZIUM_SOURCE_DATABASE_PORT, value: "5432" }
+            - { name: DEBEZIUM_SOURCE_DATABASE_DBNAME, value: "outbox" }
+            - { name: DEBEZIUM_SOURCE_DATABASE_USER, valueFrom: { secretKeyRef: { name: lingendo-secrets, key: DB_POSTGRESQL_USER } } }
+            - { name: DEBEZIUM_SOURCE_DATABASE_PASSWORD, valueFrom: { secretKeyRef: { name: lingendo-secrets, key: DB_POSTGRESQL_PASSWORD } } }
+          resources:
+            requests: { cpu: "50m", memory: "256Mi" }
+            limits: { cpu: "500m", memory: "384Mi" }
+          volumeMounts:
+            - { name: config, mountPath: /debezium/conf }
+      volumes:
+        - name: config
+          configMap: { name: debezium-server-config }

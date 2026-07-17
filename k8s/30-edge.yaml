@@ -1,0 +1,64 @@
+# Edge: frontend (nginx static) + Ingress (Traefik domyślny w k3s).
+# Frontend budowany jako Next static export (output:"export") serwowany przez nginx — patrz
+# frontend/Dockerfile.static (do dodania w kroku 7). "/" → frontend, "/api" → api-gateway.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend
+  namespace: lingendo
+spec:
+  replicas: 1
+  selector:
+    matchLabels: { app: frontend }
+  template:
+    metadata:
+      labels: { app: frontend }
+    spec:
+      containers:
+        - name: frontend
+          image: lingendo/frontend:static
+          imagePullPolicy: IfNotPresent
+          ports:
+            - { name: http, containerPort: 80 }
+          resources:
+            requests: { cpu: "10m", memory: "32Mi" }
+            limits: { cpu: "200m", memory: "64Mi" }
+          readinessProbe:
+            httpGet: { path: /, port: http }
+            periodSeconds: 10
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: frontend
+  namespace: lingendo
+spec:
+  selector: { app: frontend }
+  ports:
+    - { name: http, port: 80, targetPort: http }
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: lingendo
+  namespace: lingendo
+  annotations:
+    # Cloudflare przed Traefikiem (SSL/DNS). TLS na k3s przez cert-manager (opcjonalnie).
+    traefik.ingress.kubernetes.io/router.entrypoints: websecure
+spec:
+  rules:
+    - host: REPLACE_ME.example.com
+      http:
+        paths:
+          - path: /api
+            pathType: Prefix
+            backend:
+              service:
+                name: api-gateway
+                port: { number: 8811 }
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: frontend
+                port: { number: 80 }

@@ -1,0 +1,66 @@
+# Profil k8s — deploy na k3s z natywnym obrazem.
+# Backendy zewnętrzne (managed, off-cluster): Neon Postgres.
+# Szyna zdarzeń: Redpanda in-cluster. Observability wypięta (tylko health dla probe'ów).
+spring:
+  config:
+    activate:
+      on-profile: k8s
+
+  datasource:
+    # np. jdbc:postgresql://<neon-host>/<db>?sslmode=require
+    url: ${DATASOURCE_URL}
+    username: ${DB_POSTGRESQL_USER}
+    password: ${DB_POSTGRESQL_PASSWORD}
+    hikari:
+      maximum-pool-size: ${DB_POOL_MAX:5}
+      minimum-idle: ${DB_POOL_MIN:1}
+
+  jpa:
+    hibernate:
+      ddl-auto: ${HIBERNATE_DDL_AUTO:none}
+    open-in-view: false
+
+  flyway:
+    enabled: ${FLYWAY_ENABLED:true}
+    validate-on-migrate: true
+
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          jwk-set-uri: ${SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI}
+
+  kafka:
+    consumer:
+      bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS}
+      auto-offset-reset: ${KAFKA_AUTO_OFFSET_RESET:latest}
+      group-id: ${KAFKA_GROUP:user-service-group}
+    producer:
+      bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS}
+
+server:
+  port: ${SERVER_PORT:8812}
+
+grpc:
+  server:
+    port: ${GRPC_PORT:9098}
+    address: 0.0.0.0
+    reflectionServiceEnabled: false
+
+logging:
+  level:
+    root: ${LOG_LEVEL_ROOT:INFO}
+
+# Observability wypięta: brak tracing/zipkin/prometheus. Tylko health dla k8s probe'ów.
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+  endpoint:
+    health:
+      probes:
+        enabled: true
+      show-details: never
+  tracing:
+    enabled: false

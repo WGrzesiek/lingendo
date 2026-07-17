@@ -1,0 +1,75 @@
+name: build
+
+# Tylko build (bez deployu). Weryfikuje, że reactor Java, koog (Gradle) i frontend się budują.
+# Native image dla pilota (user-service) — job manualny (workflow_dispatch), bo jest wolny/ciężki.
+
+on:
+  push:
+    branches: ["main", "deploy/**"]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: build-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  backend:
+    name: backend (maven reactor)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "24"
+          cache: maven
+      - name: Build reactor (skip tests)
+        # Agregator learnwords-parent buduje common, proto-shared i serwisy w kolejności.
+        run: ./user-service/mvnw -B -ntp -DskipTests -f learnwords-parent/pom.xml package
+
+  koog:
+    name: koog-service (gradle)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "24"
+          cache: gradle
+      - name: Build koog-service (skip tests)
+        working-directory: koog-service
+        run: ./gradlew build -x test --no-daemon
+
+  frontend:
+    name: frontend (next build)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: frontend/frontend.git/package-lock.json
+      - name: Install + build
+        working-directory: frontend/frontend.git
+        run: |
+          npm ci
+          npm run build
+
+  native-image:
+    name: native image (user-service, pilot)
+    # Manualny — GraalVM native jest wolny i ryzykowny (gRPC/net.devh). Bez pushu.
+    if: github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-buildx-action@v3
+      - name: Build native image (no push)
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: user-service/Dockerfile.native
+          tags: lingendo/user-service:native
+          push: false

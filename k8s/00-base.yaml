@@ -1,0 +1,45 @@
+# Baza klastra: namespace + wspólny ConfigMap + SZABLON Secretu.
+# Sekret: uzupełnij realne wartości poza repo (np. `kubectl create secret ...` albo sealed-secrets).
+# NIE commituj prawdziwych sekretów.
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: lingendo
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: lingendo-config
+  namespace: lingendo
+data:
+  # Szyna zdarzeń in-cluster.
+  KAFKA_BOOTSTRAP_SERVERS: "redpanda.lingendo.svc.cluster.local:9092"
+  # JWK gateway (weryfikacja JWT w resource-serverach).
+  SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI: "http://api-gateway.lingendo.svc.cluster.local:8811/.well-known/jwks.json"
+  SPRING_PROFILES_ACTIVE: "k8s"
+  LOG_LEVEL_ROOT: "INFO"
+  HIBERNATE_DDL_AUTO: "none"
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: lingendo-secrets
+  namespace: lingendo
+type: Opaque
+stringData:
+  # --- Neon Postgres (per-serwis DB w URL) ---
+  USER_DB_URL: "jdbc:postgresql://REPLACE_ME.neon.tech/user_management?sslmode=require"
+  DECK_DB_URL: "jdbc:postgresql://REPLACE_ME.neon.tech/deck?sslmode=require"
+  VOCAB_CMD_DB_URL: "jdbc:postgresql://REPLACE_ME.neon.tech/vocabulary?sslmode=require"
+  STATS_DB_URL: "jdbc:postgresql://REPLACE_ME.neon.tech/statistics?sslmode=require"
+  OUTBOX_DB_URL: "jdbc:postgresql://REPLACE_ME.neon.tech/outbox?sslmode=require"
+  DB_POSTGRESQL_USER: "REPLACE_ME"
+  DB_POSTGRESQL_PASSWORD: "REPLACE_ME"
+  # --- Atlas MongoDB (vocabulary-read) ---
+  MONGODB_URI: "mongodb+srv://REPLACE_ME:REPLACE_ME@REPLACE_ME.mongodb.net/vocabulary?retryWrites=true&w=majority"
+  # --- cloud.redis.io (api-gateway refresh-token store) ---
+  SPRING_DATA_REDIS_HOST: "REPLACE_ME"
+  SPRING_DATA_REDIS_PORT: "6379"
+  SPRING_DATA_REDIS_PASSWORD: "REPLACE_ME"
+  # --- koog AI ---
+  OPENAI_API_KEY: "REPLACE_ME"

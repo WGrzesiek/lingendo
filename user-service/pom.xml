@@ -93,19 +93,8 @@
             <artifactId>flyway-database-postgresql</artifactId>
             <scope>runtime</scope>
         </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-actuator</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>io.micrometer</groupId>
-            <artifactId>micrometer-registry-prometheus</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>io.zipkin.reporter2</groupId>
-            <artifactId>zipkin-reporter-brave</artifactId>
-        </dependency>
+        <!-- Observability wypięta (prometheus + zipkin usunięte dla low-RAM native).
+             Actuator zostaje wyłącznie dla health probe'ów k8s (zadeklarowany wyżej). -->
         <dependency>
             <groupId>com.learnwords</groupId>
             <artifactId>common</artifactId>
@@ -141,5 +130,21 @@
             </plugin>
         </plugins>
     </build>
+
+    <profiles>
+        <!-- Build natywny GraalVM: mvn -Pnative -DskipTests native:compile
+             Wersje pluginów AOT/native dziedziczone ze spring-boot-starter-parent. -->
+        <profile>
+            <id>native</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.graalvm.buildtools</groupId>
+                        <artifactId>native-maven-plugin</artifactId>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 
 </project>

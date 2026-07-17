@@ -1,0 +1,29 @@
+# =========================================================================
+# Natywny obraz user-service (GraalVM native-image) — produkcja / CI.
+# Lokalny dev zostaje na ./Dockerfile (JVM, szybki build).
+# Wzorzec obrazów za devPath; build multi-module bo to monorepo reactor
+# (user-service zależy od common + proto-shared + learnwords-parent).
+# Build context = ROOT monorepo:
+#   docker build -f user-service/Dockerfile.native -t lingendo/user-service:native .
+# =========================================================================
+
+# --- build: kompilacja natywna (GraalVM Community, publiczny na ghcr, bez auth, toolchain w środku) ---
+FROM ghcr.io/graalvm/native-image-community:25 AS build
+WORKDIR /src
+COPY . .
+# 1) parent + biblioteki współdzielone do lokalnego repo (reactor, bez testów)
+RUN ./user-service/mvnw -B -ntp -DskipTests \
+        -f learnwords-parent/pom.xml -pl ../common,../proto-shared,../user-service -am install
+# 2) native compile user-service (profil "native" dziedziczony ze spring-boot-starter-parent
+#    odpala AOT + native-image)
+RUN ./user-service/mvnw -B -ntp -Pnative -DskipTests -f user-service/pom.xml native:compile
+
+# --- runtime: slim z glibc (native-image linkuje glibc, NIE alpine/musl) ---
+FROM debian:bookworm-slim
+WORKDIR /app
+RUN useradd --create-home spring
+USER spring
+# binarka natywna = target/<artifactId> = target/user-service
+COPY --from=build /src/user-service/target/user-service app
+EXPOSE 8812 9098
+ENTRYPOINT ["./app"]
