@@ -1,0 +1,22 @@
+# syntax=docker/dockerfile:1
+# =========================================================================
+# koog-service native (GraalVM, Kotlin/Gradle). Standalone (brak zależności monorepo).
+# Build context = koog-service:
+#   docker build -f koog-service/Dockerfile.native -t lingendo/koog-service:native ./koog-service
+# UWAGA: koog (ai.koog:koog-agents) to framework AI — native NIEZWALIDOWANY. Prawdopodobnie
+# wymaga dodatkowych hintów (reflection/serialization/ktor) albo fallbacku JVM+CDS (./Dockerfile).
+# Logowanie wyłączone (slf4j-nop, logback wykluczony w build.gradle.kts).
+# =========================================================================
+FROM ghcr.io/graalvm/native-image-community:24 AS build
+WORKDIR /src
+COPY . .
+RUN --mount=type=cache,target=/root/.gradle \
+    ./gradlew --no-daemon -x test nativeCompile && \
+    cp build/native/nativeCompile/koog-service /src/app
+
+FROM debian:bookworm-slim
+WORKDIR /app
+RUN useradd --create-home spring
+USER spring
+COPY --from=build /src/app app
+ENTRYPOINT ["./app"]

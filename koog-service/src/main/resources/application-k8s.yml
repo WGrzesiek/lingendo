@@ -1,0 +1,56 @@
+# Profil k8s — koog-service na k3s (native/JVM). Neon Postgres (schema `koog`), Redpanda in-cluster,
+# OpenAI (klucz z Secret). Observability wypięta. Logowanie wyłączone (slf4j-nop).
+spring:
+  config:
+    activate:
+      on-profile: k8s
+
+  datasource:
+    url: ${DATASOURCE_URL}
+    username: ${DB_POSTGRESQL_USER}
+    password: ${DB_POSTGRESQL_PASSWORD}
+    hikari:
+      maximum-pool-size: ${DB_POOL_MAX:5}
+      minimum-idle: ${DB_POOL_MIN:1}
+
+  jpa:
+    hibernate:
+      ddl-auto: ${HIBERNATE_DDL_AUTO:validate}
+    properties:
+      hibernate:
+        default_schema: koog
+    open-in-view: false
+
+  flyway:
+    enabled: ${FLYWAY_ENABLED:true}
+    default-schema: koog
+    schemas: koog
+    validate-on-migrate: true
+
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS}
+    consumer:
+      group-id: ${KAFKA_GROUP:koog-service-group}
+
+server:
+  port: ${SERVER_PORT:7777}
+
+openai:
+  api-key: ${OPENAI_API_KEY}
+
+logging:
+  level:
+    root: ${LOG_LEVEL_ROOT:INFO}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+  endpoint:
+    health:
+      probes:
+        enabled: true
+      show-details: never
+  tracing:
+    enabled: false

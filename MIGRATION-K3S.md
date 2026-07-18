@@ -141,8 +141,14 @@ Krok `mvnw install` (JVM, Java 24) zwalidowany lokalnie: `common`+`proto-shared`
 - [x] 3. deck / vocab-command / vocab-read — **native-ready** (pom logging-off+obs-off, logback usunięty,
       `application-k8s.yml`, workflow, manifest `11-services.yaml`). Kompilacja JVM = SUCCESS.
       DRY: profil `native` w parencie, hinty native w `common`, wspólny root `Dockerfile.native` (ARG SERVICE).
-- [ ] 4. statistics — **NIE identyczne**: wymaga rewrite ClickHouse→Postgres (JDBC + migracje) przed native.
-- [ ] 5. api-gateway — **NIE identyczne**: WebFlux + Cloud Gateway + Redis-reactive, standalone (poza reactorem).
-- [ ] 6. koog-service — **NIE identyczne**: Kotlin/Gradle → `./gradlew nativeCompile`, inny Dockerfile.
+- [~] 4. statistics — **fundament gotowy**: migracja PG (tabele+VIEWs), pom/config swap, native/logging pattern,
+      workflow, manifest. ⏳ **zostaje**: rewrite SQL w 9 repo (funkcje CH→PG) + upserty consumerów
+      (patrz `statistics-service/CH-TO-PG-REPOS.md`). Bez tego stats zbuduje się ale nie zadziała poprawnie.
+- [x] 5. api-gateway — native-ready: pom (logging/obs off + profil native), `native-image.properties`,
+      własny `Dockerfile.native` (install proto-shared → build standalone), `application-k8s.yml` (Redis),
+      workflow, manifest `13-api-gateway.yaml` (Redis env + JWT-keys volume z Secret `gateway-jwt-keys`).
+- [~] 6. koog-service — config gotowy: `build.gradle.kts` (plugin native + obs/logging off),
+      `Dockerfile.native` (Gradle nativeCompile), `application-k8s.yml`, workflow, manifest `14-koog.yaml`.
+      ⚠ **native niezwalidowany** (ai.koog AI framework) — prawdopodobnie wymaga hintów lub fallbacku JVM+CDS.
 - [ ] 7. frontend static → nginx (`output:"export"` + `Dockerfile.static`)
 - [ ] 8. Google auth

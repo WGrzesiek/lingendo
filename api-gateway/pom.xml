@@ -45,6 +45,22 @@
     </dependencyManagement>
 
     <dependencies>
+        <!-- Logowanie wyłączone (low-RAM native): wyklucz logback + slf4j-nop no-op provider. -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.springframework.boot</groupId>
+                    <artifactId>spring-boot-starter-logging</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-nop</artifactId>
+        </dependency>
+
         <!-- Gateway + WebFlux -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -138,16 +154,7 @@
             <artifactId>spring-boot-starter-actuator</artifactId>
             <version>3.5.7</version>
         </dependency>
-        <dependency>
-            <groupId>io.micrometer</groupId>
-            <artifactId>micrometer-registry-prometheus</artifactId>
-            <version>1.15.5</version>
-        </dependency>
-        <dependency>
-            <groupId>io.zipkin.reporter2</groupId>
-            <artifactId>zipkin-reporter-brave</artifactId>
-            <version>3.5.1</version>
-        </dependency>
+        <!-- Observability wypięta (low-RAM native): prometheus + zipkin usunięte. -->
         <dependency>
             <groupId>io.micrometer</groupId>
             <artifactId>micrometer-tracing-bridge-brave</artifactId>
@@ -192,4 +199,20 @@
             </plugin>
         </plugins>
     </build>
+
+    <profiles>
+        <!-- Build natywny GraalVM (api-gateway standalone — parent = spring-boot-starter-parent,
+             nie learnwords-parent, więc profil native tutaj). Hinty w native-image.properties. -->
+        <profile>
+            <id>native</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.graalvm.buildtools</groupId>
+                        <artifactId>native-maven-plugin</artifactId>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 </project>

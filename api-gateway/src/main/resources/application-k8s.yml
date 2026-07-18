@@ -1,0 +1,56 @@
+# Profil k8s — api-gateway na k3s (native, low-RAM). Managed Redis (cloud.redis.io) na refresh-token
+# store, gRPC client do user-service in-cluster, klucze JWT RSA montowane z Secret. Routes (URIs serwisów)
+# dziedziczone z application.yml — nazwy pasują do k8s Service DNS w namespace lingendo.
+spring:
+  config:
+    activate:
+      on-profile: k8s
+
+  data:
+    redis:
+      host: ${SPRING_DATA_REDIS_HOST}
+      port: ${SPRING_DATA_REDIS_PORT:6379}
+      password: ${SPRING_DATA_REDIS_PASSWORD}
+      ssl:
+        enabled: ${SPRING_DATA_REDIS_SSL:true}
+
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI}
+          jwk-set-uri: ${SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI}
+          cookie-name: ${ACCESS_TOKEN:access_token}
+
+# Klucze RSA montowane z Secret `gateway-jwt-keys` do /etc/keys (patrz manifest).
+jwt:
+  private-key-location: ${JWT_PRIVATE_KEY_LOCATION:file:/etc/keys/private_key.pem}
+  public-key-location: ${JWT_PUBLIC_KEY_LOCATION:file:/etc/keys/public_key.pem}
+  expire-in: ${JWT_EXPIRE_IN:86400000}
+
+server:
+  port: ${SERVER_PORT:8811}
+
+# gRPC client do user-service (auth) w klastrze.
+grpc:
+  client:
+    auth:
+      address: ${GRPC_CLIENT_AUTH_ADDRESS:static://user-service:9098}
+      negotiationType: ${GRPC_CLIENT_AUTH_NEGOTIATIONTYPE:PLAINTEXT}
+
+logging:
+  level:
+    root: ${LOG_LEVEL_ROOT:INFO}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+  endpoint:
+    health:
+      probes:
+        enabled: true
+      show-details: never
+  tracing:
+    enabled: false

@@ -1,0 +1,42 @@
+name: Build koog-service
+# Wzorzec devPath: native image + push do GHCR. koog Kotlin/Gradle, standalone → context = koog-service.
+# UWAGA: koog-agents (AI) native niezwalidowany — jeśli nativeCompile padnie, fallback JVM
+# (koog-service/Dockerfile) + zmiana file:/tags poniżej.
+on:
+  push:
+    branches: ["main"]
+    paths:
+      - "koog-service/**"
+      - ".github/workflows/build-koog-service.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  koog-service:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: docker/setup-buildx-action@v4.2.0
+      - uses: docker/login-action@v4.4.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - id: meta
+        uses: docker/metadata-action@v6.2.0
+        with:
+          images: ghcr.io/${{ github.repository_owner }}/lingendo-koog-service
+          tags: |
+            type=raw,value=latest
+            type=sha,format=short
+      - uses: docker/build-push-action@v7.3.0
+        with:
+          context: ./koog-service
+          file: ./koog-service/Dockerfile.native
+          platforms: linux/amd64
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}

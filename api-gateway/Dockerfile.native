@@ -1,0 +1,27 @@
+# syntax=docker/dockerfile:1
+# =========================================================================
+# api-gateway native (GraalVM). Standalone (parent = spring-boot-starter-parent, poza
+# reactorem learnwords-parent), ale zależy od proto-shared (gRPC client) → najpierw install
+# proto-shared przez reactor, potem build api-gateway. Build context = ROOT monorepo:
+#   docker build -f api-gateway/Dockerfile.native -t lingendo/api-gateway:native .
+# Logowanie wyłączone (slf4j-nop), hinty native w api-gateway/.../native-image.properties.
+# =========================================================================
+FROM ghcr.io/graalvm/native-image-community:24 AS build
+COPY --from=maven:3.9.9-eclipse-temurin-21 /usr/share/maven /usr/share/maven
+ENV PATH="/usr/share/maven/bin:${PATH}"
+WORKDIR /src
+COPY . .
+# 1) install proto-shared (+ parent) do .m2 — api-gateway od niego zależy.
+RUN --mount=type=cache,target=/root/.m2/repository \
+    mvn -B -ntp -Dmaven.test.skip=true -f learnwords-parent/pom.xml -pl ../proto-shared -am install
+# 2) native compile api-gateway (standalone).
+RUN --mount=type=cache,target=/root/.m2/repository \
+    mvn -B -ntp -Pnative -Dmaven.test.skip=true -f api-gateway/pom.xml native:compile && \
+    cp api-gateway/target/api-gateway /src/app
+
+FROM debian:bookworm-slim
+WORKDIR /app
+RUN useradd --create-home spring
+USER spring
+COPY --from=build /src/app app
+ENTRYPOINT ["./app"]
