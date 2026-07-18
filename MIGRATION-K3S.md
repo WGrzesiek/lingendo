@@ -104,11 +104,17 @@ Każdy serwis wymaga realnego `native:compile` (Docker, ~10–15 min) do walidac
 ../vocabulary-read-service ../statistics-service`). Buildy idą przez ten reactor:
 `cd learnwords-parent && ./mvnw ...`.
 
-`<relativePath>../parent/pom.xml</relativePath>` w dzieciach jest nieaktualne (folder to
-`learnwords-parent`), ale w trybie reactora to **tylko warning** — parent rozwiązywany po GAV.
-Standalone single-module build (`cd user-service && mvn`) natomiast padnie, dopóki parent +
-`common` + `proto-shared` nie są w `~/.m2`. Native Docker build robi to dwuetapowo
+**NAPRAWIONE:** `<relativePath>` w 7 dzieciach wskazywał `../parent/pom.xml` (folder to
+`learnwords-parent`) → **fatalny** błąd `Non-resolvable parent POM` (parent nie w `.m2`).
+Poprawione na `../learnwords-parent/pom.xml`. Native Docker build działa dwuetapowo
 (install deps → native compile) — patrz `user-service/Dockerfile.native`.
+
+**NAPRAWIONE:** `proto-shared` — `protobuf-maven-plugin` miał niepinowaną wersję + stary schemat
+configu (`<protocVersion>`/`<binaryMavenPlugins>`); Maven brał 5.1.7 → NPE. Przypięte 5.1.7 +
+schemat `<protoc kind="binary-maven">` / `<plugins>`.
+
+Krok `mvnw install` (JVM, Java 24) zwalidowany lokalnie: `common`+`proto-shared`+`user-service` = SUCCESS.
+`native:compile` (krok 2 Dockerfile) nadal niezwalidowany — brak GraalVM lokalnie, wychodzi w CI/Dockerze.
 
 `api-gateway` i `koog-service` (Gradle) są **poza** tym reactorem (standalone).
 

@@ -6,7 +6,7 @@
         <groupId>com.learnwords</groupId>
         <artifactId>learnwords-services</artifactId>
         <version>0.0.1-SNAPSHOT</version>
-        <relativePath>../parent/pom.xml</relativePath>
+        <relativePath>../learnwords-parent/pom.xml</relativePath>
 
     </parent>
     <artifactId>vocabulary-command-service</artifactId>

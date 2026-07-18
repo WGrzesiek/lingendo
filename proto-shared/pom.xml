@@ -7,7 +7,7 @@
         <groupId>com.learnwords</groupId>
         <artifactId>learnwords-services</artifactId>
         <version>0.0.1-SNAPSHOT</version>
-        <relativePath>../parent/pom.xml</relativePath>
+        <relativePath>../learnwords-parent/pom.xml</relativePath>
     </parent>
 
     <artifactId>proto-shared</artifactId>
@@ -48,19 +48,21 @@
         <plugin>
             <groupId>io.github.ascopes</groupId>
             <artifactId>protobuf-maven-plugin</artifactId>
-<!--            <version>${protobuf-maven-plugin.version}</version>-->
+            <version>5.1.7</version>
             <configuration>
-                <!-- To wystarczy, żeby plugin sam dobrał binarkę protoc -->
-                <protocVersion>${protobuf-java-version}</protocVersion>
+                <!-- Schemat 5.1.7: protoc jako binary-maven (nie <protocVersion>). -->
+                <protoc kind="binary-maven">
+                    <version>${protobuf-java-version}</version>
+                </protoc>
 
-                <!-- Dodajemy plugin do generowania stubów gRPC -->
-                <binaryMavenPlugins>
-                    <binaryMavenPlugin>
+                <!-- Plugin generujący stuby gRPC (schemat 5.1.7: <plugins>/<plugin kind="binary-maven">). -->
+                <plugins>
+                    <plugin kind="binary-maven">
                         <groupId>io.grpc</groupId>
                         <artifactId>protoc-gen-grpc-java</artifactId>
                         <version>${grpc.version}</version>
-                    </binaryMavenPlugin>
-                </binaryMavenPlugins>
+                    </plugin>
+                </plugins>
             </configuration>
             <executions>
                 <execution>
