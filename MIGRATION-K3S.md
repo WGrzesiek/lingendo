@@ -12,7 +12,7 @@ zewnętrzne darmowe managed (off-cluster), lekka szyna zdarzeń w klastrze.
 
 | Obszar            | Decyzja                                                                 |
 | ----------------- | ---------------------------------------------------------------------- |
-| Obrazy Java       | **GraalVM native image** (build `ghcr.io/graalvm/native-image-community:25`, runtime `debian:bookworm-slim`, wzorzec devPath) |
+| Obrazy Java       | **GraalVM native image** (build `ghcr.io/graalvm/native-image-community:24` — zgodny z java.version=24, runtime `debian:bookworm-slim`, wzorzec devPath) |
 | Statistics DB     | **Neon Postgres** (rezygnacja z ClickHouse — swap JDBC + Flyway PG)     |
 | Kafka / CDC       | **Redpanda single-node (k3s) + Debezium Server** (Estuary odrzucone*)   |
 | Frontend          | **Next static export → nginx** (`output: "export"`, zero RAM runtime)   |
@@ -134,12 +134,15 @@ Krok `mvnw install` (JVM, Java 24) zwalidowany lokalnie: `common`+`proto-shared`
 
 ### Checklista
 
-- [~] 1. user-service pilot — **config gotowy** (`application-k8s.yml`, profil `native` w pom,
-      observability wypięta, `Dockerfile.native`). ⏳ **native-compile do walidacji** (Docker, brak GraalVM lokalnie).
-- [x] 2. manifesty współdzielone (`k8s/`: ns+configmap+secret, user-service, redpanda+debezium, edge+ingress)
-- [ ] 3. deck / vocab-command / vocab-read (kopia wzorca user-service)
-- [ ] 4. statistics (ClickHouse→Postgres — rewrite JDBC + migracje)
-- [ ] 5. api-gateway (native + managed Redis)
-- [ ] 6. koog-service (native, fallback JVM+CDS)
+- [x] 1. user-service pilot — native-compile **przeszedł na CI** (GraalVM 16GB). Rozwiązane:
+      relativePath, proto-shared plugin, Maven-w-obrazie, logowanie wyłączone (slf4j-nop),
+      netty runtime-init, BouncyCastle build-time-init, observability wypięta.
+- [x] 2. manifesty współdzielone (`k8s/`: ns+configmap+secret, redpanda+debezium, edge+ingress)
+- [x] 3. deck / vocab-command / vocab-read — **native-ready** (pom logging-off+obs-off, logback usunięty,
+      `application-k8s.yml`, workflow, manifest `11-services.yaml`). Kompilacja JVM = SUCCESS.
+      DRY: profil `native` w parencie, hinty native w `common`, wspólny root `Dockerfile.native` (ARG SERVICE).
+- [ ] 4. statistics — **NIE identyczne**: wymaga rewrite ClickHouse→Postgres (JDBC + migracje) przed native.
+- [ ] 5. api-gateway — **NIE identyczne**: WebFlux + Cloud Gateway + Redis-reactive, standalone (poza reactorem).
+- [ ] 6. koog-service — **NIE identyczne**: Kotlin/Gradle → `./gradlew nativeCompile`, inny Dockerfile.
 - [ ] 7. frontend static → nginx (`output:"export"` + `Dockerfile.static`)
 - [ ] 8. Google auth

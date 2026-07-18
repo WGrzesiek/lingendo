@@ -27,6 +27,23 @@
         <url/>
     </scm>
     <dependencies>
+        <!-- Logowanie wyłączone (low-RAM native): wyklucz logback w jednym punkcie
+             (wszystkie startery idą przez spring-boot-starter) + slf4j-nop = no-op provider. -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.springframework.boot</groupId>
+                    <artifactId>spring-boot-starter-logging</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-nop</artifactId>
+        </dependency>
+
         <!-- ====== WSPÓLNY MODUŁ ====== -->
         <dependency>
             <groupId>com.learnwords</groupId>
@@ -105,14 +122,7 @@
             <artifactId>spring-boot-starter-actuator</artifactId>
         </dependency>
 
-        <dependency>
-            <groupId>io.micrometer</groupId>
-            <artifactId>micrometer-registry-prometheus</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>io.zipkin.reporter2</groupId>
-            <artifactId>zipkin-reporter-brave</artifactId>
-        </dependency>
+        <!-- Observability wypięta (low-RAM native): prometheus + zipkin usunięte. -->
         <!-- https://mvnrepository.com/artifact/org.testcontainers/testcontainers -->
         <dependency>
             <groupId>org.testcontainers</groupId>

@@ -470,4 +470,22 @@
             </plugin>
         </plugins>
     </build>
+
+    <profiles>
+        <!-- Build natywny GraalVM (wspólny dla wszystkich serwisów):
+             mvn -Pnative -Dmaven.test.skip=true -f <serwis>/pom.xml native:compile
+             Aktywny tylko z -Pnative; native:compile wołany per-serwis w Dockerfile.native.
+             Wersje AOT/native dziedziczone ze spring-boot-starter-parent. -->
+        <profile>
+            <id>native</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.graalvm.buildtools</groupId>
+                        <artifactId>native-maven-plugin</artifactId>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 </project>

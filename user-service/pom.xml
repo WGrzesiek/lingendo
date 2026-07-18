@@ -149,23 +149,5 @@
         </plugins>
     </build>
 
-    <profiles>
-        <!-- Build natywny GraalVM: mvn -Pnative -DskipTests native:compile
-             Wersje pluginów AOT/native dziedziczone ze spring-boot-starter-parent. -->
-        <profile>
-            <id>native</id>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.graalvm.buildtools</groupId>
-                        <artifactId>native-maven-plugin</artifactId>
-                        <!-- buildArgs native przez plik zasobów, nie przez <configuration>:
-                             native:compile (default-cli) nie czyta config z profilu niezawodnie.
-                             Patrz src/main/resources/META-INF/native-image/.../native-image.properties -->
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-    </profiles>
-
+    <!-- Profil `native` dziedziczony z learnwords-parent. Hinty native w common (native-image.properties). -->
 </project>

@@ -1,16 +1,14 @@
-name: Build user-service
-# Wzorzec devPath: native image + push do GHCR (bez deployu na klaster).
-# Adaptacja monorepo: context = ROOT (nie ./user-service), bo Dockerfile.native buduje
-# reactor (common + proto-shared + learnwords-parent). Path-filter obejmuje moduły współdzielone.
+name: Build vocabulary-command-service
+# Wzorzec devPath: native image (wspólny Dockerfile.native, ARG SERVICE) + push do GHCR.
 on:
   push:
     branches: ["main"]
     paths:
-      - "user-service/**"
+      - "vocabulary-command-service/**"
       - "common/**"
-      - "proto-shared/**"
       - "learnwords-parent/**"
-      - ".github/workflows/build-user-service.yml"
+      - "Dockerfile.native"
+      - ".github/workflows/build-vocabulary-command-service.yml"
   workflow_dispatch:
 
 permissions:
@@ -18,7 +16,7 @@ permissions:
   packages: write
 
 jobs:
-  user-service:
+  vocabulary-command-service:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
@@ -31,7 +29,7 @@ jobs:
       - id: meta
         uses: docker/metadata-action@v6.2.0
         with:
-          images: ghcr.io/${{ github.repository_owner }}/lingendo-user-service
+          images: ghcr.io/${{ github.repository_owner }}/lingendo-vocabulary-command-service
           tags: |
             type=raw,value=latest
             type=sha,format=short
@@ -39,7 +37,7 @@ jobs:
         with:
           context: .
           file: ./Dockerfile.native
-          build-args: SERVICE=user-service
+          build-args: SERVICE=vocabulary-command-service
           platforms: linux/amd64
           push: true
           tags: ${{ steps.meta.outputs.tags }}

@@ -1,0 +1,32 @@
+# syntax=docker/dockerfile:1
+# =========================================================================
+# Wspólny natywny build (GraalVM) dla WSZYSTKICH serwisów reactora Maven.
+# Parametryzowany ARG SERVICE (= nazwa katalogu = artifactId = nazwa binarki).
+# Build context = ROOT monorepo:
+#   docker build -f Dockerfile.native --build-arg SERVICE=deck-service -t lingendo/deck-service:native .
+# Wzorzec obrazów za devPath. Logowanie wyłączone (slf4j-nop), hinty native w common.
+# =========================================================================
+ARG SERVICE
+
+FROM ghcr.io/graalvm/native-image-community:24 AS build
+# Maven z oficjalnego obrazu (nie pobieramy przez mvnw w minimalnym obrazie).
+COPY --from=maven:3.9.9-eclipse-temurin-21 /usr/share/maven /usr/share/maven
+ENV PATH="/usr/share/maven/bin:${PATH}"
+ARG SERVICE
+WORKDIR /src
+COPY . .
+# 1) install serwisu + jego zależności reactora (-am dobiera common/proto-shared), bez deps testowych.
+RUN --mount=type=cache,target=/root/.m2/repository \
+    mvn -B -ntp -Dmaven.test.skip=true -f learnwords-parent/pom.xml -pl ../${SERVICE} -am install
+# 2) native compile serwisu (profil `native` z parenta + hinty z common/native-image.properties).
+RUN --mount=type=cache,target=/root/.m2/repository \
+    mvn -B -ntp -Pnative -Dmaven.test.skip=true -f ${SERVICE}/pom.xml native:compile && \
+    cp ${SERVICE}/target/${SERVICE} /src/app
+
+# --- runtime: slim z glibc (native-image linkuje glibc) ---
+FROM debian:bookworm-slim
+WORKDIR /app
+RUN useradd --create-home spring
+USER spring
+COPY --from=build /src/app app
+ENTRYPOINT ["./app"]
