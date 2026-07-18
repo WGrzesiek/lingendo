@@ -16,10 +16,16 @@ spring:
     hibernate:
       ddl-auto: ${HIBERNATE_DDL_AUTO:none}
     open-in-view: false
+    properties:
+      hibernate:
+        default_schema: decks
 
   flyway:
     enabled: ${FLYWAY_ENABLED:true}
     validate-on-migrate: true
+    # Izolacja schematem w wspólnej bazie `lingendo` (unika kolizji flyway_schema_history).
+    default-schema: decks
+    schemas: decks
 
   security:
     oauth2:
