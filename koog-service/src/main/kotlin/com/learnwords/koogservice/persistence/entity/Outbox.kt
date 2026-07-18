@@ -14,7 +14,7 @@ import java.time.Instant
  * Przechowuje eventy do wysłania przez Kafka.
  */
 @Entity
-@Table(name = "outbox")
+@Table(name = "koog_outbox")
 class Outbox(
     @Id
     @Column(name = "event_id", nullable = false, unique = true)

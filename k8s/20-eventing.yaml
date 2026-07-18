@@ -117,3 +117,66 @@ spec:
       volumes:
         - name: config
           configMap: { name: debezium-server-config }
+---
+# Druga instancja Debezium Server dla koog outbox (Debezium Server = 1 connector/instancja).
+# Źródło: baza lingendo, schema koog, tabela koog.koog_outbox (przemianowana z outbox by uniknąć
+# kolizji z głównym public.outbox). Slot koog_outbox_slot. Topiki: koog.<aggregate_type>.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: debezium-koog-config
+  namespace: lingendo
+data:
+  application.properties: |
+    debezium.sink.type=kafka
+    debezium.sink.kafka.producer.bootstrap.servers=redpanda.lingendo.svc.cluster.local:9092
+    debezium.sink.kafka.producer.key.serializer=org.apache.kafka.common.serialization.StringSerializer
+    debezium.sink.kafka.producer.value.serializer=org.apache.kafka.common.serialization.StringSerializer
+
+    debezium.source.connector.class=io.debezium.connector.postgresql.PostgresConnector
+    debezium.source.plugin.name=pgoutput
+    debezium.source.slot.name=koog_outbox_slot
+    debezium.source.topic.prefix=koog
+    debezium.source.schema.include.list=koog
+    debezium.source.table.include.list=koog.koog_outbox
+    debezium.source.offset.storage=org.apache.kafka.connect.storage.MemoryOffsetBackingStore
+
+    debezium.transforms=route
+    debezium.transforms.route.type=io.debezium.transforms.outbox.EventRouter
+    debezium.transforms.route.table.field.event.id=event_id
+    debezium.transforms.route.table.field.event.key=aggregate_id
+    debezium.transforms.route.table.field.event.type=event_type
+    debezium.transforms.route.table.field.event.payload=payload
+    debezium.transforms.route.route.by.field=aggregate_type
+    debezium.transforms.route.table.expand.json.payload=true
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: debezium-koog
+  namespace: lingendo
+spec:
+  replicas: 1
+  selector:
+    matchLabels: { app: debezium-koog }
+  template:
+    metadata:
+      labels: { app: debezium-koog }
+    spec:
+      containers:
+        - name: debezium-koog
+          image: debezium/server:3.0.0.Final
+          env:
+            - { name: DEBEZIUM_SOURCE_DATABASE_HOSTNAME, value: "REPLACE_ME.neon.tech" }
+            - { name: DEBEZIUM_SOURCE_DATABASE_PORT, value: "5432" }
+            - { name: DEBEZIUM_SOURCE_DATABASE_DBNAME, value: "lingendo" }
+            - { name: DEBEZIUM_SOURCE_DATABASE_USER, valueFrom: { secretKeyRef: { name: lingendo-secrets, key: DB_POSTGRESQL_USER } } }
+            - { name: DEBEZIUM_SOURCE_DATABASE_PASSWORD, valueFrom: { secretKeyRef: { name: lingendo-secrets, key: DB_POSTGRESQL_PASSWORD } } }
+          resources:
+            requests: { cpu: "50m", memory: "256Mi" }
+            limits: { cpu: "500m", memory: "384Mi" }
+          volumeMounts:
+            - { name: config, mountPath: /debezium/conf }
+      volumes:
+        - name: config
+          configMap: { name: debezium-koog-config }

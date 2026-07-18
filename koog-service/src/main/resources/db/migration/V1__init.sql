@@ -51,7 +51,8 @@ CREATE INDEX IF NOT EXISTS idx_item_job_id ON sentence_generation_item(job_id);
 CREATE INDEX IF NOT EXISTS idx_item_word_id ON sentence_generation_item(word_id);
 CREATE INDEX IF NOT EXISTS idx_item_status ON sentence_generation_item(status);
 
-CREATE TABLE IF NOT EXISTS outbox
+-- Nazwa koog_outbox (nie `outbox`) — unika kolizji z głównym public.outbox we wspólnej bazie lingendo.
+CREATE TABLE IF NOT EXISTS koog_outbox
 (
     event_id      VARCHAR(255)                NOT NULL,
     agregate_type VARCHAR(255)                NOT NULL,
@@ -62,8 +63,8 @@ CREATE TABLE IF NOT EXISTS outbox
     retry_count   INTEGER                     NOT NULL,
     created_at    TIMESTAMP WITHOUT TIME ZONE NOT NULL,
     updated_at    TIMESTAMP WITHOUT TIME ZONE NOT NULL,
-    CONSTRAINT pk_outbox PRIMARY KEY (event_id)
+    CONSTRAINT pk_koog_outbox PRIMARY KEY (event_id)
 );
 
-CREATE INDEX IF NOT EXISTS idx_outbox_status ON outbox(status);
-CREATE INDEX IF NOT EXISTS idx_outbox_created_at ON outbox(created_at);
+CREATE INDEX IF NOT EXISTS idx_koog_outbox_status ON koog_outbox(status);
+CREATE INDEX IF NOT EXISTS idx_koog_outbox_created_at ON koog_outbox(created_at);
