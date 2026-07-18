@@ -7,7 +7,7 @@
 # wymaga dodatkowych hintów (reflection/serialization/ktor) albo fallbacku JVM+CDS (./Dockerfile).
 # Logowanie wyłączone (slf4j-nop, logback wykluczony w build.gradle.kts).
 # =========================================================================
-FROM ghcr.io/graalvm/native-image-community:24 AS build
+FROM ghcr.io/graalvm/native-image-community:25 AS build
 WORKDIR /src
 COPY . .
 RUN --mount=type=cache,target=/root/.gradle \
