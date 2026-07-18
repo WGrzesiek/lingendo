@@ -14,11 +14,6 @@ spring:
         spring.deserializer.value.delegate.class: org.springframework.kafka.support.serializer.JsonDeserializer
         spring.json.trusted.packages: "*"
 
-  jpa:
-    properties:
-      hibernate:
-        dialect: org.hibernate.dialect.ClickHouseDialect
-
   flyway:
     locations: classpath:db/migration
     baseline-on-migrate: true
