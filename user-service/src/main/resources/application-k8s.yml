@@ -23,6 +23,9 @@ spring:
   flyway:
     enabled: ${FLYWAY_ENABLED:true}
     validate-on-migrate: true
+    # Współdzielona baza `lingendo`: przy rolloutcie kolejnych serwisów odizoluj je schematem,
+    # np.: default-schema: user, schemas: [user] (+ hibernate.default_schema poniżej).
+    # Pilot user-service działa na `public`.
 
   security:
     oauth2:

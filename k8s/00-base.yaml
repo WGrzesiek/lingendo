@@ -27,16 +27,14 @@ metadata:
   namespace: lingendo
 type: Opaque
 stringData:
-  # --- Neon Postgres (per-serwis DB w URL) ---
-  USER_DB_URL: "jdbc:postgresql://REPLACE_ME.neon.tech/user_management?sslmode=require"
-  DECK_DB_URL: "jdbc:postgresql://REPLACE_ME.neon.tech/deck?sslmode=require"
-  VOCAB_CMD_DB_URL: "jdbc:postgresql://REPLACE_ME.neon.tech/vocabulary?sslmode=require"
-  STATS_DB_URL: "jdbc:postgresql://REPLACE_ME.neon.tech/statistics?sslmode=require"
-  OUTBOX_DB_URL: "jdbc:postgresql://REPLACE_ME.neon.tech/outbox?sslmode=require"
+  # --- Neon Postgres: JEDNA współdzielona baza `lingendo` (free-tier). ---
+  # Wszystkie serwisy + tabela outbox w tej samej bazie. Separacja per-serwis przez SCHEMA
+  # (patrz MIGRATION-K3S.md: spring.flyway.default-schema + hibernate.default_schema).
+  DATASOURCE_URL: "jdbc:postgresql://REPLACE_ME.neon.tech/lingendo?sslmode=require"
   DB_POSTGRESQL_USER: "REPLACE_ME"
   DB_POSTGRESQL_PASSWORD: "REPLACE_ME"
   # --- Atlas MongoDB (vocabulary-read) ---
-  MONGODB_URI: "mongodb+srv://REPLACE_ME:REPLACE_ME@REPLACE_ME.mongodb.net/vocabulary?retryWrites=true&w=majority"
+  MONGODB_URI: "mongodb+srv://REPLACE_ME:REPLACE_ME@REPLACE_ME.mongodb.net/lingendo?retryWrites=true&w=majority"
   # --- cloud.redis.io (api-gateway refresh-token store) ---
   SPRING_DATA_REDIS_HOST: "REPLACE_ME"
   SPRING_DATA_REDIS_PORT: "6379"

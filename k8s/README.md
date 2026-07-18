@@ -16,9 +16,10 @@ api-gateway, koog) → skopiuj wzorzec z `10-user-service.yaml`, podmień port/D
 
 ## Prerekwizyty (poza klastrem)
 
-- **Neon**: bazy `user_management`, `deck`, `vocabulary`, `statistics`, `outbox`.
-  Dla CDC włącz **logical replication** na bazie `outbox` (+ slot `dbz_outbox_slot`).
-- **Atlas MongoDB** M0: baza `vocabulary`.
+- **Neon**: **jedna** baza `lingendo` (wszystkie serwisy PG + tabela `public.outbox`).
+  Separacja serwisów przez schema — patrz `../MIGRATION-K3S.md` (kolizja Flyway).
+  Dla CDC włącz **logical replication** na bazie `lingendo` (+ slot `dbz_outbox_slot`).
+- **Atlas MongoDB** M0: baza `lingendo`.
 - **cloud.redis.io**: instancja dla api-gateway.
 - Obrazy native zbudowane i wypchnięte do rejestru dostępnego z k3s
   (`docker build -f user-service/Dockerfile.native -t lingendo/user-service:native .`).

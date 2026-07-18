@@ -106,7 +106,7 @@ spec:
             # Źródło = baza outbox (Neon). Debezium czyta host/port/db/user/pass z env.
             - { name: DEBEZIUM_SOURCE_DATABASE_HOSTNAME, value: "REPLACE_ME.neon.tech" }
             - { name: DEBEZIUM_SOURCE_DATABASE_PORT, value: "5432" }
-            - { name: DEBEZIUM_SOURCE_DATABASE_DBNAME, value: "outbox" }
+            - { name: DEBEZIUM_SOURCE_DATABASE_DBNAME, value: "lingendo" }
             - { name: DEBEZIUM_SOURCE_DATABASE_USER, valueFrom: { secretKeyRef: { name: lingendo-secrets, key: DB_POSTGRESQL_USER } } }
             - { name: DEBEZIUM_SOURCE_DATABASE_PASSWORD, valueFrom: { secretKeyRef: { name: lingendo-secrets, key: DB_POSTGRESQL_PASSWORD } } }
           resources:

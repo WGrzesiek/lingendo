@@ -30,10 +30,22 @@ Architektura używa Kafki jednocześnie jako CDC (outbox→Debezium) **i** jako 
 
 | Usługa         | Provider           | Używane przez                                   |
 | -------------- | ------------------ | ----------------------------------------------- |
-| PostgreSQL     | Neon               | user, deck, vocabulary-command, statistics      |
-| MongoDB        | Atlas (M0)         | vocabulary-read                                 |
+| PostgreSQL     | Neon (1 baza)      | **wszystkie** serwisy PG + outbox — jedna baza `lingendo` |
+| MongoDB        | Atlas (M0)         | vocabulary-read (baza `lingendo`)               |
 | Redis          | cloud.redis.io     | api-gateway (refresh-token store)               |
 | (Kafka/CDC)    | Redpanda + DBZ     | **in-cluster** (nie ma sensownego free managed) |
+
+### ⚠ Współdzielona baza `lingendo` — separacja przez schema
+
+Free-tier = **jedna** baza Postgres `lingendo` dla wszystkich serwisów. Każdy serwis ma
+własne migracje Flyway → przy wspólnej bazie **kolidują na `flyway_schema_history`** i tabelach.
+Wymagane przed rolloutem serwisu #2:
+
+- `spring.flyway.default-schema=<serwis>` + `spring.flyway.schemas=<serwis>` (osobny schema + historia),
+- `spring.jpa.properties.hibernate.default_schema=<serwis>`,
+- schematy: `user`, `deck`, `vocabulary`, `statistics`, `public` (outbox).
+
+Dla pilota (sam user-service) nie jest to blokujące. Debezium: baza `lingendo`, tabela `public.outbox`.
 
 ---
 

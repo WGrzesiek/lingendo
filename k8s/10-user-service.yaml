@@ -13,17 +13,21 @@ spec:
     metadata:
       labels: { app: user-service }
     spec:
+      # Jeśli pakiet GHCR jest prywatny: utwórz secret `ghcr-pull` (patrz README) i odkomentuj.
+      # imagePullSecrets:
+      #   - name: ghcr-pull
       containers:
         - name: user-service
-          image: lingendo/user-service:native
-          imagePullPolicy: IfNotPresent
+          # Zgodne z build-user-service.yml. Podmień REPLACE_OWNER na właściciela repo (lowercase).
+          image: ghcr.io/REPLACE_OWNER/lingendo-user-service:latest
+          imagePullPolicy: Always
           ports:
             - { name: http, containerPort: 8812 }
             - { name: grpc, containerPort: 9098 }
           envFrom:
             - configMapRef: { name: lingendo-config }
           env:
-            - { name: DATASOURCE_URL, valueFrom: { secretKeyRef: { name: lingendo-secrets, key: USER_DB_URL } } }
+            - { name: DATASOURCE_URL, valueFrom: { secretKeyRef: { name: lingendo-secrets, key: DATASOURCE_URL } } }
             - { name: DB_POSTGRESQL_USER, valueFrom: { secretKeyRef: { name: lingendo-secrets, key: DB_POSTGRESQL_USER } } }
             - { name: DB_POSTGRESQL_PASSWORD, valueFrom: { secretKeyRef: { name: lingendo-secrets, key: DB_POSTGRESQL_PASSWORD } } }
             - { name: KAFKA_GROUP, value: user-service-group }
