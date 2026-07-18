@@ -1,0 +1,24 @@
+# syntax=docker/dockerfile:1
+# Frontend na k3s: Next standalone (mały serwer node ~90MB). Dynamiczne trasy [id] wymagają
+# runtime → nie static export. Proxy /api -> api-gateway w next.config (API_PROXY_TARGET).
+# Build context = frontend/frontend.git:
+#   docker build -f frontend/frontend.git/Dockerfile.k8s -t lingendo/frontend:k8s ./frontend/frontend.git
+FROM node:20-alpine AS build
+WORKDIR /app
+COPY package.json package-lock.json ./
+RUN npm ci
+COPY . .
+RUN npm run build
+
+FROM node:20-alpine AS runtime
+WORKDIR /app
+ENV NODE_ENV=production
+ENV HOSTNAME=0.0.0.0
+ENV PORT=3000
+# Wyjście standalone: server.js + zależności runtime.
+COPY --from=build /app/.next/standalone ./
+COPY --from=build /app/.next/static ./.next/static
+COPY --from=build /app/public ./public
+EXPOSE 3000
+USER node
+CMD ["node", "server.js"]

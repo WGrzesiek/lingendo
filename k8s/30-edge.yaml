@@ -1,6 +1,7 @@
-# Edge: frontend (nginx static) + Ingress (Traefik domyślny w k3s).
-# Frontend budowany jako Next static export (output:"export") serwowany przez nginx — patrz
-# frontend/Dockerfile.static (do dodania w kroku 7). "/" → frontend, "/api" → api-gateway.
+# Edge: frontend (Next standalone, node) + Ingress (Traefik domyślny w k3s).
+# Dynamiczne trasy [id] → nie static export; mały serwer node ~90MB (frontend/frontend.git/Dockerfile.k8s).
+# Ingress: "/api" → api-gateway (prod, bezpośrednio), "/" → frontend. next.config rewrites proxuje
+# /api → gateway w dev (Vite-style); w prod Ingress łapie /api pierwszy.
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -16,13 +17,15 @@ spec:
     spec:
       containers:
         - name: frontend
-          image: lingendo/frontend:static
-          imagePullPolicy: IfNotPresent
+          image: ghcr.io/REPLACE_OWNER/lingendo-frontend:latest
+          imagePullPolicy: Always
           ports:
-            - { name: http, containerPort: 80 }
+            - { name: http, containerPort: 3000 }
+          env:
+            - { name: API_PROXY_TARGET, value: "http://api-gateway.lingendo.svc.cluster.local:8811" }
           resources:
-            requests: { cpu: "10m", memory: "32Mi" }
-            limits: { cpu: "200m", memory: "64Mi" }
+            requests: { cpu: "50m", memory: "96Mi" }
+            limits: { cpu: "500m", memory: "160Mi" }
           readinessProbe:
             httpGet: { path: /, port: http }
             periodSeconds: 10

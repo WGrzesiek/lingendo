@@ -150,5 +150,8 @@ Krok `mvnw install` (JVM, Java 24) zwalidowany lokalnie: `common`+`proto-shared`
 - [~] 6. koog-service — config gotowy: `build.gradle.kts` (plugin native + obs/logging off),
       `Dockerfile.native` (Gradle nativeCompile), `application-k8s.yml`, workflow, manifest `14-koog.yaml`.
       ⚠ **native niezwalidowany** (ai.koog AI framework) — prawdopodobnie wymaga hintów lub fallbacku JVM+CDS.
-- [ ] 7. frontend static → nginx (`output:"export"` + `Dockerfile.static`)
-- [ ] 8. Google auth
+- [x] 7. frontend — **Next standalone (node ~90MB)**, NIE static export (7 tras `[id]` bez
+      generateStaticParams → export odpada). `next.config` rewrites proxuje `/api`→gateway (Vite-style,
+      dev+prod), front woła relatywnie `/api` (bez zmian w kodzie). `Dockerfile.k8s`, workflow,
+      manifest `30-edge.yaml` (node port 3000). W k8s **Traefik Ingress = reverse-proxy** (osobny nginx zbędny).
+- [ ] 8. Google auth (odłożone)
