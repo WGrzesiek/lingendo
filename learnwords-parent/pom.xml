@@ -272,18 +272,9 @@
                 <artifactId>spring-boot-starter-cache</artifactId>
                 <version>${spring-boot-starter-cache}</version>
             </dependency>
-            <!-- https://mvnrepository.com/artifact/org.flywaydb/flyway-core -->
-            <dependency>
-                <groupId>org.flywaydb</groupId>
-                <artifactId>flyway-core</artifactId>
-                <version>${flyway.version}</version>
-            </dependency>
-            <!-- https://mvnrepository.com/artifact/org.flywaydb/flyway-database-postgresql -->
-            <dependency>
-                <groupId>org.flywaydb</groupId>
-                <artifactId>flyway-database-postgresql</artifactId>
-                <version>${flyway.version}</version>
-            </dependency>
+            <!-- flyway-core + flyway-database-postgresql: BEZ override wersji — zarządza Spring Boot BOM.
+                 Wymuszenie 11.14.0 łamało native (NativeImageResourceProviderCustomizer oczekuje
+                 konstruktora Scanner z wersji zarządzanej przez Spring Boot 3.5.0 → NoSuchMethodError). -->
             <!-- https://mvnrepository.com/artifact/org.flywaydb/flyway-maven-plugin -->
             <dependency>
                 <groupId>org.flywaydb</groupId>
