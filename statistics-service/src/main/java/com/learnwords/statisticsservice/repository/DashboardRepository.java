@@ -132,9 +132,6 @@ public class DashboardRepository {
     WITH latest_snapshot AS (
         SELECT *
         FROM analytics.leaderboard_snapshot
-        WHERE snapshot_time = (
-            SELECT max(snapshot_time) FROM analytics.leaderboard_snapshot
-        )
     ),
     user_rank AS (
         SELECT rank
