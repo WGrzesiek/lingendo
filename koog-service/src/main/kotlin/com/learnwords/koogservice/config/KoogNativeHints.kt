@@ -70,7 +70,10 @@ class KoogNativeHints : RuntimeHintsRegistrar {
             "classpath*:org/hibernate/dialect/type/**/*.class",
             // Hibernate 7 hibernate-models: OrmAnnotationDescriptor$DynamicCreator reflectively
             // instantiates every *Annotation wrapper via its (ModelsContext) constructor.
-            "classpath*:org/hibernate/boot/models/annotations/**/*.class"
+            "classpath*:org/hibernate/boot/models/annotations/**/*.class",
+            // DialectOverridesAnnotationHelper introspects org.hibernate.annotations.* (and the
+            // nested DialectOverride.SQLInsert/... forms) reflectively to build the override map.
+            "classpath*:org/hibernate/annotations/**/*.class"
         ).forEach { pattern ->
             runCatching { resolver.getResources(pattern) }.getOrDefault(emptyArray()).forEach { res ->
                 runCatching {
@@ -83,5 +86,13 @@ class KoogNativeHints : RuntimeHintsRegistrar {
                 }
             }
         }
+
+        // DialectOverridesAnnotationHelper enumerates DialectOverride's nested annotation
+        // classes via getDeclaredClasses(); register that reflective access explicitly.
+        hints.reflection().registerTypeIfPresent(
+            loader, "org.hibernate.annotations.DialectOverride",
+            MemberCategory.DECLARED_CLASSES,
+            MemberCategory.INVOKE_DECLARED_METHODS
+        )
     }
 }
