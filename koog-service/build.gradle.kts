@@ -1,3 +1,5 @@
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+
 plugins {
     kotlin("jvm") version "2.2.21"
     kotlin("plugin.spring") version "2.2.21"
@@ -70,8 +72,17 @@ configurations.all {
 
 kotlin {
     compilerOptions {
+        // Kotlin 2.2 max JVM target = 24; toolchain JDK stays 25 so GraalVM native-image
+        // reports Java 25 (required by Spring Boot 4 AOT). Bytecode target 24 is forward-compatible.
+        jvmTarget.set(JvmTarget.JVM_24)
         freeCompilerArgs.addAll("-Xjsr305=strict", "-Xannotation-default-target=param-property")
     }
+}
+
+// Keep Java bytecode target aligned with Kotlin (24) to avoid the JVM-target mismatch,
+// while the toolchain JDK remains 25.
+tasks.withType<JavaCompile>().configureEach {
+    options.release.set(24)
 }
 
 allOpen {
