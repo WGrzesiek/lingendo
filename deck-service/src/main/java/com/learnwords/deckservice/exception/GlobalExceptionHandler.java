@@ -98,7 +98,7 @@ public class GlobalExceptionHandler {
         log.error("Unexpected error occurred: {}", ex.getMessage(), ex);
         ApiErrorResponse errorResponse = new ApiErrorResponse(
             HttpStatus.INTERNAL_SERVER_ERROR.value(),
-            "DEBUG " + ex.getClass().getName() + ": " + ex.getMessage()
+            "Wystąpił nieoczekiwany błąd. Spróbuj ponownie później."
         );
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
     }
