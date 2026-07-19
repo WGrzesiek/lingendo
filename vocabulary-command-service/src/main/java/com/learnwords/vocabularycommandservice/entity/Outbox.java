@@ -4,13 +4,13 @@ package com.learnwords.vocabularycommandservice.entity;
 import com.learnwords.common.AggregateType;
 import com.learnwords.common.EventStatus;
 import com.learnwords.common.EventType;
-import com.vladmihalcea.hibernate.type.json.JsonBinaryType;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.Type;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 import java.time.Instant;
 
@@ -41,7 +41,7 @@ public class Outbox {
     private EventType eventType;
 
     @Column(columnDefinition = "jsonb", nullable = false)
-    @Type(JsonBinaryType.class)
+    @JdbcTypeCode(SqlTypes.JSON)
     private String payload;
 
     @Enumerated(EnumType.STRING)

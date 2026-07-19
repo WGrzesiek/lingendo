@@ -114,7 +114,7 @@ spec:
             requests: { cpu: "50m", memory: "256Mi" }
             limits: { cpu: "500m", memory: "384Mi" }
           volumeMounts:
-            - { name: config, mountPath: /debezium/conf }
+            - { name: config, mountPath: /debezium/config }
       volumes:
         - name: config
           configMap: { name: debezium-server-config }
@@ -178,7 +178,7 @@ spec:
             requests: { cpu: "50m", memory: "256Mi" }
             limits: { cpu: "500m", memory: "384Mi" }
           volumeMounts:
-            - { name: config, mountPath: /debezium/conf }
+            - { name: config, mountPath: /debezium/config }
       volumes:
         - name: config
           configMap: { name: debezium-koog-config }

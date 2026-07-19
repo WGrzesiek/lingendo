@@ -1,10 +1,10 @@
 package com.learnwords.deckservice.entity;
 
 import com.learnwords.deckservice.enums.LearningPhase;
-import com.vladmihalcea.hibernate.type.json.JsonBinaryType;
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.Type;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 import java.time.Instant;
 
 @Entity
@@ -52,7 +52,7 @@ public class UserFlashcardProgress {
     private int repetitionCount = 0;
 
     @Column(name = "algorithm_state", columnDefinition = "jsonb", nullable = false)
-    @Type(JsonBinaryType.class)
+    @JdbcTypeCode(SqlTypes.JSON)
     @Builder.Default
     private String algorithmState = "{}";
 
