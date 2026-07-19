@@ -5,6 +5,8 @@ import org.springframework.aot.hint.BindingReflectionHintsRegistrar
 import org.springframework.aot.hint.MemberCategory
 import org.springframework.aot.hint.RuntimeHints
 import org.springframework.aot.hint.RuntimeHintsRegistrar
+import org.springframework.core.io.support.PathMatchingResourcePatternResolver
+import org.springframework.core.type.classreading.CachingMetadataReaderFactory
 import java.util.ServiceLoader
 
 /**
@@ -53,6 +55,26 @@ class KoogNativeHints : RuntimeHintsRegistrar {
                 MemberCategory.INVOKE_PUBLIC_CONSTRUCTORS,
                 MemberCategory.INVOKE_DECLARED_CONSTRUCTORS
             )
+        }
+
+        // JBoss Logging typed loggers: Hibernate calls Logger.getMessageLogger(X.class) which
+        // does Class.forName("X_$logger"). Native strips those generated impls unless registered.
+        // Scan every Hibernate *_$logger / *_$bundle impl and register their constructors at once.
+        val resolver = PathMatchingResourcePatternResolver(loader)
+        val readerFactory = CachingMetadataReaderFactory(loader)
+        listOf(
+            "classpath*:org/hibernate/**/*_\$logger.class",
+            "classpath*:org/hibernate/**/*_\$bundle.class"
+        ).forEach { pattern ->
+            runCatching { resolver.getResources(pattern) }.getOrDefault(emptyArray()).forEach { res ->
+                runCatching {
+                    val className = readerFactory.getMetadataReader(res).classMetadata.className
+                    hints.reflection().registerTypeIfPresent(
+                        loader, className,
+                        MemberCategory.INVOKE_DECLARED_CONSTRUCTORS
+                    )
+                }
+            }
         }
     }
 }
