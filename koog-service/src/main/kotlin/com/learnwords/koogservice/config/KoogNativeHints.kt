@@ -64,7 +64,10 @@ class KoogNativeHints : RuntimeHintsRegistrar {
         val readerFactory = CachingMetadataReaderFactory(loader)
         listOf(
             "classpath*:org/hibernate/**/*_\$logger.class",
-            "classpath*:org/hibernate/**/*_\$bundle.class"
+            "classpath*:org/hibernate/**/*_\$bundle.class",
+            // PostgreSQLDialect.contributePostgreSQLTypes loads these via Class.forName
+            // (PgJdbcHelper): PostgreSQLInetJdbcType, ...IntervalSecondJdbcType, ...StructJdbcType, etc.
+            "classpath*:org/hibernate/dialect/type/**/*.class"
         ).forEach { pattern ->
             runCatching { resolver.getResources(pattern) }.getOrDefault(emptyArray()).forEach { res ->
                 runCatching {
