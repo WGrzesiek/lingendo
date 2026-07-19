@@ -15,9 +15,11 @@ spec:
     metadata:
       labels: { app: frontend }
     spec:
+      imagePullSecrets:
+        - name: ghcr-secret
       containers:
         - name: frontend
-          image: ghcr.io/REPLACE_OWNER/lingendo-frontend:latest
+          image: ghcr.io/wgrzesiek/lingendo-frontend:latest
           imagePullPolicy: Always
           ports:
             - { name: http, containerPort: 3000 }

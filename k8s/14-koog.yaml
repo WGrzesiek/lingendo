@@ -13,9 +13,11 @@ spec:
     metadata:
       labels: { app: koog-service }
     spec:
+      imagePullSecrets:
+        - name: ghcr-secret
       containers:
         - name: koog-service
-          image: ghcr.io/REPLACE_OWNER/lingendo-koog-service:latest
+          image: ghcr.io/wgrzesiek/lingendo-koog-service:latest
           imagePullPolicy: Always
           ports:
             - { name: http, containerPort: 7777 }

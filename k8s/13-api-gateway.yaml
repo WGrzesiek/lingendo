@@ -14,9 +14,11 @@ spec:
     metadata:
       labels: { app: api-gateway }
     spec:
+      imagePullSecrets:
+        - name: ghcr-secret
       containers:
         - name: api-gateway
-          image: ghcr.io/REPLACE_OWNER/lingendo-api-gateway:latest
+          image: ghcr.io/wgrzesiek/lingendo-api-gateway:latest
           imagePullPolicy: Always
           ports:
             - { name: http, containerPort: 8811 }
@@ -26,6 +28,7 @@ spec:
             - { name: SERVER_PORT, value: "8811" }
             - { name: SPRING_DATA_REDIS_HOST, valueFrom: { secretKeyRef: { name: lingendo-secrets, key: SPRING_DATA_REDIS_HOST } } }
             - { name: SPRING_DATA_REDIS_PORT, valueFrom: { secretKeyRef: { name: lingendo-secrets, key: SPRING_DATA_REDIS_PORT } } }
+            - { name: SPRING_DATA_REDIS_USERNAME, valueFrom: { secretKeyRef: { name: lingendo-secrets, key: SPRING_DATA_REDIS_USERNAME } } }
             - { name: SPRING_DATA_REDIS_PASSWORD, valueFrom: { secretKeyRef: { name: lingendo-secrets, key: SPRING_DATA_REDIS_PASSWORD } } }
             - { name: SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI, value: "http://api-gateway.lingendo.svc.cluster.local:8811" }
           resources:

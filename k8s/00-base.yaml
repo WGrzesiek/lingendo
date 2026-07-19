@@ -1,6 +1,6 @@
-# Baza klastra: namespace + wspólny ConfigMap + SZABLON Secretu.
-# Sekret: uzupełnij realne wartości poza repo (np. `kubectl create secret ...` albo sealed-secrets).
-# NIE commituj prawdziwych sekretów.
+# Baza klastra: namespace + wspólny ConfigMap. BEZPIECZNE do re-apply (deploy workflow).
+# Secret `lingendo-secrets` tworzysz RĘCZNIE poza gitem (szablon: k8s/secret.example.yaml).
+# Deploy NIE aplikuje sekretu — inaczej nadpisałby realne wartości placeholderami.
 apiVersion: v1
 kind: Namespace
 metadata:
@@ -19,25 +19,3 @@ data:
   SPRING_PROFILES_ACTIVE: "k8s"
   LOG_LEVEL_ROOT: "INFO"
   HIBERNATE_DDL_AUTO: "none"
----
-apiVersion: v1
-kind: Secret
-metadata:
-  name: lingendo-secrets
-  namespace: lingendo
-type: Opaque
-stringData:
-  # --- Neon Postgres: JEDNA współdzielona baza `lingendo` (free-tier). ---
-  # Wszystkie serwisy + tabela outbox w tej samej bazie. Separacja per-serwis przez SCHEMA
-  # (patrz MIGRATION-K3S.md: spring.flyway.default-schema + hibernate.default_schema).
-  DATASOURCE_URL: "jdbc:postgresql://REPLACE_ME.neon.tech/lingendo?sslmode=require"
-  DB_POSTGRESQL_USER: "REPLACE_ME"
-  DB_POSTGRESQL_PASSWORD: "REPLACE_ME"
-  # --- Atlas MongoDB (vocabulary-read) ---
-  MONGODB_URI: "mongodb+srv://REPLACE_ME:REPLACE_ME@REPLACE_ME.mongodb.net/lingendo?retryWrites=true&w=majority"
-  # --- cloud.redis.io (api-gateway refresh-token store) ---
-  SPRING_DATA_REDIS_HOST: "REPLACE_ME"
-  SPRING_DATA_REDIS_PORT: "6379"
-  SPRING_DATA_REDIS_PASSWORD: "REPLACE_ME"
-  # --- koog AI ---
-  OPENAI_API_KEY: "REPLACE_ME"

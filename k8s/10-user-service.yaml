@@ -13,13 +13,12 @@ spec:
     metadata:
       labels: { app: user-service }
     spec:
-      # Jeśli pakiet GHCR jest prywatny: utwórz secret `ghcr-pull` (patrz README) i odkomentuj.
-      # imagePullSecrets:
-      #   - name: ghcr-pull
+      imagePullSecrets:
+        - name: ghcr-secret
       containers:
         - name: user-service
-          # Zgodne z build-user-service.yml. Podmień REPLACE_OWNER na właściciela repo (lowercase).
-          image: ghcr.io/REPLACE_OWNER/lingendo-user-service:latest
+          # Zgodne z build-user-service.yml. Podmień wgrzesiek na właściciela repo (lowercase).
+          image: ghcr.io/wgrzesiek/lingendo-user-service:latest
           imagePullPolicy: Always
           ports:
             - { name: http, containerPort: 8812 }

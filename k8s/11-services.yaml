@@ -1,5 +1,5 @@
 # deck / vocabulary-command / vocabulary-read — deploymenty native (wzorzec jak user-service).
-# Obraz: ghcr.io/REPLACE_OWNER/lingendo-<serwis>:latest. RAM limit 256Mi.
+# Obraz: ghcr.io/wgrzesiek/lingendo-<serwis>:latest. RAM limit 256Mi.
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -13,9 +13,11 @@ spec:
     metadata:
       labels: { app: deck-service }
     spec:
+      imagePullSecrets:
+        - name: ghcr-secret
       containers:
         - name: deck-service
-          image: ghcr.io/REPLACE_OWNER/lingendo-deck-service:latest
+          image: ghcr.io/wgrzesiek/lingendo-deck-service:latest
           imagePullPolicy: Always
           ports:
             - { name: http, containerPort: 8814 }
@@ -63,9 +65,11 @@ spec:
     metadata:
       labels: { app: vocabulary-command-service }
     spec:
+      imagePullSecrets:
+        - name: ghcr-secret
       containers:
         - name: vocabulary-command-service
-          image: ghcr.io/REPLACE_OWNER/lingendo-vocabulary-command-service:latest
+          image: ghcr.io/wgrzesiek/lingendo-vocabulary-command-service:latest
           imagePullPolicy: Always
           ports:
             - { name: http, containerPort: 8810 }
@@ -113,9 +117,11 @@ spec:
     metadata:
       labels: { app: vocabulary-read-service }
     spec:
+      imagePullSecrets:
+        - name: ghcr-secret
       containers:
         - name: vocabulary-read-service
-          image: ghcr.io/REPLACE_OWNER/lingendo-vocabulary-read-service:latest
+          image: ghcr.io/wgrzesiek/lingendo-vocabulary-read-service:latest
           imagePullPolicy: Always
           ports:
             - { name: http, containerPort: 8813 }

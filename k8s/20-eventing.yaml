@@ -69,6 +69,7 @@ data:
 
     debezium.source.connector.class=io.debezium.connector.postgresql.PostgresConnector
     debezium.source.plugin.name=pgoutput
+    debezium.source.database.sslmode=require
     debezium.source.slot.name=dbz_outbox_slot
     debezium.source.topic.prefix=outbox
     debezium.source.table.include.list=public.outbox
@@ -104,7 +105,7 @@ spec:
           image: debezium/server:3.0.0.Final
           env:
             # Źródło = baza outbox (Neon). Debezium czyta host/port/db/user/pass z env.
-            - { name: DEBEZIUM_SOURCE_DATABASE_HOSTNAME, value: "REPLACE_ME.neon.tech" }
+            - { name: DEBEZIUM_SOURCE_DATABASE_HOSTNAME, valueFrom: { secretKeyRef: { name: lingendo-secrets, key: DB_POSTGRESQL_HOST } } }
             - { name: DEBEZIUM_SOURCE_DATABASE_PORT, value: "5432" }
             - { name: DEBEZIUM_SOURCE_DATABASE_DBNAME, value: "lingendo" }
             - { name: DEBEZIUM_SOURCE_DATABASE_USER, valueFrom: { secretKeyRef: { name: lingendo-secrets, key: DB_POSTGRESQL_USER } } }
@@ -135,6 +136,7 @@ data:
 
     debezium.source.connector.class=io.debezium.connector.postgresql.PostgresConnector
     debezium.source.plugin.name=pgoutput
+    debezium.source.database.sslmode=require
     debezium.source.slot.name=koog_outbox_slot
     debezium.source.topic.prefix=koog
     debezium.source.schema.include.list=koog
@@ -167,7 +169,7 @@ spec:
         - name: debezium-koog
           image: debezium/server:3.0.0.Final
           env:
-            - { name: DEBEZIUM_SOURCE_DATABASE_HOSTNAME, value: "REPLACE_ME.neon.tech" }
+            - { name: DEBEZIUM_SOURCE_DATABASE_HOSTNAME, valueFrom: { secretKeyRef: { name: lingendo-secrets, key: DB_POSTGRESQL_HOST } } }
             - { name: DEBEZIUM_SOURCE_DATABASE_PORT, value: "5432" }
             - { name: DEBEZIUM_SOURCE_DATABASE_DBNAME, value: "lingendo" }
             - { name: DEBEZIUM_SOURCE_DATABASE_USER, valueFrom: { secretKeyRef: { name: lingendo-secrets, key: DB_POSTGRESQL_USER } } }
