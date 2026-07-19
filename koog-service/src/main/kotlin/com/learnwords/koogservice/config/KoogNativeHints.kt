@@ -37,5 +37,22 @@ class KoogNativeHints : RuntimeHintsRegistrar {
             // Jackson, so register every reachable nested model (e.g. TransactionalModel) for binding.
             binding.registerReflectionHints(hints.reflection(), type)
         }
+
+        // Hibernate resolves these named strategy classes reflectively via their no-arg
+        // constructor (StrategySelectorImpl). The native image lacks metadata for some of
+        // them under Spring Boot 4 / Hibernate 7 (e.g. ColumnOrderingStrategyStandard).
+        listOf(
+            "org.hibernate.boot.model.relational.ColumnOrderingStrategyStandard",
+            "org.hibernate.boot.model.naming.ImplicitNamingStrategyJpaCompliantImpl",
+            "org.hibernate.boot.model.naming.ImplicitNamingStrategyLegacyJpaImpl",
+            "org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl",
+            "org.hibernate.boot.model.naming.CamelCaseToUnderscoresNamingStrategy"
+        ).forEach { fqn ->
+            hints.reflection().registerTypeIfPresent(
+                loader, fqn,
+                MemberCategory.INVOKE_PUBLIC_CONSTRUCTORS,
+                MemberCategory.INVOKE_DECLARED_CONSTRUCTORS
+            )
+        }
     }
 }
