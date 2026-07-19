@@ -67,14 +67,18 @@ class KoogNativeHints : RuntimeHintsRegistrar {
             "classpath*:org/hibernate/**/*_\$bundle.class",
             // PostgreSQLDialect.contributePostgreSQLTypes loads these via Class.forName
             // (PgJdbcHelper): PostgreSQLInetJdbcType, ...IntervalSecondJdbcType, ...StructJdbcType, etc.
-            "classpath*:org/hibernate/dialect/type/**/*.class"
+            "classpath*:org/hibernate/dialect/type/**/*.class",
+            // Hibernate 7 hibernate-models: OrmAnnotationDescriptor$DynamicCreator reflectively
+            // instantiates every *Annotation wrapper via its (ModelsContext) constructor.
+            "classpath*:org/hibernate/boot/models/annotations/**/*.class"
         ).forEach { pattern ->
             runCatching { resolver.getResources(pattern) }.getOrDefault(emptyArray()).forEach { res ->
                 runCatching {
                     val className = readerFactory.getMetadataReader(res).classMetadata.className
                     hints.reflection().registerTypeIfPresent(
                         loader, className,
-                        MemberCategory.INVOKE_DECLARED_CONSTRUCTORS
+                        MemberCategory.INVOKE_DECLARED_CONSTRUCTORS,
+                        MemberCategory.INVOKE_DECLARED_METHODS
                     )
                 }
             }
