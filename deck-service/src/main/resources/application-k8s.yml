@@ -41,6 +41,23 @@ spring:
     producer:
       bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS}
 
+# gRPC clients in-cluster: PLAINTEXT (no TLS — native image has no netty-tcnative/BoringSSL,
+# TLS would UnsatisfiedLinkError on OpenSsl). user-service hosts auth/user-relations/student-groups.
+grpc:
+  client:
+    vocabulary-read:
+      address: ${GRPC_VOCAB_READ_ADDRESS:static://vocabulary-read-service:9099}
+      negotiationType: ${GRPC_VOCAB_READ_NEGOTIATION:PLAINTEXT}
+    auth:
+      address: ${GRPC_CLIENT_AUTH_ADDRESS:static://user-service:9098}
+      negotiationType: ${GRPC_CLIENT_AUTH_NEGOTIATIONTYPE:PLAINTEXT}
+    user-relations:
+      address: ${GRPC_USER_RELATIONS_ADDRESS:static://user-service:9098}
+      negotiationType: ${GRPC_USER_RELATIONS_NEGOTIATION:PLAINTEXT}
+    student-groups:
+      address: ${GRPC_STUDENT_GROUPS_ADDRESS:static://user-service:9098}
+      negotiationType: ${GRPC_STUDENT_GROUPS_NEGOTIATION:PLAINTEXT}
+
 server:
   port: ${SERVER_PORT:8814}
 
