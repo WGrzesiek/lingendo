@@ -2,7 +2,7 @@ name: Build deck-service
 # Wzorzec devPath: native image (wspólny Dockerfile.native, ARG SERVICE) + push do GHCR.
 on:
   push:
-    branches: ["main"]
+    branches: ["main", "deploy/**"]
     paths:
       - "deck-service/**"
       - "common/**"

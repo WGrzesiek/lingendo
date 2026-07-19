@@ -4,7 +4,7 @@ name: Build koog-service
 # (koog-service/Dockerfile) + zmiana file:/tags poniżej.
 on:
   push:
-    branches: ["main"]
+    branches: ["main", "deploy/**"]
     paths:
       - "koog-service/**"
       - ".github/workflows/build-koog-service.yml"

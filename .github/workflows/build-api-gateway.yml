@@ -2,7 +2,7 @@ name: Build api-gateway
 # Wzorzec devPath: native image + push do GHCR. api-gateway standalone → własny Dockerfile.
 on:
   push:
-    branches: ["main"]
+    branches: ["main", "deploy/**"]
     paths:
       - "api-gateway/**"
       - "proto-shared/**"

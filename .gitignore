@@ -15,3 +15,4 @@ kubectl create secret generic lingendo-secrets -n lingendo \
        96  kubectl create secret generic backend-secret   --from-literal=POSTGRES_DB='neondb'   --from-literal=POSTGRES_USER='devPath'   --from-literal=POSTGRES_PASSWORD='npg_qtOa9iz2JIUZ'   -n dev-path
 
 k8s/DEPLOY-ORDER.md
+k8s/secret.local.yaml

@@ -2,7 +2,7 @@ name: Build frontend
 # Next standalone (node) + push do GHCR. Front woła relatywnie /api → proxy do api-gateway.
 on:
   push:
-    branches: ["main"]
+    branches: ["main", "deploy/**"]
     paths:
       - "frontend/frontend.git/**"
       - ".github/workflows/build-frontend.yml"

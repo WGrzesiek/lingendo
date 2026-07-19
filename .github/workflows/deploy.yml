@@ -1,0 +1,35 @@
+name: Deploy
+# Wzorzec devPath: SSH na VPS → git pull → kubectl apply → rollout restart.
+# Sekrety repo: VM_HOST, VM_USER, VM_SSH_KEY (klucz prywatny do VPS).
+# UWAGA: NIE aplikuje lingendo-secrets/gateway-jwt-keys/ghcr-secret — te tworzysz raz ręcznie.
+# Obrazy muszą być pobieralne (pakiety GHCR public albo pull-secret na SA).
+on:
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: appleboy/ssh-action@v1.2.5
+        with:
+          host: ${{ secrets.VM_HOST }}
+          username: ${{ secrets.VM_USER }}
+          key: ${{ secrets.VM_SSH_KEY }}
+          script: |
+            set -e
+            export KUBECONFIG=~/.kube/config
+            cd ~/lingendo && git pull
+            # namespace + ConfigMap (bezpieczne re-apply; secret jest osobno, ręcznie)
+            kubectl apply -f k8s/00-base.yaml
+            # broker + CDC
+            kubectl apply -f k8s/20-eventing.yaml
+            # serwisy (Flyway tworzy schematy + outbox)
+            kubectl apply -f k8s/10-user-service.yaml
+            kubectl apply -f k8s/11-services.yaml
+            kubectl apply -f k8s/12-statistics.yaml
+            kubectl apply -f k8s/13-api-gateway.yaml
+            kubectl apply -f k8s/14-koog.yaml
+            # edge (frontend + ingress)
+            kubectl apply -f k8s/30-edge.yaml
+            # wymuś pull nowych :latest
+            kubectl -n lingendo rollout restart deploy

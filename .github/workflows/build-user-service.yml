@@ -4,7 +4,7 @@ name: Build user-service
 # reactor (common + proto-shared + learnwords-parent). Path-filter obejmuje moduły współdzielone.
 on:
   push:
-    branches: ["main"]
+    branches: ["main", "deploy/**"]
     paths:
       - "user-service/**"
       - "common/**"
