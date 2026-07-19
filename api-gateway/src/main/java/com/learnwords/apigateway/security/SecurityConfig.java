@@ -87,7 +87,7 @@ public class SecurityConfig {
                         .pathMatchers(HttpMethod.POST, "/api/v1/users/register").permitAll()
                         .pathMatchers(HttpMethod.POST, "/register").permitAll()
 
-                        .pathMatchers("/actuator/health", "/actuator/info", "/actuator/prometheus").permitAll()
+                        .pathMatchers("/actuator/health", "/actuator/health/**", "/actuator/info", "/actuator/prometheus").permitAll()
 
                         .anyExchange().authenticated()
                 )
