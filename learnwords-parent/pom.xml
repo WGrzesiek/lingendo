@@ -49,7 +49,6 @@
         <!--        Grcp-->
         <protobuf-java-version>3.25.5</protobuf-java-version>
         <grpc.version>1.75.0</grpc.version>
-        <flyway.version>11.14.0</flyway.version>
         <grpc-spring-boot-starter-version>3.1.0.RELEASE</grpc-spring-boot-starter-version>
         <micrometer-tracing-bridge-brave-version>1.5.5</micrometer-tracing-bridge-brave-version>
         <zipkin-reporter-brave-version>3.5.1</zipkin-reporter-brave-version>
@@ -275,12 +274,8 @@
             <!-- flyway-core + flyway-database-postgresql: BEZ override wersji — zarządza Spring Boot BOM.
                  Wymuszenie 11.14.0 łamało native (NativeImageResourceProviderCustomizer oczekuje
                  konstruktora Scanner z wersji zarządzanej przez Spring Boot 3.5.0 → NoSuchMethodError). -->
-            <!-- https://mvnrepository.com/artifact/org.flywaydb/flyway-maven-plugin -->
-            <dependency>
-                <groupId>org.flywaydb</groupId>
-                <artifactId>flyway-maven-plugin</artifactId>
-                <version>${flyway.version}</version>
-            </dependency>
+            <!-- flyway-maven-plugin: wersja pinowana lokalnie w user-service <build> (build-time),
+                 nie zarządzana tu — property flyway.version usunięta (nadpisywała Flyway Spring Boota). -->
             <dependency>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-starter-actuator</artifactId>
