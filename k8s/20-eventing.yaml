@@ -63,6 +63,12 @@ metadata:
 data:
   application.properties: |
     debezium.sink.type=kafka
+    # Emit the raw event payload (no Kafka-Connect schema envelope) so consumers can
+    # deserialize the message value straight into their DTO records.
+    debezium.format.key=json
+    debezium.format.key.schemas.enable=false
+    debezium.format.value=json
+    debezium.format.value.schemas.enable=false
     debezium.sink.kafka.producer.bootstrap.servers=redpanda.lingendo.svc.cluster.local:9092
     debezium.sink.kafka.producer.key.serializer=org.apache.kafka.common.serialization.StringSerializer
     debezium.sink.kafka.producer.value.serializer=org.apache.kafka.common.serialization.StringSerializer
@@ -130,6 +136,12 @@ metadata:
 data:
   application.properties: |
     debezium.sink.type=kafka
+    # Emit the raw event payload (no Kafka-Connect schema envelope) so consumers can
+    # deserialize the message value straight into their DTO records.
+    debezium.format.key=json
+    debezium.format.key.schemas.enable=false
+    debezium.format.value=json
+    debezium.format.value.schemas.enable=false
     debezium.sink.kafka.producer.bootstrap.servers=redpanda.lingendo.svc.cluster.local:9092
     debezium.sink.kafka.producer.key.serializer=org.apache.kafka.common.serialization.StringSerializer
     debezium.sink.kafka.producer.value.serializer=org.apache.kafka.common.serialization.StringSerializer
