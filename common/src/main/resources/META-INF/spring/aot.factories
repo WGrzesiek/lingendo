@@ -1,2 +1,3 @@
 org.springframework.aot.hint.RuntimeHintsRegistrar=com.learnwords.common.config.ProtoNativeHints,\
-com.learnwords.common.config.PaginationNativeHints
+com.learnwords.common.config.PaginationNativeHints,\
+com.learnwords.common.config.EventsNativeHints
