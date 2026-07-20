@@ -43,12 +43,12 @@ public class UserRepository {
         """;
 
     public Integer getUserStreak(String userId) {
-        Integer result = jdbcTemplate.queryForObject(
+        java.util.List<Integer> rows = jdbcTemplate.query(
                 get_user_streak_SQL,
                 (rs, rowNum) -> rs.getInt("user_streak"),
                 userId
         );
-        return result != null ? result : 0;
+        return rows.isEmpty() ? 0 : rows.get(0);
     }
 
     private static final String GET_TOTAL_POINTS_SQL = """
