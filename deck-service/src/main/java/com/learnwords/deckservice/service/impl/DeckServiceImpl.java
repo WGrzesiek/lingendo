@@ -256,6 +256,15 @@ public class DeckServiceImpl implements DeckService {
             log.error("UserId jest pusty");
             throw new IllegalArgumentException("UserId nie może być pusty");
         }
+        // Empty/absent filters mean "no filter" — pass all enum values so the query binds
+        // real IN collections instead of a nullable Serializable param (which Hibernate would
+        // serialize to varbinary, failing in native with a missing ArrayList.writeObject hint).
+        if (visibility == null || visibility.isEmpty()) {
+            visibility = List.of(DeckVisibility.values());
+        }
+        if (owner == null || owner.isEmpty()) {
+            owner = List.of(DeckOwner.values());
+        }
         Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
         Page<Deck> decks = deckRepository.findOwnedDecksWithFilters(userId, visibility, owner, pageable);
         log.info("Znaleziono {} talii należących do użytkownika", decks.getContent().size());
