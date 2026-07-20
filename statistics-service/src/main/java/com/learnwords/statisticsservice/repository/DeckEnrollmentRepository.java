@@ -61,7 +61,7 @@ public class DeckEnrollmentRepository {
     private static final String GET_USER_POINTS_SQL = """
         SELECT
             sum(points) AS total_points,
-            sumIf(points, day >= toStartOfWeek(today())) AS points_this_week
+            sum(points) FILTER (WHERE day >= date_trunc('week', current_date)) AS points_this_week
         FROM analytics.user_points_daily
         WHERE user_id = ?
     """;

@@ -31,7 +31,7 @@ public class GroupStatisticsRepository {
         INSERT INTO analytics.group_members
             (event_time, group_id, student_id, teacher_id, status)
         SELECT now(), group_id, student_id, teacher_id, 'REMOVED'
-        FROM analytics.group_members FINAL
+        FROM analytics.group_members
         WHERE group_id = ? AND student_id = ?
         LIMIT 1
         """;
@@ -44,28 +44,28 @@ public class GroupStatisticsRepository {
 
     private static final String SELECT_GROUP_TOTAL_MEMBERS_SQL = """
         SELECT count(DISTINCT student_id)
-        FROM analytics.group_members FINAL
+        FROM analytics.group_members
         WHERE group_id = ? AND status = 'ACTIVE'
         """;
 
     private static final String SELECT_GROUP_ACTIVE_MEMBERS_SQL = """
         SELECT count(DISTINCT gm.student_id)
-        FROM analytics.group_members gm FINAL
+        FROM analytics.group_members gm
         INNER JOIN analytics.user_activity ua ON gm.student_id = ua.user_id
         WHERE gm.group_id = ? AND gm.status = 'ACTIVE'
-          AND ua.event_time >= toStartOfMonth(today())
+          AND ua.event_time >= date_trunc('month', current_date)
         """;
 
     private static final String SELECT_GROUP_SHARED_DECKS_SQL = """
         SELECT count(DISTINCT deck_id)
-        FROM analytics.group_shared_decks FINAL
+        FROM analytics.group_shared_decks
         WHERE group_id = ?
         """;
 
     private static final String SELECT_GROUP_COMPLETED_LESSONS_SQL = """
-        SELECT count()
+        SELECT count(*)
         FROM analytics.sessions_finished sf
-        INNER JOIN analytics.group_members gm FINAL ON sf.user_id = gm.student_id
+        INNER JOIN analytics.group_members gm ON sf.user_id = gm.student_id
         WHERE gm.group_id = ? AND gm.status = 'ACTIVE'
         """;
 
@@ -77,22 +77,20 @@ public class GroupStatisticsRepository {
 
     private static final String SELECT_GROUP_EXTENDED_STATS_SQL = """
         SELECT
-            countIf(fa.correct = 1) AS total_correct_answers,
+            count(*) FILTER (WHERE fa.correct = 1) AS total_correct_answers,
             toInt64(coalesce(sum(fa.time_taken_ms) / 60000, 0)) AS total_study_time_minutes,
             count(DISTINCT fa.session_id) AS total_sessions,
-            if(count() > 0, countIf(fa.correct = 1) * 100.0 / count(), 0) AS average_accuracy
+            CASE WHEN count(*) > 0 THEN count(*) FILTER (WHERE fa.correct = 1) * 100.0 / count(*) ELSE 0 END AS average_accuracy
         FROM analytics.flashcard_answers fa
-        INNER JOIN analytics.group_members gm FINAL ON fa.user_id = gm.student_id
+        INNER JOIN analytics.group_members gm ON fa.user_id = gm.student_id
         WHERE gm.group_id = ? AND gm.status = 'ACTIVE'
         """;
 
     private static final String SELECT_GROUP_AVG_WORDS_PER_DAY_SQL = """
         SELECT
-            if(count(DISTINCT toDate(fa.event_time)) > 0,
-               count() * 1.0 / count(DISTINCT toDate(fa.event_time)),
-               0) AS avg_words_per_day
+            CASE WHEN count(DISTINCT (fa.event_time)::date) > 0 THEN count(*) * 1.0 / count(DISTINCT (fa.event_time)::date) ELSE 0 END AS avg_words_per_day
         FROM analytics.flashcard_answers fa
-        INNER JOIN analytics.group_members gm FINAL ON fa.user_id = gm.student_id
+        INNER JOIN analytics.group_members gm ON fa.user_id = gm.student_id
         WHERE gm.group_id = ? AND gm.status = 'ACTIVE'
         """;
 
@@ -102,7 +100,7 @@ public class GroupStatisticsRepository {
             dictGet('analytics.usernames_dict', 'username', gm.student_id) AS student_name,
             coalesce(sum(gl.points), 0) AS total_points,
             max(ga.event_time) AS last_active
-        FROM analytics.group_members gm FINAL
+        FROM analytics.group_members gm
         LEFT JOIN analytics.group_leaderboard gl
             ON gm.group_id = gl.group_id
            AND gm.student_id = gl.student_id
@@ -127,13 +125,13 @@ public class GroupStatisticsRepository {
         SELECT
             fa.user_id AS student_id,
             dictGet('analytics.usernames_dict', 'username', fa.user_id) AS student_name,
-            countIf(fa.correct = 1) AS correct_answers,
+            count(*) FILTER (WHERE fa.correct = 1) AS correct_answers,
             count(DISTINCT fa.session_id) AS total_sessions,
-            if(count() > 0, countIf(fa.correct = 1) * 100.0 / count(), 0) AS accuracy
+            CASE WHEN count(*) > 0 THEN count(*) FILTER (WHERE fa.correct = 1) * 100.0 / count(*) ELSE 0 END AS accuracy
         FROM analytics.flashcard_answers fa
-        INNER JOIN analytics.group_members gm FINAL ON fa.user_id = gm.student_id
+        INNER JOIN analytics.group_members gm ON fa.user_id = gm.student_id
         WHERE gm.group_id = ? AND gm.status = 'ACTIVE'
-          AND fa.event_time >= today() - ?
+          AND fa.event_time >= current_date - ?
         GROUP BY fa.user_id
         ORDER BY correct_answers DESC
         LIMIT ?
@@ -145,7 +143,7 @@ public class GroupStatisticsRepository {
             gsd.deck_name AS deck_name,
             count(DISTINCT ga.student_id) AS students_count,
             max(ga.event_time) AS last_activity
-        FROM analytics.group_shared_decks gsd FINAL
+        FROM analytics.group_shared_decks gsd
         LEFT JOIN analytics.group_activity ga
             ON gsd.group_id = ga.group_id
            AND gsd.deck_id = ga.deck_id
@@ -160,8 +158,8 @@ public class GroupStatisticsRepository {
             g.group_id AS group_id,
             g.group_name AS group_name,
             count(DISTINCT gm.student_id) AS member_count
-        FROM analytics.groups g FINAL
-        LEFT JOIN analytics.group_members gm FINAL
+        FROM analytics.groups g
+        LEFT JOIN analytics.group_members gm
             ON g.group_id = gm.group_id
            AND gm.status = 'ACTIVE'
         WHERE g.teacher_id = ? AND g.status = 'ACTIVE'

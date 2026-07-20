@@ -47,7 +47,7 @@ public class FriendshipStatsRepository {
     public int countFriends(String userId) {
         Integer count = jdbcTemplate.queryForObject("""
             SELECT count(DISTINCT friend_id)
-            FROM analytics.user_friendships FINAL
+            FROM analytics.user_friendships
             WHERE user_id = ? AND status = 'ACTIVE'
             """, Integer.class, userId);
         return count != null ? count : 0;
@@ -85,7 +85,7 @@ public class FriendshipStatsRepository {
     public List<String> getActiveFriendIds(String userId) {
         return jdbcTemplate.queryForList("""
             SELECT DISTINCT friend_id
-            FROM analytics.user_friendships FINAL
+            FROM analytics.user_friendships
             WHERE user_id = ? AND status = 'ACTIVE'
             """, String.class, userId);
     }
@@ -95,28 +95,27 @@ public class FriendshipStatsRepository {
             WITH user_points AS (
                 SELECT
                     sum(points) AS total_points,
-                    sumIf(points, day >= toStartOfWeek(today())) AS weekly_points
+                    sum(points) FILTER (WHERE day >= date_trunc('week', current_date)) AS weekly_points
                 FROM analytics.user_points_daily
                 WHERE user_id = ?
             ),
             user_sessions AS (
                 SELECT
-                    countDistinct(session_id) AS total_sessions
+                    count(DISTINCT session_id) AS total_sessions
                 FROM analytics.sessions_finished
                 WHERE user_id = ?
             ),
             user_answers AS (
                 SELECT
-                    count() AS total_answers,
-                    countIf(correct = 1) AS total_correct
+                    count(*) AS total_answers,
+                    count(*) FILTER (WHERE correct = 1) AS total_correct
                 FROM analytics.flashcard_answers
                 WHERE user_id = ?
             ),
             user_rank AS (
                 SELECT rank, username
                 FROM analytics.leaderboard_snapshot
-                WHERE user_id = ? 
-                  AND snapshot_time = (SELECT max(snapshot_time) FROM analytics.leaderboard_snapshot)
+                WHERE user_id = ?
             ),
             user_streak AS (
                 SELECT subtitle AS streak_info
@@ -185,14 +184,14 @@ public class FriendshipStatsRepository {
         return jdbcTemplate.query("""
             WITH active_friends AS (
                 SELECT DISTINCT friend_id
-                FROM analytics.user_friendships FINAL
+                FROM analytics.user_friendships
                 WHERE user_id = ? AND status = 'ACTIVE'
             ),
             friends_points AS (
                 SELECT
                     user_id,
                     sum(points) AS total_points,
-                    sumIf(points, day >= toStartOfWeek(today())) AS weekly_points
+                    sum(points) FILTER (WHERE day >= date_trunc('week', current_date)) AS weekly_points
                 FROM analytics.user_points_daily
                 WHERE user_id IN (SELECT friend_id FROM active_friends)
                 GROUP BY user_id
@@ -201,7 +200,6 @@ public class FriendshipStatsRepository {
                 SELECT user_id, rank, username
                 FROM analytics.leaderboard_snapshot
                 WHERE user_id IN (SELECT friend_id FROM active_friends)
-                  AND snapshot_time = (SELECT max(snapshot_time) FROM analytics.leaderboard_snapshot)
             )
             SELECT
                 af.friend_id,

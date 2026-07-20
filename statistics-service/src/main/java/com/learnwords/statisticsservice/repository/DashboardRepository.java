@@ -22,17 +22,17 @@ public class DashboardRepository {
     }
 
     private static final String GET_ACTIVE_DECKS_SQL = """
-        SELECT countDistinct(deck_id) AS active_decks
+        SELECT count(DISTINCT deck_id) AS active_decks
         FROM analytics.sessions_started
         WHERE user_id = ?
-          AND event_time >= now() - INTERVAL 30 DAY
+          AND event_time >= now() - INTERVAL '30 days'
         """;
 
     private static final String GET_COMPLETED_LESSONS_THIS_MONTH_SQL = """
-        SELECT countDistinct(session_id) AS completed_lessons
+        SELECT count(DISTINCT session_id) AS completed_lessons
         FROM analytics.sessions_finished
         WHERE user_id = ?
-          AND toStartOfMonth(event_time) = toStartOfMonth(today())
+          AND date_trunc('month', event_time) = date_trunc('month', current_date)
         """;
 
     // streak: ile kolejnych dni od dzisiaj w dół user miał aktywność
@@ -47,7 +47,7 @@ public class DashboardRepository {
     private static final String GET_USER_POINTS_SQL = """
         SELECT
             sum(points) AS total_points,
-            sumIf(points, day >= toStartOfWeek(today())) AS points_this_week
+            sum(points) FILTER (WHERE day >= date_trunc('week', current_date)) AS points_this_week
         FROM analytics.user_points_daily
         WHERE user_id = ?
         """;

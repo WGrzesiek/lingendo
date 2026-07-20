@@ -47,29 +47,29 @@ public class TeacherDashboardRepository {
 
     private static final String SELECT_TOTAL_STUDENTS_SQL = """
         SELECT count(DISTINCT student_id)
-        FROM analytics.teacher_students FINAL
+        FROM analytics.teacher_students
         WHERE teacher_id = ? AND status = 'ACTIVE'
         """;
 
     private static final String SELECT_ACTIVE_STUDENTS_SQL = """
         SELECT count(DISTINCT ts.student_id)
-        FROM analytics.teacher_students ts FINAL
+        FROM analytics.teacher_students ts
         INNER JOIN analytics.user_activity ua ON ts.student_id = ua.user_id
         WHERE ts.teacher_id = ?
           AND ts.status = 'ACTIVE'
-          AND ua.event_time >= toStartOfMonth(today())
+          AND ua.event_time >= date_trunc('month', current_date)
         """;
 
     private static final String SELECT_SHARED_DECKS_SQL = """
         SELECT count(DISTINCT deck_id)
-        FROM analytics.teacher_shared_decks FINAL
+        FROM analytics.teacher_shared_decks
         WHERE teacher_id = ?
         """;
 
     private static final String SELECT_COMPLETED_LESSONS_SQL = """
-        SELECT count()
+        SELECT count(*)
         FROM analytics.sessions_finished sf
-        INNER JOIN analytics.teacher_students ts FINAL ON sf.user_id = ts.student_id
+        INNER JOIN analytics.teacher_students ts ON sf.user_id = ts.student_id
         WHERE ts.teacher_id = ?
           AND ts.status = 'ACTIVE'
         """;
@@ -80,7 +80,7 @@ public class TeacherDashboardRepository {
             dictGet('analytics.usernames_dict', 'username', ts.student_id) AS student_name,
             coalesce(points_agg.total_points, 0) AS total_points,
             max(tsa.event_time) AS last_active
-        FROM analytics.teacher_students ts FINAL
+        FROM analytics.teacher_students ts
         LEFT JOIN (
             SELECT user_id, sum(points) AS total_points
             FROM analytics.user_points_daily
@@ -102,7 +102,7 @@ public class TeacherDashboardRepository {
             tsd.deck_name AS deck_name,
             count(DISTINCT tsa.student_id) AS students_count,
             max(tsa.event_time) AS last_activity
-        FROM analytics.teacher_shared_decks tsd FINAL
+        FROM analytics.teacher_shared_decks tsd
         LEFT JOIN analytics.teacher_student_activity tsa 
             ON tsd.teacher_id = tsa.teacher_id
            AND tsd.deck_id = tsa.deck_id
@@ -123,13 +123,13 @@ public class TeacherDashboardRepository {
     // === Szczegółowe statystyki nauczyciela ===
     
     private static final String SELECT_TEACHER_CREATED_DECKS_SQL = """
-        SELECT count()
+        SELECT count(*)
         FROM analytics.decks_created
         WHERE user_id = ?
         """;
 
     private static final String SELECT_TEACHER_CREATED_FLASHCARDS_SQL = """
-        SELECT count()
+        SELECT count(*)
         FROM analytics.flashcards_created
         WHERE user_id = ?
         """;
@@ -137,25 +137,25 @@ public class TeacherDashboardRepository {
     private static final String SELECT_STUDENT_POINTS_SQL = """
         SELECT coalesce(sum(upd.points), 0)
         FROM analytics.user_points_daily upd
-        INNER JOIN analytics.teacher_students ts FINAL ON upd.user_id = ts.student_id
+        INNER JOIN analytics.teacher_students ts ON upd.user_id = ts.student_id
         WHERE ts.teacher_id = ?
           AND ts.status = 'ACTIVE'
         """;
 
     private static final String SELECT_STUDENT_SESSIONS_SQL = """
-        SELECT count()
+        SELECT count(*)
         FROM analytics.sessions_finished sf
-        INNER JOIN analytics.teacher_students ts FINAL ON sf.user_id = ts.student_id
+        INNER JOIN analytics.teacher_students ts ON sf.user_id = ts.student_id
         WHERE ts.teacher_id = ?
           AND ts.status = 'ACTIVE'
         """;
 
     private static final String SELECT_STUDENT_ANSWERS_SQL = """
         SELECT 
-            coalesce(countIf(correct = 1), 0) AS correct_answers,
-            count() AS total_answers
+            coalesce(count(*) FILTER (WHERE correct = 1), 0) AS correct_answers,
+            count(*) AS total_answers
         FROM analytics.flashcard_answers fa
-        INNER JOIN analytics.teacher_students ts FINAL ON fa.user_id = ts.student_id
+        INNER JOIN analytics.teacher_students ts ON fa.user_id = ts.student_id
         WHERE ts.teacher_id = ?
           AND ts.status = 'ACTIVE'
         """;
@@ -165,10 +165,10 @@ public class TeacherDashboardRepository {
             formatDateTime(upd.day, '%Y%m') AS year_month,
             sum(upd.points) AS total_points
         FROM analytics.user_points_daily upd
-        INNER JOIN analytics.teacher_students ts FINAL ON upd.user_id = ts.student_id
+        INNER JOIN analytics.teacher_students ts ON upd.user_id = ts.student_id
         WHERE ts.teacher_id = ?
           AND ts.status = 'ACTIVE'
-          AND upd.day >= toStartOfMonth(today() - INTERVAL 11 MONTH)
+          AND upd.day >= date_trunc('month', current_date - INTERVAL 11 MONTH)
         GROUP BY year_month
         ORDER BY year_month
         """;
