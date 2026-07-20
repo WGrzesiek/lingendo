@@ -85,6 +85,16 @@ tasks.withType<JavaCompile>().configureEach {
     options.release.set(24)
 }
 
+// slf4j-simple's SimpleLogger is instantiated during Spring AOT and lands in the image heap,
+// so it must be initialized at build time or native-image aborts (UnsupportedFeatureException).
+graalvmNative {
+    binaries {
+        named("main") {
+            buildArgs.add("--initialize-at-build-time=org.slf4j.simple")
+        }
+    }
+}
+
 allOpen {
     annotation("jakarta.persistence.Entity")
     annotation("jakarta.persistence.MappedSuperclass")
