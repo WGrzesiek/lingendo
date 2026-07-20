@@ -71,11 +71,12 @@ public class DashboardRepository {
     }
 
     public int getStreakDays(String userId) {
-        String result = jdbcTemplate.queryForObject(
+        List<String> rows = jdbcTemplate.query(
                 GET_STREAK_SQL,
-                String.class,
+                (rs, rowNum) -> rs.getString(1),
                 userId
         );
+        String result = rows.isEmpty() ? null : rows.get(0);
         if (result == null || result.isEmpty()) {
             return 0;
         }
