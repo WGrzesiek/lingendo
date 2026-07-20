@@ -61,7 +61,7 @@ public class FlashcardRepository {
     private static final String GET_FLASHCARD_ANSWERS_SQL = """
         SELECT
             COUNT(*) AS total_answers,
-            SUM(CASE WHEN correct THEN 1 ELSE 0 END) AS correct_answers,
+            SUM(CASE WHEN correct = 1 THEN 1 ELSE 0 END) AS correct_answers,
             min(time_taken_ms) AS fastest_response_time,
             max(time_taken_ms) AS slowest_response_time,
             avg(time_taken_ms) AS average_response_time,
@@ -76,7 +76,7 @@ public class FlashcardRepository {
     private static final String GET_FLASHCARD_ANSWERS_SQL_WITH_DATE = """
         SELECT
             COUNT(*) AS total_answers,
-            SUM(CASE WHEN correct THEN 1 ELSE 0 END) AS correct_answers,
+            SUM(CASE WHEN correct = 1 THEN 1 ELSE 0 END) AS correct_answers,
             min(time_taken_ms) AS fastest_response_time,
             max(time_taken_ms) AS slowest_response_time,
             avg(time_taken_ms) AS average_response_time,
@@ -200,14 +200,14 @@ public class FlashcardRepository {
 
     private static final String GET_ANSWERED_FLASHCARDS_COUNT_BY_USER_SQL = """
         SELECT COUNT(flashcard_id) AS answered_flashcards,
-        SUM(CASE WHEN correct THEN 1 ELSE 0 END) AS correct_answers
+        SUM(CASE WHEN correct = 1 THEN 1 ELSE 0 END) AS correct_answers
         FROM analytics.flashcard_answers
         WHERE user_id = ?
         """;
 
     private static final String GET_ANSWERED_FLASHCARDS_COUNT_BY_USER_SQL_WITH_DATE = """
         SELECT COUNT(flashcard_id) AS answered_flashcards,
-        SUM(CASE WHEN correct THEN 1 ELSE 0 END) AS correct_answers
+        SUM(CASE WHEN correct = 1 THEN 1 ELSE 0 END) AS correct_answers
         FROM analytics.flashcard_answers
         WHERE user_id = ? AND event_time >= ?
         """;
