@@ -31,12 +31,12 @@ public class DeckEnrollmentRepository {
     public void saveDeckEnrollmentCreate(DeckEnrollmentsCreated event) {
         jdbcTemplate.update(
                 INSERT_DECK_ENROLLMENT_CREATED_SQL,
-                event.eventTime(),
+                java.sql.Timestamp.from(event.eventTime()),
                 event.deckEnrollmentId(),
                 event.deckId(),
                 event.deckName(),
                 event.userId(),
-                Instant.now()
+                java.sql.Timestamp.from(Instant.now())
         );
     }
 
@@ -49,12 +49,12 @@ public class DeckEnrollmentRepository {
     public void saveDeckEnrollmentFinished(DeckEnrollmentsFinished event) {
         jdbcTemplate.update(
                 INSERT_DECK_ENROLLMENT_FINISHED_SQL,
-                event.eventTime(),
+                java.sql.Timestamp.from(event.eventTime()),
                 event.deckEnrollmentId(),
                 event.deckId(),
                 event.deckName(),
                 event.userId(),
-                Instant.now()
+                java.sql.Timestamp.from(Instant.now())
         );
     }
 
@@ -189,7 +189,7 @@ public class DeckEnrollmentRepository {
                 GET_DECK_ENROLLMENTS_COUNT_BY_USER_SQL_WITH_DATE,
                 (rs, rowNum) -> rs.getLong("enrollments_count"),
                 userId,
-                since
+                Timestamp.from(since)
         );
         return result != null ? result : 0L;
     }

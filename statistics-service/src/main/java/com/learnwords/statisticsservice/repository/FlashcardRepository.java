@@ -29,11 +29,11 @@ public class FlashcardRepository {
     public void saveFlashcardCreated(FlashcardCreatedEvent event) {
         jdbcTemplate.update(
                 INSERT_FLASHCARD_CREATED_SQL,
-                event.eventTime(),
+                java.sql.Timestamp.from(event.eventTime()),
                 event.flashcardId(),
                 event.deckId(),
                 event.userId(),
-                event.receivedAt());
+                java.sql.Timestamp.from(event.receivedAt()));
     }
 
     private static final String INSERT_FLASHCARD_ANSWERED_SQL = """
@@ -48,13 +48,13 @@ public class FlashcardRepository {
 
         jdbcTemplate.update(
                 INSERT_FLASHCARD_ANSWERED_SQL,
-                event.eventTime(),
+                java.sql.Timestamp.from(event.eventTime()),
                 event.userId(),
                 event.deckEnrollmentId(),
                 event.sessionId(),
                 event.flashcardId(),
                 event.correct(),
-                event.receivedAt(),
+                java.sql.Timestamp.from(event.receivedAt()),
                 timeTakenMs);
     }
 

@@ -26,7 +26,7 @@ public class UserRepository {
     public void save(UserLoginEvent event) {
         jdbcTemplate.update(
                 INSERT_SQL,
-                event.eventTime(),
+                java.sql.Timestamp.from(event.eventTime()),
                 event.userId(),
                 event.username(),
                 event.streak(),

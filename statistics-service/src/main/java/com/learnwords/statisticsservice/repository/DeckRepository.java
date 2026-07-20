@@ -27,14 +27,14 @@ public class DeckRepository {
     public void saveDeckCreated(DeckCreatedEvent event) {
         jdbcTemplate.update(
                 INSERT_DECK_CREATED_SQL,
-                event.eventTime(),
+                java.sql.Timestamp.from(event.eventTime()),
                 event.deckId(),
                 event.userId(),
                 event.deckName(),
                 event.deckCategory(),
                 event.languageFrom(),
                 event.languageTo(),
-                event.receivedAt()
+                java.sql.Timestamp.from(event.receivedAt())
         );
     }
 

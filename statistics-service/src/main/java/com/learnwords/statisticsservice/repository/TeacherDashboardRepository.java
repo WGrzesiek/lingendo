@@ -227,7 +227,7 @@ public class TeacherDashboardRepository {
                             rs.getString("student_id"),
                             rs.getString("student_name"),
                             rs.getLong("total_points"),
-                            lastActive != null ? lastActive.toInstant() : Instant.now()
+                            lastActive != null ? lastActive.toInstant() : java.sql.Timestamp.from(Instant.now())
                     );
                 },
                 teacherId, limit
@@ -243,7 +243,7 @@ public class TeacherDashboardRepository {
                             rs.getString("deck_id"),
                             rs.getString("deck_name"),
                             rs.getInt("students_count"),
-                            lastActivity != null ? lastActivity.toInstant() : Instant.now()
+                            lastActivity != null ? lastActivity.toInstant() : java.sql.Timestamp.from(Instant.now())
                     );
                 },
                 teacherId, limit
@@ -256,7 +256,7 @@ public class TeacherDashboardRepository {
                 (rs, rowNum) -> {
                     Timestamp eventTime = rs.getTimestamp("event_time");
                     return new TeacherActivityItemDto(
-                            eventTime != null ? eventTime.toInstant() : Instant.now(),
+                            eventTime != null ? eventTime.toInstant() : java.sql.Timestamp.from(Instant.now()),
                             rs.getString("student_id"),
                             rs.getString("student_name"),
                             rs.getString("activity_type"),

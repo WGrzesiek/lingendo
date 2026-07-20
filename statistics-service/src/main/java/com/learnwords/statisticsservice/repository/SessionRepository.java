@@ -26,13 +26,13 @@ public class SessionRepository {
     public void saveSessionStarted(SessionStartedEvent event) {
         jdbcTemplate.update(
                 INSERT_SESSION_STARTED_SQL,
-                event.eventTime(),
+                java.sql.Timestamp.from(event.eventTime()),
                 event.sessionId(),
                 event.userId(),
                 event.deckId(),
                 event.deckName(),
                 event.deckEnrollmentId(),
-                event.receivedAt()
+                java.sql.Timestamp.from(event.receivedAt())
         );
     }
 
@@ -45,7 +45,7 @@ public class SessionRepository {
     public void saveSessionFinished(SessionFinishedEvent event) {
         jdbcTemplate.update(
                 INSERT_SESSION_FINISHED_SQL,
-                event.eventTime(),
+                java.sql.Timestamp.from(event.eventTime()),
                 event.startedAt(),
                 event.sessionId(),
                 event.userId(),
@@ -54,7 +54,7 @@ public class SessionRepository {
                 event.deckEnrollmentId(),
                 event.correctAnswers(),
                 event.incorrectAnswers(),
-                event.receivedAt()
+                java.sql.Timestamp.from(event.receivedAt())
         );
     }
 
