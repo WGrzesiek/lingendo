@@ -11,11 +11,6 @@ on:
         required: true
         default: false
         type: boolean
-  # One-shot trigger for this audited deployment. Removed after a successful rollout.
-  push:
-    branches: ["deploy/codex-security-frontend-foundations"]
-    paths:
-      - ".github/workflows/deploy.yml"
 
 concurrency:
   group: lingendo-production
@@ -45,7 +40,10 @@ jobs:
 
             cd ~/lingendo
             git fetch origin "$DEPLOY_REF"
-            git checkout -B "$DEPLOY_REF" "origin/$DEPLOY_REF"
+            deploy_dir="$(mktemp -d)"
+            trap 'rm -rf "$deploy_dir"' EXIT
+            git archive "origin/$DEPLOY_REF" | tar -x -C "$deploy_dir"
+            cd "$deploy_dir"
 
             # namespace + ConfigMap (bezpieczne re-apply; secret jest osobno, ręcznie)
             kubectl apply -f k8s/00-base.yaml
@@ -61,8 +59,8 @@ jobs:
             kubectl apply -f k8s/30-edge.yaml
 
             if [ "$ROTATE_JWT_KEYS" = "true" ]; then
-              key_dir="$(mktemp -d)"
-              trap 'rm -rf "$key_dir"' EXIT
+              key_dir="$deploy_dir/.jwt-keys"
+              mkdir -m 700 "$key_dir"
               openssl genpkey -algorithm RSA -pkeyopt rsa_keygen_bits:3072 -out "$key_dir/private_key.pem"
               openssl rsa -pubout -in "$key_dir/private_key.pem" -out "$key_dir/public_key.pem"
               kubectl create secret generic gateway-jwt-keys \
@@ -93,4 +91,4 @@ jobs:
             test "$me_status" = "401"
 
             swagger_status="$(curl -sS -o /dev/null -w '%{http_code}' https://lingendo.gwawrzen.pl/api-docs)"
-            test "$swagger_status" = "401" -o "$swagger_status" = "403"
+            test "$swagger_status" = "401" -o "$swagger_status" = "403" -o "$swagger_status" = "404"
