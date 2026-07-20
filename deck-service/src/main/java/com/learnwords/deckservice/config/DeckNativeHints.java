@@ -62,24 +62,30 @@ public class DeckNativeHints implements RuntimeHintsRegistrar {
                     MemberCategory.INVOKE_PUBLIC_METHODS);
         }
 
-        // Polymorphic Jackson request/response types (sealed UserAnswer + @JsonSubTypes,
-        // algorithm result hierarchy) — register the whole evaluationService graph for binding.
+        // Polymorphic Jackson types (sealed hierarchies with @JsonSubTypes): the UserAnswer
+        // request bodies and the learning-algorithm state/step graph that is (de)serialized to
+        // and from the jsonb algorithmState column. Register both packages for binding.
         PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver(loader);
         CachingMetadataReaderFactory readers = new CachingMetadataReaderFactory(loader);
-        try {
-            Resource[] resources = resolver.getResources(
-                    "classpath*:com/learnwords/deckservice/service/evaluationService/**/*.class");
-            for (Resource res : resources) {
-                try {
-                    String className = readers.getMetadataReader(res).getClassMetadata().getClassName();
-                    Class<?> type = Class.forName(className, false, loader);
-                    binding.registerReflectionHints(hints.reflection(), type);
-                } catch (Throwable ignored) {
-                    // Skip unreadable/unresolvable entries.
+        for (String pattern : new String[]{
+                "classpath*:com/learnwords/deckservice/service/evaluationService/**/*.class",
+                "classpath*:com/learnwords/deckservice/service/algorithm/**/*.class",
+                "classpath*:com/learnwords/deckservice/service/learningStrategy/**/*.class"
+        }) {
+            try {
+                Resource[] resources = resolver.getResources(pattern);
+                for (Resource res : resources) {
+                    try {
+                        String className = readers.getMetadataReader(res).getClassMetadata().getClassName();
+                        Class<?> type = Class.forName(className, false, loader);
+                        binding.registerReflectionHints(hints.reflection(), type);
+                    } catch (Throwable ignored) {
+                        // Skip unreadable/unresolvable entries.
+                    }
                 }
+            } catch (Exception ignored) {
+                // Nothing to register for this pattern.
             }
-        } catch (Exception ignored) {
-            // Nothing to register.
         }
     }
 }
