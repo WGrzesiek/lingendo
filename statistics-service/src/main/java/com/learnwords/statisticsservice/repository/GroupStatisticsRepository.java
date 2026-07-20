@@ -170,7 +170,7 @@ public class GroupStatisticsRepository {
     public void createGroup(String groupId, String groupName, String teacherId, Instant createdAt) {
         jdbcTemplate.update(
                 INSERT_GROUP_SQL,
-                Timestamp.from(createdAt != null ? createdAt : java.sql.Timestamp.from(Instant.now())),
+                Timestamp.from(createdAt != null ? createdAt : Instant.now()),
                 groupId,
                 groupName,
                 teacherId
@@ -180,7 +180,7 @@ public class GroupStatisticsRepository {
     public void addMember(String groupId, String studentId, String teacherId, Instant joinedAt) {
         jdbcTemplate.update(
                 INSERT_GROUP_MEMBER_SQL,
-                Timestamp.from(joinedAt != null ? joinedAt : java.sql.Timestamp.from(Instant.now())),
+                Timestamp.from(joinedAt != null ? joinedAt : Instant.now()),
                 groupId,
                 studentId,
                 teacherId
@@ -198,7 +198,7 @@ public class GroupStatisticsRepository {
     public void addSharedDeck(String groupId, String deckId, String deckName, String teacherId, Instant sharedAt) {
         jdbcTemplate.update(
                 INSERT_GROUP_SHARED_DECK_SQL,
-                Timestamp.from(sharedAt != null ? sharedAt : java.sql.Timestamp.from(Instant.now())),
+                Timestamp.from(sharedAt != null ? sharedAt : Instant.now()),
                 groupId,
                 deckId,
                 deckName,
@@ -270,7 +270,7 @@ public class GroupStatisticsRepository {
                             rs.getString("student_id"),
                             rs.getString("student_name"),
                             rs.getLong("total_points"),
-                            lastActive != null ? lastActive.toInstant() : java.sql.Timestamp.from(Instant.now())
+                            lastActive != null ? lastActive.toInstant() : Instant.now()
                     );
                 },
                 groupId, limit
@@ -287,7 +287,7 @@ public class GroupStatisticsRepository {
                 (rs, rowNum) -> {
                     Timestamp eventTime = rs.getTimestamp("event_time");
                     return new GroupActivityItemDto(
-                            eventTime != null ? eventTime.toInstant() : java.sql.Timestamp.from(Instant.now()),
+                            eventTime != null ? eventTime.toInstant() : Instant.now(),
                             rs.getString("student_id"),
                             rs.getString("student_name"),
                             rs.getString("activity_type"),
@@ -323,7 +323,7 @@ public class GroupStatisticsRepository {
                             rs.getString("deck_id"),
                             rs.getString("deck_name"),
                             rs.getInt("students_count"),
-                            lastActivity != null ? lastActivity.toInstant() : java.sql.Timestamp.from(Instant.now())
+                            lastActivity != null ? lastActivity.toInstant() : Instant.now()
                     );
                 },
                 groupId, limit
