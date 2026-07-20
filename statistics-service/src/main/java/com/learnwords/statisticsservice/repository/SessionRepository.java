@@ -107,7 +107,7 @@ public class SessionRepository {
 
     private static final String GET_AVERAGE_ANSWERS_PER_SESSION_SQL = """
         WITH answer_per_session AS (
-            SELECT COUNT() AS answers_per_session
+            SELECT COUNT(*) AS answers_per_session
             FROM analytics.flashcard_answers
             WHERE user_id = ?
             GROUP BY session_id
@@ -122,7 +122,7 @@ public class SessionRepository {
 
     private static final String GET_AVERAGE_ANSWERS_PER_SESSION_SQL_WITH_DATE = """
         WITH answer_per_session AS (
-            SELECT COUNT() AS answers_per_session
+            SELECT COUNT(*) AS answers_per_session
             FROM analytics.flashcard_answers
             WHERE user_id = ? AND event_time >= ?
             GROUP BY session_id
