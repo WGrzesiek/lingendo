@@ -61,6 +61,9 @@ public class VocabularyGrpcClientImpl implements VocabularyGrpcClient {
     @Deprecated
     @Override
     public BatchGetVocabulariesResponse batchGetVocabularies(List<String> ids) {
+        if (ids == null || ids.isEmpty()) {
+            return BatchGetVocabulariesResponse.getDefaultInstance();
+        }
         log.debug("Pobieranie {} słówek przez gRPC (DEPRECATED)", ids.size());
         
         try {
@@ -96,6 +99,9 @@ public class VocabularyGrpcClientImpl implements VocabularyGrpcClient {
      */
     @Override
     public BatchGetOnlyWordResponse batchGetOnlyWord(List<String> ids) {
+        if (ids == null || ids.isEmpty()) {
+            return BatchGetOnlyWordResponse.getDefaultInstance();
+        }
         log.debug("Pobieranie {} słów (bez zdań) przez gRPC", ids.size());
         
         try {
@@ -168,8 +174,12 @@ public class VocabularyGrpcClientImpl implements VocabularyGrpcClient {
      */
     @Override
     public BatchGetWordsResponse batchGetWordsByIds(List<String> ids) {
+        if (ids == null || ids.isEmpty()) {
+            // Nothing to fetch — skip the gRPC call (vocab-read rejects empty id lists).
+            return BatchGetWordsResponse.getDefaultInstance();
+        }
         log.debug("Pobieranie {} słówek (z pełnymi danymi) przez gRPC", ids.size());
-        
+
         try {
             BatchGetWordsRequest request = BatchGetWordsRequest.newBuilder()
                     .addAllIds(ids)
