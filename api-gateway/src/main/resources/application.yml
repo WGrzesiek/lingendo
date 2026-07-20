@@ -111,8 +111,13 @@ spring:
                 maxAge: 3600
 server:
   error:
-    include-message: always
-    include-binding-errors: always
+    # Nie wystawiaj wewnętrznych szczegółów błędu klientowi (leak Redis endpoint/hasło w trace itp.).
+    include-message: never
+    include-stacktrace: never
+    include-binding-errors: never
+    include-exception: false
+    whitelabel:
+      enabled: false
   port: ${SERVER_PORT:8811}
 
 logging:
