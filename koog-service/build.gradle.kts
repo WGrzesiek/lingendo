@@ -90,7 +90,7 @@ tasks.withType<JavaCompile>().configureEach {
 graalvmNative {
     binaries {
         named("main") {
-            buildArgs.add("--initialize-at-build-time=org.slf4j.simple")
+            buildArgs.add("--initialize-at-build-time=org.slf4j.simple.SimpleLogger,org.slf4j.simple.SimpleLoggerConfiguration,org.slf4j.simple.SimpleLoggerFactory,org.slf4j.simple.SimpleServiceProvider,org.slf4j.simple.OutputChoice,org.slf4j.simple.OutputChoice\$OutputChoiceType")
         }
     }
 }
