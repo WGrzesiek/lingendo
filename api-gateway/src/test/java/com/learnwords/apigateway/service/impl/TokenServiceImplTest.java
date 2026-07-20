@@ -25,13 +25,16 @@ class TokenServiceImplTest {
         var generator = KeyPairGenerator.getInstance("RSA");
         generator.initialize(2048);
 
-        tokens = new TokenServiceImpl(generator.generateKeyPair(), store);
-        tokens.issuer = "learnwords-api";
-        tokens.kid = "test-key";
-        tokens.accessAudience = "lingendo-api";
-        tokens.refreshAudience = "lingendo-refresh";
-        tokens.accessTtl = Duration.ofMinutes(15);
-        tokens.refreshTtl = Duration.ofDays(30);
+        tokens = new TokenServiceImpl(
+                generator.generateKeyPair(),
+                store,
+                "learnwords-api",
+                "test-key",
+                "lingendo-api",
+                "lingendo-refresh",
+                Duration.ofMinutes(15),
+                Duration.ofDays(30)
+        );
     }
 
     @Test
