@@ -22,7 +22,7 @@ export default function HeroSection() {
           <HeroH1 text="Zamień każde słowo w" colorText="Postęp" />
 
           <p className="text-pretty text-lg leading-relaxed text-muted-foreground md:text-xl">
-            Ucz się skutecznie dzięki inteligentnym fiszkom z zdaniami
+            Ucz się skutecznie dzięki inteligentnym fiszkom ze zdaniami
             tworzonymi przez AI. Lingendo pomaga Ci rozwijać słownictwo
             szybciej, pewniej i z przyjemnością.
           </p>
@@ -32,8 +32,8 @@ export default function HeroSection() {
             rightButtonText="Dowiedz się więcej"
           />
           <HeroSocialProof
-            firstText="Używany przez 5 000+ użytkowników"
-            secondText="500 000+ wygenerowanych fiszek"
+            firstText="Projekt demonstracyjny — bez danych produkcyjnych"
+            secondText="Kod i infrastruktura rozwijane etapami"
           />
         </AnimatedContainer>
 

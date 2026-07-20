@@ -39,41 +39,24 @@ export const useProtectedRoute = (options: ProtectionOptions = {}) => {
     if (isLoading) return;
 
     if (!user || error) {
-      console.log(
-        "[useProtectedRoute] Brak użytkownika, przekierowanie na login"
-      );
       router.push(loginRedirect);
       return;
     }
 
     if (requireEnabled && !user.isEnabled) {
-      console.log("[useProtectedRoute] Konto nieaktywne, przekierowanie");
       router.push("/account-disabled");
       return;
     }
 
     if (requiredUserType && user.userType !== requiredUserType) {
-      console.log(
-        `[useProtectedRoute] Nieprawidłowy userType. Wymagany: ${requiredUserType}, obecny: ${user.userType}`
-      );
       router.push(redirectTo);
       return;
     }
 
     if (requiredAccountType && user.accountType !== requiredAccountType) {
-      console.log(
-        `[useProtectedRoute] Nieprawidłowy accountType. Wymagany: ${requiredAccountType}, obecny: ${user.accountType}`
-      );
       router.push(redirectTo);
       return;
     }
-
-    console.log("✅ [useProtectedRoute] Użytkownik zweryfikowany:", {
-      username: user.username,
-      accountType: user.accountType,
-      userType: user.userType,
-      isEnabled: user.isEnabled,
-    });
   }, [
     user,
     isLoading,
@@ -90,6 +73,12 @@ export const useProtectedRoute = (options: ProtectionOptions = {}) => {
     user,
     isLoading,
     error,
-    hasAccess: !isLoading && !!user,
+    hasAccess:
+      !isLoading &&
+      !error &&
+      !!user &&
+      (!requireEnabled || user.isEnabled) &&
+      (!requiredUserType || user.userType === requiredUserType) &&
+      (!requiredAccountType || user.accountType === requiredAccountType),
   };
 };

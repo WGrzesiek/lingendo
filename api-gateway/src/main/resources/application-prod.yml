@@ -3,13 +3,6 @@ spring:
     activate:
       on-profile: prod
 
-  security:
-    oauth2:
-      resourceserver:
-        jwt:
-          issuer-uri: ${SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI}
-          jwk-set-uri: ${SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI}
-        cookie-name: ${ACCESS_TOKEN}
 logging:
   level:
     root: INFO
@@ -27,15 +20,17 @@ grpc:
       address: ${GRPC_CLIENT_AUTH_ADDRESS}
       negotiationType: ${GRPC_CLIENT_AUTH_NEGOTIATIONTYPE}
 security:
+  cors:
+    allowed-origins: ${CORS_ALLOWED_ORIGINS:https://lingendo.app,https://lingendo.gwawrzen.pl}
   jwt:
-    issuer: api-gateway
-    audience: learnwords
+    issuer: ${JWT_ISSUER:learnwords-api}
+    kid: ${JWT_KID:gateway-kid}
+    access-audience: ${JWT_ACCESS_AUDIENCE:lingendo-api}
+    refresh-audience: ${JWT_REFRESH_AUDIENCE:lingendo-refresh}
     access-ttl: 5m
     refresh-ttl: 30d
     cookie:
-      refresh:
-        name: refresh
-        path: /auth
-        same-site: Lax
-        secure: true
-        http-only: true
+      access-name: ${ACCESS_TOKEN_COOKIE_NAME:__Host-lingendo-access}
+      refresh-name: ${REFRESH_TOKEN_COOKIE_NAME:__Host-lingendo-refresh}
+      same-site: Strict
+      secure: true

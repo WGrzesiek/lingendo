@@ -18,7 +18,7 @@ class JwksController {
     private final KeyPair keyPair;
     private final String  jwksJson;
 
-    JwksController(KeyPair keyPair, @Value("${security.jwt.keys.kid:gateway-kid}") String kid) {
+    JwksController(KeyPair keyPair, @Value("${security.jwt.kid:gateway-kid}") String kid) {
         this.keyPair = keyPair;
 
         RSAKey jwk = new RSAKey.Builder((RSAPublicKey) keyPair.getPublic())

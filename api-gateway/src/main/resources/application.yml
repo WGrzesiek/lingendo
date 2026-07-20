@@ -5,14 +5,7 @@ spring:
     redis:
       host: ${SPRING_DATA_REDIS_HOST:192.168.23.9}
       port: ${SPRING_DATA_REDIS_PORT:6379}
-      password: ${SPRING_DATA_REDIS_PASSWORD:SuperSecret123}
-  security:
-    oauth2:
-      resourceserver:
-        jwt:
-          issuer-uri: ${SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI:http://192.168.23.9:8811}
-          jwk-set-uri: ${SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI:http://192.168.23.9:8811/.well-known/jwks.json}
-          cookie-name: ${ACCESS_TOKEN:access_token}
+      password: ${SPRING_DATA_REDIS_PASSWORD:}
   cloud:
     gateway:
       server:
@@ -92,23 +85,6 @@ spring:
                 - Path=/openapi/statistics-service
               filters:
                 - SetPath=/api-docs
-          globalcors:
-            cors-configurations:
-              "[/**]":
-                allowedOrigins:
-                  - "http://localhost:8811"
-                  - "http://localhost:3000"
-                  - "http://127.0.0.1:8811"
-                  - "https://lingendo.app"
-                allowedMethods:
-                  - GET
-                  - POST
-                  - PUT
-                  - DELETE
-                  - OPTIONS
-                allowedHeaders: "*"
-                allowCredentials: true
-                maxAge: 3600
 server:
   error:
     # Nie wystawiaj wewnętrznych szczegółów błędu klientowi (leak Redis endpoint/hasło w trace itp.).
@@ -161,11 +137,9 @@ management:
       probability: 1
 
 jwt:
-  private-key-location: classpath:jwt/private_key.pem
-  public-key-location: classpath:jwt/public_key.pem
+  private-key-location: ${JWT_PRIVATE_KEY_LOCATION:file:./secrets/private_key.pem}
+  public-key-location: ${JWT_PUBLIC_KEY_LOCATION:file:./secrets/public_key.pem}
   expire-in: ${JWT_EXPIRE_IN:86400000}
-  keys:
-    kid: ${KID:gateway-kid}
 
 grpc:
   client:
@@ -174,8 +148,17 @@ grpc:
       negotiationType: ${GRPC_CLIENT_AUTH_NEGOTIATIONTYPE:PLAINTEXT}
 
 security:
+  cors:
+    allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:3000,http://localhost:8081,http://localhost:19006}
   jwt:
-    issuer: "learnwords-api"
-    kid: "gateway-kid"
-    access-ttl: 15m
-    refresh-ttl: 30d
+    issuer: ${JWT_ISSUER:learnwords-api}
+    kid: ${JWT_KID:gateway-kid}
+    access-audience: ${JWT_ACCESS_AUDIENCE:lingendo-api}
+    refresh-audience: ${JWT_REFRESH_AUDIENCE:lingendo-refresh}
+    access-ttl: ${JWT_ACCESS_TTL:15m}
+    refresh-ttl: ${JWT_REFRESH_TTL:30d}
+    cookie:
+      access-name: ${ACCESS_TOKEN_COOKIE_NAME:access_token}
+      refresh-name: ${REFRESH_TOKEN_COOKIE_NAME:refresh_token}
+      secure: ${JWT_COOKIE_SECURE:false}
+      same-site: ${JWT_COOKIE_SAME_SITE:Strict}

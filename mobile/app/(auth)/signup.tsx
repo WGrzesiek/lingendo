@@ -10,40 +10,8 @@ import {
   ActivityIndicator,
 } from 'react-native';
 
-import type { AccountType } from '@/features/auth/types';
 import { router } from 'expo-router';
 import { useAuth } from '@/features/auth';
-
-
-/**
- * Opcje typu konta
- */
-const ACCOUNT_TYPE_OPTIONS: {
-  value: AccountType;
-  label: string;
-  description: string;
-}[] = [
-  {
-    value: 'BASIC',
-    label: 'Basic',
-    description: 'Darmowy plan z podstawowymi funkcjami',
-  },
-  {
-    value: 'PREMIUM',
-    label: 'Premium',
-    description: 'Pełny dostęp i kursy społeczności',
-  },
-  {
-    value: 'STUDENT',
-    label: 'Uczeń',
-    description: 'Dostęp do talii nauczyciela',
-  },
-  {
-    value: 'TEACHER',
-    label: 'Nauczyciel',
-    description: 'Panel nauczyciela i zarządzanie uczniami',
-  },
-];
 
 /**
  * Ekran rejestracji
@@ -55,7 +23,6 @@ export const Signup = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  const [accountType, setAccountType] = useState<AccountType>('BASIC');
   const [localError, setLocalError] = useState<string | null>(null);
 
   const { signupAsync, isSignupLoading, signupError, resetSignupError } = useAuth();
@@ -98,10 +65,8 @@ export const Signup = () => {
         username,
         email,
         password,
-        accountType,
-        userType: 'NORMAL',
       });
-    } catch (err) {
+    } catch {
       // Błąd jest obsługiwany przez useAuth hook
       console.log('[Signup] Błąd rejestracji');
     }
@@ -214,32 +179,6 @@ export const Signup = () => {
                 editable={!isSignupLoading}
                 className="w-full rounded-lg border border-input bg-secondary px-4 py-3 text-foreground"
               />
-            </View>
-
-            {/* Account Type */}
-            <View className="mb-4">
-              <Text className="mb-3 text-sm font-medium text-foreground">Typ konta</Text>
-              <View className="flex-row flex-wrap gap-2">
-                {ACCOUNT_TYPE_OPTIONS.map((option) => (
-                  <TouchableOpacity
-                    key={option.value}
-                    onPress={() => setAccountType(option.value)}
-                    disabled={isSignupLoading}
-                    className={`min-w-[45%] flex-1 rounded-lg border p-3 ${
-                      accountType === option.value
-                        ? 'border-primary bg-primary-light'
-                        : 'border-input bg-secondary'
-                    }`}>
-                    <Text
-                      className={`text-sm font-medium ${
-                        accountType === option.value ? 'text-primary-dark' : 'text-foreground'
-                      }`}>
-                      {option.label}
-                    </Text>
-                    <Text className="mt-1 text-xs text-muted-foreground">{option.description}</Text>
-                  </TouchableOpacity>
-                ))}
-              </View>
             </View>
 
             {/* Error */}

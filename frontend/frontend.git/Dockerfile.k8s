@@ -5,6 +5,8 @@
 #   docker build -f frontend/frontend.git/Dockerfile.k8s -t lingendo/frontend:k8s ./frontend/frontend.git
 FROM node:20-alpine AS build
 WORKDIR /app
+ARG API_PROXY_TARGET=http://api-gateway.lingendo.svc.cluster.local:8811
+ENV API_PROXY_TARGET=$API_PROXY_TARGET
 COPY package.json package-lock.json ./
 RUN npm ci
 COPY . .

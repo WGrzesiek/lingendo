@@ -96,11 +96,6 @@ const CommunityCoursesPage = () => {
     return result;
   }, [courses, filters]);
 
-  const handleEnroll = (courseId: string) => {
-    console.log("Zapisuję na kurs:", courseId);
-    // TODO: Implementacja zapisu na kurs
-  };
-
   return (
     <div className="min-h-screen bg-background">
       <div className="container mx-auto p-6 lg:p-8 space-y-8">

@@ -10,8 +10,8 @@ import {
   Repeat2,
   LineChart,
   BookOpenCheck,
-  Target,
-  Shield,
+  Layers3,
+  Users,
 } from "lucide-react";
 
 const FEATURES: FeatureItem[] = [
@@ -23,33 +23,33 @@ const FEATURES: FeatureItem[] = [
   },
   {
     icon: Brain,
-    title: "Kontekst i przykłady",
-    desc: "Każde słowo widzisz w zdaniu i realnym użyciu. Szybciej rozumiesz znaczenie i łatwiej przychodzi mówienie.",
-    footer: "Fiszki z dźwiękiem i transkrypcją — opcjonalnie.",
+    title: "Przykłady tworzone przez AI",
+    desc: "Do słów możesz generować zdania, które pokazują ich znaczenie w kontekście i ułatwiają zapamiętywanie.",
+    footer: "AI wspiera tworzenie materiału, a nie zastępuje nauki.",
   },
   {
-    icon: Target,
-    title: "Cele i nawyki",
-    desc: "Ustal dzienny cel (np. 15 słów) i buduj serię. Lingendo przypomina o nauce i dba o regularność.",
-    footer: "Motywujące „streaki” i powiadomienia.",
+    icon: Layers3,
+    title: "Własne talie",
+    desc: "Twórz zestawy słownictwa, dodawaj fiszki i porządkuj materiał według języka, poziomu oraz tematu.",
+    footer: "Materiał dopasowany do tego, czego faktycznie się uczysz.",
   },
   {
     icon: LineChart,
     title: "Przejrzyste statystyki",
     desc: "Śledź postęp: opanowane słowa, skuteczność odpowiedzi, tempo nauki. Liczą się fakty, nie tylko odhaczone lekcje.",
-    footer: "Panel postępu dostępny na wszystkich urządzeniach.",
+    footer: "Jedno miejsce do oceny postępu i regularności.",
   },
   {
     icon: BookOpenCheck,
-    title: "Zestawy i ścieżki",
-    desc: "Gotowe talie według poziomu (A1–C1), branży i celu (rozmowa, praca, podróże) — lub twórz własne.",
-    footer: "Import/eksport własnych talii w minutę.",
+    title: "Nauka i powtórki",
+    desc: "Osobne sesje nauki i powtórek prowadzą przez materiał krok po kroku, bez konieczności ręcznego planowania kolejności.",
+    footer: "Skupiasz się na odpowiedzi, aplikacja pilnuje kolejki.",
   },
   {
-    icon: Shield,
-    title: "Prywatność i bezpieczeństwo",
-    desc: "Twoje dane są bezpieczne. Hosting w UE, zgodność z RODO i przejrzyste ustawienia prywatności.",
-    footer: "Logowanie bezpieczne, opcjonalnie 2FA.",
+    icon: Users,
+    title: "Udostępnianie i społeczność",
+    desc: "Przeglądaj publiczne talie, zapisuj się do wybranych zestawów i udostępniaj własne materiały innym użytkownikom.",
+    footer: "Funkcje społecznościowe są nadal rozwijane.",
   },
 ];
 

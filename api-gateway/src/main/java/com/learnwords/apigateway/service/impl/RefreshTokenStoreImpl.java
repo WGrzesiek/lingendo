@@ -63,15 +63,17 @@ public class RefreshTokenStoreImpl implements RefreshTokenStore {
 
         return redis.opsForHash().get(k, "userId")
                 .cast(String.class)
-//                .defaultIfEmpty(null)
-                .switchIfEmpty(Mono.just(""))
                 .flatMap(uid -> {
-                    Mono<Long> delHash = redis.delete(k);
-                    Mono<Long> delIdx  = (uid == null)
-                            ? Mono.just(0L)
-                            : redis.opsForSet().remove(USER_IDX.formatted(uid), jti);
-                    return Mono.when(delHash, delIdx).thenReturn(true);
-                });
+                    return redis.delete(k).flatMap(deleted -> {
+                        if (deleted == 0) {
+                            return Mono.just(false);
+                        }
+                        return redis.opsForSet()
+                                .remove(USER_IDX.formatted(uid), jti)
+                                .thenReturn(true);
+                    });
+                })
+                .defaultIfEmpty(false);
     }
 
     @Override
@@ -92,10 +94,17 @@ public class RefreshTokenStoreImpl implements RefreshTokenStore {
 
     @Override
     public Mono<Boolean> rotate(String oldJti, RefreshSession newSession, Duration ttl) {
-        return deleteByJti(oldJti)
-                .then(save(newSession, ttl))
-                .thenReturn(true);
-
+        // Zapis nowego tokena następuje przed atomowym DEL starego klucza. Tylko jeden
+        // równoległy refresh może usunąć stary klucz; przegrane próby sprzątają swój
+        // niewydany token i zwracają false.
+        return save(newSession, ttl)
+                .then(deleteByJti(oldJti))
+                .flatMap(rotated -> {
+                    if (rotated) {
+                        return Mono.just(true);
+                    }
+                    return deleteByJti(newSession.getId()).thenReturn(false);
+                });
     }
 
     private static Map<String, String> toMap(RefreshSession s) {

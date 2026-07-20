@@ -1,6 +1,6 @@
 import { User, GraduationCap, Users, Globe, LucideIcon } from "lucide-react";
 import { Feather, TrendingUp, Flame } from "lucide-react";
-import { Sparkles, Boxes, FlaskConical } from "lucide-react";
+import { Sparkles, Boxes } from "lucide-react";
 
 import {
   Code,

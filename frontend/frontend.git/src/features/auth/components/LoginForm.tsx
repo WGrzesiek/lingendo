@@ -18,7 +18,7 @@ export const LoginForm = () => {
     <form onSubmit={handleSubmit} className="space-y-4 w-full max-w-md">
       <div>
         <label htmlFor="username" className="block text-sm font-medium mb-1">
-          Username
+          Nazwa użytkownika
         </label>
         <input
           id="username"
@@ -33,7 +33,7 @@ export const LoginForm = () => {
 
       <div>
         <label htmlFor="password" className="block text-sm font-medium mb-1">
-          Password
+          Hasło
         </label>
         <input
           id="password"
@@ -58,7 +58,7 @@ export const LoginForm = () => {
         disabled={isLoading}
         className="w-full bg-primary text-primary-foreground py-2 rounded-lg hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
       >
-        {isLoading ? "Logging in..." : "Sign In"}
+        {isLoading ? "Logowanie…" : "Zaloguj się"}
       </button>
     </form>
   );

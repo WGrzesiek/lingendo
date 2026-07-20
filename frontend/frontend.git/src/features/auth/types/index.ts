@@ -20,8 +20,6 @@ export interface SignupRequest {
   username: string;
   email: string;
   password: string;
-  userType: "NORMAL";
-  accountType: AccountType;
 }
 
 /**

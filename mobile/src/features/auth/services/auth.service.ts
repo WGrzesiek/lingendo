@@ -45,7 +45,14 @@ export const AuthService = {
   async logout(): Promise<void> {
     try {
       console.log('[AuthService] Próba wylogowania...');
-      await apiClient.post(ENDPOINTS.AUTH.LOGOUT);
+      const refreshToken = await storage.getRefreshToken();
+      await apiClient.post(
+        ENDPOINTS.AUTH.LOGOUT,
+        {},
+        refreshToken
+          ? { headers: { Authorization: `Bearer ${refreshToken}` } }
+          : undefined
+      );
     } catch (error) {
       console.error('[AuthService] Błąd podczas wylogowania (ignorowany):', error);
     } finally {

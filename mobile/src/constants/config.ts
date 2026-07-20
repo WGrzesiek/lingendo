@@ -11,10 +11,10 @@ export const API_CONFIG = {
  */
 export const ENDPOINTS = {
   AUTH: {
-    LOGIN: '/v1/gateway/login',
+    LOGIN: '/v1/gateway/mobile/login',
     REGISTER: '/v1/users/register',
-    REFRESH: '/v1/gateway/refresh',
-    LOGOUT: '/v1/gateway/logout',
+    REFRESH: '/v1/gateway/mobile/refresh',
+    LOGOUT: '/v1/gateway/mobile/logout',
     ME: '/v1/gateway/me',
   },
   DASHBOARD: {

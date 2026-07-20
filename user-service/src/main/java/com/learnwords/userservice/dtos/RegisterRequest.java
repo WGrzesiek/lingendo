@@ -1,9 +1,5 @@
 package com.learnwords.userservice.dtos;
 
-import com.learnwords.userservice.enums.AccountType;
-import com.learnwords.userservice.enums.UserType;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
@@ -25,14 +21,6 @@ public class RegisterRequest {
     @NotNull(message = "Nazwisko jest wymagane")
     @NotBlank(message = "Wprowadź swoje nazwisko")
     private String lastName;
-
-    @NotNull(message = "Typ użytkownika jest wymagany")
-    @Enumerated(value = EnumType.STRING)
-    private UserType userType;
-
-    @NotNull(message = "Typ konta jest wymagany")
-    @Enumerated(value = EnumType.STRING)
-    private AccountType accountType;
 
     @NotNull(message = "Nazwa użytkownika jest wymagana")
     @NotBlank(message = "Wprowadź nazwę użytkownika")

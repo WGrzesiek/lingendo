@@ -4,6 +4,8 @@ import com.learnwords.common.KafkaTopic;
 import com.learnwords.common.events.UserLoginEvent;
 import com.learnwords.userservice.dtos.ChangePasswordRequest;
 import com.learnwords.userservice.dtos.RegisterRequest;
+import com.learnwords.userservice.enums.AccountType;
+import com.learnwords.userservice.enums.UserType;
 import com.learnwords.userservice.dtos.UpdateProfileRequest;
 import com.learnwords.userservice.dtos.UserProfileResponse;
 import com.learnwords.userservice.entity.User;
@@ -61,8 +63,9 @@ public class UserServiceImpl implements UserService {
                 .username(registerRequest.getUsername())
                 .email(registerRequest.getEmail())
                 .password(passwordService.hashPassword(registerRequest.getPassword()))
-                .userType(registerRequest.getUserType())
-                .accountType(registerRequest.getAccountType())
+                // Publiczna rejestracja nigdy nie może nadawać ról ani płatnych typów kont.
+                .userType(UserType.NORMAL)
+                .accountType(AccountType.BASIC)
                 .build();
         userRepository.save(user);
     }
@@ -197,4 +200,3 @@ public class UserServiceImpl implements UserService {
     }
 
 }
-

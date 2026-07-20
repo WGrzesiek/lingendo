@@ -3,19 +3,10 @@ spring:
     redis:
       host: ${SPRING_DATA_REDIS_HOST:localhost}
       port: ${SPRING_DATA_REDIS_PORT:6379}
-      password: ${SPRING_DATA_REDIS_PASSWORD:SuperSecret123}
+      password: ${SPRING_DATA_REDIS_PASSWORD:}
   config:
     activate:
       on-profile: dev
-  security:
-    oauth2:
-      resourceserver:
-        jwt:
-          issuer-uri: ${SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI:http://api-gateway:8811}
-          jwk-set-uri: ${SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI:http://api-gateway:8811/.well-known/jwks.json}
-          cookie-name: ${ACCESS_TOKEN:access_token}
-
-
 logging:
   level:
     root: DEBUG
@@ -24,13 +15,9 @@ server:
   port: ${SERVER_PORT:8811}
 
 jwt:
-  private-key-location: ${JWT_PRIVATE_KEY_LOCATION:classpath:jwt/private_key.pem}
-  public-key-location: ${JWT_PUBLIC_KEY_LOCATION:classpath:jwt/public_key.pem}
+  private-key-location: ${JWT_PRIVATE_KEY_LOCATION:file:./secrets/private_key.pem}
+  public-key-location: ${JWT_PUBLIC_KEY_LOCATION:file:./secrets/public_key.pem}
   expire-in: ${JWT_EXPIRE_IN:86400000}
-  keys:
-    kid: ${KID:gateway-kid}
-
-
 grpc:
   client:
     auth:
@@ -38,9 +25,18 @@ grpc:
       negotiationType: ${GRPC_CLIENT_AUTH_NEGOTIATIONTYPE:PLAINTEXT}
 
 security:
+  cors:
+    allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:3000,http://localhost:8081,http://localhost:19006}
   jwt:
-    issuer: "learnwords-api"
-    kid: "gateway-kid"
+    issuer: ${JWT_ISSUER:learnwords-api}
+    kid: ${JWT_KID:gateway-kid}
+    access-audience: ${JWT_ACCESS_AUDIENCE:lingendo-api}
+    refresh-audience: ${JWT_REFRESH_AUDIENCE:lingendo-refresh}
     access-ttl: 60m
     refresh-ttl: 30d
+    cookie:
+      access-name: access_token
+      refresh-name: refresh_token
+      secure: false
+      same-site: Strict
 #    //na czcas deva 60min a normalnie 15min

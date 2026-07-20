@@ -3,15 +3,16 @@
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import Link from "next/link";
+import Image from "next/image";
 import {
   ArrowRight,
   BookOpen,
   Brain,
-  Target,
+  BarChart3,
   Repeat,
   Sparkles,
   Users,
-  Trophy,
+  Library,
 } from "lucide-react";
 import { AnimatedContainer } from "@/components/common/effects/AnimatedContainer";
 
@@ -24,14 +25,16 @@ const steps = [
     icon: BookOpen,
     color: "from-blue-500 to-cyan-500",
     img: "/kursy_spol.png",
+    alt: "Lista talii dostępnych w Lingendo",
   },
   {
     number: "02",
     title: "Ucz się z AI",
     description:
-      "Lingendo automatycznie generuje kontekstowe zdania i przykłady użycia. AI dostosowuje materiał do Twojego poziomu zaawansowania.",
+      "Dla dodawanych słów możesz wygenerować kontekstowe zdania i przykłady użycia, a potem zweryfikować je przed nauką.",
     icon: Sparkles,
     color: "from-purple-500 to-pink-500",
+    alt: "",
   },
   {
     number: "03",
@@ -41,15 +44,17 @@ const steps = [
     icon: Repeat,
     color: "from-green-500 to-emerald-500",
     img: "/powt.png",
+    alt: "Sesja powtórek fiszek w Lingendo",
   },
   {
     number: "04",
     title: "Śledź postępy",
     description:
-      "Szczegółowe statystyki pokazują Twój progres. Wyznaczaj cele, zdobywaj odznaki i rywalizuj ze znajomymi na tablicy wyników.",
-    icon: Target,
+      "Dashboard i statystyki pokazują postęp w nauce, skuteczność odpowiedzi oraz aktywność w wybranym okresie.",
+    icon: BarChart3,
     color: "from-orange-500 to-amber-500",
     img: "/staty.png",
+    alt: "Widok statystyk postępu użytkownika",
   },
 ];
 
@@ -67,16 +72,16 @@ const features = [
       "Każde słowo w kontekście - AI tworzy naturalne przykłady użycia dostosowane do Twojego poziomu.",
   },
   {
-    icon: Users,
-    title: "Społeczność i nauczyciele",
+    icon: Library,
+    title: "Własne i publiczne talie",
     description:
-      "Dołącz do kursów społeczności lub ucz się pod okiem nauczyciela w trybie Student.",
+      "Twórz własny materiał albo zapisuj się do talii udostępnionych przez społeczność.",
   },
   {
-    icon: Trophy,
-    title: "Gamifikacja i motywacja",
+    icon: Users,
+    title: "Funkcje społecznościowe",
     description:
-      "Serie nauki, odznaki, cele dzienne i tablice wyników sprawiają, że nauka staje się grą.",
+      "Znajomi, udostępnianie materiałów i rankingi rozszerzają podstawowy przepływ nauki.",
   },
 ];
 
@@ -141,11 +146,21 @@ export default function HowItWorksPage() {
                 <div className="flex-1">
                   <Card className="p-8 bg-gradient-to-br from-muted/50 to-muted/20 border-muted">
                     <div
-                      className={`w-full aspect-video rounded-lg bg-gradient-to-r ${step.color} opacity-100`}
+                      className={`relative aspect-video w-full overflow-hidden rounded-lg bg-gradient-to-r ${step.color}`}
                     >
-                        {step.img && (
-                            <img src={step.img}/>
-                        )}
+                      {step.img ? (
+                        <Image
+                          src={step.img}
+                          alt={step.alt}
+                          fill
+                          sizes="(min-width: 768px) 50vw, 100vw"
+                          className="object-cover"
+                        />
+                      ) : (
+                        <div className="flex h-full items-center justify-center">
+                          <step.icon className="size-16 text-white/90" />
+                        </div>
+                      )}
                     </div>
                   </Card>
                 </div>
@@ -203,18 +218,18 @@ export default function HowItWorksPage() {
               Gotowy, by zacząć?
             </h2>
             <p className="text-muted-foreground text-lg mb-8">
-              Dołącz do tysięcy użytkowników, którzy już uczą się z Lingendo.
-              Załóż darmowe konto i przekonaj się sam.
+              Wypróbuj środowisko demonstracyjne i sprawdź podstawowy przepływ
+              tworzenia talii, nauki oraz powtórek.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Button size="lg" className="h-12 px-8" asChild>
                 <Link href="/signup">
-                  Załóż darmowe konto
+                  Wypróbuj demo
                   <ArrowRight className="ml-2 h-5 w-5" />
                 </Link>
               </Button>
               <Button size="lg" variant="outline" className="h-12 px-8" asChild>
-                <Link href="/pricing">Zobacz cennik</Link>
+                <Link href="/#creator">O projekcie</Link>
               </Button>
             </div>
           </AnimatedContainer>

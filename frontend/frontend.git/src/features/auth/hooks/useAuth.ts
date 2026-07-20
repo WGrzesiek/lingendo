@@ -9,7 +9,6 @@ import type { ApiErrorResponse } from "@/types/common";
 
 import { CURRENT_USER_KEY } from "./useCurrentUser";
 import { login, signup, logout, getCurrentUser } from "../services/auth";
-import { REFETCH_GROUPS } from "@/lib/queryKeys";
 /**
  * Hook do obsługi procesów logowania, rejestracji i wylogowania
  * Korzysta z React Query mutations, cache’uje usera oraz
@@ -32,10 +31,25 @@ export const useAuth = () => {
     onSuccess: (user) => {
       queryClient.setQueryData(CURRENT_USER_KEY, user);
 
+      const requestedPath =
+        typeof window !== "undefined"
+          ? new URLSearchParams(window.location.search).get("next")
+          : null;
+
+      if (
+        requestedPath &&
+        requestedPath.startsWith("/") &&
+        !requestedPath.startsWith("//") &&
+        requestedPath !== "/login"
+      ) {
+        router.replace(requestedPath);
+        return;
+      }
+
       if (user.accountType === "TEACHER") {
-        router.push("/dashboard-teacher");
+        router.replace("/dashboard-teacher");
       } else {
-        router.push("/dashboard");
+        router.replace("/dashboard");
       }
     },
   });
@@ -55,8 +69,8 @@ export const useAuth = () => {
     mutationFn: logout,
     onSuccess: () => {
       queryClient.clear();
-    router.push("/login");
-  },
+      router.replace("/login");
+    },
   });
 
   return {

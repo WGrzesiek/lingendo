@@ -14,6 +14,9 @@ spec:
     metadata:
       labels: { app: api-gateway }
     spec:
+      automountServiceAccountToken: false
+      securityContext:
+        seccompProfile: { type: RuntimeDefault }
       imagePullSecrets:
         - name: ghcr-secret
       containers:
@@ -31,7 +34,18 @@ spec:
             - { name: SPRING_DATA_REDIS_USERNAME, valueFrom: { secretKeyRef: { name: lingendo-secrets, key: SPRING_DATA_REDIS_USERNAME } } }
             - { name: SPRING_DATA_REDIS_PASSWORD, valueFrom: { secretKeyRef: { name: lingendo-secrets, key: SPRING_DATA_REDIS_PASSWORD } } }
             - { name: SPRING_DATA_REDIS_SSL, valueFrom: { secretKeyRef: { name: lingendo-secrets, key: SPRING_DATA_REDIS_SSL } } }
-            - { name: SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI, value: "http://api-gateway.lingendo.svc.cluster.local:8811" }
+            - { name: JWT_ISSUER, value: "learnwords-api" }
+            - { name: JWT_KID, value: "gateway-2026-07-rotation-1" }
+            - { name: JWT_ACCESS_AUDIENCE, value: "lingendo-api" }
+            - { name: JWT_REFRESH_AUDIENCE, value: "lingendo-refresh" }
+            - { name: ACCESS_TOKEN_COOKIE_NAME, value: "__Host-lingendo-access" }
+            - { name: REFRESH_TOKEN_COOKIE_NAME, value: "__Host-lingendo-refresh" }
+            - { name: CORS_ALLOWED_ORIGINS, value: "https://lingendo.app,https://lingendo.gwawrzen.pl" }
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
+            runAsNonRoot: true
           resources:
             requests: { cpu: "50m", memory: "160Mi" }
             limits: { cpu: "500m", memory: "320Mi" }

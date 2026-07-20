@@ -6,30 +6,14 @@ import axios from "axios";
  * Obsługuje automatyczne odświeżanie tokenów przy błędzie 401
  */
 const apiClient = axios.create({
-  // baseURL: "http://staging.ibis-tautara.ts.net:8811/api",
   baseURL: "/api",
-  timeout: 3000,
+  timeout: 10000,
   headers: {
     "Content-Type": "application/json",
     Accept: "application/json",
   },
   withCredentials: true,
 });
-
-/**
- * Interceptor requestów - loguje informacje o każdym wychodzącym zapytaniu
- */
-apiClient.interceptors.request.use(
-  (config) => {
-    console.log(
-      "[Axios] Wysyłam request:",
-      config.method?.toUpperCase(),
-      config.url
-    );
-    return config;
-  },
-  (error) => Promise.reject(error)
-);
 
 /**
  * Promise przechowujący aktualny proces odświeżania tokenu
@@ -47,9 +31,7 @@ async function refreshAccess(): Promise<boolean> {
     refreshing = (async () => {
       try {
         await apiClient.post("/v1/gateway/refresh", {});
-        console.log("[Axios] Token odświeżony pomyślnie");
       } catch (error) {
-        console.error("[Axios] Nie udało się odświeżyć tokenu");
         throw error;
       } finally {
         refreshing = null;
@@ -68,7 +50,8 @@ async function refreshAccess(): Promise<boolean> {
 /**
  * Interceptor odpowiedzi - automatycznie odświeża token przy błędzie 401
  * Jeśli odświeżenie się powiedzie, ponawia oryginalny request
- * Jeśli odświeżenie się nie powiedzie, przekierowuje na stronę logowania
+ * Jeśli odświeżenie się nie powiedzie, zwraca pierwotny błąd 401. Warstwa
+ * ochrony tras decyduje wtedy o przekierowaniu, zamiast robić twardy reload.
  */
 apiClient.interceptors.response.use(
   (response) => response,
@@ -76,11 +59,6 @@ apiClient.interceptors.response.use(
     const originalRequest = error.config;
     const status = error.response?.status;
     const url = originalRequest?.url ?? "";
-
-    // Jezeli blad z /me to nie odswiezamy
-    if (status === 401 && url.includes("/me")) {
-      return Promise.reject(error);
-    }
 
     if (
       status === 401 &&
@@ -90,21 +68,10 @@ apiClient.interceptors.response.use(
     ) {
       originalRequest._retry = true;
 
-      console.log("[Axios] Otrzymano 401, próba odświeżenia tokenu...");
-
       const refreshed = await refreshAccess();
 
       if (refreshed) {
-        console.log("[Axios] Ponawiam oryginalny request...");
         return apiClient(originalRequest);
-      } else {
-        console.log("[Axios] Refresh nieudany, przekierowanie na /login");
-        if (
-          typeof window !== "undefined" &&
-          window.location.pathname !== "/login"
-        ) {
-          window.location.href = "/login";
-        }
       }
     }
 

@@ -1,13 +1,9 @@
 package com.learnwords.apigateway.service.impl;
 
 import com.learnwords.apigateway.entity.RefreshSession;
-import com.learnwords.apigateway.security.RsaKeyConfig;
 import com.learnwords.apigateway.service.RefreshTokenStore;
 import com.learnwords.apigateway.service.TokenService;
-import com.learnwords.auth.v1.AuthenticateRequest;
-import com.learnwords.auth.v1.AuthenticateResponse;
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
@@ -22,6 +18,10 @@ import java.util.UUID;
 @Service
 class TokenServiceImpl implements TokenService {
 
+    static final String TOKEN_USE_CLAIM = "token_use";
+    static final String ACCESS_TOKEN_USE = "access";
+    static final String REFRESH_TOKEN_USE = "refresh";
+
     private final KeyPair keyPair;
     private final RefreshTokenStore store;
 
@@ -32,6 +32,8 @@ class TokenServiceImpl implements TokenService {
 
     @Value("${security.jwt.issuer}") String issuer;
     @Value("${security.jwt.kid}") String kid;
+    @Value("${security.jwt.access-audience:lingendo-api}") String accessAudience;
+    @Value("${security.jwt.refresh-audience:lingendo-refresh}") String refreshAudience;
     @Value("${security.jwt.access-ttl}") Duration accessTtl;
     @Value("${security.jwt.refresh-ttl}") Duration refreshTtl;
 
@@ -40,13 +42,17 @@ class TokenServiceImpl implements TokenService {
         var now = new Date();
         var exp = new Date(now.getTime() + accessTtl.toMillis());
         return Jwts.builder()
-                .setHeaderParam("kid", kid)
-                .setIssuer(issuer)
-                .setSubject(userId)
+                .header().keyId(kid).and()
+                .issuer(issuer)
+                .audience().add(accessAudience).and()
+                .subject(userId)
+                .id(UUID.randomUUID().toString())
+                .claim(TOKEN_USE_CLAIM, ACCESS_TOKEN_USE)
                 .claim("accountType", accountType)
                 .claim("userType", userType)
-                .setIssuedAt(now).setExpiration(exp)
-                .signWith(keyPair.getPrivate(), SignatureAlgorithm.RS256)
+                .issuedAt(now)
+                .expiration(exp)
+                .signWith(keyPair.getPrivate(), Jwts.SIG.RS256)
                 .compact();
     }
 
@@ -56,15 +62,18 @@ class TokenServiceImpl implements TokenService {
         var exp = new Date(now.getTime() + refreshTtl.toMillis());
         var jti = UUID.randomUUID().toString();
         return Jwts.builder()
-                .setHeaderParam("kid", kid)
-                .setIssuer(issuer)
-                .setSubject(userId)
-                .setId(jti)
+                .header().keyId(kid).and()
+                .issuer(issuer)
+                .audience().add(refreshAudience).and()
+                .subject(userId)
+                .id(jti)
+                .claim(TOKEN_USE_CLAIM, REFRESH_TOKEN_USE)
                 .claim("deviceId", deviceId)
                 .claim("accountType",accountType)
                 .claim("userType", userType)
-                .setIssuedAt(now).setExpiration(exp)
-                .signWith(keyPair.getPrivate(), SignatureAlgorithm.RS256)
+                .issuedAt(now)
+                .expiration(exp)
+                .signWith(keyPair.getPrivate(), Jwts.SIG.RS256)
                 .compact();
     }
 
@@ -74,7 +83,7 @@ class TokenServiceImpl implements TokenService {
                 .map(old -> parseRefresh(newToken).flatMap(newOpt -> newOpt
                         .map(n -> store.rotate(old.jti(), new RefreshSession(
                                         n.jti(), n.userId(), n.deviceId(), n.accountType(), n.userType(),
-                                        nExp(newToken), iat(newToken), Instant.now()),
+                                        n.expiration(), n.issuedAt(), Instant.now()),
                                 ttl))
                         .orElseGet(() -> Mono.just(false))))
                 .orElseGet(() -> Mono.just(false)));
@@ -89,26 +98,41 @@ class TokenServiceImpl implements TokenService {
     @Override
     public Mono<Optional<RefreshPayload>> parseRefresh(String token) {
         try {
-            var claims = Jwts.parserBuilder().setSigningKey(keyPair.getPublic()).build()
-                    .parseClaimsJws(token).getBody();
+            var claims = Jwts.parser()
+                    .verifyWith(keyPair.getPublic())
+                    .require(TOKEN_USE_CLAIM, REFRESH_TOKEN_USE)
+                    .build()
+                    .parseSignedClaims(token)
+                    .getPayload();
             var userId = claims.getSubject();
             var deviceId = claims.get("deviceId", String.class);
             var accountType = claims.get("accountType", String.class);
             var userType = claims.get("userType", String.class);
             var jti = claims.getId();
-            return Mono.just(Optional.of(new RefreshPayload(userId, deviceId, jti, accountType, userType)));
+            if (!issuer.equals(claims.getIssuer())
+                    || claims.getAudience() == null
+                    || !claims.getAudience().contains(refreshAudience)
+                    || isBlank(userId) || isBlank(deviceId) || isBlank(jti)
+                    || isBlank(accountType) || isBlank(userType)
+                    || claims.getExpiration() == null || claims.getIssuedAt() == null
+                    || !claims.getExpiration().after(claims.getIssuedAt())) {
+                return Mono.just(Optional.empty());
+            }
+            return Mono.just(Optional.of(new RefreshPayload(
+                    userId,
+                    deviceId,
+                    jti,
+                    accountType,
+                    userType,
+                    claims.getExpiration().toInstant(),
+                    claims.getIssuedAt().toInstant()
+            )));
         } catch (Exception e) {
             return Mono.just(Optional.empty());
         }
     }
 
-    private static Instant nExp(String jwt) {
-        var c = Jwts.parserBuilder().build().parseClaimsJwt(jwt.split("\\.")[0] + "." + jwt.split("\\.")[1] + ".").getBody();
-        return c.getExpiration().toInstant();
-    }
-    private static Instant iat(String jwt) {
-        var c = Jwts.parserBuilder().build().parseClaimsJwt(jwt.split("\\.")[0] + "." + jwt.split("\\.")[1] + ".").getBody();
-        return c.getIssuedAt().toInstant();
+    private static boolean isBlank(String value) {
+        return value == null || value.isBlank();
     }
 }
-

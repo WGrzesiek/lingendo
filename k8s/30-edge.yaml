@@ -15,6 +15,9 @@ spec:
     metadata:
       labels: { app: frontend }
     spec:
+      automountServiceAccountToken: false
+      securityContext:
+        seccompProfile: { type: RuntimeDefault }
       imagePullSecrets:
         - name: ghcr-secret
       containers:
@@ -23,8 +26,11 @@ spec:
           imagePullPolicy: Always
           ports:
             - { name: http, containerPort: 3000 }
-          env:
-            - { name: API_PROXY_TARGET, value: "http://api-gateway.lingendo.svc.cluster.local:8811" }
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
+            runAsNonRoot: true
           resources:
             requests: { cpu: "50m", memory: "96Mi" }
             limits: { cpu: "500m", memory: "160Mi" }

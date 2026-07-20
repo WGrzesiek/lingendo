@@ -3,6 +3,8 @@ package com.learnwords.userservice.integration;
 import com.learnwords.userservice.TestDataUtil;
 import com.learnwords.userservice.dtos.RegisterRequest;
 import com.learnwords.userservice.entity.User;
+import com.learnwords.userservice.enums.AccountType;
+import com.learnwords.userservice.enums.UserType;
 import com.learnwords.userservice.exception.exceptions.EmailAlreadyExistsException;
 import com.learnwords.userservice.exception.exceptions.UsernameAlreadyExistsException;
 import com.learnwords.userservice.repository.UserRepository;
@@ -39,6 +41,8 @@ class UserServiceTest {
         User capturedUser = userCaptor.getValue();
         assertThat(capturedUser.getUsername()).isEqualTo("testUser");
         assertThat(capturedUser.getEmail()).isEqualTo("test@example.com");
+        assertThat(capturedUser.getUserType()).isEqualTo(UserType.NORMAL);
+        assertThat(capturedUser.getAccountType()).isEqualTo(AccountType.BASIC);
     }
 
     @Test

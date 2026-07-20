@@ -2,34 +2,6 @@
 
 import { useState } from "react";
 import { useAuth } from "../hooks/useAuth";
-import type { AccountType } from "../types";
-
-const ACCOUNT_TYPE_OPTIONS: {
-  value: AccountType;
-  label: string;
-  description: string;
-}[] = [
-  {
-    value: "BASIC",
-    label: "Basic",
-    description: "Darmowy plan z podstawowymi funkcjami",
-  },
-  {
-    value: "PREMIUM",
-    label: "Premium",
-    description: "Pełny dostęp i kursy społeczności",
-  },
-  {
-    value: "STUDENT",
-    label: "Student",
-    description: "Dostęp do talii nauczyciela",
-  },
-  {
-    value: "TEACHER",
-    label: "Teacher",
-    description: "Panel nauczyciela i zarządzanie uczniami",
-  },
-];
 
 export const SignupForm = () => {
   const { signupAsync, isLoading, signupError } = useAuth();
@@ -39,7 +11,6 @@ export const SignupForm = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [accountType, setAccountType] = useState<AccountType>("BASIC");
   const [passwordError, setPasswordError] = useState("");
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -57,8 +28,6 @@ export const SignupForm = () => {
       username,
       email,
       password,
-      userType: "NORMAL",
-      accountType,
     });
   };
 
@@ -159,30 +128,6 @@ export const SignupForm = () => {
           className="w-full px-3 py-2 bg-background border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-ring"
           disabled={isLoading}
         />
-      </div>
-
-      <div>
-        <label className="block text-sm font-medium mb-2">Typ konta</label>
-        <div className="grid grid-cols-2 gap-2">
-          {ACCOUNT_TYPE_OPTIONS.map((option) => (
-            <button
-              key={option.value}
-              type="button"
-              onClick={() => setAccountType(option.value)}
-              disabled={isLoading}
-              className={`p-3 rounded-lg border text-left transition-all ${
-                accountType === option.value
-                  ? "border-primary bg-primary/10 ring-1 ring-primary"
-                  : "border-input hover:border-primary/50"
-              } disabled:opacity-50 disabled:cursor-not-allowed`}
-            >
-              <span className="font-medium text-sm">{option.label}</span>
-              <p className="text-xs text-muted-foreground mt-0.5">
-                {option.description}
-              </p>
-            </button>
-          ))}
-        </div>
       </div>
 
       {passwordError && (

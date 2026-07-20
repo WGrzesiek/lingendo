@@ -39,10 +39,10 @@ export function useCurrentUser() {
         throw error;
       }
     },
-    staleTime: 1000 * 60 * 5,
-    retry: false, // Nie retry jeśli user nie jest zalogowany
-    refetchOnMount: false,
-    refetchOnWindowFocus: false,
+    staleTime: 1000 * 30,
+    retry: false,
+    refetchOnMount: true,
+    refetchOnWindowFocus: true,
     refetchOnReconnect: true,
   });
 }

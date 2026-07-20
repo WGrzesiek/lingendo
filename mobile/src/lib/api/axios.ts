@@ -21,7 +21,7 @@ const apiClient = axios.create({
 apiClient.interceptors.request.use(
   async (config: InternalAxiosRequestConfig) => {
     const token = await storage.getAccessToken();
-    if (token && config.headers) {
+    if (token && config.headers && !config.headers.Authorization) {
       config.headers.Authorization = `Bearer ${token}`;
     }
     console.log('[Axios] Wysyłam request:', config.method?.toUpperCase(), config.url);
@@ -98,10 +98,6 @@ apiClient.interceptors.response.use(
     const originalRequest = error.config as InternalAxiosRequestConfig & { _retry?: boolean };
     const status = error.response?.status;
     const url = originalRequest?.url ?? '';
-
-    if (status === 401 && url.includes('/me')) {
-      return Promise.reject(error);
-    }
 
     if (
       status === 401 &&

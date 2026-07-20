@@ -2,17 +2,7 @@
 .idea
 .qodo
 graphify-out/
-
-
-kubectl create secret generic lingendo-secrets -n lingendo \
-  --from-literal=USER_DB_URL='jdbc:postgresql://ep-dark-waterfall-ass5eyk8-pooler.c-4.eu-central-1.aws.neon.tech/lingendo?sslmode=require' \
-  --from-literal=OUTBOX_DB_URL='jdbc:postgresql://ep-dark-waterfall-ass5eyk8-pooler.c-4.eu-central-1.aws.neon.tech/lingendo?sslmode=require' \
-  --from-literal=DB_POSTGRESQL_USER='devPath' \
-  --from-literal=DB_POSTGRESQL_PASSWORD='npg_qtOa9iz2JIUZ'
-
-    178  kubectl create secret docker-registry ghcr-secret --docker-server=ghcr.io   --docker-username=WGrzesiek --docker-password=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 -n lingendo
-
-       96  kubectl create secret generic backend-secret   --from-literal=POSTGRES_DB='neondb'   --from-literal=POSTGRES_USER='devPath'   --from-literal=POSTGRES_PASSWORD='npg_qtOa9iz2JIUZ'   -n dev-path
-
 k8s/DEPLOY-ORDER.md
 k8s/secret.local.yaml
+.m2-codex/
+**/allure-results/

@@ -15,14 +15,6 @@ spring:
       ssl:
         enabled: ${SPRING_DATA_REDIS_SSL:true}
 
-  security:
-    oauth2:
-      resourceserver:
-        jwt:
-          issuer-uri: ${SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI}
-          jwk-set-uri: ${SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI}
-          cookie-name: ${ACCESS_TOKEN:access_token}
-
 # Klucze RSA montowane z Secret `gateway-jwt-keys` do /etc/keys (patrz manifest).
 jwt:
   private-key-location: ${JWT_PRIVATE_KEY_LOCATION:file:/etc/keys/private_key.pem}
@@ -55,3 +47,22 @@ management:
       show-details: never
   tracing:
     enabled: false
+
+springdoc:
+  api-docs:
+    enabled: false
+  swagger-ui:
+    enabled: false
+
+security:
+  cors:
+    allowed-origins: ${CORS_ALLOWED_ORIGINS:https://lingendo.app,https://lingendo.gwawrzen.pl}
+  jwt:
+    issuer: ${JWT_ISSUER:learnwords-api}
+    access-audience: ${JWT_ACCESS_AUDIENCE:lingendo-api}
+    refresh-audience: ${JWT_REFRESH_AUDIENCE:lingendo-refresh}
+    cookie:
+      access-name: ${ACCESS_TOKEN_COOKIE_NAME:__Host-lingendo-access}
+      refresh-name: ${REFRESH_TOKEN_COOKIE_NAME:__Host-lingendo-refresh}
+      secure: true
+      same-site: Strict

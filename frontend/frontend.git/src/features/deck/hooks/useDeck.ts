@@ -7,7 +7,7 @@ import { QUERY_KEYS } from "@/lib/queryKeys";
  */
 export const useDeck = (deckId: string) => {
   return useQuery({
-    queryKey: [QUERY_KEYS.DECKS, "detail", deckId],
+    queryKey: [QUERY_KEYS.DECKS, "byId", deckId],
     queryFn: () => getDeckById(deckId),
     enabled: !!deckId,
   });

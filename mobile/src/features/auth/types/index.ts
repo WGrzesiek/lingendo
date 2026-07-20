@@ -25,8 +25,6 @@ export interface SignupRequest {
   username: string;
   email: string;
   password: string;
-  userType: UserType;
-  accountType: AccountType;
 }
 
 /**

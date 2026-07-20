@@ -1,8 +1,6 @@
 package com.learnwords.userservice;
 
 import com.learnwords.userservice.dtos.RegisterRequest;
-import com.learnwords.userservice.enums.AccountType;
-import com.learnwords.userservice.enums.UserType;
 
 public class TestDataUtil {
     public static RegisterRequest registerRequest() {
@@ -12,8 +10,6 @@ public class TestDataUtil {
                 .password("password123")
                 .firstName("Test")
                 .lastName("User")
-                .userType(UserType.NORMAL)
-                .accountType(AccountType.BASIC)
                 .build();
     }
 }

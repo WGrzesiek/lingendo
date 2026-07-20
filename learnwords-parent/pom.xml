@@ -5,7 +5,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.5.0</version>
+        <version>3.5.16</version>
         <relativePath/>
     </parent>
 
@@ -18,20 +18,20 @@
 
     <properties>
         <java.version>24</java.version>
-        <spring-boot-version>3.5.0</spring-boot-version>
-        <spring-boot-starter-web>3.5.3</spring-boot-starter-web>
-        <spring-boot-starter-data-jpa>3.5.3</spring-boot-starter-data-jpa>
-        <spring-boot-starter-validation>3.5.3</spring-boot-starter-validation>
-        <spring-boot-starter-test>3.5.3</spring-boot-starter-test>
-        <spring-boot-starter-data-redis>3.5.3</spring-boot-starter-data-redis>
-        <spring-boot-starter-cache>3.5.3</spring-boot-starter-cache>
-        <spring-boot-starter-actuator-version>3.5.7</spring-boot-starter-actuator-version>
+        <spring-boot-version>3.5.16</spring-boot-version>
+        <spring-boot-starter-web>3.5.16</spring-boot-starter-web>
+        <spring-boot-starter-data-jpa>3.5.16</spring-boot-starter-data-jpa>
+        <spring-boot-starter-validation>3.5.16</spring-boot-starter-validation>
+        <spring-boot-starter-test>3.5.16</spring-boot-starter-test>
+        <spring-boot-starter-data-redis>3.5.16</spring-boot-starter-data-redis>
+        <spring-boot-starter-cache>3.5.16</spring-boot-starter-cache>
+        <spring-boot-starter-actuator-version>3.5.16</spring-boot-starter-actuator-version>
         <spring-cloud-starter-openfeign>4.3.0</spring-cloud-starter-openfeign>
         <jakarta-persistence-api>3.1.0</jakarta-persistence-api>
-        <spring-boot-starter-data-mongodb>3.5.7</spring-boot-starter-data-mongodb>
+        <spring-boot-starter-data-mongodb>3.5.16</spring-boot-starter-data-mongodb>
         <postgresql>42.7.7</postgresql>
-        <spring-boot-starter-oauth2-resource-server>3.5.3</spring-boot-starter-oauth2-resource-server>
-        <spring-security-oauth2-jose>6.5.1</spring-security-oauth2-jose>
+        <spring-boot-starter-oauth2-resource-server>3.5.16</spring-boot-starter-oauth2-resource-server>
+        <spring-security-oauth2-jose>6.5.11</spring-security-oauth2-jose>
         <nimbus-jose-jwt>10.3.1</nimbus-jose-jwt>
         <jjwt-jackson>0.11.5</jjwt-jackson>
         <jjwt-impl>0.11.5</jjwt-impl>
@@ -45,7 +45,7 @@
         <springdoc-version>2.8.8</springdoc-version>
         <hibernate-types-60>2.21.1</hibernate-types-60>
         <h2>2.3.232</h2>
-        <spring-cloud-version>2025.0.0</spring-cloud-version>
+        <spring-cloud-version>2025.0.3</spring-cloud-version>
         <!--        Grcp-->
         <protobuf-java-version>3.25.5</protobuf-java-version>
         <grpc.version>1.75.0</grpc.version>

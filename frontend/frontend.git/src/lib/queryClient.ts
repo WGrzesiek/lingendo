@@ -4,10 +4,10 @@ import { QueryClient } from "@tanstack/react-query";
  * Globalny klient React Query z konfiguracją cache'owania dla całej aplikacji
  *
  * Konfiguracja:
- * - staleTime: 5 minut - dane traktowane jako świeże przez 5 minut (bez automatycznego refetchu)
+ * - staleTime: 1 minuta - krótki cache bez utrzymywania długo nieaktualnych danych
  * - gcTime: 10 minut - cache usuwany po 10 minutach nieużywania (dawniej cacheTime)
- * - refetchOnMount: false - NIE refetchuj jeśli dane są świeże przy montowaniu komponentu
- * - refetchOnWindowFocus: false - NIE refetchuj automatycznie gdy wrócisz do okna przeglądarki
+ * - refetchOnMount: true - odświeżaj dane po ponownym wejściu do widoku
+ * - refetchOnWindowFocus: true - synchronizuj stan po powrocie do aplikacji
  * - refetchOnReconnect: "always" - ZAWSZE refetchuj gdy połączenie internetowe zostanie przywrócone
  *
  * Dzięki tej konfiguracji wielokrotne wywołania useCurrentUser() w navbar, dashboard, itp.
@@ -16,11 +16,12 @@ import { QueryClient } from "@tanstack/react-query";
 export const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      staleTime: 1000 * 60 * 5,
+      staleTime: 1000 * 60,
       gcTime: 1000 * 60 * 10,
-      refetchOnMount: false,
-      refetchOnWindowFocus: false,
+      refetchOnMount: true,
+      refetchOnWindowFocus: true,
       refetchOnReconnect: "always",
+      retry: 1,
     },
   },
 });
