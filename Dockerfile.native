@@ -15,11 +15,12 @@ ENV PATH="/usr/share/maven/bin:${PATH}"
 ARG SERVICE
 WORKDIR /src
 COPY . .
-# 1) install serwisu + jego zależności reactora (-am dobiera common/proto-shared), bez deps testowych.
+# install reactora (-am dobiera common/proto-shared) + native compile w JEDNYM RUN.
+# Oba mvn w tym samym wykonaniu → cache-mount .m2 zawsze świeży dla native:compile.
+# Rozdzielenie na 2 RUN powodowało flaky "Could not find artifact common/proto-shared",
+# gdy layer install był cache-hit a mount .m2 wyczyszczony (nowy runner / GC cache).
 RUN --mount=type=cache,target=/root/.m2/repository \
-    mvn -B -ntp -Dmaven.test.skip=true -f learnwords-parent/pom.xml -pl ../${SERVICE} -am install
-# 2) native compile serwisu (profil `native` z parenta + hinty z common/native-image.properties).
-RUN --mount=type=cache,target=/root/.m2/repository \
+    mvn -B -ntp -Dmaven.test.skip=true -f learnwords-parent/pom.xml -pl ../${SERVICE} -am install && \
     mvn -B -ntp -Pnative -Dmaven.test.skip=true -f ${SERVICE}/pom.xml native:compile && \
     cp ${SERVICE}/target/${SERVICE} /src/app
 
