@@ -67,7 +67,7 @@ public class UserRepository {
     }
 
     private static final String GET_POINTS_PER_MONTH_BY_USER = """
-        SELECT toYYYYMM(month) AS month, sum(points) AS points
+        SELECT to_char(month, 'YYYYMM')::int AS month, sum(points) AS points
         FROM analytics.user_points_monthly
         WHERE user_id = ?
         GROUP BY month
@@ -92,7 +92,7 @@ public class UserRepository {
     }
 
     private static final String GET_POINTS_PER_DAY_BY_USER = """
-        SELECT toYYYYMMDD(day) AS day, sum(points) AS points
+        SELECT to_char(day, 'YYYYMMDD')::int AS day, sum(points) AS points
         FROM analytics.user_points_daily
         WHERE user_id = ?
         GROUP BY day
