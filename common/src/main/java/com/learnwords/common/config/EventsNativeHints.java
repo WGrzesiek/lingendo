@@ -21,7 +21,12 @@ import org.springframework.core.type.classreading.CachingMetadataReaderFactory;
  */
 public class EventsNativeHints implements RuntimeHintsRegistrar {
 
-    private static final String EVENTS_PATTERN = "classpath*:com/learnwords/common/events/**/*.class";
+    private static final String[] PATTERNS = {
+            // Kafka-produced domain events.
+            "classpath*:com/learnwords/common/events/**/*.class",
+            // Kafka payload DTOs consumed via @KafkaListener (e.g. SendWordFromKafkaDto, SentenceDto).
+            "classpath*:com/learnwords/common/dto/**/*.class"
+    };
 
     private final BindingReflectionHintsRegistrar binding = new BindingReflectionHintsRegistrar();
 
@@ -30,20 +35,22 @@ public class EventsNativeHints implements RuntimeHintsRegistrar {
         ClassLoader loader = classLoader != null ? classLoader : getClass().getClassLoader();
         PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver(loader);
         CachingMetadataReaderFactory readers = new CachingMetadataReaderFactory(loader);
-        try {
-            Resource[] resources = resolver.getResources(EVENTS_PATTERN);
-            for (Resource res : resources) {
-                try {
-                    String className = readers.getMetadataReader(res).getClassMetadata().getClassName();
-                    Class<?> type = Class.forName(className, false, loader);
-                    // Walks the whole graph (record components + nested enums) for Jackson binding.
-                    binding.registerReflectionHints(hints.reflection(), type);
-                } catch (Throwable ignored) {
-                    // Skip entries that cannot be read/resolved.
+        for (String pattern : PATTERNS) {
+            try {
+                Resource[] resources = resolver.getResources(pattern);
+                for (Resource res : resources) {
+                    try {
+                        String className = readers.getMetadataReader(res).getClassMetadata().getClassName();
+                        Class<?> type = Class.forName(className, false, loader);
+                        // Walks the whole graph (record components + nested enums) for Jackson binding.
+                        binding.registerReflectionHints(hints.reflection(), type);
+                    } catch (Throwable ignored) {
+                        // Skip entries that cannot be read/resolved.
+                    }
                 }
+            } catch (Exception ignored) {
+                // No matching classes on the classpath — nothing to register.
             }
-        } catch (Exception ignored) {
-            // No event classes on the classpath — nothing to register.
         }
     }
 }
