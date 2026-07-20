@@ -57,7 +57,7 @@ public class FriendshipStatsRepository {
         return jdbcTemplate.query("""
             SELECT
                 friend_id,
-                dictGet('analytics.usernames_dict', 'username', friend_id) AS friend_name,
+                (SELECT username FROM analytics.user_dim WHERE user_id = friend_id) AS friend_name,
                 sum(sessions) AS total_sessions,
                 sum(correct) AS total_correct,
                 sum(total) AS total_answers,

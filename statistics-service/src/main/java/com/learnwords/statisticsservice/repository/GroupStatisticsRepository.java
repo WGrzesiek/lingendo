@@ -78,7 +78,7 @@ public class GroupStatisticsRepository {
     private static final String SELECT_GROUP_EXTENDED_STATS_SQL = """
         SELECT
             count(*) FILTER (WHERE fa.correct = 1) AS total_correct_answers,
-            toInt64(coalesce(sum(fa.time_taken_ms) / 60000, 0)) AS total_study_time_minutes,
+            CAST(coalesce(sum(fa.time_taken_ms) / 60000, 0) AS bigint) AS total_study_time_minutes,
             count(DISTINCT fa.session_id) AS total_sessions,
             CASE WHEN count(*) > 0 THEN count(*) FILTER (WHERE fa.correct = 1) * 100.0 / count(*) ELSE 0 END AS average_accuracy
         FROM analytics.flashcard_answers fa
@@ -97,7 +97,7 @@ public class GroupStatisticsRepository {
     private static final String SELECT_GROUP_TOP_MEMBERS_SQL = """
         SELECT
             gm.student_id AS student_id,
-            dictGet('analytics.usernames_dict', 'username', gm.student_id) AS student_name,
+            (SELECT username FROM analytics.user_dim WHERE user_id = gm.student_id) AS student_name,
             coalesce(sum(gl.points), 0) AS total_points,
             max(ga.event_time) AS last_active
         FROM analytics.group_members gm
@@ -124,7 +124,7 @@ public class GroupStatisticsRepository {
     private static final String SELECT_GROUP_LEADERBOARD_SQL = """
         SELECT
             fa.user_id AS student_id,
-            dictGet('analytics.usernames_dict', 'username', fa.user_id) AS student_name,
+            (SELECT username FROM analytics.user_dim WHERE user_id = fa.user_id) AS student_name,
             count(*) FILTER (WHERE fa.correct = 1) AS correct_answers,
             count(DISTINCT fa.session_id) AS total_sessions,
             CASE WHEN count(*) > 0 THEN count(*) FILTER (WHERE fa.correct = 1) * 100.0 / count(*) ELSE 0 END AS accuracy

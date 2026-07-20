@@ -77,7 +77,7 @@ public class TeacherDashboardRepository {
     private static final String SELECT_TOP_STUDENTS_SQL = """
         SELECT
             ts.student_id AS student_id,
-            dictGet('analytics.usernames_dict', 'username', ts.student_id) AS student_name,
+            (SELECT username FROM analytics.user_dim WHERE user_id = ts.student_id) AS student_name,
             coalesce(points_agg.total_points, 0) AS total_points,
             max(tsa.event_time) AS last_active
         FROM analytics.teacher_students ts
