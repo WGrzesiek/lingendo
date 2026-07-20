@@ -1,24 +1,52 @@
 name: Deploy
 # Wzorzec devPath: SSH na VPS → git pull → kubectl apply → rollout restart.
 # Sekrety repo: VM_HOST, VM_USER, VM_SSH_KEY (klucz prywatny do VPS).
-# UWAGA: NIE aplikuje lingendo-secrets/gateway-jwt-keys/ghcr-secret — te tworzysz raz ręcznie.
+# Nie aplikuje lingendo-secrets/ghcr-secret. Klucz gateway-jwt-keys może opcjonalnie rotować.
 # Obrazy muszą być pobieralne (pakiety GHCR public albo pull-secret na SA).
 on:
   workflow_dispatch:
+    inputs:
+      rotate_jwt_keys:
+        description: "Rotate gateway JWT signing key (invalidates sessions)"
+        required: true
+        default: false
+        type: boolean
+  # One-shot trigger for this audited deployment. Removed after a successful rollout.
+  push:
+    branches: ["deploy/codex-security-frontend-foundations"]
+    paths:
+      - ".github/workflows/deploy.yml"
+
+concurrency:
+  group: lingendo-production
+  cancel-in-progress: false
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - uses: appleboy/ssh-action@v1.2.5
+        env:
+          DEPLOY_REF: ${{ github.ref_name }}
+          ROTATE_JWT_KEYS: ${{ github.event_name == 'push' || inputs.rotate_jwt_keys }}
         with:
           host: ${{ secrets.VM_HOST }}
           username: ${{ secrets.VM_USER }}
           key: ${{ secrets.VM_SSH_KEY }}
+          envs: DEPLOY_REF,ROTATE_JWT_KEYS
           script: |
             set -e
             export KUBECONFIG=~/.kube/config
-            cd ~/lingendo && git pull
+            case "$DEPLOY_REF" in
+              main|deploy/*) ;;
+              *) echo "Ref not allowed for production deploy"; exit 1 ;;
+            esac
+
+            cd ~/lingendo
+            git fetch origin "$DEPLOY_REF"
+            git checkout -B "$DEPLOY_REF" "origin/$DEPLOY_REF"
+
             # namespace + ConfigMap (bezpieczne re-apply; secret jest osobno, ręcznie)
             kubectl apply -f k8s/00-base.yaml
             # broker + CDC
@@ -31,5 +59,38 @@ jobs:
             kubectl apply -f k8s/14-koog.yaml
             # edge (frontend + ingress)
             kubectl apply -f k8s/30-edge.yaml
-            # wymuś pull nowych :latest
-            kubectl -n lingendo rollout restart deploy
+
+            if [ "$ROTATE_JWT_KEYS" = "true" ]; then
+              key_dir="$(mktemp -d)"
+              trap 'rm -rf "$key_dir"' EXIT
+              openssl genpkey -algorithm RSA -pkeyopt rsa_keygen_bits:3072 -out "$key_dir/private_key.pem"
+              openssl rsa -pubout -in "$key_dir/private_key.pem" -out "$key_dir/public_key.pem"
+              kubectl create secret generic gateway-jwt-keys \
+                -n lingendo \
+                --from-file=private_key.pem="$key_dir/private_key.pem" \
+                --from-file=public_key.pem="$key_dir/public_key.pem" \
+                --dry-run=client -o yaml | kubectl apply -f -
+            fi
+
+            # Wymuś pull nowych :latest tylko dla obrazów zbudowanych z tego brancha.
+            for deployment in \
+              api-gateway frontend user-service deck-service statistics-service \
+              vocabulary-command-service vocabulary-read-service
+            do
+              kubectl -n lingendo rollout restart "deployment/$deployment"
+            done
+
+            for deployment in \
+              api-gateway frontend user-service deck-service statistics-service \
+              vocabulary-command-service vocabulary-read-service
+            do
+              kubectl -n lingendo rollout status "deployment/$deployment" --timeout=180s
+            done
+
+            curl -fsS https://lingendo.gwawrzen.pl/ >/dev/null
+
+            me_status="$(curl -sS -o /dev/null -w '%{http_code}' https://lingendo.gwawrzen.pl/api/v1/gateway/me)"
+            test "$me_status" = "401"
+
+            swagger_status="$(curl -sS -o /dev/null -w '%{http_code}' https://lingendo.gwawrzen.pl/api-docs)"
+            test "$swagger_status" = "401" -o "$swagger_status" = "403"
