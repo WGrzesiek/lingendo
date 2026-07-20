@@ -10,7 +10,8 @@ spring:
     redis:
       host: ${SPRING_DATA_REDIS_HOST}
       port: ${SPRING_DATA_REDIS_PORT:6379}
-      username: ${SPRING_DATA_REDIS_USERNAME:default}
+      # Bez username → Lettuce robi legacy AUTH <password> (user default). Jawny username
+      # (AUTH <user> <pass>) dawał WRONGPASS gdy nie pasował do ACL — regresja z f3e546f.
       password: ${SPRING_DATA_REDIS_PASSWORD}
       ssl:
         enabled: ${SPRING_DATA_REDIS_SSL:true}
