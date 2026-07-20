@@ -58,7 +58,11 @@ public class DeckEnrollmentServiceImpl implements DeckEnrollmentService {
     @Override
     @Transactional
     public void enrollUserToDeck(String userId, String deckId, CreateDeckEnrollmentDto createDeckEnrollmentDto) {
-        Deck deck = deckRepository.getReferenceById(deckId);
+        // findById (not getReferenceById): native image has BytecodeProvider 'none' and cannot
+        // create lazy HibernateProxy instances, and the entity is dereferenced below anyway.
+        Deck deck = deckRepository.findById(deckId)
+                .orElseThrow(() -> new com.learnwords.deckservice.exception.exceptions.DeckNotFoundException(
+                        "Nie znaleziono talii: " + deckId));
         
         EnrollmentContext context = resolveEnrollmentContext(userId, deck);
         
