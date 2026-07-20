@@ -29,7 +29,7 @@ repositories {
 dependencies {
     // Observability wypięta (low-RAM native): tracing-brave/zipkin/logstash/prometheus usunięte.
     implementation("org.springframework.boot:spring-boot-starter-actuator")
-    implementation("org.slf4j:slf4j-nop") // logowanie wyłączone (no-op provider)
+    implementation("org.slf4j:slf4j-simple") // logowanie wyłączone (no-op provider)
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
     implementation("org.springframework.boot:spring-boot-starter-flyway")
     implementation("org.springframework.boot:spring-boot-starter-kafka")
