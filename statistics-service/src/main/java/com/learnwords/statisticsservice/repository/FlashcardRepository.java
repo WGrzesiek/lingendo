@@ -53,7 +53,7 @@ public class FlashcardRepository {
                 event.deckEnrollmentId(),
                 event.sessionId(),
                 event.flashcardId(),
-                (event.correct() != null && event.correct()) ? 1 : 0,
+                event.correct() ? 1 : 0,
                 java.sql.Timestamp.from(event.receivedAt()),
                 timeTakenMs);
     }
