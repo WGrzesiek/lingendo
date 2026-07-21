@@ -94,5 +94,23 @@ class KoogNativeHints : RuntimeHintsRegistrar {
             MemberCategory.DECLARED_CLASSES,
             MemberCategory.INVOKE_DECLARED_METHODS
         )
+
+        // Kafka/JSON payload DTOs. The ai.sentence.request consumer deserializes
+        // SentenceGenerationRequestDto (Kotlin data class, @JsonProperty snake_case) and the
+        // producer serializes the generation result. Without reflection hints the native
+        // JsonDeserializer fails and ErrorHandlingDeserializer silently drops the message
+        // (offset committed, no job created). Register the whole messaging + application DTO graph.
+        listOf(
+            "classpath*:com/learnwords/koogservice/messaging/dto/**/*.class",
+            "classpath*:com/learnwords/koogservice/application/dto/**/*.class"
+        ).forEach { pattern ->
+            runCatching { resolver.getResources(pattern) }.getOrDefault(emptyArray()).forEach { res ->
+                runCatching {
+                    val className = readerFactory.getMetadataReader(res).classMetadata.className
+                    val type = Class.forName(className, false, loader)
+                    binding.registerReflectionHints(hints.reflection(), type)
+                }
+            }
+        }
     }
 }
