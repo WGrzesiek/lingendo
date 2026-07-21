@@ -1,6 +1,6 @@
 package com.learnwords.koogservice.messaging
 
-import com.learnwords.koogservice.application.SentenceGenerationService
+import com.learnwords.koogservice.application.SentenceGenerationDispatcher
 import com.learnwords.koogservice.messaging.dto.SentenceGenerationRequestDto
 import org.slf4j.LoggerFactory
 import org.springframework.kafka.annotation.KafkaListener
@@ -14,7 +14,7 @@ import org.springframework.stereotype.Component
  */
 @Component
 class SentenceRequestedConsumer(
-    private val sentenceGenerationService: SentenceGenerationService
+    private val dispatcher: SentenceGenerationDispatcher
 ) {
     
     private val log = LoggerFactory.getLogger(SentenceRequestedConsumer::class.java)
@@ -43,20 +43,9 @@ class SentenceRequestedConsumer(
             request.id,
             request.words.size
         )
-        
-        try {
-            sentenceGenerationService.processGenerationRequest(request)
-            log.info(
-                "Zakończono przetwarzanie żądania - correlationId: {}",
-                request.id
-            )
-        } catch (e: Exception) {
-            log.error(
-                "Błąd podczas przetwarzania żądania - correlationId: {}, błąd: {}",
-                request.id,
-                e.message,
-                e
-            )
-        }
+
+        // Deleguj asynchronicznie i wróć od razu → offset commituje się natychmiast.
+        // Długie generowanie AI nie blokuje konsumenta, więc Kafka nie robi rebalance/redelivery.
+        dispatcher.dispatch(request)
     }
 }
