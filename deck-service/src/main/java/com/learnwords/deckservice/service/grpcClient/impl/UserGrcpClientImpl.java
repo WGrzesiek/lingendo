@@ -9,6 +9,7 @@ import com.learnwords.users.v1.*;
 import io.grpc.StatusRuntimeException;
 import lombok.extern.slf4j.Slf4j;
 import net.devh.boot.grpc.client.inject.GrpcClient;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
@@ -21,7 +22,8 @@ import java.util.concurrent.TimeUnit;
 @Component
 public class UserGrcpClientImpl implements UserGrcpClient {
     
-    private static final long GRPC_DEADLINE_MS = 800;
+    @Value("${grpc.deadline-ms:5000}")
+    private long grpcDeadlineMs;
 
     @GrpcClient("auth")
     private AuthServiceGrpc.AuthServiceBlockingStub authStub;
@@ -38,7 +40,7 @@ public class UserGrcpClientImpl implements UserGrcpClient {
                 .setUserId(userId)
                 .build();
         return authStub
-                .withDeadlineAfter(GRPC_DEADLINE_MS, TimeUnit.MILLISECONDS)
+                .withDeadlineAfter(grpcDeadlineMs, TimeUnit.MILLISECONDS)
                 .getUserNameById(request);
     }
 
@@ -51,7 +53,7 @@ public class UserGrcpClientImpl implements UserGrcpClient {
                     .build();
             
             CheckUserAccessResponse response = userRelationsStub
-                    .withDeadlineAfter(GRPC_DEADLINE_MS, TimeUnit.MILLISECONDS)
+                    .withDeadlineAfter(grpcDeadlineMs, TimeUnit.MILLISECONDS)
                     .checkUserAccess(request);
             
             return response.getHasAccess();
@@ -71,7 +73,7 @@ public class UserGrcpClientImpl implements UserGrcpClient {
                     .build();
             
             IsTeacherOfResponse response = userRelationsStub
-                    .withDeadlineAfter(GRPC_DEADLINE_MS, TimeUnit.MILLISECONDS)
+                    .withDeadlineAfter(grpcDeadlineMs, TimeUnit.MILLISECONDS)
                     .isTeacherOf(request);
             
             return response.getIsTeacher();
@@ -91,7 +93,7 @@ public class UserGrcpClientImpl implements UserGrcpClient {
                     .build();
             
             AreFriendsResponse response = userRelationsStub
-                    .withDeadlineAfter(GRPC_DEADLINE_MS, TimeUnit.MILLISECONDS)
+                    .withDeadlineAfter(grpcDeadlineMs, TimeUnit.MILLISECONDS)
                     .areFriends(request);
             
             return response.getAreFriends();
@@ -110,7 +112,7 @@ public class UserGrcpClientImpl implements UserGrcpClient {
                     .build();
             
             GetAccessibleUsersResponse response = userRelationsStub
-                    .withDeadlineAfter(GRPC_DEADLINE_MS, TimeUnit.MILLISECONDS)
+                    .withDeadlineAfter(grpcDeadlineMs, TimeUnit.MILLISECONDS)
                     .getAccessibleUsers(request);
             
             List<String> userIds = new ArrayList<>();
@@ -133,7 +135,7 @@ public class UserGrcpClientImpl implements UserGrcpClient {
                     .build();
             
             GetStudentIdsResponse response = userRelationsStub
-                    .withDeadlineAfter(GRPC_DEADLINE_MS, TimeUnit.MILLISECONDS)
+                    .withDeadlineAfter(grpcDeadlineMs, TimeUnit.MILLISECONDS)
                     .getStudentIds(request);
             
             return response.getStudentIdsList();
@@ -152,7 +154,7 @@ public class UserGrcpClientImpl implements UserGrcpClient {
                     .build();
             
             GetFriendIdsResponse response = userRelationsStub
-                    .withDeadlineAfter(GRPC_DEADLINE_MS, TimeUnit.MILLISECONDS)
+                    .withDeadlineAfter(grpcDeadlineMs, TimeUnit.MILLISECONDS)
                     .getFriendIds(request);
             
             return response.getFriendIdsList();
@@ -198,7 +200,7 @@ public class UserGrcpClientImpl implements UserGrcpClient {
                     .build();
             
             var teacherResponse = groupsStub
-                    .withDeadlineAfter(GRPC_DEADLINE_MS, TimeUnit.MILLISECONDS)
+                    .withDeadlineAfter(grpcDeadlineMs, TimeUnit.MILLISECONDS)
                     .getTeacherGroupIds(teacherRequest);
             
             // Pobierz grupy jako uczeń
@@ -207,7 +209,7 @@ public class UserGrcpClientImpl implements UserGrcpClient {
                     .build();
             
             var studentResponse = groupsStub
-                    .withDeadlineAfter(GRPC_DEADLINE_MS, TimeUnit.MILLISECONDS)
+                    .withDeadlineAfter(grpcDeadlineMs, TimeUnit.MILLISECONDS)
                     .getStudentGroupIds(studentRequest);
             
             List<String> allGroupIds = new java.util.ArrayList<>(teacherResponse.getGroupIdsList());
@@ -228,7 +230,7 @@ public class UserGrcpClientImpl implements UserGrcpClient {
                     .build();
             
             var response = groupsStub
-                    .withDeadlineAfter(GRPC_DEADLINE_MS, TimeUnit.MILLISECONDS)
+                    .withDeadlineAfter(grpcDeadlineMs, TimeUnit.MILLISECONDS)
                     .getTeacherGroupIds(request);
             
             return response.getGroupIdsList();
@@ -246,7 +248,7 @@ public class UserGrcpClientImpl implements UserGrcpClient {
                     .build();
             
             var response = groupsStub
-                    .withDeadlineAfter(GRPC_DEADLINE_MS, TimeUnit.MILLISECONDS)
+                    .withDeadlineAfter(grpcDeadlineMs, TimeUnit.MILLISECONDS)
                     .getGroupMemberIds(request);
             
             return response.getStudentIdsList();
@@ -268,7 +270,7 @@ public class UserGrcpClientImpl implements UserGrcpClient {
                     .build();
             
             var response = groupsStub
-                    .withDeadlineAfter(GRPC_DEADLINE_MS, TimeUnit.MILLISECONDS)
+                    .withDeadlineAfter(grpcDeadlineMs, TimeUnit.MILLISECONDS)
                     .getStudentIdsFromGroups(request);
             
             return response.getStudentIdsList();
@@ -287,7 +289,7 @@ public class UserGrcpClientImpl implements UserGrcpClient {
                     .build();
             
             var response = groupsStub
-                    .withDeadlineAfter(GRPC_DEADLINE_MS, TimeUnit.MILLISECONDS)
+                    .withDeadlineAfter(grpcDeadlineMs, TimeUnit.MILLISECONDS)
                     .checkGroupAccess(request);
             log.error("Odpowiedz: {}", response.getAccessMapMap());
             log.error("Odpowiedz: {}", response.getAccessMapMap());
@@ -324,7 +326,7 @@ public class UserGrcpClientImpl implements UserGrcpClient {
                     .build();
             
             var response = groupsStub
-                    .withDeadlineAfter(GRPC_DEADLINE_MS, TimeUnit.MILLISECONDS)
+                    .withDeadlineAfter(grpcDeadlineMs, TimeUnit.MILLISECONDS)
                     .isStudentInGroup(request);
             
             return response.getIsMember();
@@ -348,7 +350,7 @@ public class UserGrcpClientImpl implements UserGrcpClient {
                     .build();
             
             var response = groupsStub
-                    .withDeadlineAfter(GRPC_DEADLINE_MS, TimeUnit.MILLISECONDS)
+                    .withDeadlineAfter(grpcDeadlineMs, TimeUnit.MILLISECONDS)
                     .isStudentInAnyGroup(request);
             
             return response.getIsMember();

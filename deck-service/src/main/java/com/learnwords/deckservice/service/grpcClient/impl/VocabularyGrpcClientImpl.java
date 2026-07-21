@@ -6,6 +6,7 @@ import io.grpc.Deadline;
 import io.grpc.StatusRuntimeException;
 import lombok.extern.slf4j.Slf4j;
 import net.devh.boot.grpc.client.inject.GrpcClient;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -39,10 +40,12 @@ import java.util.concurrent.TimeUnit;
 public class VocabularyGrpcClientImpl implements VocabularyGrpcClient {
 
     /**
-     * Timeout dla wszystkich wywołań gRPC w milisekundach.
-     * Można przenieść do konfiguracji (application.yml) dla lepszej elastyczności.
+     * Timeout (deadline) dla wywołań gRPC w ms. Konfigurowalny przez {@code grpc.deadline-ms}.
+     * Default 5000ms — 800ms było za mało na batch uderzający w Mongo Atlas przy native cold start
+     * (DEADLINE_EXCEEDED na generateSentences).
      */
-    private static final long GRPC_DEADLINE_MS = 800;
+    @Value("${grpc.deadline-ms:5000}")
+    private long grpcDeadlineMs;
 
     @GrpcClient("vocabulary-read")
     private VocabularyReadServiceGrpc.VocabularyReadServiceBlockingStub blockingStub;
@@ -72,7 +75,7 @@ public class VocabularyGrpcClientImpl implements VocabularyGrpcClient {
                     .build();
             
             return blockingStub
-                    .withDeadline(Deadline.after(GRPC_DEADLINE_MS, TimeUnit.MILLISECONDS))
+                    .withDeadline(Deadline.after(grpcDeadlineMs, TimeUnit.MILLISECONDS))
                     .batchGetVocabularies(request);
                     
         } catch (StatusRuntimeException e) {
@@ -110,7 +113,7 @@ public class VocabularyGrpcClientImpl implements VocabularyGrpcClient {
                     .build();
             
             BatchGetOnlyWordResponse response = blockingStub
-                    .withDeadline(Deadline.after(GRPC_DEADLINE_MS, TimeUnit.MILLISECONDS))
+                    .withDeadline(Deadline.after(grpcDeadlineMs, TimeUnit.MILLISECONDS))
                     .batchGetOnlyWord(request);
             
             log.debug("Pomyślnie pobrano {} słów", response.getWordCount());
@@ -143,7 +146,7 @@ public class VocabularyGrpcClientImpl implements VocabularyGrpcClient {
                     .build();
             
             GetWordResponse response = blockingStub
-                    .withDeadline(Deadline.after(GRPC_DEADLINE_MS, TimeUnit.MILLISECONDS))
+                    .withDeadline(Deadline.after(grpcDeadlineMs, TimeUnit.MILLISECONDS))
                     .getWord(request);
             
             log.debug("Pomyślnie pobrano słówko: {}", response.getWord().getWord());
@@ -186,7 +189,7 @@ public class VocabularyGrpcClientImpl implements VocabularyGrpcClient {
                     .build();
             
             BatchGetWordsResponse response = blockingStub
-                    .withDeadline(Deadline.after(GRPC_DEADLINE_MS, TimeUnit.MILLISECONDS))
+                    .withDeadline(Deadline.after(grpcDeadlineMs, TimeUnit.MILLISECONDS))
                     .batchGetWords(request);
             
             log.debug("Pomyślnie pobrano {} słówek z pełnymi danymi", response.getWordsCount());
