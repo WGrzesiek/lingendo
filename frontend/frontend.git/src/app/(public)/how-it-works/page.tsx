@@ -229,7 +229,7 @@ export default function HowItWorksPage() {
                 </Link>
               </Button>
               <Button size="lg" variant="outline" className="h-12 px-8" asChild>
-                <Link href="/#creator">O projekcie</Link>
+                <Link href="https://gwawrzen.pl/projekty/lingendo/">O projekcie</Link>
               </Button>
             </div>
           </AnimatedContainer>
