@@ -70,7 +70,11 @@ public class DeckNativeHints implements RuntimeHintsRegistrar {
         for (String pattern : new String[]{
                 "classpath*:com/learnwords/deckservice/service/evaluationService/**/*.class",
                 "classpath*:com/learnwords/deckservice/service/algorithm/**/*.class",
-                "classpath*:com/learnwords/deckservice/service/learningStrategy/**/*.class"
+                "classpath*:com/learnwords/deckservice/service/learningStrategy/**/*.class",
+                // Kafka/JSON payload DTOs (np. SentenceGenerationRequestDto → topic ai.sentence.request,
+                // GenerateSentencesResponse). Jackson serializuje/deserializuje je refleksyjnie —
+                // bez tego native rzuca "No serializer found ... configure reflection".
+                "classpath*:com/learnwords/deckservice/dto/**/*.class"
         }) {
             try {
                 Resource[] resources = resolver.getResources(pattern);
