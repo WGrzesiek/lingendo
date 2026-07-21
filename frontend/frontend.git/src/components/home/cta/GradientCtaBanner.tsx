@@ -17,7 +17,7 @@ export function GradientCtaBanner({
   onCtaClick,
 }: Props) {
   return (
-    <section>
+    <section className="px-4 py-20 sm:py-28">
       <div className="relative mx-auto max-w-4xl px-4 text-center">
         <h2 className="text-3xl font-bold leading-tight tracking-tight md:text-4xl">
           {title}

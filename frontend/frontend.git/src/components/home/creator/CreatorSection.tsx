@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 
 export function CreatorSection() {
   return (
-    <section id="creator" className="px-4 py-16 sm:py-24">
+    <section id="creator" className="px-4 pb-24 pt-20 sm:pb-32 sm:pt-28">
       <div className="mx-auto grid max-w-6xl overflow-hidden rounded-3xl border bg-card shadow-sm lg:grid-cols-[0.8fr_1.2fr]">
         <div className="flex min-h-64 items-center justify-center bg-gradient-to-br from-emerald-500/20 via-primary/10 to-background p-8">
           <div className="rounded-3xl border border-primary/20 bg-background/80 p-7 shadow-xl backdrop-blur">
@@ -32,11 +32,11 @@ export function CreatorSection() {
           <div className="mt-7 flex flex-col gap-3 sm:flex-row">
             <Button asChild>
               <Link
-                href="https://gwawrzen.pl"
+                href="https://gwawrzen.pl/projekty/lingendo/"
                 target="_blank"
                 rel="noopener noreferrer"
               >
-                Zobacz portfolio
+                Zobacz opis projektu
                 <ArrowUpRight className="ml-2 size-4" />
               </Link>
             </Button>

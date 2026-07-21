@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Lingendo">
+  <rect width="64" height="64" rx="16" fill="#112118"/>
+  <path d="M17 18.5c6.5-2 11.5-.6 15 3.4 3.5-4 8.5-5.4 15-3.4v27c-6.1-1.8-11.1-.5-15 3.5-3.9-4-8.9-5.3-15-3.5v-27Z" fill="none" stroke="#4ade80" stroke-width="3" stroke-linejoin="round"/>
+  <path d="M32 22v27" stroke="#4ade80" stroke-width="3" stroke-linecap="round"/>
+</svg>

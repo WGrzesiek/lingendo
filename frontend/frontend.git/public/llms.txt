@@ -1,0 +1,17 @@
+# Lingendo
+
+Lingendo is a Polish-language demonstration platform for learning vocabulary with flashcards, spaced repetition and AI-assisted example sentences.
+
+## Project status
+
+- Public portfolio and engineering project by Grzegorz Wawrzeń.
+- Demonstration environment, not a commercial product.
+- Demo data may be reset periodically; users should not enter sensitive data.
+
+## Public pages
+
+- Home: https://www.lingendo.app/
+- How it works: https://www.lingendo.app/how-it-works
+- FAQ: https://www.lingendo.app/faq
+- Project description: https://gwawrzen.pl/projekty/lingendo/
+- Source code: https://github.com/WGrzesiek/lingendo

@@ -3,6 +3,7 @@ import { FeaturesSection } from "@/components/home/features/FeaturesSection";
 import { HowItWorksSection } from "@/components/home/how-it-works/HowItWorksSection";
 import CtaSection from "@/components/home/cta/CtaSection";
 import { CreatorSection } from "@/components/home/creator/CreatorSection";
+import { LearningLoopSection } from "@/components/home/learning-loop/LearningLoopSection";
 
 export default function Home() {
   return (
@@ -10,8 +11,9 @@ export default function Home() {
       <HeroSection />
       <FeaturesSection />
       <HowItWorksSection />
-      <CreatorSection />
+      <LearningLoopSection />
       <CtaSection />
+      <CreatorSection />
     </main>
   );
 }

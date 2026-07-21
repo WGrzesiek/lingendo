@@ -12,7 +12,7 @@ export function DemoBanner() {
           · dane mogą być okresowo resetowane
         </span>
         <Link
-          href="https://gwawrzen.pl"
+          href="https://gwawrzen.pl/projekty/lingendo/"
           target="_blank"
           rel="noopener noreferrer"
           className="shrink-0 underline decoration-emerald-900/30 underline-offset-2 hover:decoration-emerald-950"

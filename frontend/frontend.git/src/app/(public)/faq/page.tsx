@@ -17,6 +17,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
+import { BackgroundWithGreen } from "@/components/common/BackgroundWithGreen";
 
 interface FAQItem {
   question: string;
@@ -165,8 +166,9 @@ export default function FAQPage() {
     : filteredCategories;
 
   return (
-    <main className="min-h-screen">
-      <section className="relative overflow-hidden py-20 md:py-28">
+    <main className="relative isolate min-h-screen overflow-hidden">
+      <BackgroundWithGreen />
+      <section className="relative z-10 overflow-hidden py-20 md:py-28">
         <div className="absolute inset-0 bg-gradient-to-b from-primary/5 via-background to-background" />
         <AnimatedContainer
           variant="slide"
@@ -194,7 +196,7 @@ export default function FAQPage() {
         </AnimatedContainer>
       </section>
 
-      <section className="pb-8">
+      <section className="relative z-10 pb-8">
         <div className="container mx-auto flex flex-wrap justify-center gap-3 px-6">
           <Button
             variant={selectedCategory === null ? "default" : "outline"}
@@ -217,7 +219,7 @@ export default function FAQPage() {
         </div>
       </section>
 
-      <section className="container mx-auto max-w-4xl px-6 pb-24 pt-8">
+      <section className="container relative z-10 mx-auto max-w-4xl px-6 pb-24 pt-8">
         {displayCategories.length === 0 ? (
           <div className="py-12 text-center">
             <HelpCircle className="mx-auto mb-4 size-12 text-muted-foreground" />
@@ -251,7 +253,7 @@ export default function FAQPage() {
         )}
       </section>
 
-      <section className="bg-muted/30 py-16 md:py-20">
+      <section className="relative z-10 border-t border-primary/5 bg-muted/30 py-16 backdrop-blur-[2px] md:py-20">
         <div className="container mx-auto max-w-2xl px-6 text-center">
           <h2 className="text-3xl font-bold md:text-4xl">Zajrzyj za kulisy</h2>
           <p className="mt-4 text-lg text-muted-foreground">

@@ -15,6 +15,7 @@ import {
   Library,
 } from "lucide-react";
 import { AnimatedContainer } from "@/components/common/effects/AnimatedContainer";
+import { BackgroundWithGreen } from "@/components/common/BackgroundWithGreen";
 
 const steps = [
   {
@@ -87,9 +88,10 @@ const features = [
 
 export default function HowItWorksPage() {
   return (
-    <main className="min-h-screen">
+    <main className="relative isolate min-h-screen overflow-hidden">
+      <BackgroundWithGreen />
       {/* Hero Section */}
-      <section className="relative overflow-hidden py-20 md:py-28">
+      <section className="relative z-10 overflow-hidden py-20 md:py-28">
         <div className="absolute inset-0 bg-gradient-to-b from-primary/5 via-background to-background" />
         <div className="container mx-auto px-6 relative">
           <AnimatedContainer
@@ -112,7 +114,7 @@ export default function HowItWorksPage() {
       </section>
 
       {/* Steps Section */}
-      <section className="py-16 md:py-24">
+      <section className="relative z-10 py-16 md:py-24">
         <div className="container mx-auto px-6">
           <div className="grid gap-8 md:gap-12">
             {steps.map((step, index) => (
@@ -171,7 +173,7 @@ export default function HowItWorksPage() {
       </section>
 
       {/* Features Grid */}
-      <section className="py-16 md:py-24 bg-muted/30">
+      <section className="relative z-10 border-y border-primary/5 bg-muted/30 py-16 backdrop-blur-[2px] md:py-24">
         <div className="container mx-auto px-6">
           <AnimatedContainer variant="slide" className="text-center mb-12">
             <h2 className="text-3xl md:text-4xl font-bold mb-4">
@@ -208,7 +210,7 @@ export default function HowItWorksPage() {
       </section>
 
       {/* CTA Section */}
-      <section className="py-16 md:py-24">
+      <section className="relative z-10 py-16 md:py-24">
         <div className="container mx-auto px-6">
           <AnimatedContainer
             variant="slide"

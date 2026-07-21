@@ -1,6 +1,15 @@
 import { AuthBoundary } from "@/components/auth/AuthBoundary";
 import { DemoBanner } from "@/components/common/DemoBanner";
 import { Navbar } from "@/components/menu/navbar";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  robots: {
+    index: false,
+    follow: false,
+    noarchive: true,
+  },
+};
 
 export default function ProtectedLayout({
   children,
