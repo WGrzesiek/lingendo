@@ -60,8 +60,23 @@ metadata:
     traefik.ingress.kubernetes.io/router.entrypoints: websecure
 spec:
   rules:
-    # Primary branded domain + legacy domain — both routed to the same backends.
+    # Primary branded domain (apex + www) + legacy domain — all to the same backends.
     - host: lingendo.app
+      http:
+        paths:
+          - path: /api
+            pathType: Prefix
+            backend:
+              service:
+                name: api-gateway
+                port: { number: 8811 }
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: frontend
+                port: { number: 80 }
+    - host: www.lingendo.app
       http:
         paths:
           - path: /api

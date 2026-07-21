@@ -40,7 +40,7 @@ spec:
             - { name: JWT_REFRESH_AUDIENCE, value: "lingendo-refresh" }
             - { name: ACCESS_TOKEN_COOKIE_NAME, value: "__Host-lingendo-access" }
             - { name: REFRESH_TOKEN_COOKIE_NAME, value: "__Host-lingendo-refresh" }
-            - { name: CORS_ALLOWED_ORIGINS, value: "https://lingendo.app,https://lingendo.gwawrzen.pl" }
+            - { name: CORS_ALLOWED_ORIGINS, value: "https://lingendo.app,https://www.lingendo.app,https://lingendo.gwawrzen.pl" }
             - { name: MANAGEMENT_ENDPOINT_HEALTH_SHOWDETAILS, value: "never" }
             - { name: SERVER_ERROR_INCLUDE_MESSAGE, value: "never" }
             - { name: SERVER_ERROR_INCLUDE_STACKTRACE, value: "never" }
