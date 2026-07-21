@@ -13,7 +13,8 @@ spring:
       username: ${SPRING_DATA_REDIS_USERNAME:default}
       password: ${SPRING_DATA_REDIS_PASSWORD}
       ssl:
-        enabled: ${SPRING_DATA_REDIS_SSL:true}
+        # Required explicitly in the Deployment: Redis endpoints differ in TLS support.
+        enabled: ${SPRING_DATA_REDIS_SSL}
 
 # Klucze RSA montowane z Secret `gateway-jwt-keys` do /etc/keys (patrz manifest).
 jwt:

@@ -16,7 +16,7 @@ COPY . .
 # (rozdzielenie na 2 RUN powodowało flaky "Could not find artifact proto-shared").
 RUN --mount=type=cache,target=/root/.m2/repository \
     mvn -B -ntp -Dmaven.test.skip=true -f learnwords-parent/pom.xml -pl ../proto-shared -am install && \
-    mvn -B -ntp -PnativeTest -Dtest=TokenServiceImplTest,GrpcExceptionHandlerTest -f api-gateway/pom.xml test && \
+    mvn -B -ntp -PnativeTest -Dtest=TokenServiceImplTest,GrpcExceptionHandlerTest,RedisExceptionHandlerTest -f api-gateway/pom.xml test && \
     mvn -B -ntp -Pnative -Dmaven.test.skip=true -f api-gateway/pom.xml native:compile && \
     cp api-gateway/target/api-gateway /src/app
 

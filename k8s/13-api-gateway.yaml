@@ -33,6 +33,8 @@ spec:
             - { name: SPRING_DATA_REDIS_PORT, valueFrom: { secretKeyRef: { name: lingendo-secrets, key: SPRING_DATA_REDIS_PORT } } }
             - { name: SPRING_DATA_REDIS_USERNAME, valueFrom: { secretKeyRef: { name: lingendo-secrets, key: SPRING_DATA_REDIS_USERNAME } } }
             - { name: SPRING_DATA_REDIS_PASSWORD, valueFrom: { secretKeyRef: { name: lingendo-secrets, key: SPRING_DATA_REDIS_PASSWORD } } }
+            # TLS is required for the external session store. The configured Redis
+            # endpoint and port must have TLS enabled in Redis Cloud.
             - { name: SPRING_DATA_REDIS_SSL, value: "true" }
             - { name: JWT_ISSUER, value: "learnwords-api" }
             - { name: JWT_KID, value: "gateway-2026-07-rotation-1" }
