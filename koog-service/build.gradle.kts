@@ -41,6 +41,11 @@ dependencies {
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
     implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310")
     implementation("ai.koog:koog-agents:0.6.0")
+    // koog picks its Ktor HTTP engine via ServiceLoader (HttpClient()); by default that resolves
+    // to ktor-client-apache5, whose async NIO reactor hangs in the GraalVM native image (request
+    // sent, callback never fires → coroutine suspends forever, no exception). Swap to the JDK
+    // java.net.http engine, which has first-class native support. apache5 is excluded below.
+    implementation("io.ktor:ktor-client-java:3.2.2")
     implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:3.0.1")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.9.0")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-reactor:1.9.0")
@@ -68,6 +73,9 @@ dependencies {
 // Bez logbacka netty/AI nie łapią Loggera → brak kaskady image-heap w native.
 configurations.all {
     exclude(group = "ch.qos.logback")
+    // Force the JDK (java.net.http) Ktor engine instead of apache5 (hangs in native — see above).
+    exclude(group = "io.ktor", module = "ktor-client-apache5")
+    exclude(group = "io.ktor", module = "ktor-client-apache5-jvm")
 }
 
 kotlin {

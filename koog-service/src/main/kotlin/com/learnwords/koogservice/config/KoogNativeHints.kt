@@ -112,5 +112,24 @@ class KoogNativeHints : RuntimeHintsRegistrar {
                 }
             }
         }
+
+        // Ktor picks its HTTP engine via ServiceLoader (io.ktor.client.HttpClient()). The native
+        // image must be able to instantiate the java (java.net.http) engine container reflectively,
+        // and the service descriptor resource must be present in the image.
+        hints.resources().registerPattern(
+            "META-INF/services/io.ktor.client.engine.HttpClientEngineContainer"
+        )
+        listOf(
+            "io.ktor.client.engine.java.JavaHttpEngineContainer",
+            "io.ktor.client.engine.java.Java",
+            "io.ktor.client.engine.java.JavaHttpEngine"
+        ).forEach { fqn ->
+            hints.reflection().registerTypeIfPresent(
+                loader, fqn,
+                MemberCategory.INVOKE_DECLARED_CONSTRUCTORS,
+                MemberCategory.INVOKE_PUBLIC_CONSTRUCTORS,
+                MemberCategory.INVOKE_PUBLIC_METHODS
+            )
+        }
     }
 }

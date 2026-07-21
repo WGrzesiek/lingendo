@@ -11,6 +11,7 @@ import com.learnwords.koogservice.persistence.repository.OutboxRepository
 import com.learnwords.koogservice.persistence.repository.SentenceGenerationItemRepository
 import com.learnwords.koogservice.persistence.repository.SentenceGenerationJobRepository
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withTimeout
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
@@ -45,6 +46,9 @@ class SentenceGenerationServiceImpl(
     companion object {
         const val SCHEMA_VERSION = 1
         const val MAX_SENTENCES_PER_WORD = 3
+        // Guard the OpenAI call so a stuck HTTP request surfaces as a per-item error instead of
+        // hanging the Kafka listener forever (offset never commits, consumer blocked).
+        const val AI_CALL_TIMEOUT_MS = 60_000L
     }
 
     /**
@@ -164,7 +168,7 @@ class SentenceGenerationServiceImpl(
         )
 
 
-        val response = runBlocking { aiClient.generateSentenceStructured(prompt)}
+        val response = runBlocking { withTimeout(AI_CALL_TIMEOUT_MS) { aiClient.generateSentenceStructured(prompt) } }
         
         // Nadpisujemy wordId wartością z requestu - AI czasami zwraca błędny identyfikator
         val correctedResult = response.json.copy(wordId = word.wordId)
